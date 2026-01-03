@@ -13,6 +13,14 @@ import { Badge } from "@/components/ui/badge";
 import { ScoreBadge } from "./ScoreBadge";
 import { Star } from "lucide-react";
 
+const categoryLabels: Record<string, string> = {
+  game: "Games",
+  movie: "Filme",
+  series: "Serien",
+  hardware: "Hardware",
+  amazon: "Amazon",
+};
+
 interface PaginationData {
   page: number;
   limit: number;
@@ -85,7 +93,7 @@ export function ReviewsList() {
           Alle Reviews
         </h1>
         <p className="text-muted-foreground text-lg">
-          Durchsuche unsere neuesten Tests zu Games und Hardware.
+          Durchsuche unsere neuesten Tests zu Games, Filmen, Serien und Hardware.
         </p>
       </div>
 
@@ -141,7 +149,7 @@ export function ReviewsList() {
                         Featured Review
                       </Badge>
                       <Badge variant="outline" className="bg-background/50 backdrop-blur-md text-foreground border-foreground/10 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                        {featuredReview.category}
+                        {categoryLabels[featuredReview.category] || featuredReview.category}
                       </Badge>
                     </div>
                     

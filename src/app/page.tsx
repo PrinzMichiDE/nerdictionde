@@ -88,8 +88,8 @@ export default async function HomePage() {
       gameReviews,
       hardwareReviews,
       amazonReviews,
-      movieReviews,
-      seriesReviews,
+      movieReviews: movieReviews || 0,
+      seriesReviews: seriesReviews || 0,
     };
   } catch (error) {
     // Silently fail during build if database is not available

@@ -9,12 +9,22 @@ interface ReviewCardProps {
   review: Review;
 }
 
+const categoryLabels: Record<string, string> = {
+  game: "Games",
+  movie: "Filme",
+  series: "Serien",
+  hardware: "Hardware",
+  amazon: "Amazon",
+};
+
 export function ReviewCard({ review }: ReviewCardProps) {
   const formattedDate = new Date(review.createdAt).toLocaleDateString("de-DE", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
+
+  const categoryLabel = categoryLabels[review.category] || review.category;
 
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 border-2 hover:border-primary/20">
@@ -43,9 +53,9 @@ export function ReviewCard({ review }: ReviewCardProps) {
         <div className="flex items-center justify-between gap-2 mb-2">
           <Badge 
             variant="outline" 
-            className="capitalize text-xs font-semibold border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors"
+            className="text-xs font-semibold border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors"
           >
-            {review.category}
+            {categoryLabel}
           </Badge>
           <time 
             dateTime={review.createdAt instanceof Date ? review.createdAt.toISOString() : review.createdAt}

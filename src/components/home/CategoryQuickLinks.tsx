@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Cpu, ShoppingCart, ArrowRight } from "lucide-react";
+import { Gamepad2, Cpu, ShoppingCart, Film, Tv, ArrowRight } from "lucide-react";
 
 interface CategoryLink {
   name: string;
@@ -22,6 +22,24 @@ const categories: CategoryLink[] = [
     description: "Umfassende Reviews zu den neuesten Spielen",
     color: "from-blue-500/10 to-blue-600/5",
     hoverColor: "hover:from-blue-500/20 hover:to-blue-600/10",
+  },
+  {
+    name: "Filme",
+    nameEn: "Movies",
+    href: "/reviews?category=movie",
+    icon: <Film className="h-8 w-8" />,
+    description: "Professionelle Film-Reviews und Kritiken",
+    color: "from-red-500/10 to-red-600/5",
+    hoverColor: "hover:from-red-500/20 hover:to-red-600/10",
+  },
+  {
+    name: "Serien",
+    nameEn: "Series",
+    href: "/reviews?category=series",
+    icon: <Tv className="h-8 w-8" />,
+    description: "Detaillierte Serien-Reviews und Analysen",
+    color: "from-green-500/10 to-green-600/5",
+    hoverColor: "hover:from-green-500/20 hover:to-green-600/10",
   },
   {
     name: "Hardware",
@@ -53,7 +71,7 @@ export function CategoryQuickLinks() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {categories.map((category, index) => (
           <Card
             key={category.href}

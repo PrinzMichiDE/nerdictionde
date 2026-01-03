@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Gamepad2, Cpu, ShoppingCart, TrendingUp, Star } from "lucide-react";
+import { Gamepad2, Cpu, ShoppingCart, Film, Tv, TrendingUp, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface StatisticsData {
@@ -10,6 +10,8 @@ interface StatisticsData {
   gameReviews: number;
   hardwareReviews: number;
   amazonReviews: number;
+  movieReviews?: number;
+  seriesReviews?: number;
 }
 
 interface StatCardProps {
@@ -77,7 +79,7 @@ export function Statistics({ data }: StatisticsProps) {
         </p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
         <StatCard
           icon={<Gamepad2 className="h-5 w-5" />}
           label="Gesamt Reviews"
@@ -100,11 +102,25 @@ export function Statistics({ data }: StatisticsProps) {
           delay={300}
         />
         <StatCard
+          icon={<Film className="h-5 w-5" />}
+          label="Filme"
+          value={data.movieReviews || 0}
+          description="Film-Reviews"
+          delay={350}
+        />
+        <StatCard
+          icon={<Tv className="h-5 w-5" />}
+          label="Serien"
+          value={data.seriesReviews || 0}
+          description="Serien-Reviews"
+          delay={400}
+        />
+        <StatCard
           icon={<Cpu className="h-5 w-5" />}
           label="Hardware"
           value={data.hardwareReviews}
           description="Hardware-Reviews"
-          delay={400}
+          delay={450}
         />
         <StatCard
           icon={<ShoppingCart className="h-5 w-5" />}
