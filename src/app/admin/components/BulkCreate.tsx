@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Database, CheckCircle2, XCircle, SkipForward } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, Database, CheckCircle2, XCircle, Film, Tv } from "lucide-react";
 import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 
@@ -26,10 +27,13 @@ interface BulkCreateResult {
   failed: number;
   skipped: number;
   reviews: Array<{ id: string; title: string; slug: string }>;
-  errors: Array<{ game: string; error: string }>;
+  errors: Array<{ game?: string; movie?: string; series?: string; error: string }>;
 }
 
+type Category = "game" | "movie" | "series";
+
 export function BulkCreate() {
+  const [category, setCategory] = useState<Category>("game");
   const [genres, setGenres] = useState<Genre[]>([]);
   const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,7 +46,7 @@ export function BulkCreate() {
   const [releaseYear, setReleaseYear] = useState<string>("");
   const [minRating, setMinRating] = useState<string>("");
   const [limit, setLimit] = useState<string>("20");
-  const [sortBy, setSortBy] = useState<"popularity" | "rating" | "release_date" | "name">("popularity");
+  const [sortBy, setSortBy] = useState<"popularity" | "rating" | "release_date" | "name" | "title">("popularity");
   const [order, setOrder] = useState<"asc" | "desc">("desc");
   const [batchSize, setBatchSize] = useState<string>("5");
   const [delay, setDelay] = useState<string>("2000");
@@ -92,16 +96,25 @@ export function BulkCreate() {
     try {
       const queryOptions: any = {
         limit: parseInt(limit),
-        sortBy,
+        sortBy: sortBy === "title" ? "name" : sortBy, // TMDB uses "name" for title sorting
         order,
       };
 
       if (genreId && genreId !== "all") queryOptions.genreId = parseInt(genreId);
-      if (platformId && platformId !== "all") queryOptions.platformId = parseInt(platformId);
+      if (platformId && platformId !== "all" && category === "game") {
+        queryOptions.platformId = parseInt(platformId);
+      }
       if (releaseYear) queryOptions.releaseYear = parseInt(releaseYear);
       if (minRating) queryOptions.minRating = parseFloat(minRating);
 
-      const response = await axios.post("/api/reviews/bulk-create", {
+      let endpoint = "/api/reviews/bulk-create";
+      if (category === "movie") {
+        endpoint = "/api/reviews/bulk-create-movies";
+      } else if (category === "series") {
+        endpoint = "/api/reviews/bulk-create-series";
+      }
+
+      const response = await axios.post(endpoint, {
         queryOptions,
         batchSize: parseInt(batchSize) || 5,
         delayBetweenBatches: parseInt(delay) || 2000,
@@ -129,22 +142,39 @@ export function BulkCreate() {
             <div>
               <CardTitle className="text-2xl">Massen-Erstellung</CardTitle>
               <CardDescription>
-                Erstelle mehrere Reviews gleichzeitig basierend auf IGDB-Datenbank-Kriterien
+                Erstelle mehrere Reviews gleichzeitig basierend auf Datenbank-Kriterien
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {loadingOptions ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-muted-foreground">Lade Optionen...</span>
-            </div>
-          ) : (
-            <>
-              {/* IGDB Query Options */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">IGDB Filter</h3>
+          <Tabs value={category} onValueChange={(v) => setCategory(v as Category)}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="game" className="flex items-center gap-2">
+                <Database className="h-4 w-4" />
+                Games
+              </TabsTrigger>
+              <TabsTrigger value="movie" className="flex items-center gap-2">
+                <Film className="h-4 w-4" />
+                Filme
+              </TabsTrigger>
+              <TabsTrigger value="series" className="flex items-center gap-2">
+                <Tv className="h-4 w-4" />
+                Serien
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="game" className="space-y-6 mt-6">
+              {loadingOptions ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-muted-foreground">Lade Optionen...</span>
+                </div>
+              ) : (
+                <>
+                  {/* IGDB Query Options */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">IGDB Filter</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="genre">Genre</Label>
@@ -230,19 +260,6 @@ export function BulkCreate() {
                         <SelectItem value="rating">Bewertung</SelectItem>
                         <SelectItem value="release_date">Erscheinungsdatum</SelectItem>
                         <SelectItem value="name">Name</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="order">Reihenfolge</Label>
-                    <Select value={order} onValueChange={(v) => setOrder(v as any)}>
-                      <SelectTrigger id="order">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="desc">Absteigend</SelectItem>
-                        <SelectItem value="asc">Aufsteigend</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -334,8 +351,332 @@ export function BulkCreate() {
                   </>
                 )}
               </Button>
-            </>
-          )}
+                </>
+              )}
+            </TabsContent>
+
+            <TabsContent value="movie" className="space-y-6 mt-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">TMDB Filter</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="movie-releaseYear">Erscheinungsjahr</Label>
+                    <Input
+                      id="movie-releaseYear"
+                      type="number"
+                      placeholder="z.B. 2023"
+                      value={releaseYear}
+                      onChange={(e) => setReleaseYear(e.target.value)}
+                      min="1900"
+                      max={new Date().getFullYear()}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="movie-minRating">Mindest-Rating (0-10)</Label>
+                    <Input
+                      id="movie-minRating"
+                      type="number"
+                      placeholder="z.B. 7.0"
+                      value={minRating}
+                      onChange={(e) => setMinRating(e.target.value)}
+                      min="0"
+                      max="10"
+                      step="0.1"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="movie-limit">Anzahl Filme</Label>
+                    <Input
+                      id="movie-limit"
+                      type="number"
+                      placeholder="20"
+                      value={limit}
+                      onChange={(e) => setLimit(e.target.value)}
+                      min="1"
+                      max="100"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="movie-sortBy">Sortieren nach</Label>
+                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                      <SelectTrigger id="movie-sortBy">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="popularity">Popularität</SelectItem>
+                        <SelectItem value="rating">Bewertung</SelectItem>
+                        <SelectItem value="release_date">Erscheinungsdatum</SelectItem>
+                        <SelectItem value="title">Titel</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="movie-order">Reihenfolge</Label>
+                    <Select value={order} onValueChange={(v) => setOrder(v as any)}>
+                      <SelectTrigger id="movie-order">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="desc">Absteigend</SelectItem>
+                        <SelectItem value="asc">Aufsteigend</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Processing Options */}
+              <div className="space-y-4 border-t pt-4">
+                <h3 className="text-lg font-semibold">Verarbeitungs-Optionen</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="movie-batchSize">Batch-Größe</Label>
+                    <Input
+                      id="movie-batchSize"
+                      type="number"
+                      placeholder="5"
+                      value={batchSize}
+                      onChange={(e) => setBatchSize(e.target.value)}
+                      min="1"
+                      max="10"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Anzahl der gleichzeitig verarbeiteten Filme
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="movie-delay">Verzögerung zwischen Batches (ms)</Label>
+                    <Input
+                      id="movie-delay"
+                      type="number"
+                      placeholder="2000"
+                      value={delay}
+                      onChange={(e) => setDelay(e.target.value)}
+                      min="0"
+                      max="10000"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Pause zwischen Batches (verhindert Rate-Limiting)
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="movie-status">Status</Label>
+                    <Select value={status} onValueChange={(v) => setStatus(v as any)}>
+                      <SelectTrigger id="movie-status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">Entwurf</SelectItem>
+                        <SelectItem value="published">Veröffentlicht</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="movie-skipExisting">Bereits vorhandene überspringen</Label>
+                    <Select
+                      value={skipExisting ? "true" : "false"}
+                      onValueChange={(v) => setSkipExisting(v === "true")}
+                    >
+                      <SelectTrigger id="movie-skipExisting">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nein</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleBulkCreate}
+                disabled={loading || !limit}
+                className="w-full h-12 text-lg font-bold"
+                size="lg"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Erstelle Reviews...
+                  </>
+                ) : (
+                  <>
+                    <Film className="mr-2 h-5 w-5" />
+                    Massenerstellung starten
+                  </>
+                )}
+              </Button>
+            </TabsContent>
+
+            <TabsContent value="series" className="space-y-6 mt-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">TMDB Filter</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="series-releaseYear">Erstausstrahlungsjahr</Label>
+                    <Input
+                      id="series-releaseYear"
+                      type="number"
+                      placeholder="z.B. 2023"
+                      value={releaseYear}
+                      onChange={(e) => setReleaseYear(e.target.value)}
+                      min="1900"
+                      max={new Date().getFullYear()}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="series-minRating">Mindest-Rating (0-10)</Label>
+                    <Input
+                      id="series-minRating"
+                      type="number"
+                      placeholder="z.B. 7.0"
+                      value={minRating}
+                      onChange={(e) => setMinRating(e.target.value)}
+                      min="0"
+                      max="10"
+                      step="0.1"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="series-limit">Anzahl Serien</Label>
+                    <Input
+                      id="series-limit"
+                      type="number"
+                      placeholder="20"
+                      value={limit}
+                      onChange={(e) => setLimit(e.target.value)}
+                      min="1"
+                      max="100"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="series-sortBy">Sortieren nach</Label>
+                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                      <SelectTrigger id="series-sortBy">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="popularity">Popularität</SelectItem>
+                        <SelectItem value="rating">Bewertung</SelectItem>
+                        <SelectItem value="release_date">Erstausstrahlung</SelectItem>
+                        <SelectItem value="title">Titel</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="series-order">Reihenfolge</Label>
+                    <Select value={order} onValueChange={(v) => setOrder(v as any)}>
+                      <SelectTrigger id="series-order">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="desc">Absteigend</SelectItem>
+                        <SelectItem value="asc">Aufsteigend</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Processing Options */}
+              <div className="space-y-4 border-t pt-4">
+                <h3 className="text-lg font-semibold">Verarbeitungs-Optionen</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="series-batchSize">Batch-Größe</Label>
+                    <Input
+                      id="series-batchSize"
+                      type="number"
+                      placeholder="5"
+                      value={batchSize}
+                      onChange={(e) => setBatchSize(e.target.value)}
+                      min="1"
+                      max="10"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Anzahl der gleichzeitig verarbeiteten Serien
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="series-delay">Verzögerung zwischen Batches (ms)</Label>
+                    <Input
+                      id="series-delay"
+                      type="number"
+                      placeholder="2000"
+                      value={delay}
+                      onChange={(e) => setDelay(e.target.value)}
+                      min="0"
+                      max="10000"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Pause zwischen Batches (verhindert Rate-Limiting)
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="series-status">Status</Label>
+                    <Select value={status} onValueChange={(v) => setStatus(v as any)}>
+                      <SelectTrigger id="series-status">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">Entwurf</SelectItem>
+                        <SelectItem value="published">Veröffentlicht</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="series-skipExisting">Bereits vorhandene überspringen</Label>
+                    <Select
+                      value={skipExisting ? "true" : "false"}
+                      onValueChange={(v) => setSkipExisting(v === "true")}
+                    >
+                      <SelectTrigger id="series-skipExisting">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Ja</SelectItem>
+                        <SelectItem value="false">Nein</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleBulkCreate}
+                disabled={loading || !limit}
+                className="w-full h-12 text-lg font-bold"
+                size="lg"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Erstelle Reviews...
+                  </>
+                ) : (
+                  <>
+                    <Tv className="mr-2 h-5 w-5" />
+                    Massenerstellung starten
+                  </>
+                )}
+              </Button>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -398,7 +739,9 @@ export function BulkCreate() {
                       key={index}
                       className="p-2 bg-red-500/10 rounded text-sm"
                     >
-                      <div className="font-medium">{error.game}</div>
+                      <div className="font-medium">
+                        {error.game || error.movie || error.series}
+                      </div>
                       <div className="text-xs text-muted-foreground">{error.error}</div>
                     </div>
                   ))}
