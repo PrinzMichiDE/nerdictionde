@@ -2,6 +2,9 @@ import { Suspense } from "react";
 import { Metadata } from "next";
 import { ReviewsList } from "@/components/reviews/ReviewsList";
 import { Skeleton } from "@/components/shared/Skeleton";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { BookOpen, BarChart3 } from "lucide-react";
 
 function ReviewsListSkeleton() {
   return (
@@ -55,9 +58,27 @@ export const metadata: Metadata = {
 
 export default function ReviewsPage() {
   return (
-    <Suspense fallback={<ReviewsListSkeleton />}>
-      <ReviewsList />
-    </Suspense>
+    <div className="space-y-8">
+      {/* Quick Links */}
+      <div className="flex flex-wrap items-center gap-3 pb-4 border-b">
+        <Link href="/collections">
+          <Button variant="outline" size="sm" className="gap-2">
+            <BookOpen className="size-4" />
+            Collections
+          </Button>
+        </Link>
+        <Link href="/statistics">
+          <Button variant="outline" size="sm" className="gap-2">
+            <BarChart3 className="size-4" />
+            Statistiken
+          </Button>
+        </Link>
+      </div>
+
+      <Suspense fallback={<ReviewsListSkeleton />}>
+        <ReviewsList />
+      </Suspense>
+    </div>
   );
 }
 

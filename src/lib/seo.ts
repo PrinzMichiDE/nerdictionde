@@ -17,7 +17,7 @@ export function generateReviewSchema(review: Review & { title: string; content: 
     itemType = "Product";
   }
 
-  const schema = {
+  const schema: any = {
     "@context": "https://schema.org",
     "@type": itemType,
     name: review.title,
@@ -48,6 +48,51 @@ export function generateReviewSchema(review: Review & { title: string; content: 
       reviewBody: review.content.substring(0, 500),
     },
   };
+
+  // Add FAQ Schema if pros/cons exist
+  if (review.pros && review.pros.length > 0 && review.cons && review.cons.length > 0) {
+    schema.mainEntity = {
+      "@type": "FAQPage",
+      mainEntity: [
+        ...review.pros.slice(0, 3).map((pro) => ({
+          "@type": "Question",
+          name: `Was sind die Vorteile von ${review.title}?`,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: pro,
+          },
+        })),
+        ...review.cons.slice(0, 3).map((con) => ({
+          "@type": "Question",
+          name: `Was sind die Nachteile von ${review.title}?`,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: con,
+          },
+        })),
+      ],
+    };
+  }
+
+  // Add Video Schema if YouTube videos exist
+  if (review.youtubeVideos && review.youtubeVideos.length > 0) {
+    schema.video = review.youtubeVideos.map((videoId: string) => {
+      // Extract video ID if it's a URL
+      const id = videoId.includes("youtube.com") || videoId.includes("youtu.be")
+        ? videoId.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)?.[1] || videoId
+        : videoId;
+
+      return {
+        "@type": "VideoObject",
+        name: `${review.title} - Video`,
+        description: review.content.substring(0, 200),
+        thumbnailUrl: `https://img.youtube.com/vi/${id}/maxresdefault.jpg`,
+        uploadDate: review.createdAt instanceof Date ? review.createdAt.toISOString() : new Date(review.createdAt).toISOString(),
+        contentUrl: `https://www.youtube.com/watch?v=${id}`,
+        embedUrl: `https://www.youtube.com/embed/${id}`,
+      };
+    });
+  }
 
   // Add game-specific metadata
   if (review.category === "game" && review.metadata) {

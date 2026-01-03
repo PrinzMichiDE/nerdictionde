@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { ScoreBadge } from "./ScoreBadge";
 import { Star, AlertCircle, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TagFilter } from "./TagFilter";
+import { Recommendations } from "./Recommendations";
 
 interface PaginationData {
   page: number;
@@ -38,6 +40,7 @@ interface ApiResponse {
 export function ReviewsList() {
   const searchParams = useSearchParams();
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
   const [pagination, setPagination] = useState<PaginationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,14 +71,17 @@ export function ReviewsList() {
         const data: ApiResponse = await response.json();
         
         // Handle new API response format: { success: true, data: { reviews }, meta: { pagination } }
+        let fetchedReviews: Review[] = [];
         if (data.success && data.data) {
-          setReviews(data.data.reviews || []);
+          fetchedReviews = data.data.reviews || [];
           setPagination(data.meta?.pagination || null);
         } else {
           // Legacy format support
-          setReviews(data.reviews || []);
+          fetchedReviews = data.reviews || [];
           setPagination(data.pagination || data.meta?.pagination || null);
         }
+        setReviews(fetchedReviews);
+        setFilteredReviews(fetchedReviews);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten");
         setReviews([]);
@@ -92,8 +98,9 @@ export function ReviewsList() {
     return query || sort !== "date-desc" || dateFilter !== "all" || minScore || maxScore;
   }
 
-  const featuredReview = !hasActiveFilters() && page === "1" && reviews.length > 0 ? reviews[0] : null;
-  const otherReviews = featuredReview ? reviews.slice(1) : reviews;
+  const displayReviews = filteredReviews.length > 0 ? filteredReviews : reviews;
+  const featuredReview = !hasActiveFilters() && page === "1" && displayReviews.length > 0 ? displayReviews[0] : null;
+  const otherReviews = featuredReview ? displayReviews.slice(1) : displayReviews;
 
   return (
     <div className="space-y-10 pb-12 animate-fade-in">
@@ -107,6 +114,18 @@ export function ReviewsList() {
       </div>
 
       <ReviewsFilter onViewChange={setView} currentView={view} />
+      
+      {/* Tag Filter */}
+      {reviews.length > 0 && (
+        <div className="pb-6 border-b">
+          <TagFilter
+            reviews={reviews}
+            onFilterChange={setFilteredReviews}
+            showCounts={true}
+            maxTags={15}
+          />
+        </div>
+      )}
 
       {isLoading ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -222,6 +241,15 @@ export function ReviewsList() {
             <ReviewsPagination 
               totalPages={pagination.totalPages} 
               currentPage={pagination.page} 
+            />
+          )}
+
+          {/* Recommendations */}
+          {!hasActiveFilters() && reviews.length > 0 && (
+            <Recommendations
+              allReviews={reviews}
+              variant="trending"
+              limit={6}
             />
           )}
         </>

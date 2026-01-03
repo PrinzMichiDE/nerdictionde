@@ -22,9 +22,13 @@ import { StickySidebar } from "@/components/reviews/StickySidebar";
 import { createMarkdownComponents } from "@/components/reviews/MarkdownComponents";
 import { AnimatedSection } from "@/components/shared/AnimatedSection";
 import { AnimatedText } from "@/components/shared/AnimatedText";
+import { Recommendations } from "@/components/reviews/Recommendations";
+import { PriceDisplay } from "@/components/reviews/PriceDisplay";
+import { ImageZoom } from "@/components/reviews/ImageZoom";
 import { Clock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Review } from "@/types/review";
 
 export async function generateMetadata({
   params,
@@ -97,8 +101,13 @@ export default async function ReviewDetailPage({
 
   const review = await prisma.review.findUnique({
     where: { slug },
-    include: { comments: true }
+    include: { comments: true },
   });
+
+  // Fetch all reviews for recommendations
+  const allReviews = (await prisma.review.findMany({
+    where: { status: "published" },
+  })) as unknown as Review[];
 
   if (!review) notFound();
 
@@ -280,20 +289,31 @@ export default async function ReviewDetailPage({
 
       {/* YouTube Videos Section */}
       {review.youtubeVideos && review.youtubeVideos.length > 0 && (
-        <div className="space-y-6">
-          <h2 className="text-3xl font-bold">
-            {isEn ? "Videos & Trailers" : "Videos & Trailer"}
-          </h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            {review.youtubeVideos.map((videoId, index) => (
-              <YouTubeEmbed
-                key={index}
-                videoId={videoId}
-                title={`${title} - ${isEn ? "Video" : "Video"} ${index + 1}`}
-              />
-            ))}
+        <AnimatedSection direction="up" delay={0.3}>
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold">
+              {isEn ? "Videos & Trailers" : "Videos & Trailer"}
+            </h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              {review.youtubeVideos.map((videoId, index) => (
+                <YouTubeEmbed
+                  key={index}
+                  videoId={videoId}
+                  title={`${title} - ${isEn ? "Video" : "Video"} ${index + 1}`}
+                  timestamps={
+                    index === 0
+                      ? [
+                          { time: 30, label: "Gameplay" },
+                          { time: 120, label: "Features" },
+                          { time: 240, label: "Fazit" },
+                        ]
+                      : undefined
+                  }
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        </AnimatedSection>
       )}
 
               {/* Game Metadata Section */}
@@ -326,6 +346,14 @@ export default async function ReviewDetailPage({
             <SystemRequirements specs={specs} isEn={isEn} />
           )}
 
+          {/* Recommendations */}
+          <Recommendations
+            currentReview={review as Review}
+            allReviews={allReviews}
+            variant="similar"
+            limit={6}
+          />
+
           {/* Related Reviews */}
           <RelatedReviews 
             currentReviewId={review.id} 
@@ -338,15 +366,28 @@ export default async function ReviewDetailPage({
         </div>
 
         {/* Sidebar */}
-        <StickySidebar
-          score={review.score}
-          pros={pros}
-          cons={cons}
-          affiliateLink={review.affiliateLink}
-          title={title}
-          url={`/reviews/${slug}`}
-          isEn={isEn}
-        />
+        <div className="space-y-8">
+          <StickySidebar
+            score={review.score}
+            pros={pros}
+            cons={cons}
+            affiliateLink={review.affiliateLink}
+            title={title}
+            url={`/reviews/${slug}`}
+            isEn={isEn}
+          />
+
+          {/* Price Display */}
+          {(review.affiliateLink || review.amazonAsin) && (
+            <AnimatedSection direction="up" delay={0.4}>
+              <PriceDisplay
+                affiliateLink={review.affiliateLink}
+                amazonAsin={review.amazonAsin}
+                category={review.category}
+              />
+            </AnimatedSection>
+          )}
+        </div>
       </div>
     </article>
   );
