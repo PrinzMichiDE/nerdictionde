@@ -1,4 +1,4 @@
-export type ReviewCategory = "game" | "hardware" | "amazon";
+export type ReviewCategory = "game" | "hardware" | "amazon" | "movie" | "series";
 export type ReviewStatus = "draft" | "published";
 
 export interface Review {
@@ -18,6 +18,7 @@ export interface Review {
   youtubeVideos: string[];
   status: ReviewStatus;
   igdbId?: number | null;
+  tmdbId?: number | null;
   steamAppId?: string | null;
   amazonAsin?: string | null;
   affiliateLink?: string | null;

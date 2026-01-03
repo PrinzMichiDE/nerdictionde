@@ -11,7 +11,7 @@ model Review {
   title       String
   title_en    String?
   slug        String   @unique
-  category    String   // "game" | "hardware" | "amazon"
+  category    String   // "game" | "hardware" | "amazon" | "movie" | "series"
   content     String   // Markdown
   content_en  String?  // Markdown English
   score       Int      // 0-100
@@ -23,6 +23,7 @@ model Review {
   youtubeVideos String[] // YouTube video IDs or URLs (e.g., "dQw4w9WgXcQ" or "https://youtube.com/watch?v=dQw4w9WgXcQ")
   status      String   @default("draft") // "draft" | "published"
   igdbId      Int?
+  tmdbId      Int?     // TMDB ID for movies and series
   steamAppId  String?
   amazonAsin  String?  // Amazon Product ASIN
   affiliateLink String? // Amazon Affiliate Link
@@ -38,6 +39,7 @@ model Review {
   @@index([slug])
   @@index([category, status])
   @@index([amazonAsin])
+  @@index([tmdbId])
 }
 
 model Comment {

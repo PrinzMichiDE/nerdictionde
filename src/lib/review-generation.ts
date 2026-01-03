@@ -3,6 +3,7 @@ import openai, { OPENAI_MODEL } from "@/lib/openai";
 import { uploadImage } from "@/lib/blob";
 import { calculatePublicationDate } from "@/lib/date-utils";
 import { HardwareType } from "@/lib/hardware";
+import { TMDBMovie, TMDBSeries, getTMDBImageUrl } from "@/lib/tmdb";
 
 // Helper function to generate slug from title
 export function generateSlug(title: string): string {
@@ -540,6 +541,408 @@ export async function processGame(
     return { success: true, reviewId: review.id };
   } catch (error: any) {
     console.error(`Error processing game ${gameData.name}:`, error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Helper function to generate movie review content using OpenAI
+export async function generateMovieReviewContent(
+  movieData: TMDBMovie,
+  retryCount = 0
+): Promise<{
+  de: { title: string; content: string; pros: string[]; cons: string[] };
+  en: { title: string; content: string; pros: string[]; cons: string[] };
+  score: number;
+}> {
+  const isRetry = retryCount > 0;
+  
+  const prompt = `
+    Schreibe eine professionelle Film-Review für "${movieData.title}" (Originaltitel: "${movieData.original_title}") in Deutsch UND Englisch.
+    
+    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 800-1000 Wörter pro Sprache), damit das JSON vollständig ist." : "WICHTIG: Erwähne NIEMALS, dass dieser Text von einer KI, AI oder einem Sprachmodell generiert wurde. Der Text muss so klingen, als wäre er von einem passionierten Filmexperten von Nerdiction geschrieben worden. Nutze einen professionellen, enthusiastischen, aber objektiven Tonfall."}
+    
+    Antworte EXKLUSIV im JSON-Format mit folgendem Schema:
+    {
+      "de": {
+        "title": "...",
+        "content": "Markdown mit Inhaltsverzeichnis, ausführlicher Einleitung, mehreren tiefgehenden Analyse-Abschnitten mit Überschriften (z.B. Handlung, Charaktere, Regie, Kamera, Musik, etc.), BILD-PLATZHALTERN (![[IMAGE_X]]) und Fazit...",
+        "pros": ["...", "...", "...", "...", "..."],
+        "cons": ["...", "...", "...", "...", "..."]
+      },
+      "en": {
+        "title": "...",
+        "content": "Markdown with Table of Contents, detailed intro, several deep-dive analysis sections with headings (e.g., Plot, Characters, Direction, Cinematography, Music, etc.), IMAGE PLACEHOLDERS (![[IMAGE_X]]) and conclusion...",
+        "pros": ["...", "...", "...", "...", "..."],
+        "cons": ["...", "...", "...", "...", "..."]
+      },
+      "score": 0-100
+    }
+    
+    Handlung: ${movieData.overview || "N/A"}
+    Genres: ${movieData.genres?.map((g) => g.name).join(", ") || movieData.genre_ids?.join(", ") || "N/A"}
+    Release Date: ${movieData.release_date || "N/A"}
+    Laufzeit: ${movieData.runtime ? `${movieData.runtime} Minuten` : "N/A"}
+    Produktionsfirmen: ${movieData.production_companies?.map((c) => c.name).join(", ") || "N/A"}
+    Bewertung: ${movieData.vote_average ? `${movieData.vote_average}/10` : "N/A"}
+  `;
+
+  try {
+    return await generateContent(prompt, movieData.title, retryCount);
+  } catch (error) {
+    console.error(`Final error generating movie content for ${movieData.title}:`, error);
+    return {
+      de: {
+        title: movieData.title,
+        content: `## Einleitung\n\n${movieData.overview || "Keine Beschreibung verfügbar."}\n\n## Fazit\n\nEin interessanter Film, der es wert ist, genauer betrachtet zu werden.`,
+        pros: ["Gute Handlung", "Starke Schauspieler"],
+        cons: ["Könnte mehr Tiefe haben"],
+      },
+      en: {
+        title: movieData.title,
+        content: `## Introduction\n\n${movieData.overview || "No description available."}\n\n## Conclusion\n\nAn interesting movie worth taking a closer look at.`,
+        pros: ["Good plot", "Strong acting"],
+        cons: ["Could have more depth"],
+      },
+      score: Math.round((movieData.vote_average || 5) * 10),
+    };
+  }
+}
+
+// Helper function to generate series review content using OpenAI
+export async function generateSeriesReviewContent(
+  seriesData: TMDBSeries,
+  retryCount = 0
+): Promise<{
+  de: { title: string; content: string; pros: string[]; cons: string[] };
+  en: { title: string; content: string; pros: string[]; cons: string[] };
+  score: number;
+}> {
+  const isRetry = retryCount > 0;
+  
+  const prompt = `
+    Schreibe eine professionelle Serien-Review für "${seriesData.name}" (Originaltitel: "${seriesData.original_name}") in Deutsch UND Englisch.
+    
+    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 800-1000 Wörter pro Sprache), damit das JSON vollständig ist." : "WICHTIG: Erwähne NIEMALS, dass dieser Text von einer KI, AI oder einem Sprachmodell generiert wurde. Der Text muss so klingen, als wäre er von einem passionierten Serienexperten von Nerdiction geschrieben worden. Nutze einen professionellen, enthusiastischen, aber objektiven Tonfall."}
+    
+    Antworte EXKLUSIV im JSON-Format mit folgendem Schema:
+    {
+      "de": {
+        "title": "...",
+        "content": "Markdown mit Inhaltsverzeichnis, ausführlicher Einleitung, mehreren tiefgehenden Analyse-Abschnitten mit Überschriften (z.B. Handlung, Charaktere, Regie, Kamera, Musik, Serienstruktur, etc.), BILD-PLATZHALTERN (![[IMAGE_X]]) und Fazit...",
+        "pros": ["...", "...", "...", "...", "..."],
+        "cons": ["...", "...", "...", "...", "..."]
+      },
+      "en": {
+        "title": "...",
+        "content": "Markdown with Table of Contents, detailed intro, several deep-dive analysis sections with headings (e.g., Plot, Characters, Direction, Cinematography, Music, Series Structure, etc.), IMAGE PLACEHOLDERS (![[IMAGE_X]]) and conclusion...",
+        "pros": ["...", "...", "...", "...", "..."],
+        "cons": ["...", "...", "...", "...", "..."]
+      },
+      "score": 0-100
+    }
+    
+    Handlung: ${seriesData.overview || "N/A"}
+    Genres: ${seriesData.genres?.map((g) => g.name).join(", ") || seriesData.genre_ids?.join(", ") || "N/A"}
+    Erste Ausstrahlung: ${seriesData.first_air_date || "N/A"}
+    Staffeln: ${seriesData.number_of_seasons || "N/A"}
+    Episoden: ${seriesData.number_of_episodes || "N/A"}
+    Produktionsfirmen: ${seriesData.production_companies?.map((c) => c.name).join(", ") || "N/A"}
+    Bewertung: ${seriesData.vote_average ? `${seriesData.vote_average}/10` : "N/A"}
+  `;
+
+  try {
+    return await generateContent(prompt, seriesData.name, retryCount);
+  } catch (error) {
+    console.error(`Final error generating series content for ${seriesData.name}:`, error);
+    return {
+      de: {
+        title: seriesData.name,
+        content: `## Einleitung\n\n${seriesData.overview || "Keine Beschreibung verfügbar."}\n\n## Fazit\n\nEine interessante Serie, die es wert ist, genauer betrachtet zu werden.`,
+        pros: ["Gute Handlung", "Starke Charaktere"],
+        cons: ["Könnte mehr Tiefe haben"],
+      },
+      en: {
+        title: seriesData.name,
+        content: `## Introduction\n\n${seriesData.overview || "No description available."}\n\n## Conclusion\n\nAn interesting series worth taking a closer look at.`,
+        pros: ["Good plot", "Strong characters"],
+        cons: ["Could have more depth"],
+      },
+      score: Math.round((seriesData.vote_average || 5) * 10),
+    };
+  }
+}
+
+// Helper function to process a single movie
+export async function processMovie(
+  movieData: TMDBMovie,
+  options: { status: "draft" | "published"; skipExisting: boolean }
+): Promise<{ success: boolean; reviewId?: string; error?: string }> {
+  try {
+    // Check if review already exists by TMDB ID
+    if (options.skipExisting) {
+      const existing = await prisma.review.findFirst({
+        where: { tmdbId: movieData.id, category: "movie" },
+      });
+      if (existing) {
+        return { success: false, error: "Already exists" };
+      }
+    }
+
+    // Generate review content
+    const reviewContent = await generateMovieReviewContent(movieData);
+
+    // Generate slug
+    let slug = generateSlug(reviewContent.de.title || movieData.title);
+    const existingSlug = await prisma.review.findUnique({ where: { slug } });
+    if (existingSlug) {
+      slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+    }
+
+    // Upload poster image if available
+    let imageUrls: string[] = [];
+    if (movieData.poster_path) {
+      try {
+        const posterUrl = getTMDBImageUrl(movieData.poster_path, "w1280");
+        if (posterUrl) {
+          const syncedUrl = await uploadImage(posterUrl, `${slug}-poster.jpg`);
+          imageUrls.push(syncedUrl);
+        }
+      } catch (error) {
+        console.error(`Error uploading poster for ${movieData.title}:`, error);
+        const posterUrl = getTMDBImageUrl(movieData.poster_path, "w1280");
+        if (posterUrl) {
+          imageUrls.push(posterUrl);
+        }
+      }
+    }
+
+    // Add backdrop images if available
+    if (movieData.images?.backdrops && movieData.images.backdrops.length > 0) {
+      const backdropUrls = movieData.images.backdrops
+        .slice(0, 5)
+        .map((img) => getTMDBImageUrl(img.file_path, "w1280"))
+        .filter((url): url is string => url !== null);
+      
+      for (let i = 0; i < backdropUrls.length; i++) {
+        try {
+          const syncedUrl = await uploadImage(
+            backdropUrls[i],
+            `${slug}-backdrop-${i+1}.jpg`
+          );
+          imageUrls.push(syncedUrl);
+        } catch (err) {
+          imageUrls.push(backdropUrls[i]);
+        }
+      }
+    }
+
+    // Extract YouTube video IDs from TMDB videos
+    const youtubeVideos: string[] = [];
+    if (movieData.videos?.results && Array.isArray(movieData.videos.results)) {
+      // Filter YouTube videos and prioritize trailers
+      const youtubeVids = movieData.videos.results.filter(
+        (v) => v.site === "YouTube" && v.key
+      );
+      
+      // Sort: trailers first
+      const sortedVideos = [...youtubeVids].sort((a, b) => {
+        const aIsTrailer = a.type === "Trailer" || a.name.toLowerCase().includes("trailer");
+        const bIsTrailer = b.type === "Trailer" || b.name.toLowerCase().includes("trailer");
+        if (aIsTrailer && !bIsTrailer) return -1;
+        if (!aIsTrailer && bIsTrailer) return 1;
+        return 0;
+      });
+
+      // Extract video IDs (limit to 5 videos max)
+      for (const video of sortedVideos.slice(0, 5)) {
+        if (video.key && /^[a-zA-Z0-9_-]{11}$/.test(video.key)) {
+          youtubeVideos.push(video.key);
+        }
+      }
+    }
+
+    // Process metadata
+    const movieMetadata = {
+      genres: movieData.genres?.map((g) => g.name) || [],
+      production_companies: movieData.production_companies?.map((c) => c.name) || [],
+      production_countries: movieData.production_countries?.map((c) => c.name) || [],
+      spoken_languages: movieData.spoken_languages?.map((l) => l.name) || [],
+      release_date: movieData.release_date,
+      runtime: movieData.runtime,
+      tmdb_score: movieData.vote_average,
+      vote_count: movieData.vote_count,
+      popularity: movieData.popularity,
+    };
+
+    // Calculate publication date from release date
+    const releaseDate = movieData.release_date 
+      ? new Date(movieData.release_date).getTime() / 1000 
+      : null;
+
+    // Create review
+    const review = await prisma.review.create({
+      data: {
+        title: reviewContent.de.title,
+        title_en: reviewContent.en.title,
+        slug,
+        category: "movie",
+        content: reviewContent.de.content,
+        content_en: reviewContent.en.content,
+        score: reviewContent.score,
+        pros: reviewContent.de.pros,
+        pros_en: reviewContent.en.pros,
+        cons: reviewContent.de.cons,
+        cons_en: reviewContent.en.cons,
+        images: imageUrls,
+        youtubeVideos: youtubeVideos,
+        status: options.status,
+        tmdbId: movieData.id,
+        metadata: movieMetadata,
+        createdAt: releaseDate ? calculatePublicationDate(releaseDate) : new Date(),
+      },
+    });
+
+    return { success: true, reviewId: review.id };
+  } catch (error: any) {
+    console.error(`Error processing movie ${movieData.title}:`, error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Helper function to process a single series
+export async function processSeries(
+  seriesData: TMDBSeries,
+  options: { status: "draft" | "published"; skipExisting: boolean }
+): Promise<{ success: boolean; reviewId?: string; error?: string }> {
+  try {
+    // Check if review already exists by TMDB ID
+    if (options.skipExisting) {
+      const existing = await prisma.review.findFirst({
+        where: { tmdbId: seriesData.id, category: "series" },
+      });
+      if (existing) {
+        return { success: false, error: "Already exists" };
+      }
+    }
+
+    // Generate review content
+    const reviewContent = await generateSeriesReviewContent(seriesData);
+
+    // Generate slug
+    let slug = generateSlug(reviewContent.de.title || seriesData.name);
+    const existingSlug = await prisma.review.findUnique({ where: { slug } });
+    if (existingSlug) {
+      slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+    }
+
+    // Upload poster image if available
+    let imageUrls: string[] = [];
+    if (seriesData.poster_path) {
+      try {
+        const posterUrl = getTMDBImageUrl(seriesData.poster_path, "w1280");
+        if (posterUrl) {
+          const syncedUrl = await uploadImage(posterUrl, `${slug}-poster.jpg`);
+          imageUrls.push(syncedUrl);
+        }
+      } catch (error) {
+        console.error(`Error uploading poster for ${seriesData.name}:`, error);
+        const posterUrl = getTMDBImageUrl(seriesData.poster_path, "w1280");
+        if (posterUrl) {
+          imageUrls.push(posterUrl);
+        }
+      }
+    }
+
+    // Add backdrop images if available
+    if (seriesData.images?.backdrops && seriesData.images.backdrops.length > 0) {
+      const backdropUrls = seriesData.images.backdrops
+        .slice(0, 5)
+        .map((img) => getTMDBImageUrl(img.file_path, "w1280"))
+        .filter((url): url is string => url !== null);
+      
+      for (let i = 0; i < backdropUrls.length; i++) {
+        try {
+          const syncedUrl = await uploadImage(
+            backdropUrls[i],
+            `${slug}-backdrop-${i+1}.jpg`
+          );
+          imageUrls.push(syncedUrl);
+        } catch (err) {
+          imageUrls.push(backdropUrls[i]);
+        }
+      }
+    }
+
+    // Extract YouTube video IDs from TMDB videos
+    const youtubeVideos: string[] = [];
+    if (seriesData.videos?.results && Array.isArray(seriesData.videos.results)) {
+      // Filter YouTube videos and prioritize trailers
+      const youtubeVids = seriesData.videos.results.filter(
+        (v) => v.site === "YouTube" && v.key
+      );
+      
+      // Sort: trailers first
+      const sortedVideos = [...youtubeVids].sort((a, b) => {
+        const aIsTrailer = a.type === "Trailer" || a.name.toLowerCase().includes("trailer");
+        const bIsTrailer = b.type === "Trailer" || b.name.toLowerCase().includes("trailer");
+        if (aIsTrailer && !bIsTrailer) return -1;
+        if (!aIsTrailer && bIsTrailer) return 1;
+        return 0;
+      });
+
+      // Extract video IDs (limit to 5 videos max)
+      for (const video of sortedVideos.slice(0, 5)) {
+        if (video.key && /^[a-zA-Z0-9_-]{11}$/.test(video.key)) {
+          youtubeVideos.push(video.key);
+        }
+      }
+    }
+
+    // Process metadata
+    const seriesMetadata = {
+      genres: seriesData.genres?.map((g) => g.name) || [],
+      production_companies: seriesData.production_companies?.map((c) => c.name) || [],
+      production_countries: seriesData.production_countries?.map((c) => c.name) || [],
+      spoken_languages: seriesData.spoken_languages?.map((l) => l.name) || [],
+      first_air_date: seriesData.first_air_date,
+      number_of_seasons: seriesData.number_of_seasons,
+      number_of_episodes: seriesData.number_of_episodes,
+      tmdb_score: seriesData.vote_average,
+      vote_count: seriesData.vote_count,
+      popularity: seriesData.popularity,
+    };
+
+    // Calculate publication date from first air date
+    const releaseDate = seriesData.first_air_date 
+      ? new Date(seriesData.first_air_date).getTime() / 1000 
+      : null;
+
+    // Create review
+    const review = await prisma.review.create({
+      data: {
+        title: reviewContent.de.title,
+        title_en: reviewContent.en.title,
+        slug,
+        category: "series",
+        content: reviewContent.de.content,
+        content_en: reviewContent.en.content,
+        score: reviewContent.score,
+        pros: reviewContent.de.pros,
+        pros_en: reviewContent.en.pros,
+        cons: reviewContent.de.cons,
+        cons_en: reviewContent.en.cons,
+        images: imageUrls,
+        youtubeVideos: youtubeVideos,
+        status: options.status,
+        tmdbId: seriesData.id,
+        metadata: seriesMetadata,
+        createdAt: releaseDate ? calculatePublicationDate(releaseDate) : new Date(),
+      },
+    });
+
+    return { success: true, reviewId: review.id };
+  } catch (error: any) {
+    console.error(`Error processing series ${seriesData.name}:`, error);
     return { success: false, error: error.message };
   }
 }
