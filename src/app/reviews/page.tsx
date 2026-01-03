@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Metadata } from "next";
 import { ReviewsList } from "@/components/reviews/ReviewsList";
 import { Skeleton } from "@/components/shared/Skeleton";
 
@@ -29,6 +30,28 @@ function ReviewsListSkeleton() {
     </div>
   );
 }
+
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nerdiction.de";
+
+export const metadata: Metadata = {
+  title: "Alle Reviews - Game & Hardware Tests",
+  description: "Durchsuche unsere umfangreiche Sammlung von professionellen Game- und Hardware-Reviews. Finde die besten Tests und Bewertungen für deine Kaufentscheidung.",
+  alternates: {
+    canonical: `${baseUrl}/reviews`,
+  },
+  openGraph: {
+    title: "Alle Reviews - Game & Hardware Tests | Nerdiction",
+    description: "Durchsuche unsere umfangreiche Sammlung von professionellen Game- und Hardware-Reviews.",
+    url: `${baseUrl}/reviews`,
+    siteName: "Nerdiction",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Alle Reviews - Game & Hardware Tests",
+    description: "Durchsuche unsere umfangreiche Sammlung von professionellen Game- und Hardware-Reviews.",
+  },
+};
 
 export default function ReviewsPage() {
   return (
