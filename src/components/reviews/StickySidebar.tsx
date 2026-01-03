@@ -7,6 +7,7 @@ import { ShareButtons } from "./ShareButtons";
 import { CheckCircle2, XCircle, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface StickySidebarProps {
   score: number;
@@ -52,14 +53,20 @@ export function StickySidebar({
   };
 
   return (
-    <aside
-      className={cn(
-        "space-y-8 transition-opacity duration-300",
-        !isVisible && "opacity-50"
-      )}
+    <motion.aside
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: isVisible ? 1 : 0.5, x: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-8"
     >
       {/* Score Card */}
-      <div className="p-8 border-2 border-primary/20 rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 flex flex-col items-center text-center space-y-6 shadow-xl sticky top-24 backdrop-blur-sm">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        whileHover={{ scale: 1.02 }}
+        className="p-8 border-2 border-primary/20 rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 flex flex-col items-center text-center space-y-6 shadow-xl sticky top-24 backdrop-blur-sm"
+      >
         <h3 className="font-bold text-xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
           {isEn ? "Nerdiction Score" : "Nerdiction Wertung"}
         </h3>
@@ -155,7 +162,7 @@ export function StickySidebar({
             </a>
           </div>
         )}
-      </div>
-    </aside>
+      </motion.div>
+    </motion.aside>
   );
 }

@@ -1,9 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { Review } from "@/types/review";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScoreBadge } from "./ScoreBadge";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 interface ReviewCardProps {
   review: Review;
@@ -19,8 +22,12 @@ export function ReviewCard({ review, variant = "grid" }: ReviewCardProps) {
 
   if (variant === "list") {
     return (
-      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 border-2 hover:border-primary/20 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-        <div className="flex flex-col sm:flex-row gap-4 p-5">
+      <motion.div
+        whileHover={{ x: 4 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      >
+        <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 border-2 hover:border-primary/20 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+          <div className="flex flex-col sm:flex-row gap-4 p-5">
           <div className="relative aspect-video sm:aspect-square sm:w-48 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
             {review.images?.[0] ? (
               <Image
@@ -84,11 +91,16 @@ export function ReviewCard({ review, variant = "grid" }: ReviewCardProps) {
           </div>
         </div>
       </Card>
+      </motion.div>
     );
   }
 
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 border-2 hover:border-primary/20 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+    <motion.div
+      whileHover={{ y: -8 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    >
+      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 border-2 hover:border-primary/20 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
       <div className="relative aspect-video w-full overflow-hidden bg-muted">
         {review.images?.[0] ? (
           <Image
@@ -150,6 +162,7 @@ export function ReviewCard({ review, variant = "grid" }: ReviewCardProps) {
         </Link>
       </CardFooter>
     </Card>
+    </motion.div>
   );
 }
 

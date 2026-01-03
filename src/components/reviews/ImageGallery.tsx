@@ -5,6 +5,7 @@ import Image from "next/image";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ImageGalleryProps {
   images: string[];
@@ -59,12 +60,17 @@ export function ImageGallery({ images, title, startIndex = 0 }: ImageGalleryProp
       {/* Thumbnail Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {images.map((image, index) => (
-          <button
+          <motion.button
             key={index}
             onClick={() => {
               setCurrentIndex(index);
               setIsOpen(true);
             }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.05, duration: 0.3 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             className="relative aspect-video overflow-hidden rounded-lg border-2 border-border hover:border-primary/50 transition-all group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-label={`Bild ${index + 1} von ${images.length} öffnen: ${title}`}
           >
@@ -77,23 +83,32 @@ export function ImageGallery({ images, title, startIndex = 0 }: ImageGalleryProp
               loading={index < 4 ? "eager" : "lazy"}
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-          </button>
+          </motion.button>
         ))}
       </div>
 
       {/* Lightbox Modal */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm p-4"
-          onClick={() => setIsOpen(false)}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Bildergalerie"
-        >
-          <div
-            className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center"
-            onClick={(e) => e.stopPropagation()}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm p-4"
+            onClick={() => setIsOpen(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Bildergalerie"
           >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
             {/* Close Button */}
             <Button
               variant="ghost"
@@ -119,16 +134,25 @@ export function ImageGallery({ images, title, startIndex = 0 }: ImageGalleryProp
             )}
 
             {/* Image */}
-            <div className="relative w-full h-full flex items-center justify-center">
-              <Image
-                src={images[currentIndex]}
-                alt={`${title} - Screenshot ${currentIndex + 1}`}
-                fill
-                className="object-contain"
-                priority
-                sizes="100vw"
-              />
-            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentIndex}
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ duration: 0.3 }}
+                className="relative w-full h-full flex items-center justify-center"
+              >
+                <Image
+                  src={images[currentIndex]}
+                  alt={`${title} - Screenshot ${currentIndex + 1}`}
+                  fill
+                  className="object-contain"
+                  priority
+                  sizes="100vw"
+                />
+              </motion.div>
+            </AnimatePresence>
 
             {/* Next Button */}
             {images.length > 1 && (
@@ -149,9 +173,10 @@ export function ImageGallery({ images, title, startIndex = 0 }: ImageGalleryProp
                 {currentIndex + 1} / {images.length}
               </div>
             )}
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

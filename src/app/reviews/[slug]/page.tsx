@@ -20,8 +20,11 @@ import { YouTubeEmbed } from "@/components/reviews/YouTubeEmbed";
 import { ImageGallery } from "@/components/reviews/ImageGallery";
 import { StickySidebar } from "@/components/reviews/StickySidebar";
 import { createMarkdownComponents } from "@/components/reviews/MarkdownComponents";
+import { AnimatedSection } from "@/components/shared/AnimatedSection";
+import { AnimatedText } from "@/components/shared/AnimatedText";
 import { Clock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 export async function generateMetadata({
   params,
@@ -177,17 +180,20 @@ export default async function ReviewDetailPage({
       />
       
       {/* Back Button */}
-      <Link
-        href="/reviews"
-        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-        aria-label={isEn ? "Back to reviews" : "Zurück zu Reviews"}
-      >
-        <ArrowLeft className="size-4" aria-hidden="true" />
-        {isEn ? "Back to Reviews" : "Zurück zu Reviews"}
-      </Link>
+      <AnimatedSection direction="left" delay={0.1}>
+        <Link
+          href="/reviews"
+          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+          aria-label={isEn ? "Back to reviews" : "Zurück zu Reviews"}
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          {isEn ? "Back to Reviews" : "Zurück zu Reviews"}
+        </Link>
+      </AnimatedSection>
       
       {/* Header Section */}
-      <header className="space-y-6">
+      <AnimatedSection direction="up" delay={0.2}>
+        <header className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-4 flex-1">
             <div className="flex flex-wrap items-center gap-3">
@@ -205,9 +211,9 @@ export default async function ReviewDetailPage({
                 {isEn ? "Published on" : "Veröffentlicht am"} {formattedDate}
               </time>
             </div>
-            <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl xl:text-6xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
+            <AnimatedText variant="h1" stagger delay={0.3} className="text-4xl font-extrabold tracking-tight lg:text-5xl xl:text-6xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
               {title}
-            </h1>
+            </AnimatedText>
             <div className="pt-2">
               <ShareButtons title={title} url={`/reviews/${slug}`} />
             </div>
@@ -259,7 +265,8 @@ export default async function ReviewDetailPage({
             </span>
           </div>
         )}
-      </div>
+        </motion.div>
+      </AnimatedSection>
 
       {/* Image Gallery */}
       {review.images && review.images.length > 1 && (
