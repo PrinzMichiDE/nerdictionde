@@ -178,8 +178,10 @@ export default async function ReviewDetailPage({
                 {isEn ? "Published on" : "Veröffentlicht am"} {formattedDate}
               </time>
             </div>
-            <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl xl:text-6xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
-              {title}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight leading-[1.1] text-balance mb-2">
+              <span className="block bg-gradient-to-r from-foreground via-foreground/95 to-foreground/80 bg-clip-text text-transparent drop-shadow-sm">
+                {title}
+              </span>
             </h1>
             <div className="pt-2">
               <ShareButtons title={title} url={`/reviews/${slug}`} />

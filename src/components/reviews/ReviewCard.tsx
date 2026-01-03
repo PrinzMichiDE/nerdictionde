@@ -54,7 +54,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
             {formattedDate}
           </time>
         </div>
-        <CardTitle className="line-clamp-2 text-lg leading-tight group-hover:text-primary transition-colors">
+        <CardTitle className="line-clamp-2 text-lg font-bold leading-tight group-hover:text-primary transition-colors text-balance">
           {review.title}
         </CardTitle>
       </CardHeader>
