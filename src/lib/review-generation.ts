@@ -672,12 +672,35 @@ export async function generateSeriesReviewContent(
   }
 }
 
+// Helper function to check and ensure tmdbId column exists
+async function ensureTmdbIdColumn() {
+  try {
+    // Try a simple query to check if column exists
+    await prisma.$queryRaw`SELECT "tmdbId" FROM "Review" LIMIT 1`;
+  } catch (error: any) {
+    // If column doesn't exist, try to add it
+    if (error.message?.includes("does not exist") || error.message?.includes("column")) {
+      try {
+        await prisma.$executeRaw`ALTER TABLE "Review" ADD COLUMN IF NOT EXISTS "tmdbId" INTEGER`;
+        await prisma.$executeRaw`CREATE INDEX IF NOT EXISTS "Review_tmdbId_idx" ON "Review"("tmdbId")`;
+        console.log("✓ tmdbId column and index created");
+      } catch (migrationError) {
+        console.error("Failed to create tmdbId column:", migrationError);
+        // Continue anyway - might fail in some environments
+      }
+    }
+  }
+}
+
 // Helper function to process a single movie
 export async function processMovie(
   movieData: TMDBMovie,
   options: { status: "draft" | "published"; skipExisting: boolean }
 ): Promise<{ success: boolean; reviewId?: string; error?: string }> {
   try {
+    // Ensure tmdbId column exists before using it
+    await ensureTmdbIdColumn();
+    
     // Check if review already exists by TMDB ID
     if (options.skipExisting) {
       const existing = await prisma.review.findFirst({
@@ -815,6 +838,9 @@ export async function processSeries(
   options: { status: "draft" | "published"; skipExisting: boolean }
 ): Promise<{ success: boolean; reviewId?: string; error?: string }> {
   try {
+    // Ensure tmdbId column exists before using it
+    await ensureTmdbIdColumn();
+    
     // Check if review already exists by TMDB ID
     if (options.skipExisting) {
       const existing = await prisma.review.findFirst({

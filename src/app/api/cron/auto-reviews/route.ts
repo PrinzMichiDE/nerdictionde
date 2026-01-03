@@ -82,20 +82,28 @@ export async function GET(req: NextRequest) {
       });
 
       if (movies && movies.length > 0) {
-        // Filter out movies that already have reviews
-        const existingTmdbIds = await prisma.review.findMany({
-          where: {
-            tmdbId: {
-              in: movies.map((m: any) => m.id),
+        // Try to filter out movies that already have reviews
+        // If tmdbId column doesn't exist, this will be handled by processMovie
+        let existingTmdbIds: any[] = [];
+        try {
+          existingTmdbIds = await prisma.review.findMany({
+            where: {
+              tmdbId: {
+                in: movies.map((m: any) => m.id),
+              },
             },
-            category: "movie",
-          },
-          select: {
-            tmdbId: true,
-          },
-        });
+            select: {
+              tmdbId: true,
+            },
+          });
+        } catch (error: any) {
+          // If column doesn't exist, processMovie will handle it
+          if (!error.message?.includes("does not exist")) {
+            throw error;
+          }
+        }
 
-        const existingIdsSet = new Set(existingTmdbIds.map((r) => r.tmdbId));
+        const existingIdsSet = new Set(existingTmdbIds.map((r) => r.tmdbId).filter(Boolean));
         const newMovies = movies.filter((m: any) => !existingIdsSet.has(m.id));
 
         if (newMovies.length > 0) {
@@ -133,20 +141,28 @@ export async function GET(req: NextRequest) {
       });
 
       if (series && series.length > 0) {
-        // Filter out series that already have reviews
-        const existingTmdbIds = await prisma.review.findMany({
-          where: {
-            tmdbId: {
-              in: series.map((s: any) => s.id),
+        // Try to filter out series that already have reviews
+        // If tmdbId column doesn't exist, this will be handled by processSeries
+        let existingTmdbIds: any[] = [];
+        try {
+          existingTmdbIds = await prisma.review.findMany({
+            where: {
+              tmdbId: {
+                in: series.map((s: any) => s.id),
+              },
             },
-            category: "series",
-          },
-          select: {
-            tmdbId: true,
-          },
-        });
+            select: {
+              tmdbId: true,
+            },
+          });
+        } catch (error: any) {
+          // If column doesn't exist, processSeries will handle it
+          if (!error.message?.includes("does not exist")) {
+            throw error;
+          }
+        }
 
-        const existingIdsSet = new Set(existingTmdbIds.map((r) => r.tmdbId));
+        const existingIdsSet = new Set(existingTmdbIds.map((r) => r.tmdbId).filter(Boolean));
         const newSeries = series.filter((s: any) => !existingIdsSet.has(s.id));
 
         if (newSeries.length > 0) {
