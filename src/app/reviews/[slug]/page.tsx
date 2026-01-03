@@ -117,8 +117,6 @@ export default async function ReviewDetailPage({
     where: { status: "published" },
   })) as unknown as Review[];
 
-  if (!review) notFound();
-
   const title = isEn && review.title_en ? review.title_en : review.title;
   const content = isEn && review.content_en ? review.content_en : review.content;
   const pros = isEn && review.pros_en.length > 0 ? review.pros_en : review.pros;
