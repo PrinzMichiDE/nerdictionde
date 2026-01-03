@@ -11,6 +11,7 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "db:apply-tmdb-migration": "tsx scripts/apply-tmdb-migration.ts",
     "type-check": "tsc --noEmit"
   },
   "prisma": {
