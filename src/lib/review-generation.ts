@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import openai, { OPENAI_MODEL } from "@/lib/openai";
 import { uploadImage } from "@/lib/blob";
 import { calculatePublicationDate } from "@/lib/date-utils";
+import { HardwareType } from "@/lib/hardware";
 
 // Helper function to generate slug from title
 export function generateSlug(title: string): string {
@@ -12,8 +13,8 @@ export function generateSlug(title: string): string {
 }
 
 // Helper function to repair common JSON issues from AI responses
-export function repairJson(contentRaw: string, parseError: any, gameName: string): any {
-  console.error(`JSON parsing error for ${gameName}:`, parseError.message);
+export function repairJson(contentRaw: string, parseError: any, itemName: string): any {
+  console.error(`JSON parsing error for ${itemName}:`, parseError.message);
   console.error(`Raw content length: ${contentRaw.length}`);
   
   // Try to repair common JSON issues
@@ -30,7 +31,6 @@ export function repairJson(contentRaw: string, parseError: any, gameName: string
     // 1. Handle unterminated string first
     let inString = false;
     let escaped = false;
-    let lastUnescapedQuote = -1;
     
     for (let i = 0; i < work.length; i++) {
       if (escaped) {
@@ -43,7 +43,6 @@ export function repairJson(contentRaw: string, parseError: any, gameName: string
       }
       if (work[i] === '"') {
         inString = !inString;
-        if (inString) lastUnescapedQuote = i;
       }
     }
     
@@ -140,14 +139,14 @@ export function repairJson(contentRaw: string, parseError: any, gameName: string
   try {
     const parsed = JSON.parse(repaired);
     if (parsed.de && parsed.en && (parsed.score || parsed.de.content)) {
-      console.log(`Successfully repaired JSON for ${gameName}`);
+      console.log(`Successfully repaired JSON for ${itemName}`);
       return parsed;
     } else {
       throw new Error("Missing required fields after repair");
     }
   } catch (repairError: any) {
     // Repair failed, try one more aggressive repair attempt
-    console.error(`JSON repair failed for ${gameName}, attempting aggressive repair`);
+    console.error(`JSON repair failed for ${itemName}, attempting aggressive repair`);
     
     // Try aggressive repair: truncate at the last known good position
     const errorPosMatch = (repairError.message || parseError.message).match(/position (\d+)/);
@@ -186,7 +185,7 @@ export function repairJson(contentRaw: string, parseError: any, gameName: string
       try {
         const parsed = JSON.parse(aggressive);
         if (parsed.de && parsed.en && (parsed.score || parsed.de.content)) {
-          console.log(`Successfully repaired JSON for ${gameName} using aggressive repair`);
+          console.log(`Successfully repaired JSON for ${itemName} using aggressive repair`);
           return parsed;
         }
       } catch (e) {}
@@ -197,11 +196,11 @@ export function repairJson(contentRaw: string, parseError: any, gameName: string
       const finalTry = closeStructures(repaired.substring(0, errorPos));
       const parsed = JSON.parse(finalTry);
       if (parsed.de && parsed.en) {
-        console.log(`Successfully repaired JSON for ${gameName} using final fallback`);
+        console.log(`Successfully repaired JSON for ${itemName} using final fallback`);
         return parsed;
       }
     } catch (e) {
-      console.error(`Final fallback failed for ${gameName}:`, (e as Error).message);
+      console.error(`Final fallback failed for ${itemName}:`, (e as Error).message);
       // Log first and last 100 chars of attempted JSON for debugging
       console.error(`Repair attempt start: ${repaired.substring(0, 100)}...`);
       console.error(`Repair attempt end: ...${repaired.substring(repaired.length - 100)}`);
@@ -211,17 +210,72 @@ export function repairJson(contentRaw: string, parseError: any, gameName: string
   }
 }
 
-// Helper function to generate review content using OpenAI
-export async function generateReviewContent(gameData: any): Promise<{
+// Helper function to generate any content using OpenAI with built-in auto-repair
+export async function generateContent(
+  prompt: string, 
+  itemName: string,
+  retryCount = 0
+): Promise<any> {
+  try {
+    const aiResponse = await openai.chat.completions.create({
+      model: OPENAI_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+      max_tokens: 4000,
+    });
+
+    let contentRaw = aiResponse.choices[0].message.content || "{}";
+    
+    // Extract JSON block
+    const jsonMatch = contentRaw.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      contentRaw = jsonMatch[0];
+    }
+    
+    if (contentRaw.startsWith("```json")) {
+      contentRaw = contentRaw.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+    } else if (contentRaw.startsWith("```")) {
+      contentRaw = contentRaw.replace(/^```\n?/, "").replace(/\n?```$/, "");
+    }
+
+    try {
+      const parsed = JSON.parse(contentRaw);
+      if (!parsed.de || !parsed.de.content || !parsed.en || !parsed.en.content) {
+        throw new Error("Missing essential content fields");
+      }
+      return parsed;
+    } catch (parseError: any) {
+      const repaired = repairJson(contentRaw, parseError, itemName);
+      
+      if ((!repaired.en || !repaired.en.content) && retryCount < 1) {
+        console.log(`Repaired JSON for ${itemName} is still missing content. Retrying...`);
+        return generateContent(prompt + "\n\nHINWEIS: Dein letzter Versuch wurde abgeschnitten. Bitte fass dich etwas kürzer, damit das JSON vollständig ist.", itemName, retryCount + 1);
+      }
+      
+      return repaired;
+    }
+  } catch (error) {
+    if (retryCount < 1) {
+      console.error(`Error in generation for ${itemName}, retrying...`, error);
+      return generateContent(prompt, itemName, retryCount + 1);
+    }
+    throw error;
+  }
+}
+
+// Helper function to generate review content using OpenAI with built-in auto-repair
+export async function generateReviewContent(gameData: any, retryCount = 0): Promise<{
   de: { title: string; content: string; pros: string[]; cons: string[] };
   en: { title: string; content: string; pros: string[]; cons: string[] };
   score: number;
   specs?: any;
 }> {
+  const isRetry = retryCount > 0;
+  
   const prompt = `
     Schreibe eine professionelle Game-Review für "${gameData.name}" in Deutsch UND Englisch.
     
-    WICHTIG: Erwähne NIEMALS, dass dieser Text von einer KI, AI oder einem Sprachmodell generiert wurde. Der Text muss so klingen, als wäre er von einem passionierten Experten von Nerdiction geschrieben worden. Nutze einen professionellen, enthusiastischen, aber objektiven Tonfall.
+    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 800-1000 Wörter pro Sprache), damit das JSON vollständig ist." : "WICHTIG: Erwähne NIEMALS, dass dieser Text von einer KI, AI oder einem Sprachmodell generiert wurde. Der Text muss so klingen, als wäre er von einem passionierten Experten von Nerdiction geschrieben worden. Nutze einen professionellen, enthusiastischen, aber objektiven Tonfall."}
     
     Antworte EXKLUSIV im JSON-Format mit folgendem Schema:
     {
@@ -250,56 +304,90 @@ export async function generateReviewContent(gameData: any): Promise<{
   `;
 
   try {
-    const aiResponse = await openai.chat.completions.create({
-      model: OPENAI_MODEL,
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
-      max_tokens: 4000, // Increase max tokens to avoid truncation
-    });
-
-    let contentRaw = aiResponse.choices[0].message.content || "{}";
-    
-    // Extract JSON block if it's surrounded by other text
-    const jsonMatch = contentRaw.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      contentRaw = jsonMatch[0];
-    }
-    
-    // Fallback: Strip markdown code blocks if the AI included them
-    if (contentRaw.startsWith("```json")) {
-      contentRaw = contentRaw.replace(/^```json\n?/, "").replace(/\n?```$/, "");
-    } else if (contentRaw.startsWith("```")) {
-      contentRaw = contentRaw.replace(/^```\n?/, "").replace(/\n?```$/, "");
-    }
-
-    // Try to parse JSON, with better error handling and repair attempts
-    try {
-      const parsed = JSON.parse(contentRaw);
-      // Ensure all required fields exist
-      if (!parsed.de || !parsed.en || !parsed.score) {
-        throw new Error("Missing required fields in AI response");
-      }
-      return parsed;
-    } catch (parseError: any) {
-      return repairJson(contentRaw, parseError, gameData.name);
-    }
+    return await generateContent(prompt, gameData.name, retryCount);
   } catch (error) {
-    console.error(`Error generating content for ${gameData.name}:`, error);
-    // Return fallback content
+    console.error(`Final error generating content for ${gameData.name}:`, error);
     return {
-        de: {
+      de: {
         title: gameData.name,
         content: `## Einleitung\n\n${gameData.summary || "Keine Beschreibung verfügbar."}\n\n## Fazit\n\nEin interessantes Spiel, das es wert ist, genauer betrachtet zu werden.`,
-        pros: ["Gute Grafik", "Interessante Mechaniken", "Gutes Sounddesign", "Stimmige Atmosphäre", "Hoher Wiederspielwert"],
-        cons: ["Könnte mehr Inhalt haben", "Kleinere technische Fehler", "Gelegentliche Framerate-Einbrüche", "Hoher Schwierigkeitsgrad", "Lange Ladezeiten"],
+        pros: ["Gute Grafik", "Interessante Mechaniken"],
+        cons: ["Könnte mehr Inhalt haben"],
       },
       en: {
         title: gameData.name,
         content: `## Introduction\n\n${gameData.summary || "No description available."}\n\n## Conclusion\n\nAn interesting game worth taking a closer look at.`,
-        pros: ["Good graphics", "Interesting mechanics", "Great sound design", "Atmospheric world", "High replay value"],
-        cons: ["Could have more content", "Minor technical glitches", "Occasional frame drops", "Steep learning curve", "Long loading times"],
+        pros: ["Good graphics", "Interesting mechanics"],
+        cons: ["Could have more content"],
       },
       score: 70,
+    };
+  }
+}
+
+// Helper function to generate hardware review content using OpenAI with built-in auto-repair
+export async function generateHardwareReviewContent(
+  hardwareData: { name: string; type: HardwareType; manufacturer?: string; model?: string; description?: string; specs?: any },
+  retryCount = 0
+): Promise<{
+  de: { title: string; content: string; pros: string[]; cons: string[] };
+  en: { title: string; content: string; pros: string[]; cons: string[] };
+  score: number;
+  specs?: any;
+}> {
+  const isRetry = retryCount > 0;
+  
+  const prompt = `
+    Schreibe eine EXTREM AUSFÜHRLICHE professionelle Hardware-Review für "${hardwareData.name}" in Deutsch UND Englisch.
+    
+    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 800-1000 Wörter pro Sprache), damit das JSON vollständig ist." : "ANFORDERUNGEN AN DEN INHALT:\n1. Der Text muss MASSIV DETAILLIERT sein (Ziel: 1200-1500 Wörter pro Sprache).\n2. Nutze eine tiefgehende journalistische Struktur mit aussagekräftigen H2- und H3-Überschriften."}
+    
+    Antworte EXKLUSIV im JSON-Format mit folgendem Schema:
+    {
+      "de": {
+        "title": "...",
+        "content": "Markdown mit Inhaltsverzeichnis, ausführlicher Einleitung, mehreren tiefgehenden Analyse-Abschnitten mit Überschriften, BILD-PLATZHALTERN (![[IMAGE_X]]) und Fazit...",
+        "pros": ["...", "...", "...", "...", "..."],
+        "cons": ["...", "...", "...", "...", "..."]
+      },
+      "en": {
+        "title": "...",
+        "content": "Markdown with Table of Contents, detailed intro, several deep-dive analysis sections with headings, IMAGE PLACEHOLDERS (![[IMAGE_X]]) and conclusion...",
+        "pros": ["...", "...", "...", "...", "..."],
+        "cons": ["...", "...", "...", "...", "..."]
+      },
+      "score": 0-100,
+      "specs": {
+        // Hardware-spezifische Spezifikationen
+      }
+    }
+    
+    Hardware-Typ: ${hardwareData.type}
+    Hersteller: ${hardwareData.manufacturer || "Unbekannt"}
+    Modell: ${hardwareData.model || hardwareData.name}
+    Beschreibung: ${hardwareData.description || "Keine Beschreibung verfügbar"}
+    ${hardwareData.specs ? `Bekannte Specs: ${JSON.stringify(hardwareData.specs)}` : ""}
+  `;
+
+  try {
+    return await generateContent(prompt, hardwareData.name, retryCount);
+  } catch (error) {
+    console.error(`Final error generating hardware content for ${hardwareData.name}:`, error);
+    return {
+      de: {
+        title: hardwareData.name,
+        content: `## Einleitung\n\n${hardwareData.description || "Keine Beschreibung verfügbar."}\n\n## Fazit\n\nEin interessantes Hardware-Produkt.`,
+        pros: ["Gute Leistung", "Solide Verarbeitung"],
+        cons: ["Könnte mehr Features haben"],
+      },
+      en: {
+        title: hardwareData.name,
+        content: `## Introduction\n\n${hardwareData.description || "No description available."}\n\n## Conclusion\n\nAn interesting hardware product.`,
+        pros: ["Good performance", "Solid build quality"],
+        cons: ["Could have more features"],
+      },
+      score: 70,
+      specs: hardwareData.specs || null,
     };
   }
 }
@@ -455,4 +543,3 @@ export async function processGame(
     return { success: false, error: error.message };
   }
 }
-

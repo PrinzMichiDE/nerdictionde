@@ -4,7 +4,7 @@ import openai, { OPENAI_MODEL } from "@/lib/openai";
 import { uploadImage } from "@/lib/blob";
 import prisma from "@/lib/prisma";
 import { calculatePublicationDate } from "@/lib/date-utils";
-import { repairJson } from "@/lib/review-generation";
+import { repairJson, generateHardwareReviewContent } from "@/lib/review-generation";
 
 interface BulkCreateHardwareOptions {
   hardwareNames: string[]; // List of hardware names to create reviews for
@@ -20,114 +20,6 @@ function generateSlug(title: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-}
-
-// Helper function to generate review content using OpenAI
-async function generateHardwareReviewContent(
-  hardwareData: { name: string; type: HardwareType; manufacturer?: string; model?: string; description?: string; specs?: any }
-): Promise<{
-  de: { title: string; content: string; pros: string[]; cons: string[] };
-  en: { title: string; content: string; pros: string[]; cons: string[] };
-  score: number;
-  specs?: any;
-}> {
-  const prompt = `
-    Schreibe eine EXTREM AUSFÜHRLICHE professionelle Hardware-Review für "${hardwareData.name}" in Deutsch UND Englisch.
-    
-    ANFORDERUNGEN AN DEN INHALT:
-    1. Der Text muss MASSIV DETAILLIERT sein (Ziel: 1200-1500 Wörter pro Sprache).
-    2. Nutze eine tiefgehende journalistische Struktur mit aussagekräftigen H2- und H3-Überschriften.
-    3. Füge am Anfang jedes Berichts ein "Inhaltsverzeichnis" (Table of Contents) in Markdown-Listenform ein, das auf die Überschriften verweist (nutze Anker-Links wie [Überschrift](#überschrift)).
-    4. Gehe extrem tief ins Detail:
-       - Design & Ergonomie: Haptik, Materialien und tägliche Nutzung.
-       - Technische Leistung: Benchmarks, Hitzeentwicklung, Lautstärke und Effizienz.
-       - Features & Software: Integration, Treibersoftware und Zusatzfunktionen.
-       - Preis-Leistung: Einordnung im aktuellen Marktvergleich.
-       - Fazit: Für wen lohnt sich der Kauf?
-    5. BILD-INTEGRATION:
-       Integriere im Fließtext an passenden Stellen (ca. alle 3-4 Absätze) Bild-Platzhalter im Format:
-       ![[IMAGE_1]]
-       ![[IMAGE_2]]
-       ![[IMAGE_3]]
-       Nutze bis zu 5 verschiedene Platzhalter (IMAGE_1 bis IMAGE_5). Platziere sie dort, wo ein Produktfoto den Text sinnvoll ergänzen würde.
-    
-    WICHTIG: Erwähne NIEMALS, dass dieser Text von einer KI, AI oder einem Sprachmodell generiert wurde. Der Text muss so klingen, als wäre er von einem passionierten Experten von Nerdiction geschrieben worden. Nutze einen professionellen, journalistischen, enthusiastischen, aber objektiven Tonfall.
-    
-    Antworte EXKLUSIV im JSON-Format mit folgendem Schema:
-    {
-      "de": {
-        "title": "...",
-        "content": "Markdown mit Inhaltsverzeichnis, ausführlicher Einleitung, mehreren tiefgehenden Analyse-Abschnitten mit Überschriften, BILD-PLATZHALTERN (![[IMAGE_X]]) und Fazit...",
-        "pros": ["...", "...", "...", "...", "..."],
-        "cons": ["...", "...", "...", "...", "..."]
-      },
-      "en": {
-        "title": "...",
-        "content": "Markdown with Table of Contents, detailed intro, several deep-dive analysis sections with headings, IMAGE PLACEHOLDERS (![[IMAGE_X]]) and conclusion...",
-        "pros": ["...", "...", "...", "...", "..."],
-        "cons": ["...", "...", "...", "...", "..."]
-      },
-      "score": 0-100,
-      "specs": {
-        // Hardware-spezifische Spezifikationen basierend auf dem Typ
-      }
-    }
-    
-    Hardware-Typ: ${hardwareData.type}
-    Hersteller: ${hardwareData.manufacturer || "Unbekannt"}
-    Modell: ${hardwareData.model || hardwareData.name}
-    Beschreibung: ${hardwareData.description || "Keine Beschreibung verfügbar"}
-    ${hardwareData.specs ? `Bekannte Specs: ${JSON.stringify(hardwareData.specs)}` : ""}
-  `;
-
-  try {
-    const aiResponse = await openai.chat.completions.create({
-      model: OPENAI_MODEL,
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
-      max_tokens: 4000,
-    });
-
-    let contentRaw = aiResponse.choices[0].message.content || "{}";
-    
-    // Extract JSON block if it's surrounded by other text
-    const jsonMatch = contentRaw.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      contentRaw = jsonMatch[0];
-    }
-    
-    // Fallback: Strip markdown code blocks if the AI included them
-    if (contentRaw.startsWith("```json")) {
-      contentRaw = contentRaw.replace(/^```json\n?/, "").replace(/\n?```$/, "");
-    } else if (contentRaw.startsWith("```")) {
-      contentRaw = contentRaw.replace(/^```\n?/, "").replace(/\n?```$/, "");
-    }
-
-    try {
-      return JSON.parse(contentRaw);
-    } catch (parseError: any) {
-      return repairJson(contentRaw, parseError, hardwareData.name);
-    }
-  } catch (error) {
-    console.error(`Error generating content for ${hardwareData.name}:`, error);
-    // Return fallback content
-    return {
-      de: {
-        title: hardwareData.name,
-        content: `## Einleitung\n\n${hardwareData.description || "Keine Beschreibung verfügbar."}\n\n## Fazit\n\nEin interessantes Hardware-Produkt, das es wert ist, genauer betrachtet zu werden.`,
-        pros: ["Gute Leistung", "Solide Verarbeitung", "Gute Features", "Guter Preis", "Zuverlässig"],
-        cons: ["Könnte mehr Features haben", "Design könnte moderner sein", "Leicht laut", "Hoher Stromverbrauch", "Begrenzte Kompatibilität"],
-      },
-      en: {
-        title: hardwareData.name,
-        content: `## Introduction\n\n${hardwareData.description || "No description available."}\n\n## Conclusion\n\nAn interesting hardware product worth taking a closer look at.`,
-        pros: ["Good performance", "Solid build quality", "Great features", "Good value", "Reliable"],
-        cons: ["Could have more features", "Design could be more modern", "Slightly noisy", "High power consumption", "Limited compatibility"],
-      },
-      score: 70,
-      specs: hardwareData.specs || null,
-    };
-  }
 }
 
 // Helper function to extract manufacturer and model from hardware name
