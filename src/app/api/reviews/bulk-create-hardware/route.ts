@@ -90,6 +90,12 @@ async function generateHardwareReviewContent(
 
     let contentRaw = aiResponse.choices[0].message.content || "{}";
     
+    // Extract JSON block if it's surrounded by other text
+    const jsonMatch = contentRaw.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      contentRaw = jsonMatch[0];
+    }
+    
     // Fallback: Strip markdown code blocks if the AI included them
     if (contentRaw.startsWith("```json")) {
       contentRaw = contentRaw.replace(/^```json\n?/, "").replace(/\n?```$/, "");

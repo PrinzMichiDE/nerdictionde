@@ -27,21 +27,36 @@ export function repairJson(contentRaw: string, parseError: any, gameName: string
   const closeStructures = (str: string) => {
     let work = str.trim();
     
-    // Count unescaped quotes
-    let quoteCount = 0;
+    // 1. Handle unterminated string first
+    let inString = false;
+    let escaped = false;
+    let lastUnescapedQuote = -1;
+    
     for (let i = 0; i < work.length; i++) {
-      if (work[i] === '"' && (i === 0 || work[i-1] !== '\\')) {
-        quoteCount++;
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (work[i] === '\\') {
+        escaped = true;
+        continue;
+      }
+      if (work[i] === '"') {
+        inString = !inString;
+        if (inString) lastUnescapedQuote = i;
       }
     }
-    if (quoteCount % 2 !== 0) {
+    
+    if (inString) {
+      // If we are mid-string, just close it
       work += '"';
     }
 
-    // Close brackets and braces in correct order
+    // 2. Close brackets and braces in correct order
     let stack: string[] = [];
-    let inString = false;
-    let escaped = false;
+    inString = false;
+    escaped = false;
+    
     for (let i = 0; i < work.length; i++) {
       const char = work[i];
       if (escaped) {
@@ -185,7 +200,12 @@ export function repairJson(contentRaw: string, parseError: any, gameName: string
         console.log(`Successfully repaired JSON for ${gameName} using final fallback`);
         return parsed;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(`Final fallback failed for ${gameName}:`, (e as Error).message);
+      // Log first and last 100 chars of attempted JSON for debugging
+      console.error(`Repair attempt start: ${repaired.substring(0, 100)}...`);
+      console.error(`Repair attempt end: ...${repaired.substring(repaired.length - 100)}`);
+    }
 
     throw parseError;
   }
@@ -238,6 +258,12 @@ export async function generateReviewContent(gameData: any): Promise<{
     });
 
     let contentRaw = aiResponse.choices[0].message.content || "{}";
+    
+    // Extract JSON block if it's surrounded by other text
+    const jsonMatch = contentRaw.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      contentRaw = jsonMatch[0];
+    }
     
     // Fallback: Strip markdown code blocks if the AI included them
     if (contentRaw.startsWith("```json")) {

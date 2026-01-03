@@ -7,6 +7,7 @@ import { searchHardware, detectHardwareType, createHardware } from "@/lib/hardwa
 import { uploadImage } from "@/lib/blob";
 import { calculatePublicationDate } from "@/lib/date-utils";
 import { requireAdminAuth } from "@/lib/auth";
+import { repairJson } from "@/lib/review-generation";
 
 export async function POST(req: NextRequest) {
   // Require admin authentication
@@ -160,9 +161,16 @@ export async function POST(req: NextRequest) {
       model: OPENAI_MODEL,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
+      max_tokens: 4000,
     });
 
     let contentRaw = aiResponse.choices[0].message.content || "{}";
+    
+    // Extract JSON block if it's surrounded by other text
+    const jsonMatch = contentRaw.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      contentRaw = jsonMatch[0];
+    }
     
     // Fallback: Strip markdown code blocks if the AI included them
     if (contentRaw.startsWith("```json")) {
@@ -171,7 +179,12 @@ export async function POST(req: NextRequest) {
       contentRaw = contentRaw.replace(/^```\n?/, "").replace(/\n?```$/, "");
     }
 
-    const result = JSON.parse(contentRaw);
+    let result;
+    try {
+      result = JSON.parse(contentRaw);
+    } catch (parseError: any) {
+      result = repairJson(contentRaw, parseError, data.name);
+    }
     const pubDate = calculatePublicationDate(data.first_release_date);
 
     // Process metadata
