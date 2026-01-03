@@ -107,7 +107,7 @@ export default async function ReviewDetailPage({
 
   if (!review) notFound();
 
-  // Increment view count (fire and forget)
+  // Increment view count (fire and forget - don't await to avoid blocking)
   incrementViewCount(review.id).catch(() => {
     // Silently fail if view count increment fails
   });

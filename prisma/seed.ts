@@ -54,7 +54,17 @@ async function main() {
     });
   }
 
-  console.log("Seeding completed.");
+  console.log("✅ Reviews seeded");
+
+  // Sync collections and tags
+  try {
+    const { seedDatabase } = await import("../src/lib/db/seed-collections");
+    await seedDatabase();
+  } catch (error) {
+    console.warn("⚠️  Could not sync collections/tags:", error);
+  }
+
+  console.log("✅ Seeding completed.");
 }
 
 main()
