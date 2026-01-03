@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  title       String
+  title_en    String?
+  slug        String   @unique
+  category    String   // "game" | "hardware" | "amazon"
+  content     String   // Markdown
+  content_en  String?  // Markdown English
+  score       Int      // 0-100
+  pros        String[]
+  pros_en     String[]
+  cons        String[]
+  cons_en     String[]
+  images      String[] // Vercel Blob URLs
+  youtubeVideos String[] // YouTube video IDs or URLs (e.g., "dQw4w9WgXcQ" or "https://youtube.com/watch?v=dQw4w9WgXcQ")
+  status      String   @default("draft") // "draft" | "published"
+  igdbId      Int?
+  steamAppId  String?
+  amazonAsin  String?  // Amazon Product ASIN
+  affiliateLink String? // Amazon Affiliate Link
+  hardwareId  String?  // Reference to Hardware model
+  specs       Json?    // Hardware requirements or technical specs
+  metadata    Json?    // Additional IGDB metadata (developer, publisher, modes, etc.)
+  hardware    Hardware? @relation(fields: [hardwareId], references: [id], onDelete: SetNull)
+  comments    Comment[]
+  userRatings UserRating[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([category, status])
+  @@index([amazonAsin])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  text      String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reviewId  String
+  author    String
+  createdAt DateTime @default(now())
+
+  @@index([reviewId])
+}
+
+model UserRating {
+  id        String   @id @default(cuid())
+  score     Int     // 0-10
+  review    Review  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reviewId  String
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId]) // Ein Rating pro Review (später mit User-ID erweitern)
+  @@index([reviewId])
+}
+
+model Hardware {
+  id          String   @id @default(cuid())
+  name        String
+  name_en     String?
+  slug        String   @unique
+  type        String   // "gpu" | "cpu" | "motherboard" | "ram" | "storage" | "psu" | "case" | "cooler" | "monitor" | "keyboard" | "mouse" | "headset" | "controller" | "console"
+  manufacturer String? // e.g. "NVIDIA", "AMD", "Intel", "Sony", "Microsoft"
+  model       String? // e.g. "RTX 4090", "Ryzen 9 7950X", "PlayStation 5"
+  specs       Json?    // Technical specifications (varies by type)
+  images      String[] // Product images URLs
+  description String?  // Short description
+  description_en String?
+  releaseDate DateTime?
+  msrp        Float?   // Manufacturer's suggested retail price
+  reviews     Review[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([type, manufacturer])
+  @@index([name])
+}

@@ -1,0 +1,9 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/auto-reviews",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
+
