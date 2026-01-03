@@ -24,24 +24,30 @@ async function testHardwareReviewGeneration() {
   }
   console.log();
 
-  // Test 2: Hardware Search
+  // Test 2: Hardware Search (uses nerdiction.de API first, then local database)
   console.log("Test 2: Hardware Search");
+  console.log("  API URL: " + (process.env.NERDICTION_API_URL || "https://www.nerdiction.de"));
   try {
     const searchResults = await searchHardware("RTX");
     console.log(`  Found ${searchResults.length} hardware items matching "RTX"`);
     if (searchResults.length > 0) {
       console.log(`  First result: ${searchResults[0].name} (${searchResults[0].type})`);
       console.log(`    ID: ${searchResults[0].id}`);
+      console.log(`    Slug: ${searchResults[0].slug}`);
       console.log(`    Manufacturer: ${searchResults[0].manufacturer || "N/A"}`);
       console.log(`    Model: ${searchResults[0].model || "N/A"}`);
       console.log(`    Images: ${Array.isArray(searchResults[0].images) ? searchResults[0].images.length : 0}`);
+      console.log(`    Source: ${searchResults[0].id ? "API or Database" : "Unknown"}`);
     } else {
-      console.log("  ⚠️  No hardware found in database (this is OK if database is empty)");
+      console.log("  ⚠️  No hardware found (checked API and local database)");
     }
   } catch (error: any) {
     console.error(`  ❌ Error: ${error.message}`);
     if (error.message.includes("DATABASE_URL")) {
-      console.log("  ⚠️  Database not configured. Skipping database tests.");
+      console.log("  ⚠️  Database not configured. API search may still work.");
+    }
+    if (error.message.includes("timeout") || error.message.includes("ECONNREFUSED")) {
+      console.log("  ⚠️  API not reachable. Falling back to local database.");
     }
   }
   console.log();

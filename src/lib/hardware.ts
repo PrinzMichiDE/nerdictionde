@@ -1,5 +1,6 @@
 import prisma from "./prisma";
 import { Hardware } from "@prisma/client";
+import axios from "axios";
 
 export type HardwareType =
   | "gpu"
@@ -34,9 +35,52 @@ export interface HardwareSearchResult {
 }
 
 /**
- * Searches for hardware in the database by name
+ * Searches for hardware using the nerdiction.de API, then falls back to local database
  */
 export async function searchHardware(query: string): Promise<Hardware[]> {
+  const apiBaseUrl = process.env.NERDICTION_API_URL || "https://www.nerdiction.de";
+  
+  try {
+    // First, try to search via the public API
+    const apiResponse = await axios.post(
+      `${apiBaseUrl}/api/hardware/search`,
+      { query },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        timeout: 5000, // 5 second timeout
+      }
+    );
+
+    if (apiResponse.data && Array.isArray(apiResponse.data) && apiResponse.data.length > 0) {
+      // Map API response to Hardware format
+      const mappedResults = apiResponse.data.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        name_en: item.name_en || null,
+        slug: item.slug,
+        type: item.type,
+        manufacturer: item.manufacturer || null,
+        model: item.model || null,
+        description: item.description || null,
+        description_en: item.description_en || null,
+        images: Array.isArray(item.images) ? item.images : [],
+        specs: item.specs || null,
+        releaseDate: item.releaseDate ? new Date(item.releaseDate) : null,
+        msrp: item.msrp || null,
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+        updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
+      }));
+
+      return mappedResults as Hardware[];
+    }
+  } catch (error: any) {
+    // If API call fails, log and fall back to local database
+    console.log(`API search failed for "${query}", falling back to local database:`, error.message);
+  }
+
+  // Fallback to local database search
   const results = await prisma.hardware.findMany({
     where: {
       OR: [
@@ -54,9 +98,50 @@ export async function searchHardware(query: string): Promise<Hardware[]> {
 }
 
 /**
- * Gets hardware by slug
+ * Gets hardware by slug using the nerdiction.de API, then falls back to local database
  */
 export async function getHardwareBySlug(slug: string): Promise<Hardware | null> {
+  const apiBaseUrl = process.env.NERDICTION_API_URL || "https://www.nerdiction.de";
+  
+  try {
+    // First, try to get via the public API
+    const apiResponse = await axios.get(
+      `${apiBaseUrl}/api/hardware/${slug}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        timeout: 5000,
+      }
+    );
+
+    if (apiResponse.data) {
+      const item = apiResponse.data;
+      // Map API response to Hardware format
+      return {
+        id: item.id,
+        name: item.name,
+        name_en: item.name_en || null,
+        slug: item.slug,
+        type: item.type,
+        manufacturer: item.manufacturer || null,
+        model: item.model || null,
+        description: item.description || null,
+        description_en: item.description_en || null,
+        images: Array.isArray(item.images) ? item.images : [],
+        specs: item.specs || null,
+        releaseDate: item.releaseDate ? new Date(item.releaseDate) : null,
+        msrp: item.msrp || null,
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+        updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
+      } as Hardware;
+    }
+  } catch (error: any) {
+    // If API call fails, log and fall back to local database
+    console.log(`API get failed for slug "${slug}", falling back to local database:`, error.message);
+  }
+
+  // Fallback to local database
   const hardware = await prisma.hardware.findUnique({
     where: { slug },
   });
