@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Gamepad2, Mail, FileText, Cpu, ShoppingCart, Handshake, Shield, FileCheck } from "lucide-react";
+import { Gamepad2, Mail, FileText, Cpu, ShoppingCart, Handshake, Shield, FileCheck, BookOpen, BarChart3 } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -7,6 +7,8 @@ export function Footer() {
   const navigationLinks = [
     { href: "/", label: "Startseite", icon: null },
     { href: "/reviews", label: "Alle Reviews", icon: FileText },
+    { href: "/collections", label: "Collections", icon: BookOpen },
+    { href: "/statistics", label: "Statistiken", icon: BarChart3 },
   ];
 
   const categoryLinks = [

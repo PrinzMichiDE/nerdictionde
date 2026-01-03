@@ -1,6 +1,10 @@
 import { Suspense } from "react";
+import { Metadata } from "next";
 import { ReviewsList } from "@/components/reviews/ReviewsList";
 import { Skeleton } from "@/components/shared/Skeleton";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { BookOpen, BarChart3 } from "lucide-react";
 
 function ReviewsListSkeleton() {
   return (
@@ -30,11 +34,51 @@ function ReviewsListSkeleton() {
   );
 }
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nerdiction.de";
+
+export const metadata: Metadata = {
+  title: "Alle Reviews - Game & Hardware Tests",
+  description: "Durchsuche unsere umfangreiche Sammlung von professionellen Game- und Hardware-Reviews. Finde die besten Tests und Bewertungen für deine Kaufentscheidung.",
+  alternates: {
+    canonical: `${baseUrl}/reviews`,
+  },
+  openGraph: {
+    title: "Alle Reviews - Game & Hardware Tests | Nerdiction",
+    description: "Durchsuche unsere umfangreiche Sammlung von professionellen Game- und Hardware-Reviews.",
+    url: `${baseUrl}/reviews`,
+    siteName: "Nerdiction",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Alle Reviews - Game & Hardware Tests",
+    description: "Durchsuche unsere umfangreiche Sammlung von professionellen Game- und Hardware-Reviews.",
+  },
+};
+
 export default function ReviewsPage() {
   return (
-    <Suspense fallback={<ReviewsListSkeleton />}>
-      <ReviewsList />
-    </Suspense>
+    <div className="space-y-8">
+      {/* Quick Links */}
+      <div className="flex flex-wrap items-center gap-3 pb-4 border-b">
+        <Link href="/collections">
+          <Button variant="outline" size="sm" className="gap-2">
+            <BookOpen className="size-4" />
+            Collections
+          </Button>
+        </Link>
+        <Link href="/statistics">
+          <Button variant="outline" size="sm" className="gap-2">
+            <BarChart3 className="size-4" />
+            Statistiken
+          </Button>
+        </Link>
+      </div>
+
+      <Suspense fallback={<ReviewsListSkeleton />}>
+        <ReviewsList />
+      </Suspense>
+    </div>
   );
 }
 

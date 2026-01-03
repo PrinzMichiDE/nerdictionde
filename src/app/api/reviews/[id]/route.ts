@@ -1,63 +1,89 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAdminAuth } from "@/lib/auth";
+import { apiHandler, validateBody } from "@/lib/api-handler";
+import { successResponse, ApiErrors } from "@/lib/api-response";
+import { ReviewUpdateSchema } from "@/lib/validations/review";
+import { z } from "zod";
 
-export async function GET(
+const ReviewIdSchema = z.object({
+  id: z.string().uuid("Invalid review ID"),
+});
+
+export const GET = apiHandler(async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    const review = await prisma.review.findUnique({
-      where: { id },
-      include: { comments: true, userRatings: true },
-    });
-    if (!review) {
-      return NextResponse.json({ error: "Review not found" }, { status: 404 });
-    }
-    return NextResponse.json(review);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+) => {
+  const { id } = await params;
+  const validatedId = ReviewIdSchema.parse({ id });
+  
+  const review = await prisma.review.findUnique({
+    where: { id: validatedId.id },
+    include: { comments: true, userRatings: true },
+  });
+  
+  if (!review) {
+    return ApiErrors.notFound("Review not found");
   }
-}
+  
+  return successResponse(review);
+});
 
-export async function PUT(
+export const PUT = apiHandler(async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   // Require admin authentication for updating reviews
   const authError = requireAdminAuth(req);
   if (authError) return authError;
 
-  try {
-    const { id } = await params;
-    const body = await req.json();
-    const review = await prisma.review.update({
-      where: { id },
-      data: body,
-    });
-    return NextResponse.json(review);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  const { id } = await params;
+  const validatedId = ReviewIdSchema.parse({ id });
+  
+  const { validateBody } = await import("@/lib/api-handler");
+  const body = await validateBody(ReviewUpdateSchema.partial())(req);
+  
+  // Check if review exists
+  const existingReview = await prisma.review.findUnique({
+    where: { id: validatedId.id },
+  });
+  
+  if (!existingReview) {
+    return ApiErrors.notFound("Review not found");
   }
-}
 
-export async function DELETE(
+  const review = await prisma.review.update({
+    where: { id: validatedId.id },
+    data: body,
+  });
+  
+  return successResponse(review);
+});
+
+export const DELETE = apiHandler(async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   // Require admin authentication for deleting reviews
   const authError = requireAdminAuth(req);
   if (authError) return authError;
 
-  try {
-    const { id } = await params;
-    await prisma.review.delete({
-      where: { id },
-    });
-    return NextResponse.json({ message: "Review deleted" });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  const { id } = await params;
+  const validatedId = ReviewIdSchema.parse({ id });
+  
+  // Check if review exists
+  const existingReview = await prisma.review.findUnique({
+    where: { id: validatedId.id },
+  });
+  
+  if (!existingReview) {
+    return ApiErrors.notFound("Review not found");
   }
-}
+
+  await prisma.review.delete({
+    where: { id: validatedId.id },
+  });
+  
+  return successResponse({ message: "Review deleted successfully" });
+});
 

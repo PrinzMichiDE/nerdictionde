@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Play } from "lucide-react";
+import { VideoTimestamps } from "./VideoTimestamp";
 
 interface YouTubeEmbedProps {
   videoId: string;
   title?: string;
   className?: string;
+  timestamps?: Array<{ time: number; label: string }>;
 }
 
 /**
@@ -34,7 +36,7 @@ function extractVideoId(urlOrId: string): string | null {
   return null;
 }
 
-export function YouTubeEmbed({ videoId, title, className = "" }: YouTubeEmbedProps) {
+export function YouTubeEmbed({ videoId, title, className = "", timestamps }: YouTubeEmbedProps) {
   const [isClient, setIsClient] = useState(false);
   const [embedId, setEmbedId] = useState<string | null>(null);
 
@@ -56,15 +58,20 @@ export function YouTubeEmbed({ videoId, title, className = "" }: YouTubeEmbedPro
   }
 
   return (
-    <div className={`relative aspect-video w-full overflow-hidden rounded-2xl border-2 shadow-xl group ${className}`}>
-      <iframe
-        src={`https://www.youtube.com/embed/${embedId}?rel=0&modestbranding=1`}
-        title={title || "YouTube video player"}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowFullScreen
-        className="absolute inset-0 w-full h-full"
-        loading="lazy"
-      />
+    <div className={`space-y-4 ${className}`}>
+      <div className="relative aspect-video w-full overflow-hidden rounded-2xl border-2 shadow-xl group">
+        <iframe
+          src={`https://www.youtube.com/embed/${embedId}?rel=0&modestbranding=1`}
+          title={title || "YouTube video player"}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          className="absolute inset-0 w-full h-full"
+          loading="lazy"
+        />
+      </div>
+      {timestamps && timestamps.length > 0 && (
+        <VideoTimestamps videoId={embedId} timestamps={timestamps} />
+      )}
     </div>
   );
 }

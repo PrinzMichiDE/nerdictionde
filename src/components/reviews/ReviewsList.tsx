@@ -11,7 +11,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ScoreBadge } from "./ScoreBadge";
-import { Star } from "lucide-react";
+import { Star, AlertCircle, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { TagFilter } from "./TagFilter";
+import { Recommendations } from "./Recommendations";
 
 interface PaginationData {
   page: number;
@@ -23,16 +26,25 @@ interface PaginationData {
 }
 
 interface ApiResponse {
-  reviews: Review[];
-  pagination: PaginationData;
+  success: boolean;
+  data?: {
+    reviews: Review[];
+  };
+  reviews?: Review[]; // Legacy format support
+  pagination?: PaginationData;
+  meta?: {
+    pagination?: PaginationData;
+  };
 }
 
 export function ReviewsList() {
   const searchParams = useSearchParams();
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
   const [pagination, setPagination] = useState<PaginationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<"grid" | "list">("grid");
 
   // All filter parameters from URL
   const query = searchParams.get("query") || "";
@@ -57,8 +69,19 @@ export function ReviewsList() {
         }
 
         const data: ApiResponse = await response.json();
-        setReviews(data.reviews);
-        setPagination(data.pagination);
+        
+        // Handle new API response format: { success: true, data: { reviews }, meta: { pagination } }
+        let fetchedReviews: Review[] = [];
+        if (data.success && data.data) {
+          fetchedReviews = data.data.reviews || [];
+          setPagination(data.meta?.pagination || null);
+        } else {
+          // Legacy format support
+          fetchedReviews = data.reviews || [];
+          setPagination(data.pagination || data.meta?.pagination || null);
+        }
+        setReviews(fetchedReviews);
+        setFilteredReviews(fetchedReviews);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten");
         setReviews([]);
@@ -75,8 +98,9 @@ export function ReviewsList() {
     return query || sort !== "date-desc" || dateFilter !== "all" || minScore || maxScore;
   }
 
-  const featuredReview = !hasActiveFilters() && page === "1" && reviews.length > 0 ? reviews[0] : null;
-  const otherReviews = featuredReview ? reviews.slice(1) : reviews;
+  const displayReviews = filteredReviews.length > 0 ? filteredReviews : reviews;
+  const featuredReview = !hasActiveFilters() && page === "1" && displayReviews.length > 0 ? displayReviews[0] : null;
+  const otherReviews = featuredReview ? displayReviews.slice(1) : displayReviews;
 
   return (
     <div className="space-y-10 pb-12 animate-fade-in">
@@ -89,7 +113,19 @@ export function ReviewsList() {
         </p>
       </div>
 
-      <ReviewsFilter />
+      <ReviewsFilter onViewChange={setView} currentView={view} />
+      
+      {/* Tag Filter */}
+      {reviews.length > 0 && (
+        <div className="pb-6 border-b">
+          <TagFilter
+            reviews={reviews}
+            onFilterChange={setFilteredReviews}
+            showCounts={true}
+            maxTags={15}
+          />
+        </div>
+      )}
 
       {isLoading ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -107,7 +143,10 @@ export function ReviewsList() {
         </div>
       ) : error ? (
         <div className="text-center py-24 border-2 border-destructive/20 rounded-xl bg-destructive/5">
-          <p className="text-destructive text-lg font-medium">{error}</p>
+          <div className="flex justify-center mb-4">
+            <AlertCircle className="size-12 text-destructive" aria-hidden="true" />
+          </div>
+          <p className="text-destructive text-lg font-semibold">{error}</p>
           <p className="text-muted-foreground text-sm mt-2">
             Bitte versuche es später erneut.
           </p>
@@ -176,14 +215,24 @@ export function ReviewsList() {
               {pagination && pagination.totalPages > 1 && ` (Seite ${pagination.page} von ${pagination.totalPages})`}
             </p>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            className={cn(
+              "gap-6",
+              view === "grid"
+                ? "grid sm:grid-cols-2 lg:grid-cols-3"
+                : "flex flex-col"
+            )}
+          >
             {otherReviews.map((review, index) => (
               <div
                 key={review.id}
-                className="animate-scale-in"
+                className={cn(
+                  "animate-scale-in",
+                  view === "list" && "w-full"
+                )}
                 style={{ animationDelay: `${index * 0.05}s`, animationFillMode: "both" }}
               >
-                <ReviewCard review={review} />
+                <ReviewCard review={review} variant={view} />
               </div>
             ))}
           </div>
@@ -194,17 +243,41 @@ export function ReviewsList() {
               currentPage={pagination.page} 
             />
           )}
+
+          {/* Recommendations */}
+          {!hasActiveFilters() && reviews.length > 0 && (
+            <Recommendations
+              allReviews={reviews}
+              variant="trending"
+              limit={6}
+            />
+          )}
         </>
       ) : (
         <div className="text-center py-24 border-2 border-dashed rounded-xl bg-muted/30">
-          <p className="text-muted-foreground text-lg font-medium">
-            {hasActiveFilters() ? "Keine Reviews gefunden." : "Keine Reviews vorhanden."}
+          <div className="flex justify-center mb-4">
+            {hasActiveFilters() ? (
+              <Search className="size-12 text-muted-foreground/50" aria-hidden="true" />
+            ) : (
+              <Star className="size-12 text-muted-foreground/50" aria-hidden="true" />
+            )}
+          </div>
+          <p className="text-muted-foreground text-lg font-semibold">
+            {hasActiveFilters() ? "Keine Reviews gefunden" : "Keine Reviews vorhanden"}
           </p>
-          <p className="text-muted-foreground/70 text-sm mt-2">
+          <p className="text-muted-foreground/70 text-sm mt-2 max-w-md mx-auto">
             {hasActiveFilters()
-              ? "Versuche andere Suchbegriffe oder Filter."
+              ? "Versuche andere Suchbegriffe oder Filter, um mehr Ergebnisse zu finden."
               : "Erstelle deinen ersten Review im Admin-Bereich."}
           </p>
+          {hasActiveFilters() && (
+            <Link
+              href="/reviews"
+              className="inline-block mt-4 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              Alle Filter zurücksetzen →
+            </Link>
+          )}
         </div>
       )}
     </div>
