@@ -23,8 +23,15 @@ interface PaginationData {
 }
 
 interface ApiResponse {
-  reviews: Review[];
-  pagination: PaginationData;
+  success: boolean;
+  data?: {
+    reviews: Review[];
+  };
+  reviews?: Review[]; // Legacy format support
+  pagination?: PaginationData;
+  meta?: {
+    pagination?: PaginationData;
+  };
 }
 
 export function ReviewsList() {
@@ -57,8 +64,16 @@ export function ReviewsList() {
         }
 
         const data: ApiResponse = await response.json();
-        setReviews(data.reviews);
-        setPagination(data.pagination);
+        
+        // Handle new API response format: { success: true, data: { reviews }, meta: { pagination } }
+        if (data.success && data.data) {
+          setReviews(data.data.reviews || []);
+          setPagination(data.meta?.pagination || null);
+        } else {
+          // Legacy format support
+          setReviews(data.reviews || []);
+          setPagination(data.pagination || data.meta?.pagination || null);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten");
         setReviews([]);

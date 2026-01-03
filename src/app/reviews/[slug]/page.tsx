@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { ScoreBadge } from "@/components/reviews/ScoreBadge";
 import Image from "next/image";
-import { generateReviewSchema } from "@/lib/seo";
+import { generateReviewSchema, generateBreadcrumbSchema } from "@/lib/seo";
 import { CommentSection } from "@/components/community/CommentSection";
 import Link from "next/link";
 import { Metadata } from "next";
@@ -39,13 +39,40 @@ export async function generateMetadata({
   const title = isEn && review.title_en ? review.title_en : review.title;
   const description = (isEn && review.content_en ? review.content_en : review.content).substring(0, 160);
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nerdiction.de";
+  const reviewUrl = `${baseUrl}/reviews/${slug}`;
+  const imageUrl = review.images?.[0] || `${baseUrl}/og-image.png`;
+
   return {
     title: `${title} - Nerdiction`,
     description,
+    alternates: {
+      canonical: reviewUrl,
+    },
     openGraph: {
       title,
       description,
-      images: review.images?.[0] ? [review.images[0]] : [],
+      url: reviewUrl,
+      siteName: "Nerdiction",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+      type: "article",
+      publishedTime: review.createdAt instanceof Date ? review.createdAt.toISOString() : new Date(review.createdAt).toISOString(),
+      modifiedTime: review.updatedAt instanceof Date ? review.updatedAt.toISOString() : new Date(review.updatedAt).toISOString(),
+      authors: ["Nerdiction"],
+      tags: [review.category],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
     },
   };
 }
@@ -151,12 +178,23 @@ export default async function ReviewDetailPage({
     },
   };
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nerdiction.de";
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Startseite", url: baseUrl },
+    { name: "Reviews", url: `${baseUrl}/reviews` },
+    { name: title, url: `${baseUrl}/reviews/${slug}` },
+  ]);
+
   return (
     <article className="max-w-5xl mx-auto space-y-10 pb-12 animate-fade-in">
       <ReviewProgress />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       
       {/* Header Section */}

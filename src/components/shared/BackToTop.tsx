@@ -28,18 +28,20 @@ export function BackToTop() {
     });
   };
 
+  if (!isVisible) return null;
+
   return (
     <Button
       variant="secondary"
       size="icon"
       className={cn(
-        "fixed bottom-6 right-6 z-50 rounded-full shadow-2xl transition-all duration-300 border border-primary/20",
-        isVisible ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0"
+        "fixed bottom-6 right-6 z-50 rounded-full shadow-2xl transition-all duration-300 border border-primary/20 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       )}
       onClick={scrollToTop}
       aria-label="Nach oben scrollen"
+      title="Nach oben scrollen"
     >
-      <ArrowUp className="size-5" />
+      <ArrowUp className="size-5" aria-hidden="true" />
     </Button>
   );
 }

@@ -82,9 +82,15 @@ export function GlobalSearch() {
       try {
         const response = await fetch(`/api/reviews?query=${encodeURIComponent(query)}&limit=5`);
         if (response.ok) {
-          const data: Review[] = await response.json();
-          setResults(data.slice(0, 5)); // Limit to 5 results
-          setIsOpen(data.length > 0);
+          const apiResponse = await response.json();
+          // Handle new API response format: { success: true, data: { reviews } }
+          const reviews = apiResponse.success && apiResponse.data?.reviews 
+            ? apiResponse.data.reviews 
+            : Array.isArray(apiResponse) 
+            ? apiResponse 
+            : apiResponse.reviews || [];
+          setResults(reviews.slice(0, 5)); // Limit to 5 results
+          setIsOpen(reviews.length > 0);
         } else {
           setResults([]);
           setIsOpen(false);
@@ -133,9 +139,12 @@ export function GlobalSearch() {
             if (results.length > 0) setIsOpen(true);
           }}
           className="pl-9 pr-9 h-9 w-full"
-          aria-label="Globale Suche"
+          aria-label="Globale Suche nach Reviews"
           aria-expanded={isOpen}
           aria-controls="search-results"
+          aria-autocomplete="list"
+          aria-activedescendant={selectedIndex >= 0 ? `search-result-${selectedIndex}` : undefined}
+          role="combobox"
         />
         {query && (
           <button
@@ -162,14 +171,16 @@ export function GlobalSearch() {
           {results.map((review, index) => (
             <Link
               key={review.id}
+              id={`search-result-${index}`}
               href={`/reviews/${review.slug}`}
               onClick={() => handleResultClick(review.slug)}
               className={cn(
-                "block px-4 py-3 hover:bg-accent transition-colors border-b last:border-b-0",
+                "block px-4 py-3 hover:bg-accent transition-colors border-b last:border-b-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 selectedIndex === index && "bg-accent"
               )}
               role="option"
               aria-selected={selectedIndex === index}
+              tabIndex={-1}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
