@@ -52,22 +52,25 @@ export async function RelatedReviews({
   if (relatedReviews.length === 0) return null;
 
   return (
-    <div className="space-y-8 pt-12 border-t mt-12">
+    <section className="space-y-8 pt-12 border-t mt-12" aria-labelledby="related-reviews-heading">
       <div className="flex flex-col space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">
+        <h2 id="related-reviews-heading" className="text-3xl font-bold tracking-tight">
           Das könnte dich auch interessieren
         </h2>
         <p className="text-muted-foreground">
-          Weitere Reviews aus der Kategorie <span className="capitalize font-semibold text-foreground">{category}</span>.
+          Weitere Reviews aus der Kategorie{" "}
+          <span className="capitalize font-semibold text-foreground">{category}</span>.
         </p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" role="list">
         {relatedReviews.map((review) => (
-          <ReviewCard key={review.id} review={review} />
+          <div key={review.id} role="listitem">
+            <ReviewCard review={review} />
+          </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 

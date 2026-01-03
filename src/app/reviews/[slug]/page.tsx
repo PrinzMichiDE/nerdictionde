@@ -10,14 +10,18 @@ import { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
-import { Monitor, Cpu, HardDrive, CpuIcon } from "lucide-react";
 import { GameMetadata } from "@/components/reviews/GameMetadata";
+import { SystemRequirements } from "@/components/reviews/SystemRequirements";
 import { TableOfContents } from "@/components/reviews/TableOfContents";
 import { RelatedReviews } from "@/components/reviews/RelatedReviews";
 import { ReviewProgress } from "@/components/reviews/ReviewProgress";
 import { ShareButtons } from "@/components/reviews/ShareButtons";
 import { YouTubeEmbed } from "@/components/reviews/YouTubeEmbed";
-import { Clock } from "lucide-react";
+import { ImageGallery } from "@/components/reviews/ImageGallery";
+import { StickySidebar } from "@/components/reviews/StickySidebar";
+import { createMarkdownComponents } from "@/components/reviews/MarkdownComponents";
+import { Clock, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export async function generateMetadata({
   params,
@@ -147,36 +151,11 @@ export default async function ReviewDetailPage({
   const headings = extractHeadings(content || "");
   const hasTableOfContents = headings.length > 0;
 
-  // Custom component for Markdown images to handle placeholders
-  const MarkdownComponents = {
-    p: ({ children, ...props }: any) => {
-      // Check if children is a placeholder like ![[IMAGE_1]]
-      const content = children?.toString() || "";
-      const match = content.match(/!\[\[IMAGE_(\d+)\]\]/);
-      
-      if (match) {
-        const index = parseInt(match[1]); // Index from placeholder (1-based)
-        const imageUrl = review.images[index]; // Use index as is, because 0 is hero
-        
-        if (imageUrl) {
-          return (
-            <div className="my-12 relative aspect-video w-full overflow-hidden rounded-2xl border-2 shadow-xl group">
-              <Image
-                src={imageUrl}
-                alt={`Screenshot ${index}`}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                unoptimized
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            </div>
-          );
-        }
-        return null; // Don't show anything if image is missing
-      }
-      return <p {...props}>{children}</p>;
-    },
-  };
+  // Create markdown components with images and review title
+  const MarkdownComponents = createMarkdownComponents({
+    images: review.images || [],
+    reviewTitle: title,
+  });
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nerdiction.de";
   const breadcrumbSchema = generateBreadcrumbSchema([
@@ -196,6 +175,16 @@ export default async function ReviewDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+      
+      {/* Back Button */}
+      <Link
+        href="/reviews"
+        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+        aria-label={isEn ? "Back to reviews" : "Zurück zu Reviews"}
+      >
+        <ArrowLeft className="size-4" aria-hidden="true" />
+        {isEn ? "Back to Reviews" : "Zurück zu Reviews"}
+      </Link>
       
       {/* Header Section */}
       <header className="space-y-6">
@@ -252,22 +241,35 @@ export default async function ReviewDetailPage({
       {/* Hero Image */}
       <div className="relative aspect-video w-full overflow-hidden rounded-2xl border-2 shadow-2xl group">
         {review.images?.[0] ? (
-          <Image
-            src={review.images[0]}
-            alt={title}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
-            priority
-            unoptimized
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
-          />
+          <>
+            <Image
+              src={review.images[0]}
+              alt={title}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-transparent to-transparent" />
+          </>
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-muted/50">
-            <span className="text-muted-foreground font-medium">Kein Bild vorhanden</span>
+            <span className="text-muted-foreground font-medium">
+              {isEn ? "No image available" : "Kein Bild vorhanden"}
+            </span>
           </div>
         )}
-                <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-transparent to-transparent" />
-              </div>
+      </div>
+
+      {/* Image Gallery */}
+      {review.images && review.images.length > 1 && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold">
+            {isEn ? "Screenshots" : "Screenshots"}
+          </h2>
+          <ImageGallery images={review.images.slice(1)} title={title} />
+        </div>
+      )}
 
       {/* YouTube Videos Section */}
       {review.youtubeVideos && review.youtubeVideos.length > 0 && (
@@ -314,41 +316,7 @@ export default async function ReviewDetailPage({
 
           {/* Hardware Requirements */}
           {review.category === "game" && specs && (
-            <div className="space-y-6 pt-10 border-t">
-              <h2 className="text-3xl font-bold flex items-center gap-3">
-                <Monitor className="h-8 w-8 text-primary" />
-                {isEn ? "System Requirements" : "Systemanforderungen"}
-              </h2>
-              
-              <div className="grid md:grid-cols-2 gap-6">
-                {["minimum", "recommended"].map((type) => (
-                  <div key={type} className="p-6 rounded-2xl bg-muted/30 border-2 border-border/50 space-y-4">
-                    <h3 className="text-xl font-bold capitalize flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${type === "minimum" ? "bg-yellow-500" : "bg-green-500"}`} />
-                      {isEn ? (type === "minimum" ? "Minimum" : "Recommended") : (type === "minimum" ? "Minimum" : "Empfohlen")}
-                    </h3>
-                    
-                    <div className="space-y-3">
-                      {[
-                        { icon: Monitor, label: "OS", key: "os" },
-                        { icon: Cpu, label: "CPU", key: "cpu" },
-                        { icon: CpuIcon, label: "RAM", key: "ram" },
-                        { icon: Monitor, label: "GPU", key: "gpu" },
-                        { icon: HardDrive, label: "Storage", key: "storage" },
-                      ].map((item) => (
-                        <div key={item.key} className="flex items-start gap-3 text-sm">
-                          <item.icon className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
-                          <div className="flex flex-col">
-                            <span className="font-bold text-[10px] uppercase tracking-wider text-muted-foreground/70">{item.label}</span>
-                            <span className="text-foreground/80">{specs[type]?.[item.key] || "N/A"}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <SystemRequirements specs={specs} isEn={isEn} />
           )}
 
           {/* Related Reviews */}
@@ -363,61 +331,15 @@ export default async function ReviewDetailPage({
         </div>
 
         {/* Sidebar */}
-        <aside className="space-y-8">
-          <div className="p-8 border-2 border-primary/20 rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 flex flex-col items-center text-center space-y-6 shadow-xl sticky top-24 backdrop-blur-sm">
-            <h3 className="font-bold text-xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              {isEn ? "Nerdiction Score" : "Nerdiction Wertung"}
-            </h3>
-            <ScoreBadge score={review.score} className="h-28 w-28 text-4xl border-4 border-background shadow-2xl" />
-            <p className="text-sm font-semibold uppercase tracking-wider text-primary">
-              {review.score >= 90 ? (isEn ? "Phenomenal" : "Phänomenal") : review.score >= 80 ? (isEn ? "Excellent" : "Hervorragend") : review.score >= 70 ? (isEn ? "Good" : "Gut") : (isEn ? "Satisfactory" : "Befriedigend")}
-            </p>
-            
-            <div className="w-full pt-4 space-y-6 border-t border-primary/20">
-                <div className="text-left space-y-3">
-                    <h4 className="font-bold flex items-center text-green-500 dark:text-green-400 uppercase text-xs tracking-widest">
-                        <span className="mr-2 text-lg">+</span> Pro
-                    </h4>
-                    <ul className="space-y-2.5">
-                    {pros.map((pro, i) => (
-                        <li key={i} className="flex items-start text-sm leading-relaxed">
-                        <span className="text-green-500 dark:text-green-400 mr-2.5 font-bold mt-0.5">✓</span> 
-                        <span className="flex-1">{pro}</span>
-                        </li>
-                    ))}
-                    </ul>
-                </div>
-
-                <div className="text-left space-y-3">
-                    <h4 className="font-bold flex items-center text-red-500 dark:text-red-400 uppercase text-xs tracking-widest">
-                        <span className="mr-2 text-lg">-</span> Contra
-                    </h4>
-                    <ul className="space-y-2.5">
-                    {cons.map((con, i) => (
-                        <li key={i} className="flex items-start text-sm leading-relaxed">
-                        <span className="text-red-500 dark:text-red-400 mr-2.5 font-bold mt-0.5">✗</span> 
-                        <span className="flex-1">{con}</span>
-                        </li>
-                    ))}
-                    </ul>
-                </div>
-            </div>
-
-            {review.affiliateLink && (
-                <div className="w-full pt-6 border-t border-primary/20">
-                <a 
-                    href={review.affiliateLink} 
-                    target="_blank" 
-                    rel="nofollow sponsored"
-                    className="flex items-center justify-center w-full bg-[#FF9900] hover:bg-[#E68A00] text-black font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] group"
-                >
-                    <span>{isEn ? "View on Amazon" : "Auf Amazon ansehen"}</span>
-                    <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
-                </a>
-                </div>
-            )}
-          </div>
-        </aside>
+        <StickySidebar
+          score={review.score}
+          pros={pros}
+          cons={cons}
+          affiliateLink={review.affiliateLink}
+          title={title}
+          url={`/reviews/${slug}`}
+          isEn={isEn}
+        />
       </div>
     </article>
   );
