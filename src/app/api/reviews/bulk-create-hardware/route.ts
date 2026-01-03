@@ -4,6 +4,7 @@ import openai, { OPENAI_MODEL } from "@/lib/openai";
 import { uploadImage } from "@/lib/blob";
 import prisma from "@/lib/prisma";
 import { calculatePublicationDate } from "@/lib/date-utils";
+import { repairJson } from "@/lib/review-generation";
 
 interface BulkCreateHardwareOptions {
   hardwareNames: string[]; // List of hardware names to create reviews for
@@ -84,6 +85,7 @@ async function generateHardwareReviewContent(
       model: OPENAI_MODEL,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
+      max_tokens: 4000,
     });
 
     let contentRaw = aiResponse.choices[0].message.content || "{}";
@@ -95,7 +97,11 @@ async function generateHardwareReviewContent(
       contentRaw = contentRaw.replace(/^```\n?/, "").replace(/\n?```$/, "");
     }
 
-    return JSON.parse(contentRaw);
+    try {
+      return JSON.parse(contentRaw);
+    } catch (parseError: any) {
+      return repairJson(contentRaw, parseError, hardwareData.name);
+    }
   } catch (error) {
     console.error(`Error generating content for ${hardwareData.name}:`, error);
     // Return fallback content
