@@ -84,3 +84,28 @@ model Hardware {
   @@index([type, manufacturer])
   @@index([name])
 }
+
+model BulkCreateQueue {
+  id              String   @id @default(cuid())
+  status          String   @default("pending") // "pending" | "processing" | "completed" | "failed" | "cancelled"
+  type            String   @default("bulk_create") // "bulk_create" | "bulk_create_hardware" | etc.
+  config          Json     // Query options and processing options
+  progress        Json     @default("{}") // Current progress information
+  result          Json?    // Final results after completion
+  error           String?  // Error message if failed
+  totalItems      Int      @default(0) // Total number of items to process
+  processedItems  Int      @default(0) // Number of items processed
+  successfulItems Int      @default(0) // Number of successful items
+  failedItems     Int      @default(0) // Number of failed items
+  skippedItems    Int      @default(0) // Number of skipped items
+  currentBatch    Int      @default(0) // Current batch being processed
+  totalBatches    Int      @default(0) // Total number of batches
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  startedAt       DateTime?
+  completedAt     DateTime?
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([type, status])
+}
