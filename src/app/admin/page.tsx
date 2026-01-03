@@ -3,6 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QuickCreate } from "./components/QuickCreate";
 import { BulkCreate } from "./components/BulkCreate";
+import { BulkCreateHardware } from "./components/BulkCreateHardware";
 import { ReviewList } from "./components/ReviewList";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
@@ -24,12 +25,15 @@ function AdminTabs() {
 
   return (
     <Tabs value={tab} onValueChange={handleTabChange} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-3 max-w-2xl">
+      <TabsList className="grid w-full grid-cols-4 max-w-4xl">
         <TabsTrigger value="quick" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
           Quick Create
         </TabsTrigger>
         <TabsTrigger value="bulk" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-          Massen-Erstellung
+          Massen-Erstellung Games
+        </TabsTrigger>
+        <TabsTrigger value="bulk-hardware" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          Massen-Erstellung Hardware
         </TabsTrigger>
         <TabsTrigger value="list" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
           Alle Beiträge
@@ -40,6 +44,9 @@ function AdminTabs() {
       </TabsContent>
       <TabsContent value="bulk" className="space-y-4 mt-6">
         <BulkCreate />
+      </TabsContent>
+      <TabsContent value="bulk-hardware" className="space-y-4 mt-6">
+        <BulkCreateHardware />
       </TabsContent>
       <TabsContent value="list" className="space-y-4 mt-6">
         <ReviewList />
