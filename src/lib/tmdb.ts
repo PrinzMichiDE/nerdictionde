@@ -7,7 +7,7 @@ let tmdbApiKey: string | null = null;
 
 function getApiKey() {
   if (!tmdbApiKey) {
-    tmdbApiKey = process.env.TMDB_API_KEY;
+    tmdbApiKey = process.env.TMDB_API_KEY || null;
     if (!tmdbApiKey) {
       throw new Error("TMDB_API_KEY is not set");
     }

@@ -10,61 +10,91 @@ import { FeaturedReview } from "@/components/home/FeaturedReview";
 import { WhyNerdiction } from "@/components/home/WhyNerdiction";
 import { CallToAction } from "@/components/home/CallToAction";
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
   // Fetch latest reviews
-  const latestReviews = (await prisma.review.findMany({
-    where: { status: "published" },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  })) as unknown as Review[];
-
-  // Fetch top-rated reviews
-  const topRatedReviews = (await prisma.review.findMany({
-    where: { status: "published" },
-    orderBy: { score: "desc" },
-    take: 6,
-  })) as unknown as Review[];
-
-  // Fetch featured review (highest scored review)
-  const featuredReview = (await prisma.review.findFirst({
-    where: { status: "published" },
-    orderBy: { score: "desc" },
-  })) as unknown as Review | null;
-
-  // Calculate statistics
-  const totalReviews = await prisma.review.count({
-    where: { status: "published" },
-  });
-
-  const gameReviews = await prisma.review.count({
-    where: { status: "published", category: "game" },
-  });
-
-  const hardwareReviews = await prisma.review.count({
-    where: { status: "published", category: "hardware" },
-  });
-
-  const amazonReviews = await prisma.review.count({
-    where: { status: "published", category: "amazon" },
-  });
-
-  const allScores = await prisma.review.findMany({
-    where: { status: "published" },
-    select: { score: true },
-  });
-
-  const averageScore =
-    allScores.length > 0
-      ? allScores.reduce((sum, review) => sum + review.score, 0) / allScores.length
-      : 0;
-
-  const statistics = {
-    totalReviews,
-    averageScore,
-    gameReviews,
-    hardwareReviews,
-    amazonReviews,
+  let latestReviews: Review[] = [];
+  let topRatedReviews: Review[] = [];
+  let featuredReview: Review | null = null;
+  let statistics = {
+    totalReviews: 0,
+    averageScore: 0,
+    gameReviews: 0,
+    hardwareReviews: 0,
+    amazonReviews: 0,
+    movieReviews: 0,
+    seriesReviews: 0,
   };
+
+  try {
+    latestReviews = (await prisma.review.findMany({
+      where: { status: "published" },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+    })) as unknown as Review[];
+
+    // Fetch top-rated reviews
+    topRatedReviews = (await prisma.review.findMany({
+      where: { status: "published" },
+      orderBy: { score: "desc" },
+      take: 6,
+    })) as unknown as Review[];
+
+    // Fetch featured review (highest scored review)
+    featuredReview = (await prisma.review.findFirst({
+      where: { status: "published" },
+      orderBy: { score: "desc" },
+    })) as unknown as Review | null;
+
+    // Calculate statistics
+    const totalReviews = await prisma.review.count({
+      where: { status: "published" },
+    });
+
+    const gameReviews = await prisma.review.count({
+      where: { status: "published", category: "game" },
+    });
+
+    const hardwareReviews = await prisma.review.count({
+      where: { status: "published", category: "hardware" },
+    });
+
+    const amazonReviews = await prisma.review.count({
+      where: { status: "published", category: "amazon" },
+    });
+
+    const movieReviews = await prisma.review.count({
+      where: { status: "published", category: "movie" },
+    });
+
+    const seriesReviews = await prisma.review.count({
+      where: { status: "published", category: "series" },
+    });
+
+    const allScores = await prisma.review.findMany({
+      where: { status: "published" },
+      select: { score: true },
+    });
+
+    const averageScore =
+      allScores.length > 0
+        ? allScores.reduce((sum, review) => sum + review.score, 0) / allScores.length
+        : 0;
+
+    statistics = {
+      totalReviews,
+      averageScore,
+      gameReviews,
+      hardwareReviews,
+      amazonReviews,
+      movieReviews,
+      seriesReviews,
+    };
+  } catch (error) {
+    // Silently fail during build if database is not available
+    console.error("Error fetching data:", error);
+  }
 
   return (
     <div className="space-y-16 pb-12 animate-fade-in">
@@ -103,7 +133,7 @@ export default async function HomePage() {
       </section>
 
       {/* Statistics Section */}
-      {totalReviews > 0 && <Statistics data={statistics} />}
+      {statistics.totalReviews > 0 && <Statistics data={statistics} />}
 
       {/* Featured Review Section */}
       {featuredReview && <FeaturedReview review={featuredReview} />}
