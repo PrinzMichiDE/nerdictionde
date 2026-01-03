@@ -25,11 +25,17 @@ import { AnimatedText } from "@/components/shared/AnimatedText";
 import { Recommendations } from "@/components/reviews/Recommendations";
 import { PriceDisplay } from "@/components/reviews/PriceDisplay";
 import { ImageZoom } from "@/components/reviews/ImageZoom";
+import { BookmarkButton } from "@/components/shared/BookmarkButton";
+import { ExportMenu } from "@/components/reviews/ExportMenu";
+import { ReviewViewTracker } from "@/components/reviews/ReviewViewTracker";
 import { Clock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Review } from "@/types/review";
 import { incrementViewCount } from "@/lib/db/statistics";
+
+// Enable ISR - revalidate every 60 seconds
+export const revalidate = 60;
 
 export async function generateMetadata({
   params,
@@ -185,6 +191,7 @@ export default async function ReviewDetailPage({
   return (
     <article className="max-w-5xl mx-auto space-y-10 pb-12 animate-fade-in">
       <ReviewProgress />
+      <ReviewViewTracker reviewId={review.id} reviewTitle={title} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -229,8 +236,10 @@ export default async function ReviewDetailPage({
             <AnimatedText variant="h1" stagger delay={0.3} className="text-4xl font-extrabold tracking-tight lg:text-5xl xl:text-6xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
               {title}
             </AnimatedText>
-            <div className="pt-2">
-              <ShareButtons title={title} url={`/reviews/${slug}`} />
+            <div className="flex items-center gap-3 pt-2">
+              <ShareButtons title={title} url={`/reviews/${slug}`} reviewId={review.id} />
+              <BookmarkButton reviewId={review.id} reviewTitle={title} />
+              <ExportMenu review={review as Review} />
             </div>
           </div>
 

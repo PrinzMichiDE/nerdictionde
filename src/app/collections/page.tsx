@@ -35,6 +35,9 @@ interface Collection {
   badge?: string;
 }
 
+// Enable ISR - revalidate every 5 minutes
+export const revalidate = 300;
+
 export default async function CollectionsPage() {
   // Sync collections (ensure they exist)
   await syncCollections();

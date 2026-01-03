@@ -34,6 +34,9 @@ export const metadata: Metadata = {
   },
 };
 
+// Enable ISR - revalidate every 10 minutes
+export const revalidate = 600;
+
 export default async function StatisticsPage() {
   const stats = await getStatistics();
 

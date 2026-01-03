@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Review } from "@/types/review";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { getSearchSuggestions } from "@/lib/search";
+import { trackSearch } from "@/lib/analytics";
 
 interface SearchResult {
   reviews: Review[];
@@ -15,12 +17,29 @@ interface SearchResult {
 export function GlobalSearch() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Review[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [allReviews, setAllReviews] = useState<Review[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  // Load all reviews for suggestions (once)
+  useEffect(() => {
+    fetch("/api/reviews?limit=100")
+      .then((res) => res.json())
+      .then((data) => {
+        const reviews = data.success && data.data?.reviews 
+          ? data.data.reviews 
+          : data.reviews || [];
+        setAllReviews(reviews);
+      })
+      .catch(() => {
+        // Silently fail
+      });
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -69,6 +88,16 @@ export function GlobalSearch() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, results, selectedIndex, router]);
 
+  // Generate suggestions
+  useEffect(() => {
+    if (query.length > 1 && allReviews.length > 0) {
+      const searchSuggestions = getSearchSuggestions(allReviews, query, 3);
+      setSuggestions(searchSuggestions);
+    } else {
+      setSuggestions([]);
+    }
+  }, [query, allReviews]);
+
   // Debounced search
   useEffect(() => {
     if (!query.trim()) {
@@ -91,6 +120,7 @@ export function GlobalSearch() {
             : apiResponse.reviews || [];
           setResults(reviews.slice(0, 5)); // Limit to 5 results
           setIsOpen(reviews.length > 0);
+          trackSearch(query, reviews.length);
         } else {
           setResults([]);
           setIsOpen(false);
@@ -162,6 +192,29 @@ export function GlobalSearch() {
         )}
       </div>
 
+      {/* Suggestions */}
+      {isOpen && suggestions.length > 0 && results.length === 0 && !isLoading && (
+        <div className="absolute z-50 w-full mt-2 bg-popover border rounded-md shadow-lg p-2">
+          <div className="text-xs font-semibold text-muted-foreground px-2 py-1 uppercase">
+            Vorschläge
+          </div>
+          {suggestions.map((suggestion, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setQuery(suggestion);
+                router.push(`/reviews?query=${encodeURIComponent(suggestion)}`);
+                setIsOpen(false);
+              }}
+              className="w-full text-left px-3 py-2 rounded-md hover:bg-accent transition-colors text-sm"
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Results */}
       {isOpen && results.length > 0 && (
         <div
           id="search-results"

@@ -15,6 +15,8 @@ import { Star, AlertCircle, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TagFilter } from "./TagFilter";
 import { Recommendations } from "./Recommendations";
+import { trackSearch } from "@/lib/analytics";
+import { useEffect } from "react";
 
 interface PaginationData {
   page: number;
@@ -82,6 +84,11 @@ export function ReviewsList() {
         }
         setReviews(fetchedReviews);
         setFilteredReviews(fetchedReviews);
+
+        // Track search
+        if (query) {
+          trackSearch(query, fetchedReviews.length);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten");
         setReviews([]);

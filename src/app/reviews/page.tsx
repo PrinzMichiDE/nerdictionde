@@ -56,6 +56,9 @@ export const metadata: Metadata = {
   },
 };
 
+// Enable ISR - revalidate every 60 seconds
+export const revalidate = 60;
+
 export default function ReviewsPage() {
   return (
     <div className="space-y-8">

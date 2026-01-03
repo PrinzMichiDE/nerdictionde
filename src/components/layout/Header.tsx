@@ -3,7 +3,9 @@ import { Navigation } from "./Navigation";
 import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { GlobalSearch } from "@/components/shared/GlobalSearch";
-import { Gamepad2 } from "lucide-react";
+import { BookmarkButton } from "@/components/shared/BookmarkButton";
+import { Gamepad2, Bookmark } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function Header() {
   return (
@@ -28,6 +30,11 @@ export function Header() {
           </div>
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
             <Navigation />
+            <Link href="/bookmarks" className="hidden md:flex">
+              <Button variant="ghost" size="icon" className="size-9" aria-label="Bookmarks">
+                <Bookmark className="size-5" />
+              </Button>
+            </Link>
             <ThemeToggle />
             <MobileNav />
           </div>
