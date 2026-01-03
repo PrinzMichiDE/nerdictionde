@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Review } from "@/types/review";
 import { extractTags, getAllTags, getTagCounts } from "@/lib/tags";
+import { getAllTagsWithCounts } from "@/lib/db/tags";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 interface TagFilterProps {
   reviews: Review[];
@@ -22,16 +24,44 @@ export function TagFilter({
   maxTags = 20,
 }: TagFilterProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [dbTags, setDbTags] = useState<Array<{ name: string; reviewCount: number }>>([]);
+
+  // Try to load tags from database, fallback to client-side extraction
+  useEffect(() => {
+    getAllTagsWithCounts()
+      .then((tags) => {
+        if (tags.length > 0) {
+          setDbTags(tags);
+        }
+      })
+      .catch(() => {
+        // Fallback to client-side tags
+      });
+  }, []);
 
   const tagCounts = useMemo(() => getTagCounts(reviews), [reviews]);
   const allTags = useMemo(() => getAllTags(reviews), [reviews]);
-  const topTags = useMemo(
-    () =>
-      allTags
-        .sort((a, b) => (tagCounts[b] || 0) - (tagCounts[a] || 0))
-        .slice(0, maxTags),
-    [allTags, tagCounts, maxTags]
-  );
+  
+  // Use database tags if available, otherwise use client-side tags
+  const topTags = useMemo(() => {
+    if (dbTags.length > 0) {
+      return dbTags
+        .sort((a, b) => b.reviewCount - a.reviewCount)
+        .slice(0, maxTags)
+        .map((tag) => tag.name);
+    }
+    return allTags
+      .sort((a, b) => (tagCounts[b] || 0) - (tagCounts[a] || 0))
+      .slice(0, maxTags);
+  }, [dbTags, allTags, tagCounts, maxTags]);
+
+  const getTagCount = (tagName: string): number => {
+    if (dbTags.length > 0) {
+      const dbTag = dbTags.find((t) => t.name === tagName);
+      return dbTag?.reviewCount || tagCounts[tagName] || 0;
+    }
+    return tagCounts[tagName] || 0;
+  };
 
   const filteredReviews = useMemo(() => {
     if (selectedTags.length === 0) return reviews;
@@ -108,11 +138,11 @@ export function TagFilter({
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
               aria-pressed={isSelected}
-              aria-label={`Filter nach ${tag}${showCounts ? ` (${count})` : ""}`}
+              aria-label={`Filter nach ${tag}${showCounts ? ` (${getTagCount(tag)})` : ""}`}
             >
               {tag}
               {showCounts && (
-                <span className="ml-1.5 opacity-70">({count})</span>
+                <span className="ml-1.5 opacity-70">({getTagCount(tag)})</span>
               )}
             </button>
           );

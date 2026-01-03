@@ -5,8 +5,10 @@ import { ShoppingCart, ExternalLink, TrendingDown, TrendingUp, AlertCircle } fro
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getLatestPrice, getPriceStats } from "@/lib/db/price-history";
 
 interface PriceDisplayProps {
+  reviewId: string;
   affiliateLink?: string | null;
   amazonAsin?: string | null;
   category?: string;
@@ -21,6 +23,7 @@ interface PriceData {
 }
 
 export function PriceDisplay({
+  reviewId,
   affiliateLink,
   amazonAsin,
   category,
@@ -29,23 +32,34 @@ export function PriceDisplay({
   const [priceData, setPriceData] = useState<PriceData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Simulate price fetching (in real app, this would call an API)
+  // Fetch price from database
   useEffect(() => {
     if (!amazonAsin && !affiliateLink) return;
 
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      // Mock data - in production, fetch from API
-      const mockPrice = Math.floor(Math.random() * 500) + 50;
-      setPriceData({
-        price: mockPrice,
-        currency: "EUR",
-        availability: "in-stock",
+    
+    // Fetch latest price from database
+    fetch(`/api/reviews/${reviewId}/price`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setPriceData({
+            price: data.data.price,
+            currency: data.data.currency || "EUR",
+            availability: data.data.availability,
+            priceHistory: data.data.history,
+          });
+        } else {
+          // Fallback: no price data available
+          setPriceData(null);
+        }
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsLoading(false);
+        setPriceData(null);
       });
-      setIsLoading(false);
-    }, 500);
-  }, [amazonAsin, affiliateLink]);
+  }, [reviewId, amazonAsin, affiliateLink]);
 
   if (!affiliateLink && !amazonAsin) return null;
 

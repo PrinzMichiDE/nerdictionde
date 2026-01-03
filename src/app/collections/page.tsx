@@ -7,6 +7,8 @@ import { AnimatedText } from "@/components/shared/AnimatedText";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Star, TrendingUp, Gamepad2, Cpu, ShoppingCart, Sparkles } from "lucide-react";
 import { Review } from "@/types/review";
+import { getCollectionReviews } from "@/lib/db/collections";
+import { syncCollections } from "@/lib/db/collections";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nerdiction.de";
 
@@ -34,74 +36,109 @@ interface Collection {
 }
 
 export default async function CollectionsPage() {
-  // Fetch all published reviews
-  const allReviews = (await prisma.review.findMany({
-    where: { status: "published" },
-    orderBy: { createdAt: "desc" },
-  })) as unknown as Review[];
+  // Sync collections (ensure they exist)
+  await syncCollections();
 
-  // Create collections from existing data
-  const collections: Collection[] = [
-    {
-      id: "top-rated",
-      title: "Top Bewertete Reviews",
-      description: "Die besten Reviews mit höchsten Nerdiction Scores",
-      icon: <Trophy className="size-6" />,
-      badge: "Premium",
-      reviews: allReviews
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 6),
-    },
-    {
-      id: "must-have-games",
-      title: "Must-Have Games",
-      description: "Essentielle Spiele, die jeder Gamer kennen sollte",
-      icon: <Gamepad2 className="size-6" />,
-      reviews: allReviews
-        .filter((r) => r.category === "game" && r.score >= 80)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 6),
-    },
-    {
-      id: "best-hardware",
-      title: "Beste Hardware",
-      description: "Top Hardware-Komponenten für Gaming & Performance",
-      icon: <Cpu className="size-6" />,
-      reviews: allReviews
-        .filter((r) => r.category === "hardware" && r.score >= 80)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 6),
-    },
-    {
-      id: "trending",
-      title: "Trending Reviews",
-      description: "Aktuell beliebte und viel diskutierte Reviews",
-      icon: <TrendingUp className="size-6" />,
-      reviews: allReviews
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 6),
-    },
-    {
-      id: "amazon-deals",
-      title: "Amazon Empfehlungen",
-      description: "Top bewertete Produkte mit Amazon Affiliate Links",
-      icon: <ShoppingCart className="size-6" />,
-      reviews: allReviews
-        .filter((r) => r.category === "amazon" && r.affiliateLink)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 6),
-    },
-    {
-      id: "hidden-gems",
-      title: "Hidden Gems",
-      description: "Unterbewertete Perlen, die mehr Aufmerksamkeit verdienen",
-      icon: <Sparkles className="size-6" />,
-      reviews: allReviews
-        .filter((r) => r.score >= 70 && r.score < 85)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 6),
-    },
-  ].filter((collection) => collection.reviews.length > 0);
+  // Fetch collections from database
+  const dbCollections = await prisma.collection.findMany({
+    where: { featured: true },
+    orderBy: { sortOrder: "asc" },
+  });
+
+  // Fetch reviews for each collection
+  const collections: Collection[] = await Promise.all(
+    dbCollections.map(async (dbCollection) => {
+      const collectionData = await getCollectionReviews(dbCollection.slug, 6);
+      
+      const icons: Record<string, React.ReactNode> = {
+        "top-rated": <Trophy className="size-6" />,
+        "must-have-games": <Gamepad2 className="size-6" />,
+        "best-hardware": <Cpu className="size-6" />,
+        "trending": <TrendingUp className="size-6" />,
+        "amazon-deals": <ShoppingCart className="size-6" />,
+        "hidden-gems": <Sparkles className="size-6" />,
+      };
+
+      return {
+        id: dbCollection.id,
+        title: dbCollection.name,
+        description: dbCollection.description || "",
+        icon: icons[dbCollection.slug] || <Star className="size-6" />,
+        badge: dbCollection.featured ? "Premium" : undefined,
+        reviews: (collectionData?.reviews || []) as Review[],
+      };
+    })
+  );
+
+  // Fallback to manual collections if database is empty
+  if (collections.length === 0) {
+    const allReviews = (await prisma.review.findMany({
+      where: { status: "published" },
+      orderBy: { createdAt: "desc" },
+    })) as unknown as Review[];
+
+    const fallbackCollections: Collection[] = [
+      {
+        id: "top-rated",
+        title: "Top Bewertete Reviews",
+        description: "Die besten Reviews mit höchsten Nerdiction Scores",
+        icon: <Trophy className="size-6" />,
+        badge: "Premium",
+        reviews: allReviews
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 6),
+      },
+      {
+        id: "must-have-games",
+        title: "Must-Have Games",
+        description: "Essentielle Spiele, die jeder Gamer kennen sollte",
+        icon: <Gamepad2 className="size-6" />,
+        reviews: allReviews
+          .filter((r) => r.category === "game" && r.score >= 80)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 6),
+      },
+      {
+        id: "best-hardware",
+        title: "Beste Hardware",
+        description: "Top Hardware-Komponenten für Gaming & Performance",
+        icon: <Cpu className="size-6" />,
+        reviews: allReviews
+          .filter((r) => r.category === "hardware" && r.score >= 80)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 6),
+      },
+      {
+        id: "trending",
+        title: "Trending Reviews",
+        description: "Aktuell beliebte und viel diskutierte Reviews",
+        icon: <TrendingUp className="size-6" />,
+        reviews: allReviews
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 6),
+      },
+      {
+        id: "amazon-deals",
+        title: "Amazon Empfehlungen",
+        description: "Top bewertete Produkte mit Amazon Affiliate Links",
+        icon: <ShoppingCart className="size-6" />,
+        reviews: allReviews
+          .filter((r) => r.category === "amazon" && r.affiliateLink)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 6),
+      },
+      {
+        id: "hidden-gems",
+        title: "Hidden Gems",
+        description: "Unterbewertete Perlen, die mehr Aufmerksamkeit verdienen",
+        icon: <Sparkles className="size-6" />,
+        reviews: allReviews
+          .filter((r) => r.score >= 70 && r.score < 85)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 6),
+      },
+    ].filter((collection) => collection.reviews.length > 0);
+  }
 
   return (
     <div className="space-y-16 pb-12">

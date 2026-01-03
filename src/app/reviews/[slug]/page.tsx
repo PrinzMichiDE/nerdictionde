@@ -29,6 +29,7 @@ import { Clock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Review } from "@/types/review";
+import { incrementViewCount } from "@/lib/db/statistics";
 
 export async function generateMetadata({
   params,
@@ -102,6 +103,13 @@ export default async function ReviewDetailPage({
   const review = await prisma.review.findUnique({
     where: { slug },
     include: { comments: true },
+  });
+
+  if (!review) notFound();
+
+  // Increment view count (fire and forget)
+  incrementViewCount(review.id).catch(() => {
+    // Silently fail if view count increment fails
   });
 
   // Fetch all reviews for recommendations
@@ -381,6 +389,7 @@ export default async function ReviewDetailPage({
           {(review.affiliateLink || review.amazonAsin) && (
             <AnimatedSection direction="up" delay={0.4}>
               <PriceDisplay
+                reviewId={review.id}
                 affiliateLink={review.affiliateLink}
                 amazonAsin={review.amazonAsin}
                 category={review.category}

@@ -7,37 +7,43 @@ datasource db {
 }
 
 model Review {
-  id          String   @id @default(cuid())
-  title       String
-  title_en    String?
-  slug        String   @unique
-  category    String   // "game" | "hardware" | "amazon"
-  content     String   // Markdown
-  content_en  String?  // Markdown English
-  score       Int      // 0-100
-  pros        String[]
-  pros_en     String[]
-  cons        String[]
-  cons_en     String[]
-  images      String[] // Vercel Blob URLs
+  id            String             @id @default(cuid())
+  title         String
+  title_en      String?
+  slug          String             @unique
+  category      String // "game" | "hardware" | "amazon"
+  content       String // Markdown
+  content_en    String? // Markdown English
+  score         Int // 0-100
+  pros          String[]
+  pros_en       String[]
+  cons          String[]
+  cons_en       String[]
+  images        String[] // Vercel Blob URLs
   youtubeVideos String[] // YouTube video IDs or URLs (e.g., "dQw4w9WgXcQ" or "https://youtube.com/watch?v=dQw4w9WgXcQ")
-  status      String   @default("draft") // "draft" | "published"
-  igdbId      Int?
-  steamAppId  String?
-  amazonAsin  String?  // Amazon Product ASIN
+  status        String             @default("draft") // "draft" | "published"
+  igdbId        Int?
+  steamAppId    String?
+  amazonAsin    String? // Amazon Product ASIN
   affiliateLink String? // Amazon Affiliate Link
-  hardwareId  String?  // Reference to Hardware model
-  specs       Json?    // Hardware requirements or technical specs
-  metadata    Json?    // Additional IGDB metadata (developer, publisher, modes, etc.)
-  hardware    Hardware? @relation(fields: [hardwareId], references: [id], onDelete: SetNull)
-  comments    Comment[]
-  userRatings UserRating[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  hardwareId    String? // Reference to Hardware model
+  specs         Json? // Hardware requirements or technical specs
+  metadata      Json? // Additional IGDB metadata (developer, publisher, modes, etc.)
+  hardware      Hardware?          @relation(fields: [hardwareId], references: [id], onDelete: SetNull)
+  comments      Comment[]
+  userRatings   UserRating[]
+  tags          ReviewTag[]
+  collections   ReviewCollection[]
+  priceHistory  PriceHistory[]
+  viewCount     Int                @default(0) // Track views for statistics
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
 
   @@index([slug])
   @@index([category, status])
   @@index([amazonAsin])
+  @@index([score])
+  @@index([createdAt])
 }
 
 model Comment {
@@ -53,8 +59,8 @@ model Comment {
 
 model UserRating {
   id        String   @id @default(cuid())
-  score     Int     // 0-10
-  review    Review  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  score     Int // 0-10
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   reviewId  String
   createdAt DateTime @default(now())
 
@@ -63,24 +69,123 @@ model UserRating {
 }
 
 model Hardware {
-  id          String   @id @default(cuid())
-  name        String
-  name_en     String?
-  slug        String   @unique
-  type        String   // "gpu" | "cpu" | "motherboard" | "ram" | "storage" | "psu" | "case" | "cooler" | "monitor" | "keyboard" | "mouse" | "headset" | "controller" | "console"
-  manufacturer String? // e.g. "NVIDIA", "AMD", "Intel", "Sony", "Microsoft"
-  model       String? // e.g. "RTX 4090", "Ryzen 9 7950X", "PlayStation 5"
-  specs       Json?    // Technical specifications (varies by type)
-  images      String[] // Product images URLs
-  description String?  // Short description
+  id             String    @id @default(cuid())
+  name           String
+  name_en        String?
+  slug           String    @unique
+  type           String // "gpu" | "cpu" | "motherboard" | "ram" | "storage" | "psu" | "case" | "cooler" | "monitor" | "keyboard" | "mouse" | "headset" | "controller" | "console"
+  manufacturer   String? // e.g. "NVIDIA", "AMD", "Intel", "Sony", "Microsoft"
+  model          String? // e.g. "RTX 4090", "Ryzen 9 7950X", "PlayStation 5"
+  specs          Json? // Technical specifications (varies by type)
+  images         String[] // Product images URLs
+  description    String? // Short description
   description_en String?
-  releaseDate DateTime?
-  msrp        Float?   // Manufacturer's suggested retail price
-  reviews     Review[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  releaseDate    DateTime?
+  msrp           Float? // Manufacturer's suggested retail price
+  reviews        Review[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@index([slug])
   @@index([type, manufacturer])
   @@index([name])
+}
+
+model Tag {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  slug        String      @unique
+  category    String? // Optional category grouping
+  description String?
+  reviewCount Int         @default(0) // Cached count
+  reviews     ReviewTag[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([slug])
+  @@index([name])
+  @@index([category])
+}
+
+model ReviewTag {
+  id        String   @id @default(cuid())
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reviewId  String
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId     String
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, tagId])
+  @@index([reviewId])
+  @@index([tagId])
+}
+
+model Collection {
+  id             String             @id @default(cuid())
+  name           String
+  name_en        String?
+  slug           String             @unique
+  description    String?
+  description_en String?
+  type           String             @default("manual") // "manual" | "auto" | "featured"
+  autoRules      Json? // Rules for auto-generated collections
+  featured       Boolean            @default(false)
+  sortOrder      Int                @default(0)
+  reviews        ReviewCollection[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([slug])
+  @@index([featured])
+  @@index([sortOrder])
+}
+
+model ReviewCollection {
+  id           String     @id @default(cuid())
+  review       Review     @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reviewId     String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId String
+  sortOrder    Int        @default(0)
+  createdAt    DateTime   @default(now())
+
+  @@unique([reviewId, collectionId])
+  @@index([reviewId])
+  @@index([collectionId])
+  @@index([sortOrder])
+}
+
+model PriceHistory {
+  id           String   @id @default(cuid())
+  review       Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reviewId     String
+  price        Float
+  currency     String   @default("EUR")
+  source       String   @default("amazon") // "amazon" | "idealo" | "geizhals" | "manual"
+  availability String? // "in-stock" | "out-of-stock" | "pre-order"
+  url          String?
+  recordedAt   DateTime @default(now())
+
+  @@index([reviewId])
+  @@index([recordedAt])
+  @@index([reviewId, recordedAt])
+}
+
+model UserPreference {
+  id                String   @id @default(cuid())
+  sessionId         String? // For anonymous users
+  userId            String? // For authenticated users (future)
+  categories        String[] // Preferred categories
+  tags              String[] // Preferred tags
+  minScore          Int? // Minimum score preference
+  maxScore          Int? // Maximum score preference
+  viewedReviews     String[] // Array of review IDs viewed
+  bookmarkedReviews String[] // Array of review IDs bookmarked
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([sessionId])
+  @@unique([userId])
+  @@index([sessionId])
+  @@index([userId])
 }

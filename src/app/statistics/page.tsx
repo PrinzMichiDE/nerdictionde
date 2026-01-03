@@ -15,7 +15,8 @@ import {
   Award,
 } from "lucide-react";
 import { Review } from "@/types/review";
-import { extractTags, getTagCounts } from "@/lib/tags";
+import { getStatistics } from "@/lib/db/statistics";
+import Link from "next/link";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nerdiction.de";
 
@@ -34,57 +35,24 @@ export const metadata: Metadata = {
 };
 
 export default async function StatisticsPage() {
-  const allReviews = (await prisma.review.findMany({
+  const stats = await getStatistics();
+
+  // Get top tags from database
+  const topTags = stats.topTags.map((tag) => [tag.name, tag.reviewCount] as [string, number]);
+
+  // Get top rated reviews
+  const topRated = await prisma.review.findMany({
     where: { status: "published" },
-  })) as unknown as Review[];
-
-  // Calculate statistics
-  const totalReviews = allReviews.length;
-  const averageScore =
-    allReviews.reduce((sum, r) => sum + r.score, 0) / totalReviews || 0;
-
-  const categoryStats = {
-    game: allReviews.filter((r) => r.category === "game").length,
-    hardware: allReviews.filter((r) => r.category === "hardware").length,
-    amazon: allReviews.filter((r) => r.category === "amazon").length,
-  };
-
-  const scoreDistribution = {
-    excellent: allReviews.filter((r) => r.score >= 90).length,
-    great: allReviews.filter((r) => r.score >= 80 && r.score < 90).length,
-    good: allReviews.filter((r) => r.score >= 70 && r.score < 80).length,
-    average: allReviews.filter((r) => r.score >= 60 && r.score < 70).length,
-    belowAverage: allReviews.filter((r) => r.score < 60).length,
-  };
-
-  // Get top tags
-  const tagCounts = getTagCounts(allReviews);
-  const topTags = Object.entries(tagCounts)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 10);
-
-  // Get reviews by month
-  const reviewsByMonth: Record<string, number> = {};
-  allReviews.forEach((review) => {
-    const month = new Date(review.createdAt).toLocaleDateString("de-DE", {
-      year: "numeric",
-      month: "long",
-    });
-    reviewsByMonth[month] = (reviewsByMonth[month] || 0) + 1;
+    orderBy: { score: "desc" },
+    take: 5,
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      category: true,
+      score: true,
+    },
   });
-
-  // Top rated reviews
-  const topRated = allReviews
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5);
-
-  // Most recent reviews
-  const mostRecent = allReviews
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
-    .slice(0, 5);
 
   return (
     <div className="space-y-12 pb-12">
@@ -109,7 +77,7 @@ export default async function StatisticsPage() {
               <BarChart3 className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalReviews}</div>
+              <div className="text-2xl font-bold">{stats.publishedReviews}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 Veröffentlichte Reviews
               </p>
@@ -123,7 +91,7 @@ export default async function StatisticsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {averageScore.toFixed(1)}/100
+                {stats.averageScore.toFixed(1)}/100
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 Über alle Reviews
@@ -170,8 +138,8 @@ export default async function StatisticsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {Object.entries(categoryStats).map(([category, count]) => {
-                const percentage = (count / totalReviews) * 100;
+              {Object.entries(stats.categoryStats).map(([category, count]) => {
+                const percentage = (count / stats.publishedReviews) * 100;
                 const icons = {
                   game: Gamepad2,
                   hardware: Cpu,
@@ -213,7 +181,7 @@ export default async function StatisticsPage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {Object.entries(scoreDistribution).map(([range, count]) => {
+              {Object.entries(stats.scoreDistribution).map(([range, count]) => {
                 const labels: Record<string, string> = {
                   excellent: "Exzellent (90+)",
                   great: "Großartig (80-89)",
@@ -273,9 +241,10 @@ export default async function StatisticsPage() {
           <CardContent>
             <div className="space-y-3">
               {topRated.map((review, index) => (
-                <div
+                <Link
                   key={review.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border"
+                  href={`/reviews/${review.slug}`}
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border hover:bg-muted transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-lg font-bold text-muted-foreground">
@@ -291,7 +260,7 @@ export default async function StatisticsPage() {
                   <Badge variant="default" className="text-sm">
                     {review.score}/100
                   </Badge>
-                </div>
+                </Link>
               ))}
             </div>
           </CardContent>
