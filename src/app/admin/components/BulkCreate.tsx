@@ -101,7 +101,8 @@ export function BulkCreate() {
       if (releaseYear) queryOptions.releaseYear = parseInt(releaseYear);
       if (minRating) queryOptions.minRating = parseFloat(minRating);
 
-      const response = await axios.post("/api/reviews/bulk-create", {
+      // Create queue job instead of processing directly
+      const response = await axios.post("/api/queue/bulk-create", {
         queryOptions,
         batchSize: parseInt(batchSize) || 5,
         delayBetweenBatches: parseInt(delay) || 2000,
@@ -109,7 +110,13 @@ export function BulkCreate() {
         skipExisting,
       });
 
-      setResult(response.data.results);
+      // Show success message with job ID
+      alert(
+        `Queue-Job erfolgreich erstellt!\n\nJob-ID: ${response.data.jobId}\nAnzahl Spiele: ${response.data.totalItems}\nAnzahl Batches: ${response.data.totalBatches}\n\nDer Job wird automatisch in der Warteschlange verarbeitet.`
+      );
+
+      // Reset form
+      setResult(null);
     } catch (error: any) {
       console.error("Bulk create failed:", error);
       alert("Fehler bei der Massenerstellung: " + (error.response?.data?.error || error.message));
@@ -330,7 +337,7 @@ export function BulkCreate() {
                 ) : (
                   <>
                     <Database className="mr-2 h-5 w-5" />
-                    Massenerstellung starten
+                    In Warteschlange einreihen
                   </>
                 )}
               </Button>
