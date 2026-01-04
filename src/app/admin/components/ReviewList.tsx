@@ -29,7 +29,10 @@ export function ReviewList() {
       const response = await fetch("/api/reviews?all=true");
       if (response.ok) {
         const data = await response.json();
-        setReviews(data);
+        // API returns array when all=true, otherwise { reviews: [...], pagination: {...} }
+        setReviews(Array.isArray(data) ? data : (data.reviews || []));
+      } else {
+        console.error("Failed to fetch reviews:", response.statusText);
       }
     } catch (error) {
       console.error("Error fetching reviews:", error);

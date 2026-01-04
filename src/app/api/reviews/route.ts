@@ -25,6 +25,9 @@ export async function GET(req: NextRequest) {
       ...(canSeeAll ? {} : isAdmin && status ? { status } : { status: "published" }),
     };
 
+    // If all=true, don't apply pagination
+    const shouldPaginate = !all;
+
     // Add score filter
     if (minScore || maxScore) {
       where.score = {
@@ -108,14 +111,21 @@ export async function GET(req: NextRequest) {
 
     // Get total count for pagination
     const total = await prisma.review.count({ where });
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = shouldPaginate ? Math.ceil(total / limit) : 1;
 
     const reviews = await prisma.review.findMany({
       where,
       orderBy,
-      skip: (page - 1) * limit,
-      take: limit,
+      ...(shouldPaginate ? {
+        skip: (page - 1) * limit,
+        take: limit,
+      } : {}),
     });
+
+    // If all=true, return array directly for backward compatibility, otherwise return object
+    if (all) {
+      return NextResponse.json(reviews);
+    }
 
     return NextResponse.json({
       reviews,
