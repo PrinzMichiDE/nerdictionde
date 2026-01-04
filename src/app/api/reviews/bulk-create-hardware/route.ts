@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 import { calculatePublicationDate } from "@/lib/date-utils";
 import { repairJson, generateHardwareReviewContent } from "@/lib/review-generation";
 import { searchAmazonHardware } from "@/lib/amazon-search";
+import { generateReviewImages } from "@/lib/image-generation";
 
 interface BulkCreateHardwareOptions {
   hardwareNames: string[]; // List of hardware names to create reviews for
@@ -13,6 +14,7 @@ interface BulkCreateHardwareOptions {
   delayBetweenBatches?: number;
   status?: "draft" | "published";
   skipExisting?: boolean;
+  generateImages?: boolean; // Whether to generate images using OpenAI
 }
 
 // Helper function to generate slug from title
@@ -80,7 +82,7 @@ function parseHardwareName(name: string): { manufacturer?: string; model?: strin
 // Helper function to process a single hardware item
 async function processHardware(
   hardwareName: string,
-  options: { status: "draft" | "published"; skipExisting: boolean }
+  options: { status: "draft" | "published"; skipExisting: boolean; generateImages?: boolean }
 ): Promise<{ success: boolean; reviewId?: string; error?: string }> {
   try {
     // Detect hardware type
@@ -154,6 +156,24 @@ async function processHardware(
       }
     }
     
+    // Generate images using OpenAI if requested and no images exist
+    if ((options.generateImages !== false) && imageUrls.length === 0) {
+      try {
+        console.log(`🎨 Generating review images for ${hardwareName}...`);
+        const generatedImages = await generateReviewImages({
+          productName: hardware.name,
+          productType: hardware.type,
+          manufacturer: hardware.manufacturer || undefined,
+          style: "professional",
+          count: 3,
+        });
+        imageUrls = generatedImages;
+        console.log(`✅ Generated ${imageUrls.length} images`);
+      } catch (error) {
+        console.error(`Error generating images for ${hardwareName}:`, error);
+      }
+    }
+    
     // Generate Amazon affiliate link
     let affiliateLink: string | null = null;
     try {
@@ -215,6 +235,7 @@ export async function POST(req: NextRequest) {
       delayBetweenBatches = 3000, // Longer delay for hardware
       status = "draft",
       skipExisting = true,
+      generateImages = true, // Generate images by default
     } = body;
     
     const results = {
@@ -231,7 +252,7 @@ export async function POST(req: NextRequest) {
       const batch = hardwareNames.slice(i, i + batchSize);
       
       const batchPromises = batch.map((hardwareName) =>
-        processHardware(hardwareName.trim(), { status, skipExisting })
+        processHardware(hardwareName.trim(), { status, skipExisting, generateImages })
       );
       
       const batchResults = await Promise.allSettled(batchPromises);

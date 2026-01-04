@@ -4,6 +4,7 @@ import prisma from "../src/lib/prisma";
 import { detectHardwareType, createHardware } from "../src/lib/hardware";
 import { generateHardwareReviewContent } from "../src/lib/review-generation";
 import { uploadImage } from "../src/lib/blob";
+import { generateReviewImages } from "../src/lib/image-generation";
 
 interface RSSItem {
   title: string[];
@@ -180,6 +181,23 @@ async function processHardwareItem(
       slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
     }
 
+    // Generate images using OpenAI
+    let imageUrls: string[] = [];
+    try {
+      console.log(`   🎨 Generating review images...`);
+      const generatedImages = await generateReviewImages({
+        productName: hardware.name,
+        productType: hardware.type,
+        manufacturer: hardware.manufacturer || undefined,
+        style: "professional",
+        count: 3,
+      });
+      imageUrls = generatedImages;
+      console.log(`   ✅ Generated ${imageUrls.length} images`);
+    } catch (error) {
+      console.error(`   ⚠️  Error generating images: ${error}`);
+    }
+
     // Create review
     console.log(`   ✍️  Creating review: ${reviewContent.de.title}`);
     const review = await prisma.review.create({
@@ -195,7 +213,7 @@ async function processHardwareItem(
         pros_en: reviewContent.en.pros,
         cons: reviewContent.de.cons,
         cons_en: reviewContent.en.cons,
-        images: [],
+        images: imageUrls,
         youtubeVideos: [],
         status: "draft",
         hardwareId: hardware.id,

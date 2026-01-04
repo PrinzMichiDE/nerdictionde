@@ -4,6 +4,8 @@ import { uploadImage } from "@/lib/blob";
 import { calculatePublicationDate } from "@/lib/date-utils";
 import { HardwareType } from "@/lib/hardware";
 import { TMDBMovie, TMDBSeries, getTMDBImageUrl } from "@/lib/tmdb";
+import { searchHardwareProduct, searchAmazonProduct, extractProductSpecs } from "@/lib/tavily";
+import { generateReviewImages } from "@/lib/image-generation";
 
 // Helper function to generate slug from title
 export function generateSlug(title: string): string {
@@ -338,10 +340,52 @@ export async function generateHardwareReviewContent(
 }> {
   const isRetry = retryCount > 0;
   
+  // Use Tavily Search to gather product information
+  let tavilyData: {
+    specs: Record<string, any>;
+    description: string;
+    pros: string[];
+    cons: string[];
+    price?: string;
+    rating?: number;
+  } | null = null;
+  
+  try {
+    console.log(`🔍 Searching Tavily for ${hardwareData.name}...`);
+    const searchResults = await searchHardwareProduct(
+      hardwareData.name,
+      hardwareData.manufacturer
+    );
+    tavilyData = extractProductSpecs(searchResults);
+    console.log(`✅ Found Tavily data: ${JSON.stringify(tavilyData.specs)}`);
+  } catch (error) {
+    console.warn(`⚠️  Tavily search failed for ${hardwareData.name}:`, error);
+  }
+  
+  // Merge Tavily specs with existing specs
+  const mergedSpecs = {
+    ...(hardwareData.specs || {}),
+    ...(tavilyData?.specs || {}),
+  };
+  
+  // Merge descriptions
+  const mergedDescription = tavilyData?.description || hardwareData.description || "Keine Beschreibung verfügbar";
+  
+  // Merge pros/cons
+  const mergedPros = [
+    ...(tavilyData?.pros || []),
+    ...(hardwareData.specs?.pros || []),
+  ].slice(0, 5);
+  
+  const mergedCons = [
+    ...(tavilyData?.cons || []),
+    ...(hardwareData.specs?.cons || []),
+  ].slice(0, 5);
+  
   const prompt = `
     Schreibe eine EXTREM AUSFÜHRLICHE professionelle Hardware-Review für "${hardwareData.name}" in Deutsch UND Englisch.
     
-    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 800-1000 Wörter pro Sprache), damit das JSON vollständig ist." : "ANFORDERUNGEN AN DEN INHALT:\n1. Der Text muss MASSIV DETAILLIERT sein (Ziel: 1200-1500 Wörter pro Sprache).\n2. Nutze eine tiefgehende journalistische Struktur mit aussagekräftigen H2- und H3-Überschriften."}
+    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 800-1000 Wörter pro Sprache), damit das JSON vollständig ist." : "ANFORDERUNGEN AN DEN INHALT:\n1. Der Text muss MASSIV DETAILLIERT sein (Ziel: 1200-1500 Wörter pro Sprache).\n2. Nutze eine tiefgehende journalistische Struktur mit aussagekräftigen H2- und H3-Überschriften.\n3. Nutze die recherchierten Informationen aus den Tavily-Suchergebnissen für authentische Details."}
     
     Antworte EXKLUSIV im JSON-Format mit folgendem Schema:
     {
@@ -374,29 +418,47 @@ export async function generateHardwareReviewContent(
     Hardware-Typ: ${hardwareData.type}
     Hersteller: ${hardwareData.manufacturer || "Unbekannt"}
     Modell: ${hardwareData.model || hardwareData.name}
-    Beschreibung: ${hardwareData.description || "Keine Beschreibung verfügbar"}
-    ${hardwareData.specs ? `Bekannte Specs: ${JSON.stringify(hardwareData.specs)}` : ""}
+    Beschreibung: ${mergedDescription}
+    ${Object.keys(mergedSpecs).length > 0 ? `Bekannte Specs: ${JSON.stringify(mergedSpecs)}` : ""}
+    ${tavilyData?.price ? `Preis: ${tavilyData.price}` : ""}
+    ${tavilyData?.rating ? `Bewertung: ${tavilyData.rating}/10` : ""}
   `;
 
   try {
-    return await generateContent(prompt, hardwareData.name, retryCount);
+    const result = await generateContent(prompt, hardwareData.name, retryCount);
+    
+    // Merge Tavily pros/cons if available
+    if (mergedPros.length > 0 && result.de.pros.length < 3) {
+      result.de.pros = [...result.de.pros, ...mergedPros].slice(0, 5);
+    }
+    if (mergedCons.length > 0 && result.de.cons.length < 3) {
+      result.de.cons = [...result.de.cons, ...mergedCons].slice(0, 5);
+    }
+    
+    // Merge specs
+    result.specs = {
+      ...mergedSpecs,
+      ...(result.specs || {}),
+    };
+    
+    return result;
   } catch (error) {
     console.error(`Final error generating hardware content for ${hardwareData.name}:`, error);
     return {
       de: {
         title: hardwareData.name,
-        content: `## Einleitung\n\n${hardwareData.description || "Keine Beschreibung verfügbar."}\n\n## Fazit\n\nEin interessantes Hardware-Produkt.`,
-        pros: ["Gute Leistung", "Solide Verarbeitung"],
-        cons: ["Könnte mehr Features haben"],
+        content: `## Einleitung\n\n${mergedDescription}\n\n## Fazit\n\nEin interessantes Hardware-Produkt.`,
+        pros: mergedPros.length > 0 ? mergedPros : ["Gute Leistung", "Solide Verarbeitung"],
+        cons: mergedCons.length > 0 ? mergedCons : ["Könnte mehr Features haben"],
       },
       en: {
         title: hardwareData.name,
-        content: `## Introduction\n\n${hardwareData.description || "No description available."}\n\n## Conclusion\n\nAn interesting hardware product.`,
-        pros: ["Good performance", "Solid build quality"],
-        cons: ["Could have more features"],
+        content: `## Introduction\n\n${mergedDescription}\n\n## Conclusion\n\nAn interesting hardware product.`,
+        pros: mergedPros.length > 0 ? mergedPros : ["Good performance", "Solid build quality"],
+        cons: mergedCons.length > 0 ? mergedCons : ["Could have more features"],
       },
-      score: 70,
-      specs: hardwareData.specs || null,
+      score: tavilyData?.rating ? Math.round(tavilyData.rating * 10) : 70,
+      specs: mergedSpecs,
     };
   }
 }
@@ -977,6 +1039,192 @@ export async function processSeries(
     return { success: true, reviewId: review.id };
   } catch (error: any) {
     console.error(`Error processing series ${seriesData.name}:`, error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Helper function to generate Amazon review content using OpenAI with Tavily Search
+export async function generateAmazonReviewContent(
+  productData: { name: string; asin?: string; description?: string; affiliateLink?: string },
+  retryCount = 0
+): Promise<{
+  de: { title: string; content: string; pros: string[]; cons: string[] };
+  en: { title: string; content: string; pros: string[]; cons: string[] };
+  score: number;
+  specs?: any;
+}> {
+  const isRetry = retryCount > 0;
+  
+  // Use Tavily Search to gather Amazon product information
+  let tavilyData: {
+    specs: Record<string, any>;
+    description: string;
+    pros: string[];
+    cons: string[];
+    price?: string;
+    rating?: number;
+  } | null = null;
+  
+  try {
+    console.log(`🔍 Searching Tavily for Amazon product ${productData.name}...`);
+    const searchResults = await searchAmazonProduct(
+      productData.name,
+      productData.asin
+    );
+    tavilyData = extractProductSpecs(searchResults);
+    console.log(`✅ Found Tavily data: ${JSON.stringify(tavilyData.specs)}`);
+  } catch (error) {
+    console.warn(`⚠️  Tavily search failed for ${productData.name}:`, error);
+  }
+  
+  // Merge Tavily data
+  const mergedSpecs = tavilyData?.specs || {};
+  const mergedDescription = tavilyData?.description || productData.description || "Keine Beschreibung verfügbar";
+  const mergedPros = tavilyData?.pros || [];
+  const mergedCons = tavilyData?.cons || [];
+  
+  const prompt = `
+    Schreibe eine EXTREM AUSFÜHRLICHE professionelle Amazon-Produkt-Review für "${productData.name}" in Deutsch UND Englisch.
+    
+    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 800-1000 Wörter pro Sprache), damit das JSON vollständig ist." : "ANFORDERUNGEN AN DEN INHALT:\n1. Der Text muss MASSIV DETAILLIERT sein (Ziel: 1200-1500 Wörter pro Sprache).\n2. Nutze eine tiefgehende journalistische Struktur mit aussagekräftigen H2- und H3-Überschriften.\n3. Nutze die recherchierten Informationen aus den Tavily-Suchergebnissen für authentische Details.\n4. Erwähne NIEMALS, dass dieser Text von einer KI generiert wurde. Der Text muss so klingen, als wäre er von einem passionierten Produkttester geschrieben worden."}
+    
+    Antworte EXKLUSIV im JSON-Format mit folgendem Schema:
+    {
+      "de": {
+        "title": "...",
+        "content": "Markdown mit Inhaltsverzeichnis, ausführlicher Einleitung, mehreren tiefgehenden Analyse-Abschnitten mit Überschriften (z.B. Verpackung & Lieferung, Design & Verarbeitung, Funktionen & Features, Performance, Preis-Leistungs-Verhältnis, etc.), BILD-PLATZHALTERN (![[IMAGE_X]]) und Fazit...",
+        "pros": ["...", "...", "...", "...", "..."],
+        "cons": ["...", "...", "...", "...", "..."]
+      },
+      "en": {
+        "title": "...",
+        "content": "Markdown with Table of Contents, detailed intro, several deep-dive analysis sections with headings (e.g., Packaging & Delivery, Design & Build Quality, Features & Functionality, Performance, Value for Money, etc.), IMAGE PLACEHOLDERS (![[IMAGE_X]]) and conclusion...",
+        "pros": ["...", "...", "...", "...", "..."],
+        "cons": ["...", "...", "...", "...", "..."]
+      },
+      "score": 0-100,
+      "specs": {
+        // Produktspezifische Spezifikationen und Details
+      }
+    }
+    
+    Produktname: ${productData.name}
+    ASIN: ${productData.asin || "Nicht verfügbar"}
+    Beschreibung: ${mergedDescription}
+    ${Object.keys(mergedSpecs).length > 0 ? `Bekannte Specs: ${JSON.stringify(mergedSpecs)}` : ""}
+    ${tavilyData?.price ? `Preis: ${tavilyData.price}` : ""}
+    ${tavilyData?.rating ? `Bewertung: ${tavilyData.rating}/10` : ""}
+  `;
+
+  try {
+    const result = await generateContent(prompt, productData.name, retryCount);
+    
+    // Merge Tavily pros/cons if available
+    if (mergedPros.length > 0 && result.de.pros.length < 3) {
+      result.de.pros = [...result.de.pros, ...mergedPros].slice(0, 5);
+    }
+    if (mergedCons.length > 0 && result.de.cons.length < 3) {
+      result.de.cons = [...result.de.cons, ...mergedCons].slice(0, 5);
+    }
+    
+    // Merge specs
+    result.specs = {
+      ...mergedSpecs,
+      ...(result.specs || {}),
+    };
+    
+    return result;
+  } catch (error) {
+    console.error(`Final error generating Amazon content for ${productData.name}:`, error);
+    return {
+      de: {
+        title: productData.name,
+        content: `## Einleitung\n\n${mergedDescription}\n\n## Fazit\n\nEin interessantes Produkt, das es wert ist, genauer betrachtet zu werden.`,
+        pros: mergedPros.length > 0 ? mergedPros : ["Gute Qualität", "Guter Preis"],
+        cons: mergedCons.length > 0 ? mergedCons : ["Könnte mehr Features haben"],
+      },
+      en: {
+        title: productData.name,
+        content: `## Introduction\n\n${mergedDescription}\n\n## Conclusion\n\nAn interesting product worth taking a closer look at.`,
+        pros: mergedPros.length > 0 ? mergedPros : ["Good quality", "Good price"],
+        cons: mergedCons.length > 0 ? mergedCons : ["Could have more features"],
+      },
+      score: tavilyData?.rating ? Math.round(tavilyData.rating * 10) : 70,
+      specs: mergedSpecs,
+    };
+  }
+}
+
+// Helper function to process an Amazon product review
+export async function processAmazonProduct(
+  productData: { name: string; asin?: string; description?: string; affiliateLink?: string },
+  options: { status: "draft" | "published"; skipExisting: boolean; generateImages?: boolean }
+): Promise<{ success: boolean; reviewId?: string; error?: string }> {
+  try {
+    // Check if review already exists by ASIN
+    if (options.skipExisting && productData.asin) {
+      const existing = await prisma.review.findFirst({
+        where: { amazonAsin: productData.asin, category: "amazon" },
+      });
+      if (existing) {
+        return { success: false, error: "Already exists" };
+      }
+    }
+
+    // Generate review content
+    const reviewContent = await generateAmazonReviewContent(productData);
+
+    // Generate slug
+    let slug = generateSlug(reviewContent.de.title || productData.name);
+    const existingSlug = await prisma.review.findUnique({ where: { slug } });
+    if (existingSlug) {
+      slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+    }
+
+    // Generate images using OpenAI if requested
+    let imageUrls: string[] = [];
+    if (options.generateImages !== false) {
+      try {
+        console.log(`🎨 Generating review images for ${productData.name}...`);
+        const generatedImages = await generateReviewImages({
+          productName: productData.name,
+          productType: "product",
+          style: "professional",
+          count: 3,
+        });
+        imageUrls = generatedImages;
+        console.log(`✅ Generated ${imageUrls.length} images`);
+      } catch (error) {
+        console.error(`Error generating images for ${productData.name}:`, error);
+      }
+    }
+
+    // Create review
+    const review = await prisma.review.create({
+      data: {
+        title: reviewContent.de.title,
+        title_en: reviewContent.en.title,
+        slug,
+        category: "amazon",
+        content: reviewContent.de.content,
+        content_en: reviewContent.en.content,
+        score: reviewContent.score,
+        pros: reviewContent.de.pros,
+        pros_en: reviewContent.en.pros,
+        cons: reviewContent.de.cons,
+        cons_en: reviewContent.en.cons,
+        images: imageUrls,
+        youtubeVideos: [],
+        status: options.status,
+        amazonAsin: productData.asin || null,
+        affiliateLink: productData.affiliateLink || null,
+        specs: reviewContent.specs || null,
+      },
+    });
+
+    return { success: true, reviewId: review.id };
+  } catch (error: any) {
+    console.error(`Error processing Amazon product ${productData.name}:`, error);
     return { success: false, error: error.message };
   }
 }
