@@ -80,7 +80,7 @@ function parseHardwareName(name: string): { manufacturer?: string; model?: strin
 }
 
 // Helper function to process a single hardware item
-async function processHardware(
+export async function processHardware(
   hardwareName: string,
   options: { status: "draft" | "published"; skipExisting: boolean; generateImages?: boolean }
 ): Promise<{ success: boolean; reviewId?: string; error?: string }> {
