@@ -45,6 +45,16 @@ export default async function HomePage() {
       orderBy: { score: "desc" },
     })) as unknown as Review | null;
 
+    // Remove featured review from latestReviews and topRatedReviews to avoid duplicates
+    if (featuredReview) {
+      latestReviews = latestReviews.filter((r) => r.id !== featuredReview!.id);
+      topRatedReviews = topRatedReviews.filter((r) => r.id !== featuredReview!.id);
+    }
+
+    // Also remove duplicates between latestReviews and topRatedReviews
+    const latestReviewIds = new Set(latestReviews.map((r) => r.id));
+    topRatedReviews = topRatedReviews.filter((r) => !latestReviewIds.has(r.id));
+
     // Calculate statistics
     const totalReviews = await prisma.review.count({
       where: { status: "published" },
