@@ -12,6 +12,7 @@ import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import { Monitor, Cpu, HardDrive, CpuIcon } from "lucide-react";
 import { GameMetadata } from "@/components/reviews/GameMetadata";
+import { MovieSeriesMetadata } from "@/components/reviews/MovieSeriesMetadata";
 import { TableOfContents } from "@/components/reviews/TableOfContents";
 import { RelatedReviews } from "@/components/reviews/RelatedReviews";
 import { ReviewProgress } from "@/components/reviews/ReviewProgress";
@@ -266,6 +267,24 @@ export default async function ReviewDetailPage({
                 <GameMetadata 
                   metadata={review.metadata as any} 
                   nerdictionScore={review.score}
+                  isEn={isEn}
+                />
+              )}
+
+              {/* Movie Metadata Section */}
+              {review.category === "movie" && review.metadata && (
+                <MovieSeriesMetadata 
+                  metadata={review.metadata as any} 
+                  category="movie"
+                  isEn={isEn}
+                />
+              )}
+
+              {/* Series Metadata Section */}
+              {review.category === "series" && review.metadata && (
+                <MovieSeriesMetadata 
+                  metadata={review.metadata as any} 
+                  category="series"
                   isEn={isEn}
                 />
               )}
