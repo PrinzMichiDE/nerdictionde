@@ -26,34 +26,47 @@ export default async function HomePage() {
   };
 
   try {
-    latestReviews = (await prisma.review.findMany({
-      where: { status: "published" },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-    })) as unknown as Review[];
-
-    // Fetch top-rated reviews
-    topRatedReviews = (await prisma.review.findMany({
-      where: { status: "published" },
-      orderBy: { score: "desc" },
-      take: 6,
-    })) as unknown as Review[];
-
-    // Fetch featured review (highest scored review)
+    // Fetch featured review first (highest scored review)
     featuredReview = (await prisma.review.findFirst({
       where: { status: "published" },
       orderBy: { score: "desc" },
     })) as unknown as Review | null;
 
-    // Remove featured review from latestReviews and topRatedReviews to avoid duplicates
+    // Fetch latest reviews, excluding featured review
+    const latestReviewsQuery: any = {
+      where: { status: "published" },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+    };
+    
     if (featuredReview) {
-      latestReviews = latestReviews.filter((r) => r.id !== featuredReview!.id);
-      topRatedReviews = topRatedReviews.filter((r) => r.id !== featuredReview!.id);
+      latestReviewsQuery.where.id = { not: featuredReview.id };
+    }
+    
+    latestReviews = (await prisma.review.findMany(latestReviewsQuery)) as unknown as Review[];
+
+    // Fetch top-rated reviews, excluding featured review and latest reviews
+    const excludedIds = new Set<string>();
+    if (featuredReview) {
+      excludedIds.add(featuredReview.id);
+    }
+    latestReviews.forEach((r) => excludedIds.add(r.id));
+
+    const topRatedQuery: any = {
+      where: {
+        status: "published",
+        id: excludedIds.size > 0 ? { notIn: Array.from(excludedIds) } : undefined,
+      },
+      orderBy: { score: "desc" },
+      take: 6,
+    };
+
+    // Remove undefined fields
+    if (!topRatedQuery.where.id) {
+      delete topRatedQuery.where.id;
     }
 
-    // Also remove duplicates between latestReviews and topRatedReviews
-    const latestReviewIds = new Set(latestReviews.map((r) => r.id));
-    topRatedReviews = topRatedReviews.filter((r) => !latestReviewIds.has(r.id));
+    topRatedReviews = (await prisma.review.findMany(topRatedQuery)) as unknown as Review[];
 
     // Calculate statistics
     const totalReviews = await prisma.review.count({
