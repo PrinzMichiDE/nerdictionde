@@ -10,17 +10,8 @@ import prisma from "@/lib/prisma";
  */
 export async function GET(req: NextRequest) {
   try {
-    // 1. Check for authorization (Vercel Cron Secret)
-    // If CRON_SECRET is set, require authorization. Otherwise allow public access (for manual triggers)
-    const authHeader = req.headers.get('authorization');
-    if (process.env.CRON_SECRET) {
-      if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        return NextResponse.json({ 
-          error: "Unauthorized",
-          message: "Please provide Authorization header: Bearer YOUR_CRON_SECRET"
-        }, { status: 401 });
-      }
-    }
+    // No authorization required - API can be called publicly
+    // Note: For production, consider adding rate limiting or authentication
 
     const results = {
       hardware: { success: false, reviewId: null as string | null, error: null as string | null },

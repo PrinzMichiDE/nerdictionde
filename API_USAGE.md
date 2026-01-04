@@ -9,37 +9,32 @@ GET /api/cron/generate-category-reviews
 
 ### Authorization
 
-Wenn `CRON_SECRET` in den Environment Variables gesetzt ist, muss der Request einen Authorization Header enthalten:
-
-```bash
-Authorization: Bearer YOUR_CRON_SECRET
-```
+**Keine Authorization erforderlich** - Die API kann öffentlich aufgerufen werden.
 
 ### Manueller Aufruf
 
 #### Mit cURL:
 ```bash
-curl -X GET https://your-domain.vercel.app/api/cron/generate-category-reviews \
-  -H "Authorization: Bearer YOUR_CRON_SECRET"
+curl -X GET https://your-domain.vercel.app/api/cron/generate-category-reviews
 ```
 
 #### Mit JavaScript/Fetch:
 ```javascript
 fetch('https://your-domain.vercel.app/api/cron/generate-category-reviews', {
-  method: 'GET',
-  headers: {
-    'Authorization': `Bearer ${process.env.CRON_SECRET}`
-  }
+  method: 'GET'
 })
 .then(response => response.json())
-.then(data => console.log(data));
+.then(data => {
+  console.log('Results:', data);
+  console.log('Hardware reviews:', data.results.hardware);
+  console.log('Amazon reviews:', data.results.amazon);
+});
 ```
 
 #### Mit Postman/Insomnia:
 - Method: `GET`
 - URL: `https://your-domain.vercel.app/api/cron/generate-category-reviews`
-- Headers:
-  - `Authorization: Bearer YOUR_CRON_SECRET`
+- Keine Headers erforderlich
 
 ### Response Format
 
@@ -62,9 +57,9 @@ fetch('https://your-domain.vercel.app/api/cron/generate-category-reviews', {
 }
 ```
 
-### Ohne Authorization (für lokale Entwicklung)
+### Sicherheitshinweis
 
-Wenn `CRON_SECRET` nicht gesetzt ist, kann die API ohne Authorization aufgerufen werden (nur für lokale Entwicklung empfohlen).
+Die API ist öffentlich aufrufbar. Für Produktionsumgebungen sollten Sie Rate Limiting oder andere Sicherheitsmaßnahmen in Betracht ziehen.
 
 ### Automatischer Schedule
 
