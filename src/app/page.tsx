@@ -14,8 +14,6 @@ import { TrustBadges } from "@/components/home/TrustBadges";
 import { ImageGallery } from "@/components/home/ImageGallery";
 import { VideoGallery } from "@/components/home/VideoGallery";
 import { ParallaxHighlights } from "@/components/home/ParallaxSection";
-import { Partners } from "@/components/home/Partners";
-import { Awards } from "@/components/home/Awards";
 import { SocialProof } from "@/components/home/SocialProof";
 import { FAQ } from "@/components/home/FAQ";
 import { StatsDashboard } from "@/components/home/StatsDashboard";
@@ -184,12 +182,6 @@ export default async function HomePage() {
 
       {/* Parallax Highlights Section */}
       <ParallaxHighlights />
-
-      {/* Partners Section */}
-      <Partners />
-
-      {/* Awards Section */}
-      <Awards />
 
       {/* Press Mentions Section */}
       <PressMentions />
