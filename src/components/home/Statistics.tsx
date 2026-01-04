@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Gamepad2, Cpu, ShoppingCart, Film, Tv, TrendingUp, Star } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface StatisticsData {
   totalReviews: number;
@@ -22,24 +22,77 @@ interface StatCardProps {
   delay?: number;
 }
 
-function StatCard({ icon, label, value, description, delay = 0 }: StatCardProps) {
+function useCountUp(end: number, duration: number = 2000, start: number = 0, ref: React.RefObject<HTMLDivElement>): number {
+  const [count, setCount] = useState(start);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, delay);
-    return () => clearTimeout(timer);
-  }, [delay]);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isVisible) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, [isVisible, ref]);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    let startTime: number | null = null;
+
+    const animate = (currentTime: number) => {
+      if (startTime === null) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      
+      const current = Math.floor(start + (end - start) * easeOutCubic(progress));
+      setCount(current);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setCount(end);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [isVisible, end, duration, start]);
+
+  return isVisible ? count : start;
+}
+
+function easeOutCubic(t: number): number {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function StatCard({ icon, label, value, description, delay = 0 }: StatCardProps) {
+  const isNumeric = typeof value === "number";
+  const cardRef = useRef<HTMLDivElement>(null);
+  const countUpValue = useCountUp(isNumeric ? value : 0, 2000, 0, cardRef);
+  const displayValue = isNumeric ? countUpValue : value;
 
   return (
-    <Card className="relative overflow-hidden border-2 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/30 group">
+    <Card 
+      ref={cardRef}
+      className="relative overflow-hidden border-2 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/30 group"
+    >
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       <CardContent className="p-6 relative z-10">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+              <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors group-hover:scale-110">
                 {icon}
               </div>
               <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
@@ -47,12 +100,8 @@ function StatCard({ icon, label, value, description, delay = 0 }: StatCardProps)
               </p>
             </div>
             <div className="space-y-1">
-              <p 
-                className={`text-3xl font-bold transition-all duration-700 ${
-                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                }`}
-              >
-                {value}
+              <p className="text-3xl font-bold tabular-nums">
+                {displayValue}{isNumeric && description?.includes("Punkten") ? "" : ""}
               </p>
               {description && (
                 <p className="text-xs text-muted-foreground/70">{description}</p>

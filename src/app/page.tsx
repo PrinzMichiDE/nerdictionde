@@ -9,6 +9,10 @@ import { TopRatedReviews } from "@/components/home/TopRatedReviews";
 import { FeaturedReview } from "@/components/home/FeaturedReview";
 import { WhyNerdiction } from "@/components/home/WhyNerdiction";
 import { CallToAction } from "@/components/home/CallToAction";
+import { HeroSection } from "@/components/home/HeroSection";
+import { Testimonials } from "@/components/home/Testimonials";
+import { Newsletter } from "@/components/home/Newsletter";
+import { TrustBadges } from "@/components/home/TrustBadges";
 
 export const dynamic = 'force-dynamic';
 
@@ -97,40 +101,12 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="space-y-16 pb-12 animate-fade-in">
-      {/* Hero Section */}
-      <section className="relative flex flex-col items-center justify-center space-y-6 text-center py-16 md:py-32 overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent rounded-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--primary-rgb),0.1),transparent_50%)] rounded-3xl" />
-        
-        <div className="relative z-10 space-y-6 px-4 max-w-4xl">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl animate-slide-up [animation-delay:0.1s] [animation-fill-mode:both]">
-            Willkommen bei{" "}
-            <span className="bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
-              Nerdiction
-            </span>
-          </h1>
-          
-          <p className="max-w-[700px] mx-auto text-muted-foreground text-lg md:text-xl leading-relaxed animate-slide-up [animation-delay:0.2s] [animation-fill-mode:both]">
-            Professionelle Game- und Hardware-Reviews für fundierte Kaufentscheidungen.
-          </p>
-          
-          <div className="flex flex-wrap justify-center gap-4 pt-4 animate-slide-up [animation-delay:0.3s] [animation-fill-mode:both]">
-            <Button asChild size="lg" className="rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105">
-              <Link href="/reviews">Alle Reviews</Link>
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              asChild 
-              className="rounded-full border-2 hover:bg-accent hover:border-accent-foreground/20 transition-all hover:scale-105"
-            >
-              <Link href="/reviews?sort=score-desc">Top Reviews</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+    <div className="space-y-20 pb-12 animate-fade-in">
+      {/* Enhanced Hero Section */}
+      <HeroSection />
+
+      {/* Trust Badges Section */}
+      <TrustBadges />
 
       {/* Statistics Section */}
       {statistics.totalReviews > 0 && <Statistics data={statistics} />}
@@ -186,6 +162,12 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+
+      {/* Testimonials Section */}
+      <Testimonials />
+
+      {/* Newsletter Section */}
+      <Newsletter />
 
       {/* Call to Action Section */}
       <CallToAction />
