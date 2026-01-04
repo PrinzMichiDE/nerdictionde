@@ -7,11 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Edit, Eye, Search, Filter, Loader2, X } from "lucide-react";
+import { Edit, Eye, Search, Filter, Loader2, X, Trash2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { ScoreBadge } from "@/components/reviews/ScoreBadge";
 import { useSearchParams, useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import axios from "axios";
 
 export function ReviewList() {
   const searchParams = useSearchParams();
@@ -21,6 +30,9 @@ export function ReviewList() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") || "all");
   const [categoryFilter, setCategoryFilter] = useState<string>(searchParams.get("category") || "all");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [reviewToDelete, setReviewToDelete] = useState<Review | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Sync URL params with state
   useEffect(() => {
@@ -47,6 +59,30 @@ export function ReviewList() {
   useEffect(() => {
     fetchReviews();
   }, []);
+
+  const handleDeleteClick = (review: Review) => {
+    setReviewToDelete(review);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!reviewToDelete) return;
+
+    try {
+      setDeleting(true);
+      await axios.delete(`/api/reviews/${reviewToDelete.id}`);
+      
+      // Remove from local state
+      setReviews(reviews.filter((r) => r.id !== reviewToDelete.id));
+      setDeleteDialogOpen(false);
+      setReviewToDelete(null);
+    } catch (error: any) {
+      console.error("Error deleting review:", error);
+      alert(error.response?.data?.error || "Fehler beim Löschen des Beitrags");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const fetchReviews = async () => {
     try {
@@ -254,6 +290,14 @@ export function ReviewList() {
                         </Button>
                       </Link>
                     )}
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteClick(review)}
+                      className="shrink-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -274,6 +318,48 @@ export function ReviewList() {
           </p>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Beitrag löschen?</DialogTitle>
+            <DialogDescription>
+              Möchtest du den Beitrag "{reviewToDelete?.title}" wirklich löschen?
+              Diese Aktion kann nicht rückgängig gemacht werden.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setReviewToDelete(null);
+              }}
+              disabled={deleting}
+            >
+              Abbrechen
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Wird gelöscht...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Löschen
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
