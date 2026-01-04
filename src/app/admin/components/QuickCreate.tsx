@@ -58,7 +58,7 @@ export function QuickCreate() {
       value: "product",
       label: "Produkt",
       icon: <ShoppingCart className="h-4 w-4" />,
-      placeholder: "z.B. Produktname wie 'natural elements Omega 3 – 365 Kapseln...'"
+      placeholder: "z.B. natural elements Omega 3 – 365 Kapseln – 2000mg Fischöl..."
     },
   ];
 
@@ -133,7 +133,7 @@ export function QuickCreate() {
           <p>
             {category === "game" && "Unterstützt IGDB Datenbank-Suche und Steam Store Links."}
             {category === "hardware" && "Unterstützt Hardware-Produkte wie GPUs, CPUs, Peripheriegeräte und mehr."}
-            {category === "product" && "Unterstützt Produktnamen für automatische Review-Generierung."}
+            {category === "product" && "Geben Sie den vollständigen Produktnamen ein. Die Review wird automatisch generiert."}
           </p>
         </div>
       </CardContent>
