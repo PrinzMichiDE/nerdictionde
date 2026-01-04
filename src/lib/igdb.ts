@@ -209,11 +209,17 @@ export async function getIGDBGamesBulkLarge(
   let offset = 0;
   const requestDelay = 1000; // 1 second delay between requests to respect rate limits
 
+  let requestCount = 0;
   while (allGames.length < totalLimit) {
     const remaining = totalLimit - allGames.length;
     const currentLimit = Math.min(remaining, IGDB_MAX_LIMIT);
+    requestCount++;
 
     try {
+      console.log(
+        `📥 IGDB Games Request ${requestCount}: Fetching ${currentLimit} games (offset: ${offset}, total so far: ${allGames.length}/${totalLimit})`
+      );
+
       const games = await getIGDBGamesBulk({
         ...options,
         limit: currentLimit,
@@ -222,13 +228,19 @@ export async function getIGDBGamesBulkLarge(
 
       if (games.length === 0) {
         // No more games available
+        console.log(`⚠️ No more games available at offset ${offset}`);
         break;
       }
 
       allGames.push(...games);
 
+      console.log(
+        `✅ IGDB Games Request ${requestCount}: Received ${games.length} games (Total: ${allGames.length}/${totalLimit})`
+      );
+
       // If we got fewer games than requested, we've reached the end
       if (games.length < currentLimit) {
+        console.log(`⚠️ Received fewer games than requested (${games.length} < ${currentLimit}), reached end of results`);
         break;
       }
 
@@ -253,7 +265,11 @@ export async function getIGDBGamesBulkLarge(
     }
   }
 
-  return allGames.slice(0, totalLimit);
+  const finalGames = allGames.slice(0, totalLimit);
+  console.log(
+    `✅ IGDB Games Fetch Complete: ${finalGames.length} games fetched in ${requestCount} request(s) (requested: ${totalLimit})`
+  );
+  return finalGames;
 }
 
 export async function getIGDBGameById(id: number) {
