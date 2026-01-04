@@ -123,7 +123,8 @@ Besonders gelungen ist die Art, wie der Film zeigt, dass wahre Veränderung Zeit
   console.log("Verifying table of contents links...");
   let allMatch = true;
   
-  tocLinks.forEach((tocLink, index) => {
+  for (let index = 0; index < tocLinks.length; index++) {
+    const tocLink = tocLinks[index];
     const linkText = tocLink.match(/\[([^\]]+)\]/)?.[1];
     const linkId = tocLink.match(/\(#([^\)]+)\)/)?.[1];
     
@@ -142,7 +143,7 @@ Besonders gelungen ist die Art, wie der Film zeigt, dass wahre Veränderung Zeit
         allMatch = false;
       }
     }
-  });
+  }
   
   if (!allMatch) {
     console.error("Table of contents links don't match headings. Please fix the script.");
