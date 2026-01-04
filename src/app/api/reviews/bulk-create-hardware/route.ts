@@ -184,6 +184,11 @@ async function processHardware(
 }
 
 export async function POST(req: NextRequest) {
+  // Require admin authentication
+  const { requireAdminAuth } = await import("@/lib/auth");
+  const authError = requireAdminAuth(req);
+  if (authError) return authError;
+
   try {
     const body: BulkCreateHardwareOptions = await req.json();
     
@@ -221,31 +226,43 @@ export async function POST(req: NextRequest) {
       
       const batchResults = await Promise.allSettled(batchPromises);
       
+      // Process batch results and fetch review details
+      const reviewPromises: Promise<void>[] = [];
+      
       batchResults.forEach((result, index) => {
         const hardwareName = batch[index];
         if (result.status === "fulfilled") {
           const processResult = result.value;
           if (processResult.success && processResult.reviewId) {
             results.successful++;
-            // Get review to get title and slug
-            prisma.review.findUnique({ where: { id: processResult.reviewId } })
-              .then((review) => {
-                if (review) {
+            // Fetch review details
+            reviewPromises.push(
+              prisma.review.findUnique({ where: { id: processResult.reviewId } })
+                .then((review) => {
+                  if (review) {
+                    results.reviews.push({
+                      id: review.id,
+                      title: review.title,
+                      slug: review.slug,
+                    });
+                  } else {
+                    // Fallback if review not found
+                    results.reviews.push({
+                      id: processResult.reviewId!,
+                      title: hardwareName,
+                      slug: generateSlug(hardwareName),
+                    });
+                  }
+                })
+                .catch(() => {
+                  // Fallback if fetch fails
                   results.reviews.push({
-                    id: review.id,
-                    title: review.title,
-                    slug: review.slug,
+                    id: processResult.reviewId!,
+                    title: hardwareName,
+                    slug: generateSlug(hardwareName),
                   });
-                }
-              })
-              .catch(() => {
-                // Fallback if we can't fetch review
-                results.reviews.push({
-                  id: processResult.reviewId!,
-                  title: hardwareName,
-                  slug: generateSlug(hardwareName),
-                });
-              });
+                })
+            );
           } else if (processResult.error === "Review already exists") {
             results.skipped++;
           } else {
@@ -264,14 +281,14 @@ export async function POST(req: NextRequest) {
         }
       });
       
+      // Wait for all review fetches to complete
+      await Promise.allSettled(reviewPromises);
+      
       // Delay between batches (except for the last batch)
       if (i + batchSize < hardwareNames.length) {
         await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches));
       }
     }
-    
-    // Wait a bit for all review fetches to complete
-    await new Promise((resolve) => setTimeout(resolve, 1000));
     
     return NextResponse.json({
       message: `Bulk hardware creation completed: ${results.successful} successful, ${results.failed} failed, ${results.skipped} skipped`,

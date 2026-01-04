@@ -160,6 +160,36 @@ export default async function ReviewDetailPage({
       }
       return <p {...props}>{children}</p>;
     },
+    h1: ({ children, ...props }: any) => (
+      <h1 className="text-4xl md:text-5xl font-bold mt-12 mb-6 first:mt-0 scroll-mt-24" {...props}>
+        {children}
+      </h1>
+    ),
+    h2: ({ children, ...props }: any) => (
+      <h2 className="text-3xl md:text-4xl font-bold mt-10 mb-5 first:mt-0 scroll-mt-24" {...props}>
+        {children}
+      </h2>
+    ),
+    h3: ({ children, ...props }: any) => (
+      <h3 className="text-2xl md:text-3xl font-bold mt-8 mb-4 first:mt-0 scroll-mt-24" {...props}>
+        {children}
+      </h3>
+    ),
+    h4: ({ children, ...props }: any) => (
+      <h4 className="text-xl md:text-2xl font-bold mt-6 mb-3 first:mt-0 scroll-mt-24" {...props}>
+        {children}
+      </h4>
+    ),
+    h5: ({ children, ...props }: any) => (
+      <h5 className="text-lg md:text-xl font-bold mt-5 mb-2 first:mt-0 scroll-mt-24" {...props}>
+        {children}
+      </h5>
+    ),
+    h6: ({ children, ...props }: any) => (
+      <h6 className="text-base md:text-lg font-bold mt-4 mb-2 first:mt-0 scroll-mt-24" {...props}>
+        {children}
+      </h6>
+    ),
   };
 
   return (
@@ -189,8 +219,10 @@ export default async function ReviewDetailPage({
                 {isEn ? "Published on" : "Veröffentlicht am"} {formattedDate}
               </time>
             </div>
-            <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl xl:text-6xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
-              {title}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight leading-[1.1] text-balance mb-2">
+              <span className="block bg-gradient-to-r from-foreground via-foreground/95 to-foreground/80 bg-clip-text text-transparent drop-shadow-sm">
+                {title}
+              </span>
             </h1>
             <div className="pt-2">
               <ShareButtons title={title} url={`/reviews/${slug}`} />
@@ -275,7 +307,7 @@ export default async function ReviewDetailPage({
           {/* Table of Contents */}
           {hasTableOfContents && <TableOfContents headings={headings} isEn={isEn} />}
 
-          <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed prose-headings:scroll-mt-24">
+          <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeSlug]}
