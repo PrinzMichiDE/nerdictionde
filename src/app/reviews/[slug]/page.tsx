@@ -100,6 +100,11 @@ export default async function ReviewDetailPage({
       // Remove markdown links from heading text
       text = text.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
       
+      // Skip the main title (H1) and the table of contents heading itself
+      if (level === 1) continue;
+      const tocHeadingText = isEn ? "Table of Contents" : "Inhaltsverzeichnis";
+      if (text.toLowerCase() === tocHeadingText.toLowerCase()) continue;
+      
       // Generate ID similar to rehype-slug (handles German umlauts and special chars)
       const id = text
         .toLowerCase()
