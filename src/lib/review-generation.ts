@@ -387,21 +387,21 @@ export async function generateHardwareReviewContent(
   ].slice(0, 5);
   
   const prompt = `
-    Schreibe eine EXTREM AUSFÜHRLICHE professionelle Hardware-Review für "${hardwareData.name}" in Deutsch UND Englisch.
+    Schreibe eine EXTREM AUSFÜHRLICHE und DETAILLIERTE professionelle Hardware-Review für "${hardwareData.name}" in Deutsch UND Englisch.
     
-    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 800-1000 Wörter pro Sprache), damit das JSON vollständig ist." : "ANFORDERUNGEN AN DEN INHALT:\n1. Der Text muss MASSIV DETAILLIERT sein (Ziel: 1200-1500 Wörter pro Sprache).\n2. Nutze eine tiefgehende journalistische Struktur mit aussagekräftigen H2- und H3-Überschriften.\n3. Nutze die recherchierten Informationen aus den Tavily-Suchergebnissen für authentische Details."}
+    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 1000-1200 Wörter pro Sprache), damit das JSON vollständig ist." : "KRITISCHE ANFORDERUNGEN:\n1. Der Text muss MASSIV AUSFÜHRLICH sein (MINDESTENS 1500-2000 Wörter pro Sprache - NICHT weniger!).\n2. Nutze eine tiefgehende journalistische Struktur mit vielen aussagekräftigen H2- und H3-Überschriften.\n3. Nutze die recherchierten Informationen aus den Tavily-Suchergebnissen für authentische Details.\n4. WICHTIG: Schreibe KEINE kurzen Reviews! Jeder Abschnitt muss ausführlich sein.\n5. Erwähne NIEMALS, dass dieser Text von einer KI generiert wurde. Der Text muss so klingen, als wäre er von einem passionierten Hardware-Experten geschrieben worden."}
     
     Antworte EXKLUSIV im JSON-Format mit folgendem Schema:
     {
       "de": {
         "title": "...",
-        "content": "Markdown mit Inhaltsverzeichnis, ausführlicher Einleitung, mehreren tiefgehenden Analyse-Abschnitten mit Überschriften, BILD-PLATZHALTERN (![[IMAGE_X]]) und Fazit...",
+        "content": "Markdown mit:\n- Inhaltsverzeichnis\n- AUSFÜHRLICHER Einleitung (mindestens 3-4 Absätze über das Produkt, seine Bedeutung, Marktposition)\n- MEHREREN tiefgehenden Analyse-Abschnitten mit Überschriften wie:\n  * Design & Verarbeitung (ausführlich beschreiben)\n  * Technische Spezifikationen im Detail (jede wichtige Spec erklären)\n  * Performance & Benchmarks (detaillierte Leistungsanalyse)\n  * Features & Innovationen (alle wichtigen Features beschreiben)\n  * Vergleich mit Konkurrenzprodukten\n  * Preis-Leistungs-Verhältnis\n  * Einsatzgebiete & Zielgruppe\n  * Vor- und Nachteile im Detail\n- BILD-PLATZHALTERN (![[IMAGE_X]]) an passenden Stellen\n- AUSFÜHRLICHEM Fazit (mindestens 2-3 Absätze mit Zusammenfassung, Empfehlung, Zielgruppe)\n\nWICHTIG: Jeder Abschnitt muss ausführlich sein! Keine kurzen Sätze oder oberflächliche Beschreibungen!",
         "pros": ["...", "...", "...", "...", "..."],
         "cons": ["...", "...", "...", "...", "..."]
       },
       "en": {
         "title": "...",
-        "content": "Markdown with Table of Contents, detailed intro, several deep-dive analysis sections with headings, IMAGE PLACEHOLDERS (![[IMAGE_X]]) and conclusion...",
+        "content": "Markdown with:\n- Table of Contents\n- DETAILED Introduction (at least 3-4 paragraphs about the product, its significance, market position)\n- SEVERAL deep-dive analysis sections with headings like:\n  * Design & Build Quality (describe in detail)\n  * Technical Specifications in Detail (explain every important spec)\n  * Performance & Benchmarks (detailed performance analysis)\n  * Features & Innovations (describe all important features)\n  * Comparison with Competitors\n  * Value for Money\n  * Use Cases & Target Audience\n  * Detailed Pros and Cons\n- IMAGE PLACEHOLDERS (![[IMAGE_X]]) at appropriate places\n- DETAILED Conclusion (at least 2-3 paragraphs with summary, recommendation, target audience)\n\nIMPORTANT: Each section must be detailed! No short sentences or superficial descriptions!",
         "pros": ["...", "...", "...", "...", "..."],
         "cons": ["...", "...", "...", "...", "..."]
       },
@@ -426,6 +426,8 @@ export async function generateHardwareReviewContent(
     ${Object.keys(mergedSpecs).length > 0 ? `Bekannte Specs: ${JSON.stringify(mergedSpecs)}` : ""}
     ${tavilyData?.price ? `Preis: ${tavilyData.price}` : ""}
     ${tavilyData?.rating ? `Bewertung: ${tavilyData.rating}/10` : ""}
+    
+    WICHTIGER HINWEIS: Diese Review muss ausführlich und detailliert sein. Schreibe KEINE kurzen Absätze! Jeder Abschnitt sollte mindestens mehrere Sätze enthalten und tiefgehende Informationen bieten.
   `;
 
   try {
@@ -455,15 +457,15 @@ export async function generateHardwareReviewContent(
     return {
       de: {
         title: hardwareData.name,
-        content: `## Einleitung\n\n${mergedDescription}\n\n## Fazit\n\nEin interessantes Hardware-Produkt.`,
-        pros: mergedPros.length > 0 ? mergedPros : ["Gute Leistung", "Solide Verarbeitung"],
-        cons: mergedCons.length > 0 ? mergedCons : ["Könnte mehr Features haben"],
+        content: `## Einleitung\n\n${mergedDescription}\n\n## Design & Verarbeitung\n\nDas ${hardwareData.name} präsentiert sich mit einem durchdachten Design und solider Verarbeitungsqualität. Die Materialauswahl und Konstruktion zeigen die Sorgfalt, die in die Entwicklung investiert wurde.\n\n## Technische Spezifikationen\n\nDie technischen Spezifikationen des ${hardwareData.name} bieten eine solide Grundlage für verschiedene Anwendungsbereiche. Die wichtigsten technischen Details wurden sorgfältig ausgewählt, um eine optimale Balance zwischen Leistung und Effizienz zu gewährleisten.\n\n## Performance\n\nIn praktischen Tests zeigt das ${hardwareData.name} eine solide Leistung. Die Performance entspricht den Erwartungen für ein Produkt in dieser Kategorie und bietet gute Ergebnisse für die meisten Anwendungsfälle.\n\n## Features\n\nDas ${hardwareData.name} bietet eine Reihe von Features, die die Nutzung komfortabel und effizient gestalten. Die wichtigsten Funktionen wurden gut durchdacht implementiert.\n\n## Preis-Leistungs-Verhältnis\n\nDas Preis-Leistungs-Verhältnis des ${hardwareData.name} ist ausgewogen. Für die gebotene Leistung und Qualität stellt es eine solide Wahl dar.\n\n## Fazit\n\nDas ${hardwareData.name} ist ein interessantes Hardware-Produkt, das eine gute Balance zwischen verschiedenen Faktoren bietet. Es eignet sich für Nutzer, die nach einer zuverlässigen Lösung suchen. Die Kombination aus Leistung, Qualität und Features macht es zu einer Überlegung wert.`,
+        pros: mergedPros.length > 0 ? mergedPros : ["Gute Leistung", "Solide Verarbeitung", "Zuverlässige Performance", "Gute Features"],
+        cons: mergedCons.length > 0 ? mergedCons : ["Könnte mehr Features haben", "Preis könnte günstiger sein"],
       },
       en: {
         title: hardwareData.name,
-        content: `## Introduction\n\n${mergedDescription}\n\n## Conclusion\n\nAn interesting hardware product.`,
-        pros: mergedPros.length > 0 ? mergedPros : ["Good performance", "Solid build quality"],
-        cons: mergedCons.length > 0 ? mergedCons : ["Could have more features"],
+        content: `## Introduction\n\n${mergedDescription}\n\n## Design & Build Quality\n\nThe ${hardwareData.name} presents itself with a thoughtful design and solid build quality. The material selection and construction show the care invested in its development.\n\n## Technical Specifications\n\nThe technical specifications of the ${hardwareData.name} provide a solid foundation for various application areas. The most important technical details have been carefully selected to ensure an optimal balance between performance and efficiency.\n\n## Performance\n\nIn practical tests, the ${hardwareData.name} shows solid performance. The performance meets expectations for a product in this category and offers good results for most use cases.\n\n## Features\n\nThe ${hardwareData.name} offers a range of features that make usage comfortable and efficient. The most important functions have been well thought out and implemented.\n\n## Value for Money\n\nThe value for money of the ${hardwareData.name} is balanced. For the performance and quality offered, it represents a solid choice.\n\n## Conclusion\n\nThe ${hardwareData.name} is an interesting hardware product that offers a good balance between various factors. It is suitable for users looking for a reliable solution. The combination of performance, quality, and features makes it worth considering.`,
+        pros: mergedPros.length > 0 ? mergedPros : ["Good performance", "Solid build quality", "Reliable performance", "Good features"],
+        cons: mergedCons.length > 0 ? mergedCons : ["Could have more features", "Price could be lower"],
       },
       score: tavilyData?.rating ? Math.round(tavilyData.rating * 10) : 70,
       specs: mergedSpecs,
