@@ -38,8 +38,12 @@ fetch('https://your-domain.vercel.app/api/cron/generate-category-reviews', {
 
 ### Response Format
 
+#### Erfolgreiche Antwort (Status 200):
+
 ```json
 {
+  "success": true,
+  "status": 200,
   "message": "Category review generation completed. 2/2 categories successful (hardware, amazon).",
   "results": {
     "hardware": {
@@ -53,7 +57,24 @@ fetch('https://your-domain.vercel.app/api/cron/generate-category-reviews', {
       "error": null
     }
   },
+  "summary": {
+    "totalSuccessful": 2,
+    "totalFailed": 0,
+    "hardware": "Success",
+    "amazon": "Success"
+  },
   "timestamp": "2024-01-04T12:00:00.000Z"
+}
+```
+
+#### Fehlerantwort (Status 500):
+
+```json
+{
+  "success": false,
+  "status": 500,
+  "error": "Error message",
+  "message": "An error occurred while generating category reviews"
 }
 ```
 

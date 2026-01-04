@@ -203,14 +203,35 @@ export async function GET(req: NextRequest) {
     }
 
     const totalSuccessful = Object.values(results).filter((r) => r.success).length;
+    const totalFailed = Object.values(results).filter((r) => !r.success).length;
 
-    return NextResponse.json({
-      message: `Category review generation completed. ${totalSuccessful}/2 categories successful (hardware, amazon).`,
-      results,
-      timestamp: new Date().toISOString(),
-    });
+    // Return success response with status 200
+    return NextResponse.json(
+      {
+        success: true,
+        status: 200,
+        message: `Category review generation completed. ${totalSuccessful}/2 categories successful (hardware, amazon).`,
+        results,
+        summary: {
+          totalSuccessful,
+          totalFailed,
+          hardware: results.hardware.success ? "Success" : `Failed: ${results.hardware.error}`,
+          amazon: results.amazon.success ? "Success" : `Failed: ${results.amazon.error}`,
+        },
+        timestamp: new Date().toISOString(),
+      },
+      { status: 200 }
+    );
   } catch (error: any) {
     console.error("Cron category review generation error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        status: 500,
+        error: error.message,
+        message: "An error occurred while generating category reviews",
+      },
+      { status: 500 }
+    );
   }
 }
