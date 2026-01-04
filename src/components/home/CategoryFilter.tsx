@@ -13,7 +13,7 @@ const categories = [
   { name: "Filme", href: "/reviews?category=movie", icon: Film, value: "movie" },
   { name: "Serien", href: "/reviews?category=series", icon: Tv, value: "series" },
   { name: "Hardware", href: "/reviews?category=hardware", icon: Cpu, value: "hardware" },
-  { name: "Amazon", href: "/reviews?category=amazon", icon: ShoppingCart, value: "amazon" },
+  { name: "Produkte", href: "/reviews?category=product", icon: ShoppingCart, value: "product" },
 ];
 
 function CategoryFilterContent() {

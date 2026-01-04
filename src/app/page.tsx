@@ -20,7 +20,7 @@ export default async function HomePage() {
     averageScore: 0,
     gameReviews: 0,
     hardwareReviews: 0,
-    amazonReviews: 0,
+    productReviews: 0,
     movieReviews: 0,
     seriesReviews: 0,
   };
@@ -81,8 +81,8 @@ export default async function HomePage() {
       where: { status: "published", category: "hardware" },
     });
 
-    const amazonReviews = await prisma.review.count({
-      where: { status: "published", category: "amazon" },
+    const productReviews = await prisma.review.count({
+      where: { status: "published", category: { in: ["product", "amazon"] } },
     });
 
     const movieReviews = await prisma.review.count({
@@ -114,7 +114,7 @@ export default async function HomePage() {
       averageScore,
       gameReviews,
       hardwareReviews,
-      amazonReviews,
+      productReviews,
       movieReviews: movieReviews || 0,
       seriesReviews: seriesReviews || 0,
     };

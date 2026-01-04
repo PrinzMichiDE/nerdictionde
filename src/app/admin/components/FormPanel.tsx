@@ -298,7 +298,7 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
         )}
       </div>
       
-      {(review.category === "amazon" || review.category === "hardware") && (
+      {(review.category === "product" || review.category === "amazon" || review.category === "hardware") && (
         <div className="space-y-2 border-t pt-4">
             <Label htmlFor="affiliateLink">Amazon Affiliate Link</Label>
             <Input

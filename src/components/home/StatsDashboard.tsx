@@ -71,7 +71,7 @@ interface StatsDashboardProps {
     averageScore: number;
     gameReviews: number;
     hardwareReviews: number;
-    amazonReviews: number;
+    productReviews: number;
     movieReviews: number;
     seriesReviews: number;
   };
@@ -95,8 +95,8 @@ export function StatsDashboard({ statistics }: StatsDashboardProps) {
       color: "bg-purple-500",
     },
     {
-      label: "Amazon",
-      value: statistics.amazonReviews,
+      label: "Produkte",
+      value: statistics.productReviews,
       max: statistics.totalReviews,
       color: "bg-orange-500",
     },

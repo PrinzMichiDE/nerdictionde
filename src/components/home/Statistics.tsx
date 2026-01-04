@@ -9,7 +9,7 @@ interface StatisticsData {
   averageScore: number;
   gameReviews: number;
   hardwareReviews: number;
-  amazonReviews: number;
+  productReviews: number;
   movieReviews?: number;
   seriesReviews?: number;
 }
@@ -173,9 +173,9 @@ export function Statistics({ data }: StatisticsProps) {
         />
         <StatCard
           icon={<ShoppingCart className="h-5 w-5" />}
-          label="Amazon"
-          value={data.amazonReviews}
-          description="Amazon-Reviews"
+          label="Produkte"
+          value={data.productReviews}
+          description="Produkt-Reviews"
           delay={500}
         />
       </div>

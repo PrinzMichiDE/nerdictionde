@@ -12,7 +12,7 @@ export function Footer() {
   const categoryLinks = [
     { href: "/reviews?category=game", label: "Games", icon: Gamepad2 },
     { href: "/reviews?category=hardware", label: "Hardware", icon: Cpu },
-    { href: "/reviews?category=amazon", label: "Amazon", icon: ShoppingCart },
+    { href: "/reviews?category=product", label: "Produkte", icon: ShoppingCart },
   ];
 
   const legalLinks = [

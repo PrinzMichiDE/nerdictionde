@@ -61,9 +61,14 @@ export async function GET(req: NextRequest) {
       };
     }
 
-    // Add category filter
+    // Add category filter (support both "product" and "amazon" for backward compatibility)
     if (category) {
-      where.category = category;
+      if (category === "product") {
+        // Include both "product" and "amazon" categories for backward compatibility
+        where.category = { in: ["product", "amazon"] };
+      } else {
+        where.category = category;
+      }
     }
 
     // Add search query filter

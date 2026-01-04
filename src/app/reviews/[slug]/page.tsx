@@ -325,8 +325,8 @@ export default async function ReviewDetailPage({
             <HardwareSpecs specs={review.specs || specs} isEn={isEn} />
           )}
 
-          {/* Amazon Metadata */}
-          {review.category === "amazon" && (
+          {/* Product/Amazon Metadata */}
+          {(review.category === "product" || review.category === "amazon") && (
             <AmazonMetadata 
               asin={review.amazonAsin}
               specs={review.specs || specs}
@@ -440,7 +440,7 @@ export default async function ReviewDetailPage({
             )}
             
             {/* Other affiliate links (for non-hardware, non-amazon) */}
-            {review.category !== "hardware" && review.category !== "amazon" && review.affiliateLink && (
+            {review.category !== "hardware" && review.category !== "amazon" && review.category !== "product" && review.affiliateLink && (
               <div className="w-full pt-6 border-t border-primary/20">
                 <a 
                   href={review.affiliateLink} 

@@ -133,7 +133,8 @@ export function ReviewsFilter() {
               <SelectItem value="movie">Filme</SelectItem>
               <SelectItem value="series">Serien</SelectItem>
               <SelectItem value="hardware">Hardware</SelectItem>
-              <SelectItem value="amazon">Amazon</SelectItem>
+              <SelectItem value="product">Produkte</SelectItem>
+              <SelectItem value="amazon">Amazon (Legacy)</SelectItem>
             </SelectContent>
           </Select>
 
