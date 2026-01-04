@@ -33,13 +33,15 @@ New function `generateAmazonReviewContent()` creates comprehensive Amazon produc
 - Product specifications extraction
 - Price and rating information
 
-### 3. OpenAI Image Generation
+### 3. Image Generation (Tavily + OpenAI)
 
-Automatically generates professional review images using DALL-E 3:
-- Product photography style
-- Lifestyle images showing products in use
-- Detail shots highlighting key features
-- Multiple images per review (default: 3)
+Automatically generates review images using a two-tier approach:
+1. **Tavily Search Images (Preferred)** - Extracts real product images from trusted review sites
+2. **OpenAI DALL-E 3 (Fallback)** - Generates professional images if Tavily doesn't provide enough:
+   - Product photography style
+   - Lifestyle images showing products in use
+   - Detail shots highlighting key features
+   - Multiple images per review (default: 3)
 
 ## Environment Variables
 
@@ -123,11 +125,16 @@ const images = await generateReviewImages({
 - `searchHardwareProduct(productName, manufacturer?)` - Search for hardware product info
 - `searchAmazonProduct(productName, asin?)` - Search for Amazon product info
 - `extractProductSpecs(searchResults)` - Extract specs, pros, cons from search results
+- `extractTavilyImages(searchResults)` - Extract image URLs from Tavily search results
 
 ### Image Generation (`src/lib/image-generation.ts`)
 
-- `generateReviewImages(options)` - Generate multiple review images
+- `generateReviewImages(options)` - Generate multiple review images (uses Tavily first, then OpenAI fallback)
 - `generateProductImage(productName, options?)` - Generate a single product image
+
+**Image Generation Priority:**
+1. Tavily Search images (from `tavilySearchResults` parameter)
+2. OpenAI DALL-E 3 generated images (if Tavily doesn't provide enough)
 
 ### Review Generation (`src/lib/review-generation.ts`)
 
@@ -161,6 +168,13 @@ Tavily searches these trusted domains:
 
 ## Image Generation Details
 
+### Tavily Images (Preferred)
+- Extracted from trusted review sites and product pages
+- Real product photos from professional reviews
+- Automatically filtered and validated
+- Up to 10 images per search result
+
+### OpenAI DALL-E 3 (Fallback)
 - **Model**: DALL-E 3
 - **Quality**: HD
 - **Style**: Natural
@@ -169,13 +183,17 @@ Tavily searches these trusted domains:
   - 16:9 aspect ratio: 1792x1024
   - 4:3 aspect ratio: 1024x1024
 
-Images are automatically uploaded to Vercel Blob Storage for persistence.
+All images (from Tavily or OpenAI) are automatically uploaded to Vercel Blob Storage for persistence.
 
 ## Cost Considerations
 
 - **Tavily Search**: Pay-per-search pricing (check Tavily pricing)
+  - Images are included in search results (no additional cost)
 - **OpenAI DALL-E 3**: ~$0.04 per image (1024x1024) or ~$0.08 per image (1792x1024)
+  - Only used as fallback when Tavily doesn't provide enough images
 - **OpenAI GPT-4**: Used for content generation (existing cost)
+
+**Cost Optimization**: By using Tavily images first, you can significantly reduce OpenAI DALL-E costs since real product images from review sites are preferred over generated ones.
 
 ## Error Handling
 

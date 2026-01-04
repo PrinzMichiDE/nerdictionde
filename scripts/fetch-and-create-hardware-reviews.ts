@@ -181,7 +181,7 @@ async function processHardwareItem(
       slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
     }
 
-    // Generate images using OpenAI
+    // Generate images using Tavily (preferred) or OpenAI (fallback)
     let imageUrls: string[] = [];
     try {
       console.log(`   🎨 Generating review images...`);
@@ -191,6 +191,7 @@ async function processHardwareItem(
         manufacturer: hardware.manufacturer || undefined,
         style: "professional",
         count: 3,
+        tavilySearchResults: reviewContent.tavilySearchResults, // Use Tavily images if available
       });
       imageUrls = generatedImages;
       console.log(`   ✅ Generated ${imageUrls.length} images`);

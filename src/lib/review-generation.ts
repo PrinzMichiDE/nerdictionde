@@ -337,6 +337,7 @@ export async function generateHardwareReviewContent(
   en: { title: string; content: string; pros: string[]; cons: string[] };
   score: number;
   specs?: any;
+  tavilySearchResults?: any; // Include Tavily search results for image extraction
 }> {
   const isRetry = retryCount > 0;
   
@@ -350,12 +351,15 @@ export async function generateHardwareReviewContent(
     rating?: number;
   } | null = null;
   
+  let tavilySearchResults: any = null;
+  
   try {
     console.log(`🔍 Searching Tavily for ${hardwareData.name}...`);
     const searchResults = await searchHardwareProduct(
       hardwareData.name,
       hardwareData.manufacturer
     );
+    tavilySearchResults = searchResults;
     tavilyData = extractProductSpecs(searchResults);
     console.log(`✅ Found Tavily data: ${JSON.stringify(tavilyData.specs)}`);
   } catch (error) {
@@ -441,7 +445,11 @@ export async function generateHardwareReviewContent(
       ...(result.specs || {}),
     };
     
-    return result;
+    // Include Tavily search results for image extraction
+    return {
+      ...result,
+      tavilySearchResults: tavilySearchResults || undefined,
+    };
   } catch (error) {
     console.error(`Final error generating hardware content for ${hardwareData.name}:`, error);
     return {
@@ -459,6 +467,7 @@ export async function generateHardwareReviewContent(
       },
       score: tavilyData?.rating ? Math.round(tavilyData.rating * 10) : 70,
       specs: mergedSpecs,
+      tavilySearchResults: tavilySearchResults || undefined,
     };
   }
 }
@@ -1052,6 +1061,7 @@ export async function generateAmazonReviewContent(
   en: { title: string; content: string; pros: string[]; cons: string[] };
   score: number;
   specs?: any;
+  tavilySearchResults?: any; // Include Tavily search results for image extraction
 }> {
   const isRetry = retryCount > 0;
   
@@ -1065,12 +1075,15 @@ export async function generateAmazonReviewContent(
     rating?: number;
   } | null = null;
   
+  let tavilySearchResults: any = null;
+  
   try {
     console.log(`🔍 Searching Tavily for Amazon product ${productData.name}...`);
     const searchResults = await searchAmazonProduct(
       productData.name,
       productData.asin
     );
+    tavilySearchResults = searchResults;
     tavilyData = extractProductSpecs(searchResults);
     console.log(`✅ Found Tavily data: ${JSON.stringify(tavilyData.specs)}`);
   } catch (error) {
@@ -1151,6 +1164,7 @@ export async function generateAmazonReviewContent(
       },
       score: tavilyData?.rating ? Math.round(tavilyData.rating * 10) : 70,
       specs: mergedSpecs,
+      tavilySearchResults: tavilySearchResults || undefined,
     };
   }
 }
@@ -1181,7 +1195,7 @@ export async function processAmazonProduct(
       slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
     }
 
-    // Generate images using OpenAI if requested
+    // Generate images using Tavily (preferred) or OpenAI (fallback) if requested
     let imageUrls: string[] = [];
     if (options.generateImages !== false) {
       try {
@@ -1191,6 +1205,7 @@ export async function processAmazonProduct(
           productType: "product",
           style: "professional",
           count: 3,
+          tavilySearchResults: reviewContent.tavilySearchResults, // Use Tavily images if available
         });
         imageUrls = generatedImages;
         console.log(`✅ Generated ${imageUrls.length} images`);

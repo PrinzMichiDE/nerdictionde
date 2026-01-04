@@ -156,7 +156,7 @@ async function processHardware(
       }
     }
     
-    // Generate images using OpenAI if requested and no images exist
+    // Generate images using Tavily (preferred) or OpenAI (fallback) if requested and no images exist
     if ((options.generateImages !== false) && imageUrls.length === 0) {
       try {
         console.log(`🎨 Generating review images for ${hardwareName}...`);
@@ -166,6 +166,7 @@ async function processHardware(
           manufacturer: hardware.manufacturer || undefined,
           style: "professional",
           count: 3,
+          tavilySearchResults: reviewContent.tavilySearchResults, // Use Tavily images if available
         });
         imageUrls = generatedImages;
         console.log(`✅ Generated ${imageUrls.length} images`);

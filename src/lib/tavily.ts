@@ -162,3 +162,48 @@ export function extractProductSpecs(searchResults: TavilySearchResponse): {
     rating: specs.rating,
   };
 }
+
+/**
+ * Extract images from Tavily search results
+ */
+export function extractTavilyImages(searchResults: TavilySearchResponse): string[] {
+  const images: string[] = [];
+  
+  // Get images from the images array if available
+  // Tavily images can be strings or objects with url property
+  if (searchResults.images && Array.isArray(searchResults.images)) {
+    searchResults.images.forEach((img) => {
+      if (typeof img === "string") {
+        images.push(img);
+      } else if (img && typeof img === "object" && "url" in img && typeof img.url === "string") {
+        images.push(img.url);
+      }
+    });
+  }
+  
+  // Also extract image URLs from result content (common image URL patterns)
+  const imageUrlPattern = /https?:\/\/[^\s<>"{}|\\^`\[\]]+\.(jpg|jpeg|png|gif|webp|svg)/gi;
+  
+  searchResults.results.forEach((result) => {
+    if (result.content) {
+      const matches = result.content.match(imageUrlPattern);
+      if (matches) {
+        images.push(...matches);
+      }
+    }
+  });
+  
+  // Remove duplicates and filter out invalid URLs
+  const uniqueImages = Array.from(new Set(images))
+    .filter((url) => {
+      try {
+        const urlObj = new URL(url);
+        return urlObj.protocol === "http:" || urlObj.protocol === "https:";
+      } catch {
+        return false;
+      }
+    })
+    .slice(0, 10); // Limit to 10 images
+  
+  return uniqueImages;
+}
