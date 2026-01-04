@@ -4,8 +4,9 @@ import { processHardware } from "@/app/api/reviews/bulk-create-hardware/route";
 import prisma from "@/lib/prisma";
 
 /**
- * Cron Job: Generates one review from each category every 30 minutes
+ * Cron Job: Generates one review from each category daily
  * Categories: hardware, amazon (using Tavily Search)
+ * Schedule: Daily at midnight (0 0 * * *)
  */
 export async function GET(req: NextRequest) {
   try {
@@ -25,6 +26,7 @@ export async function GET(req: NextRequest) {
       console.log("💻 Generating hardware review...");
       
       // Get a list of popular hardware items to choose from
+      // Generate multiple reviews per day to compensate for daily schedule
       const popularHardware = [
         "NVIDIA RTX 4090",
         "AMD Ryzen 9 7950X",
@@ -36,6 +38,11 @@ export async function GET(req: NextRequest) {
         "SteelSeries Arctis Nova Pro",
         "PlayStation 5",
         "Xbox Series X",
+        "AMD Ryzen 7 7800X3D",
+        "NVIDIA RTX 4070",
+        "Logitech G Pro X Superlight",
+        "Keychron Q1",
+        "HyperX Cloud Alpha",
       ];
 
       // Check which hardware items already have reviews
@@ -54,25 +61,36 @@ export async function GET(req: NextRequest) {
           .filter(Boolean)
       );
 
-      // Find first hardware item without a review
-      const hardwareToReview = popularHardware.find(
-        (name) => !existingHardwareNames.has(name)
-      );
+      // Find multiple hardware items without reviews (generate up to 3 per day)
+      const hardwareToReview = popularHardware
+        .filter((name) => !existingHardwareNames.has(name))
+        .slice(0, 3);
 
-      if (hardwareToReview) {
-        const result = await processHardware(hardwareToReview, {
-          status: "published",
-          skipExisting: true,
-          generateImages: true,
-        });
+      if (hardwareToReview.length > 0) {
+        let successCount = 0;
+        for (const hardwareName of hardwareToReview) {
+          const result = await processHardware(hardwareName, {
+            status: "published",
+            skipExisting: true,
+            generateImages: true,
+          });
 
-        if (result.success && result.reviewId) {
-          results.hardware.success = true;
-          results.hardware.reviewId = result.reviewId;
-          console.log(`✅ Hardware review created: ${hardwareToReview}`);
+          if (result.success && result.reviewId) {
+            successCount++;
+            console.log(`✅ Hardware review created: ${hardwareName}`);
+            // Update results with first successful review ID
+            if (!results.hardware.success) {
+              results.hardware.success = true;
+              results.hardware.reviewId = result.reviewId;
+            }
+          } else {
+            console.error(`❌ Failed to create hardware review for ${hardwareName}: ${result.error}`);
+          }
+        }
+        if (successCount === 0) {
+          results.hardware.error = "Failed to create any hardware reviews";
         } else {
-          results.hardware.error = result.error || "Unknown error";
-          console.error(`❌ Failed to create hardware review: ${result.error}`);
+          console.log(`✅ Created ${successCount} hardware review(s)`);
         }
       } else {
         // Try to get a random hardware item from database
@@ -113,12 +131,18 @@ export async function GET(req: NextRequest) {
       console.log("🛒 Generating Amazon review...");
       
       // Popular Amazon products to review
+      // Generate multiple reviews per day to compensate for daily schedule
       const popularAmazonProducts = [
         { name: "Echo Dot (5. Generation)", asin: "B09B8V1LZ3" },
         { name: "Fire TV Stick 4K", asin: "B08C1W5N87" },
         { name: "Kindle Paperwhite", asin: "B08KTZ8249" },
         { name: "Ring Video Doorbell", asin: "B08N5NQ869" },
         { name: "Blink Outdoor Camera", asin: "B08FM85V85" },
+        { name: "Echo Show 8", asin: "B09B8V1LZ4" },
+        { name: "Fire TV Cube", asin: "B07K89FL5Y" },
+        { name: "Ring Floodlight Cam", asin: "B08N5NQ870" },
+        { name: "Kindle Oasis", asin: "B07L5GQYYM" },
+        { name: "Echo Studio", asin: "B07N9Z9K5P" },
       ];
 
       // Check which products already have reviews
@@ -135,31 +159,42 @@ export async function GET(req: NextRequest) {
         existingAmazonReviews.map((r: { amazonAsin: string | null }) => r.amazonAsin).filter(Boolean)
       );
 
-      // Find first product without a review
-      const productToReview = popularAmazonProducts.find(
-        (p) => !existingAsins.has(p.asin)
-      );
+      // Find multiple products without reviews (generate up to 3 per day)
+      const productsToReview = popularAmazonProducts
+        .filter((p) => !existingAsins.has(p.asin))
+        .slice(0, 3);
 
-      if (productToReview) {
-        const result = await processAmazonProduct(
-          {
-            name: productToReview.name,
-            asin: productToReview.asin,
-          },
-          {
-            status: "published",
-            skipExisting: true,
-            generateImages: true,
+      if (productsToReview.length > 0) {
+        let successCount = 0;
+        for (const product of productsToReview) {
+          const result = await processAmazonProduct(
+            {
+              name: product.name,
+              asin: product.asin,
+            },
+            {
+              status: "published",
+              skipExisting: true,
+              generateImages: true,
+            }
+          );
+
+          if (result.success && result.reviewId) {
+            successCount++;
+            console.log(`✅ Amazon review created: ${product.name}`);
+            // Update results with first successful review ID
+            if (!results.amazon.success) {
+              results.amazon.success = true;
+              results.amazon.reviewId = result.reviewId;
+            }
+          } else {
+            console.error(`❌ Failed to create Amazon review for ${product.name}: ${result.error}`);
           }
-        );
-
-        if (result.success && result.reviewId) {
-          results.amazon.success = true;
-          results.amazon.reviewId = result.reviewId;
-          console.log(`✅ Amazon review created: ${productToReview.name}`);
+        }
+        if (successCount === 0) {
+          results.amazon.error = "Failed to create any Amazon reviews";
         } else {
-          results.amazon.error = result.error || "Unknown error";
-          console.error(`❌ Failed to create Amazon review: ${result.error}`);
+          console.log(`✅ Created ${successCount} Amazon review(s)`);
         }
       } else {
         results.amazon.error = "No Amazon products available for review";
