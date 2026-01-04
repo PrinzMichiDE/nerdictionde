@@ -22,7 +22,7 @@ interface StatCardProps {
   delay?: number;
 }
 
-function useCountUp(end: number, duration: number = 2000, start: number = 0, ref: React.RefObject<HTMLDivElement>): number {
+function useCountUp(end: number, duration: number = 2000, start: number = 0, ref: React.RefObject<HTMLDivElement | null>): number {
   const [count, setCount] = useState(start);
   const [isVisible, setIsVisible] = useState(false);
 

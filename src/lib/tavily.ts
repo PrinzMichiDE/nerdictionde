@@ -1,8 +1,17 @@
 import { tavily, type TavilySearchResponse } from "@tavily/core";
 
-const tavilyClient = tavily({
-  apiKey: process.env.TAVILY_API_KEY || "",
-});
+let tavilyClient: ReturnType<typeof tavily> | null = null;
+
+function getTavilyClient() {
+  if (!tavilyClient) {
+    const apiKey = process.env.TAVILY_API_KEY;
+    if (!apiKey) {
+      throw new Error("No API key provided. Please provide the api_key attribute or set the TAVILY_API_KEY environment variable.");
+    }
+    tavilyClient = tavily({ apiKey });
+  }
+  return tavilyClient;
+}
 
 export type { TavilySearchResponse };
 
@@ -18,7 +27,7 @@ export async function searchHardwareProduct(
     : `${productName} review specifications hardware`;
 
   try {
-    const response = await tavilyClient.search(query, {
+    const response = await getTavilyClient().search(query, {
       search_depth: "advanced",
       include_answer: true,
       include_images: true,
@@ -57,7 +66,7 @@ export async function searchAmazonProduct(
     : `Amazon ${productName} reviews ratings specifications`;
 
   try {
-    const response = await tavilyClient.search(query, {
+    const response = await getTavilyClient().search(query, {
       search_depth: "advanced",
       include_answer: true,
       include_images: true,

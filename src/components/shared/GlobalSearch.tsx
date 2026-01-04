@@ -8,7 +8,6 @@ import { Search, X, Filter, Gamepad2, Cpu, ShoppingCart, Film, Tv } from "lucide
 import Link from "next/link";
 import { Review } from "@/types/review";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 interface GlobalSearchProps {
   reviews?: Review[];
