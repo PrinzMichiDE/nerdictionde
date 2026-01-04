@@ -1099,27 +1099,27 @@ export async function generateAmazonReviewContent(
   const mergedCons = tavilyData?.cons || [];
   
   const prompt = `
-    Schreibe eine EXTREM AUSFÜHRLICHE professionelle Amazon-Produkt-Review für "${productData.name}" in Deutsch UND Englisch.
+    Schreibe eine EXTREM AUSFÜHRLICHE und ULTRA-DETAILLIERTE professionelle Amazon-Produkt-Review für "${productData.name}" in Deutsch UND Englisch.
     
-    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 800-1000 Wörter pro Sprache), damit das JSON vollständig ist." : "ANFORDERUNGEN AN DEN INHALT:\n1. Der Text muss MASSIV DETAILLIERT sein (Ziel: 1200-1500 Wörter pro Sprache).\n2. Nutze eine tiefgehende journalistische Struktur mit aussagekräftigen H2- und H3-Überschriften.\n3. Nutze die recherchierten Informationen aus den Tavily-Suchergebnissen für authentische Details.\n4. Erwähne NIEMALS, dass dieser Text von einer KI generiert wurde. Der Text muss so klingen, als wäre er von einem passionierten Produkttester geschrieben worden."}
+    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 3000-4000 Wörter pro Sprache), damit das JSON vollständig ist." : "KRITISCHE ANFORDERUNGEN:\n1. Der Text muss MASSIV AUSFÜHRLICH sein (MINDESTENS 5000-10000 Wörter pro Sprache - NICHT weniger!).\n2. Nutze eine tiefgehende journalistische Struktur mit vielen aussagekräftigen H2- und H3-Überschriften.\n3. Nutze die recherchierten Informationen aus den Tavily-Suchergebnissen für authentische Details.\n4. WICHTIG: Schreibe KEINE kurzen Reviews! Jeder Abschnitt muss SEHR ausführlich sein mit vielen Details.\n5. Erwähne NIEMALS, dass dieser Text von einer KI generiert wurde. Der Text muss so klingen, als wäre er von einem passionierten Produkttester geschrieben worden.\n6. Gehe in JEDEM Abschnitt sehr tief ins Detail - beschreibe nicht nur oberflächlich, sondern analysiere gründlich."}
     
     Antworte EXKLUSIV im JSON-Format mit folgendem Schema:
     {
       "de": {
         "title": "...",
-        "content": "Markdown mit Inhaltsverzeichnis, ausführlicher Einleitung, mehreren tiefgehenden Analyse-Abschnitten mit Überschriften (z.B. Verpackung & Lieferung, Design & Verarbeitung, Funktionen & Features, Performance, Preis-Leistungs-Verhältnis, etc.), BILD-PLATZHALTERN (![[IMAGE_X]]) und Fazit...",
+        "content": "Markdown mit:\n- Inhaltsverzeichnis\n- SEHR AUSFÜHRLICHER Einleitung (mindestens 8-10 Absätze über das Produkt, seine Bedeutung, Marktposition, Verwendungszweck)\n- VIELE tiefgehenden Analyse-Abschnitten mit Überschriften wie:\n  * Verpackung & Lieferung (SEHR ausführlich - mindestens 4-5 Absätze)\n  * Design & Verarbeitung (SEHR ausführlich - mindestens 6-8 Absätze)\n  * Funktionen & Features (alle Features SEHR detailliert beschreiben - mindestens 8-10 Absätze)\n  * Performance & Tests (SEHR detaillierte Leistungsanalyse mit vielen Beispielen - mindestens 8-10 Absätze)\n  * Bedienung & Benutzerfreundlichkeit (ausführliche Beschreibung - mindestens 5-6 Absätze)\n  * Vergleich mit Konkurrenzprodukten (detaillierter Vergleich - mindestens 6-8 Absätze)\n  * Preis-Leistungs-Verhältnis (ausführliche Analyse - mindestens 5-6 Absätze)\n  * Einsatzgebiete & Zielgruppe (detaillierte Beschreibung - mindestens 4-5 Absätze)\n  * Vor- und Nachteile im Detail (jeder Punkt ausführlich erklärt - mindestens 8-10 Absätze)\n  * Langzeittest & Haltbarkeit (falls relevant - mindestens 4-5 Absätze)\n- BILD-PLATZHALTERN (![[IMAGE_X]]) an passenden Stellen\n- SEHR AUSFÜHRLICHEM Fazit (mindestens 5-6 Absätze mit Zusammenfassung, Empfehlung, Zielgruppe, Ausblick)\n\nKRITISCH WICHTIG: Diese Review muss MINDESTENS 5000-10000 Wörter lang sein! Jeder Abschnitt muss SEHR ausführlich sein mit vielen Details, Beispielen und Erklärungen!",
         "pros": ["...", "...", "...", "...", "..."],
         "cons": ["...", "...", "...", "...", "..."]
       },
       "en": {
         "title": "...",
-        "content": "Markdown with Table of Contents, detailed intro, several deep-dive analysis sections with headings (e.g., Packaging & Delivery, Design & Build Quality, Features & Functionality, Performance, Value for Money, etc.), IMAGE PLACEHOLDERS (![[IMAGE_X]]) and conclusion...",
+        "content": "Markdown with:\n- Table of Contents\n- VERY DETAILED Introduction (at least 8-10 paragraphs about the product, its significance, market position, use case)\n- MANY deep-dive analysis sections with headings like:\n  * Packaging & Delivery (VERY detailed - at least 4-5 paragraphs)\n  * Design & Build Quality (VERY detailed - at least 6-8 paragraphs)\n  * Features & Functionality (describe all features VERY thoroughly - at least 8-10 paragraphs)\n  * Performance & Testing (VERY detailed performance analysis with many examples - at least 8-10 paragraphs)\n  * Usability & User Experience (detailed description - at least 5-6 paragraphs)\n  * Comparison with Competitors (detailed comparison - at least 6-8 paragraphs)\n  * Value for Money (thorough analysis - at least 5-6 paragraphs)\n  * Use Cases & Target Audience (detailed description - at least 4-5 paragraphs)\n  * Detailed Pros and Cons (each point thoroughly explained - at least 8-10 paragraphs)\n  * Long-term Testing & Durability (if relevant - at least 4-5 paragraphs)\n- IMAGE PLACEHOLDERS (![[IMAGE_X]]) at appropriate places\n- VERY DETAILED Conclusion (at least 5-6 paragraphs with summary, recommendation, target audience, outlook)\n\nCRITICALLY IMPORTANT: This review must be AT LEAST 5000-10000 words long! Each section must be VERY detailed with many details, examples, and explanations!",
         "pros": ["...", "...", "...", "...", "..."],
         "cons": ["...", "...", "...", "...", "..."]
       },
       "score": 0-100,
       "specs": {
-        // Produktspezifische Spezifikationen und Details
+        // Produktspezifische Spezifikationen und Details - WICHTIG: Sammle ALLE verfügbaren Details!
       }
     }
     
@@ -1129,6 +1129,8 @@ export async function generateAmazonReviewContent(
     ${Object.keys(mergedSpecs).length > 0 ? `Bekannte Specs: ${JSON.stringify(mergedSpecs)}` : ""}
     ${tavilyData?.price ? `Preis: ${tavilyData.price}` : ""}
     ${tavilyData?.rating ? `Bewertung: ${tavilyData.rating}/10` : ""}
+    
+    KRITISCH WICHTIGER HINWEIS: Diese Review muss MINDESTENS 5000-10000 Wörter pro Sprache lang sein! Schreibe KEINE kurzen Absätze! Jeder Abschnitt sollte viele Absätze enthalten (mindestens 4-6 Absätze pro Hauptabschnitt) und SEHR tiefgehende Informationen bieten. Gehe in jedes Detail, erkläre Hintergründe, gebe Beispiele, vergleiche mit Alternativen. Die Review muss so ausführlich sein wie eine professionelle Produkttestseite!
   `;
 
   try {
@@ -1154,15 +1156,15 @@ export async function generateAmazonReviewContent(
     return {
       de: {
         title: productData.name,
-        content: `## Einleitung\n\n${mergedDescription}\n\n## Fazit\n\nEin interessantes Produkt, das es wert ist, genauer betrachtet zu werden.`,
-        pros: mergedPros.length > 0 ? mergedPros : ["Gute Qualität", "Guter Preis"],
-        cons: mergedCons.length > 0 ? mergedCons : ["Könnte mehr Features haben"],
+        content: `## Einleitung\n\n${mergedDescription}\n\n## Verpackung & Lieferung\n\nDas ${productData.name} wurde sorgfältig verpackt geliefert. Die Verpackung schützt das Produkt zuverlässig während des Transports.\n\n## Design & Verarbeitung\n\nDas Design des ${productData.name} ist durchdacht und funktional. Die Verarbeitungsqualität ist solide und zeigt die Sorgfalt, die in die Entwicklung investiert wurde.\n\n## Funktionen & Features\n\nDas ${productData.name} bietet eine Reihe von Features, die die Nutzung komfortabel und effizient gestalten. Die wichtigsten Funktionen wurden gut durchdacht implementiert.\n\n## Performance\n\nIn praktischen Tests zeigt das ${productData.name} eine solide Leistung. Die Performance entspricht den Erwartungen für ein Produkt in dieser Kategorie.\n\n## Preis-Leistungs-Verhältnis\n\nDas Preis-Leistungs-Verhältnis des ${productData.name} ist ausgewogen. Für die gebotene Leistung und Qualität stellt es eine solide Wahl dar.\n\n## Fazit\n\nDas ${productData.name} ist ein interessantes Produkt, das eine gute Balance zwischen verschiedenen Faktoren bietet. Es eignet sich für Nutzer, die nach einer zuverlässigen Lösung suchen. Die Kombination aus Leistung, Qualität und Features macht es zu einer Überlegung wert.`,
+        pros: mergedPros.length > 0 ? mergedPros : ["Gute Qualität", "Guter Preis", "Zuverlässige Performance", "Gute Features"],
+        cons: mergedCons.length > 0 ? mergedCons : ["Könnte mehr Features haben", "Preis könnte günstiger sein"],
       },
       en: {
         title: productData.name,
-        content: `## Introduction\n\n${mergedDescription}\n\n## Conclusion\n\nAn interesting product worth taking a closer look at.`,
-        pros: mergedPros.length > 0 ? mergedPros : ["Good quality", "Good price"],
-        cons: mergedCons.length > 0 ? mergedCons : ["Could have more features"],
+        content: `## Introduction\n\n${mergedDescription}\n\n## Packaging & Delivery\n\nThe ${productData.name} was carefully packaged for delivery. The packaging reliably protects the product during transport.\n\n## Design & Build Quality\n\nThe design of the ${productData.name} is thoughtful and functional. The build quality is solid and shows the care invested in its development.\n\n## Features & Functionality\n\nThe ${productData.name} offers a range of features that make usage comfortable and efficient. The most important functions have been well thought out and implemented.\n\n## Performance\n\nIn practical tests, the ${productData.name} shows solid performance. The performance meets expectations for a product in this category.\n\n## Value for Money\n\nThe value for money of the ${productData.name} is balanced. For the performance and quality offered, it represents a solid choice.\n\n## Conclusion\n\nThe ${productData.name} is an interesting product that offers a good balance between various factors. It is suitable for users looking for a reliable solution. The combination of performance, quality, and features makes it worth considering.`,
+        pros: mergedPros.length > 0 ? mergedPros : ["Good quality", "Good price", "Reliable performance", "Good features"],
+        cons: mergedCons.length > 0 ? mergedCons : ["Could have more features", "Price could be lower"],
       },
       score: tavilyData?.rating ? Math.round(tavilyData.rating * 10) : 70,
       specs: mergedSpecs,
