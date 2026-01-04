@@ -11,6 +11,9 @@ import { WhyNerdiction } from "@/components/home/WhyNerdiction";
 import { CallToAction } from "@/components/home/CallToAction";
 import { HeroSection } from "@/components/home/HeroSection";
 import { TrustBadges } from "@/components/home/TrustBadges";
+import { ImageGallery } from "@/components/home/ImageGallery";
+import { VideoGallery } from "@/components/home/VideoGallery";
+import { ParallaxHighlights } from "@/components/home/ParallaxSection";
 
 export const dynamic = 'force-dynamic';
 
@@ -160,6 +163,15 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+
+      {/* Image Gallery Section */}
+      {latestReviews.length > 0 && <ImageGallery reviews={latestReviews} />}
+
+      {/* Video Gallery Section */}
+      {latestReviews.length > 0 && <VideoGallery reviews={latestReviews} />}
+
+      {/* Parallax Highlights Section */}
+      <ParallaxHighlights />
 
       {/* Call to Action Section */}
       <CallToAction />
