@@ -193,6 +193,16 @@ export function detectHardwareType(query: string): HardwareType | null {
     return "controller";
   }
 
+  // Webcam detection
+  if (
+    lowerQuery.includes("webcam") ||
+    lowerQuery.includes("kamera") ||
+    lowerQuery.includes("camera") ||
+    lowerQuery.includes("obsbot")
+  ) {
+    return "monitor"; // Use monitor as closest match for now
+  }
+
   // RAM detection
   if (
     lowerQuery.includes("ram") ||

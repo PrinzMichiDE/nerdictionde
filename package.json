@@ -30,6 +30,7 @@
     "@tanstack/react-query": "^5.90.16",
     "@tiptap/react": "^3.14.0",
     "@tiptap/starter-kit": "^3.14.0",
+    "@types/xml2js": "^0.4.14",
     "@vercel/blob": "^2.0.0",
     "axios": "^1.13.2",
     "cheerio": "^1.1.2",
@@ -47,6 +48,7 @@
     "remark-gfm": "^4.0.1",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.4.0",
+    "xml2js": "^0.6.2",
     "zod": "^4.3.4"
   },
   "devDependencies": {
