@@ -7,6 +7,14 @@
 GET /api/cron/generate-category-reviews
 ```
 
+### Categories
+Die API generiert Reviews für alle folgenden Kategorien:
+- **Game** (Spiele) - via IGDB API
+- **Hardware** - via Tavily Search
+- **Amazon** (Produkte) - via Tavily Search
+- **Movie** (Filme) - via TMDB API
+- **Series** (Serien) - via TMDB API
+
 ### Authorization
 
 **Keine Authorization erforderlich** - Die API kann öffentlich aufgerufen werden.
@@ -44,8 +52,13 @@ fetch('https://your-domain.vercel.app/api/cron/generate-category-reviews', {
 {
   "success": true,
   "status": 200,
-  "message": "Category review generation completed. 2/2 categories successful (hardware, amazon).",
+  "message": "Category review generation completed. 5/5 categories successful (game, hardware, amazon, movie, series).",
   "results": {
+    "game": {
+      "success": true,
+      "reviewId": "clx1111111111",
+      "error": null
+    },
     "hardware": {
       "success": true,
       "reviewId": "clx1234567890",
@@ -55,13 +68,26 @@ fetch('https://your-domain.vercel.app/api/cron/generate-category-reviews', {
       "success": true,
       "reviewId": "clx0987654321",
       "error": null
+    },
+    "movie": {
+      "success": true,
+      "reviewId": "clx2222222222",
+      "error": null
+    },
+    "series": {
+      "success": true,
+      "reviewId": "clx3333333333",
+      "error": null
     }
   },
   "summary": {
-    "totalSuccessful": 2,
+    "totalSuccessful": 5,
     "totalFailed": 0,
+    "game": "Success",
     "hardware": "Success",
-    "amazon": "Success"
+    "amazon": "Success",
+    "movie": "Success",
+    "series": "Success"
   },
   "timestamp": "2024-01-04T12:00:00.000Z"
 }
