@@ -5,7 +5,8 @@ import { processHardware } from "@/app/api/reviews/bulk-create-hardware/route";
 import { requireAdminAuth } from "@/lib/auth";
 import { createJob, updateJob, addToQueue, updateQueueItem } from "@/lib/job-status";
 import { randomUUID } from "crypto";
-import { getTMDBMoviesBulk, getTMDBSeriesBulk, BulkQueryOptions as TMDBBulkQueryOptions } from "@/lib/tmdb";
+import { BulkQueryOptions as TMDBBulkQueryOptions } from "@/lib/tmdb";
+import { getTMDBMoviesBulkLarge, getTMDBSeriesBulkLarge } from "@/lib/tmdb-large";
 
 type ReviewCategory = "game" | "movie" | "series" | "hardware" | "product";
 
@@ -76,43 +77,21 @@ export async function POST(req: NextRequest) {
           break;
         
         case "movie":
-          // Fetch movies in batches if count > 20 (TMDB limit per page)
+          // Fetch movies with proper pagination using bulk large function
           const movieQueryOptions: TMDBBulkQueryOptions = {
-            limit: Math.min(count, 20),
             ...queryOptions,
           };
-          items = await getTMDBMoviesBulk(movieQueryOptions);
-          // If we need more, fetch additional pages
-          if (count > 20) {
-            const additionalPages = Math.ceil((count - 20) / 20);
-            for (let page = 2; page <= additionalPages + 1 && items.length < count; page++) {
-              const pageOptions = { ...movieQueryOptions, offset: (page - 1) * 20 };
-              const pageItems = await getTMDBMoviesBulk(pageOptions);
-              items.push(...pageItems);
-              if (pageItems.length < 20) break; // No more items available
-            }
-          }
-          items = items.slice(0, count);
+          items = await getTMDBMoviesBulkLarge(count, movieQueryOptions);
+          console.log(`✅ Fetched ${items.length} movies from TMDB (requested: ${count})`);
           break;
         
         case "series":
-          // Fetch series in batches if count > 20 (TMDB limit per page)
+          // Fetch series with proper pagination using bulk large function
           const seriesQueryOptions: TMDBBulkQueryOptions = {
-            limit: Math.min(count, 20),
             ...queryOptions,
           };
-          items = await getTMDBSeriesBulk(seriesQueryOptions);
-          // If we need more, fetch additional pages
-          if (count > 20) {
-            const additionalPages = Math.ceil((count - 20) / 20);
-            for (let page = 2; page <= additionalPages + 1 && items.length < count; page++) {
-              const pageOptions = { ...seriesQueryOptions, offset: (page - 1) * 20 };
-              const pageItems = await getTMDBSeriesBulk(pageOptions);
-              items.push(...pageItems);
-              if (pageItems.length < 20) break; // No more items available
-            }
-          }
-          items = items.slice(0, count);
+          items = await getTMDBSeriesBulkLarge(count, seriesQueryOptions);
+          console.log(`✅ Fetched ${items.length} series from TMDB (requested: ${count})`);
           break;
         
         case "hardware":
