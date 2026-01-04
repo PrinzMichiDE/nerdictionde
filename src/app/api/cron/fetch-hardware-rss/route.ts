@@ -4,6 +4,7 @@ import { parseStringPromise } from "xml2js";
 import prisma from "@/lib/prisma";
 import { detectHardwareType, createHardware } from "@/lib/hardware";
 import { generateHardwareReviewContent } from "@/lib/review-generation";
+import { searchAmazonHardware } from "@/lib/amazon-search";
 
 interface RSSItem {
   title: string[];
@@ -199,6 +200,19 @@ async function processHardwareItem(
       finalSlug = `${finalSlug}-${Math.random().toString(36).substring(2, 7)}`;
     }
 
+    // Generate Amazon affiliate link
+    let affiliateLink: string | null = null;
+    try {
+      affiliateLink = await searchAmazonHardware(
+        hardwareName,
+        manufacturer,
+        model
+      );
+    } catch (error) {
+      console.error("Error generating Amazon affiliate link:", error);
+      // Continue without affiliate link if search fails
+    }
+
     // Create review
     const review = await prisma.review.create({
       data: {
@@ -218,6 +232,7 @@ async function processHardwareItem(
         status: "draft",
         hardwareId: hardware.id,
         specs: reviewContent.specs || hardware.specs || null,
+        affiliateLink: affiliateLink,
       },
     });
 

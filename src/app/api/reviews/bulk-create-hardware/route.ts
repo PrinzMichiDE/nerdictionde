@@ -5,6 +5,7 @@ import { uploadImage } from "@/lib/blob";
 import prisma from "@/lib/prisma";
 import { calculatePublicationDate } from "@/lib/date-utils";
 import { repairJson, generateHardwareReviewContent } from "@/lib/review-generation";
+import { searchAmazonHardware } from "@/lib/amazon-search";
 
 interface BulkCreateHardwareOptions {
   hardwareNames: string[]; // List of hardware names to create reviews for
@@ -153,6 +154,19 @@ async function processHardware(
       }
     }
     
+    // Generate Amazon affiliate link
+    let affiliateLink: string | null = null;
+    try {
+      affiliateLink = await searchAmazonHardware(
+        hardwareName,
+        manufacturer,
+        model
+      );
+    } catch (error) {
+      console.error("Error generating Amazon affiliate link:", error);
+      // Continue without affiliate link if search fails
+    }
+
     // Create review
     const review = await prisma.review.create({
       data: {
@@ -172,6 +186,7 @@ async function processHardware(
         status: options.status,
         hardwareId: hardware.id,
         specs: reviewContent.specs || hardware.specs || null,
+        affiliateLink: affiliateLink,
         createdAt: hardware.releaseDate || new Date(),
       },
     });

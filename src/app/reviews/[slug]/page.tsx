@@ -17,7 +17,8 @@ import { RelatedReviews } from "@/components/reviews/RelatedReviews";
 import { ReviewProgress } from "@/components/reviews/ReviewProgress";
 import { ShareButtons } from "@/components/reviews/ShareButtons";
 import { YouTubeEmbed } from "@/components/reviews/YouTubeEmbed";
-import { Clock } from "lucide-react";
+import { HardwareSpecs } from "@/components/reviews/HardwareSpecs";
+import { Clock, ShoppingCart } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -285,6 +286,11 @@ export default async function ReviewDetailPage({
             </ReactMarkdown>
           </div>
 
+          {/* Hardware Specifications */}
+          {review.category === "hardware" && (review.specs || specs) && (
+            <HardwareSpecs specs={review.specs || specs} isEn={isEn} />
+          )}
+
           {/* Hardware Requirements */}
           {review.category === "game" && specs && (
             <div className="space-y-6 pt-10 border-t">
@@ -376,18 +382,45 @@ export default async function ReviewDetailPage({
                 </div>
             </div>
 
-            {review.affiliateLink && (
-                <div className="w-full pt-6 border-t border-primary/20">
-                <a 
+            {/* Amazon Affiliate Link */}
+            {review.category === "hardware" && (
+              <div className="w-full pt-6 border-t border-primary/20">
+                {review.affiliateLink ? (
+                  <a 
                     href={review.affiliateLink} 
                     target="_blank" 
                     rel="nofollow sponsored"
                     className="flex items-center justify-center w-full bg-[#FF9900] hover:bg-[#E68A00] text-black font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] group"
-                >
+                  >
+                    <ShoppingCart className="mr-2 h-5 w-5" />
                     <span>{isEn ? "View on Amazon" : "Auf Amazon ansehen"}</span>
                     <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                  </a>
+                ) : (
+                  <div className="text-center p-4 rounded-lg bg-muted/50 border border-dashed">
+                    <p className="text-sm text-muted-foreground">
+                      {isEn 
+                        ? "Amazon link not available" 
+                        : "Amazon-Link nicht verfügbar"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Other affiliate links (for non-hardware) */}
+            {review.category !== "hardware" && review.affiliateLink && (
+              <div className="w-full pt-6 border-t border-primary/20">
+                <a 
+                  href={review.affiliateLink} 
+                  target="_blank" 
+                  rel="nofollow sponsored"
+                  className="flex items-center justify-center w-full bg-[#FF9900] hover:bg-[#E68A00] text-black font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] group"
+                >
+                  <span>{isEn ? "View on Amazon" : "Auf Amazon ansehen"}</span>
+                  <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
                 </a>
-                </div>
+              </div>
             )}
           </div>
         </aside>

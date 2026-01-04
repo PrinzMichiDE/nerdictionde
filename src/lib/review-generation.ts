@@ -359,7 +359,15 @@ export async function generateHardwareReviewContent(
       },
       "score": 0-100,
       "specs": {
-        // Hardware-spezifische Spezifikationen
+        // Hardware-spezifische Spezifikationen - WICHTIG: Sammle ALLE verfügbaren technischen Details!
+        // Beispiele je nach Hardware-Typ:
+        // Monitor: Auflösung, Bildwiederholfrequenz, Panel-Typ, HDR, Anschlüsse, Größe, etc.
+        // GPU: VRAM, Taktfrequenz, CUDA-Cores, Stromverbrauch, Anschlüsse, etc.
+        // CPU: Kerne, Threads, Taktfrequenz, TDP, Socket, etc.
+        // Tastatur: Switches, Layout, Beleuchtung, Anschlüsse, etc.
+        // Maus: DPI, Sensor, Buttons, Gewicht, etc.
+        // Headset: Frequenzgang, Impedanz, Mikrofon, Kabel/Wireless, etc.
+        // Sammle so viele technische Details wie möglich!
       }
     }
     
