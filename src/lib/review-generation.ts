@@ -480,24 +480,28 @@ export async function processGame(
   options: { status: "draft" | "published"; skipExisting: boolean }
 ): Promise<{ success: boolean; reviewId?: string; error?: string }> {
   try {
-    // Check if review already exists by IGDB ID
-    if (options.skipExisting) {
-      const existing = await prisma.review.findFirst({
-        where: { igdbId: gameData.id },
-      });
-      if (existing) {
-        return { success: false, error: "Already exists" };
-      }
+    // ALWAYS check if review already exists by IGDB ID (prevent duplicates)
+    const existingById = await prisma.review.findFirst({
+      where: { igdbId: gameData.id },
+    });
+    if (existingById) {
+      return { success: false, error: "Already exists" };
     }
 
     // Generate review content
     const reviewContent = await generateReviewContent(gameData);
 
-    // Generate slug
+    // Generate slug and ensure uniqueness
     let slug = generateSlug(reviewContent.de.title || gameData.name);
-    const existingSlug = await prisma.review.findUnique({ where: { slug } });
-    if (existingSlug) {
-      slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+    let slugAttempts = 0;
+    while (await prisma.review.findUnique({ where: { slug } })) {
+      slugAttempts++;
+      if (slugAttempts > 10) {
+        // Fallback to include timestamp if too many collisions
+        slug = `${generateSlug(reviewContent.de.title || gameData.name)}-${Date.now().toString(36)}`;
+        break;
+      }
+      slug = `${generateSlug(reviewContent.de.title || gameData.name)}-${Math.random().toString(36).substring(2, 7)}`;
     }
 
     // Upload cover image if available
@@ -782,24 +786,27 @@ export async function processMovie(
     // Ensure tmdbId column exists before using it
     await ensureTmdbIdColumn();
     
-    // Check if review already exists by TMDB ID
-    if (options.skipExisting) {
-      const existing = await prisma.review.findFirst({
-        where: { tmdbId: movieData.id, category: "movie" },
-      });
-      if (existing) {
-        return { success: false, error: "Already exists" };
-      }
+    // ALWAYS check if review already exists by TMDB ID (prevent duplicates)
+    const existingById = await prisma.review.findFirst({
+      where: { tmdbId: movieData.id, category: "movie" },
+    });
+    if (existingById) {
+      return { success: false, error: "Already exists" };
     }
 
     // Generate review content
     const reviewContent = await generateMovieReviewContent(movieData);
 
-    // Generate slug
+    // Generate slug and ensure uniqueness
     let slug = generateSlug(reviewContent.de.title || movieData.title);
-    const existingSlug = await prisma.review.findUnique({ where: { slug } });
-    if (existingSlug) {
-      slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+    let slugAttempts = 0;
+    while (await prisma.review.findUnique({ where: { slug } })) {
+      slugAttempts++;
+      if (slugAttempts > 10) {
+        slug = `${generateSlug(reviewContent.de.title || movieData.title)}-${Date.now().toString(36)}`;
+        break;
+      }
+      slug = `${generateSlug(reviewContent.de.title || movieData.title)}-${Math.random().toString(36).substring(2, 7)}`;
     }
 
     // Upload poster image if available
@@ -922,24 +929,27 @@ export async function processSeries(
     // Ensure tmdbId column exists before using it
     await ensureTmdbIdColumn();
     
-    // Check if review already exists by TMDB ID
-    if (options.skipExisting) {
-      const existing = await prisma.review.findFirst({
-        where: { tmdbId: seriesData.id, category: "series" },
-      });
-      if (existing) {
-        return { success: false, error: "Already exists" };
-      }
+    // ALWAYS check if review already exists by TMDB ID (prevent duplicates)
+    const existingById = await prisma.review.findFirst({
+      where: { tmdbId: seriesData.id, category: "series" },
+    });
+    if (existingById) {
+      return { success: false, error: "Already exists" };
     }
 
     // Generate review content
     const reviewContent = await generateSeriesReviewContent(seriesData);
 
-    // Generate slug
+    // Generate slug and ensure uniqueness
     let slug = generateSlug(reviewContent.de.title || seriesData.name);
-    const existingSlug = await prisma.review.findUnique({ where: { slug } });
-    if (existingSlug) {
-      slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+    let slugAttempts = 0;
+    while (await prisma.review.findUnique({ where: { slug } })) {
+      slugAttempts++;
+      if (slugAttempts > 10) {
+        slug = `${generateSlug(reviewContent.de.title || seriesData.name)}-${Date.now().toString(36)}`;
+        break;
+      }
+      slug = `${generateSlug(reviewContent.de.title || seriesData.name)}-${Math.random().toString(36).substring(2, 7)}`;
     }
 
     // Upload poster image if available
@@ -1179,12 +1189,25 @@ export async function processAmazonProduct(
   options: { status: "draft" | "published"; skipExisting: boolean; generateImages?: boolean }
 ): Promise<{ success: boolean; reviewId?: string; error?: string }> {
   try {
-    // Check if review already exists by ASIN
-    if (options.skipExisting && productData.asin) {
-      const existing = await prisma.review.findFirst({
+    // ALWAYS check if review already exists by ASIN (prevent duplicates)
+    if (productData.asin) {
+      const existingByAsin = await prisma.review.findFirst({
         where: { amazonAsin: productData.asin, category: "amazon" },
       });
-      if (existing) {
+      if (existingByAsin) {
+        return { success: false, error: "Already exists" };
+      }
+    }
+    
+    // Also check by name if no ASIN provided
+    if (!productData.asin) {
+      const existingByName = await prisma.review.findFirst({
+        where: {
+          title: { equals: productData.name, mode: "insensitive" },
+          category: "amazon",
+        },
+      });
+      if (existingByName) {
         return { success: false, error: "Already exists" };
       }
     }
@@ -1192,11 +1215,16 @@ export async function processAmazonProduct(
     // Generate review content
     const reviewContent = await generateAmazonReviewContent(productData);
 
-    // Generate slug
+    // Generate slug and ensure uniqueness
     let slug = generateSlug(reviewContent.de.title || productData.name);
-    const existingSlug = await prisma.review.findUnique({ where: { slug } });
-    if (existingSlug) {
-      slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+    let slugAttempts = 0;
+    while (await prisma.review.findUnique({ where: { slug } })) {
+      slugAttempts++;
+      if (slugAttempts > 10) {
+        slug = `${generateSlug(reviewContent.de.title || productData.name)}-${Date.now().toString(36)}`;
+        break;
+      }
+      slug = `${generateSlug(reviewContent.de.title || productData.name)}-${Math.random().toString(36).substring(2, 7)}`;
     }
 
     // Generate images using Tavily (preferred) or OpenAI (fallback) if requested

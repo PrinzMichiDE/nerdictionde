@@ -297,36 +297,41 @@ async function processItemsAsync(
         
         switch (category) {
           case "game":
+            // Always skip existing for games to prevent duplicates
             result = await retryWithBackoff(
-              () => processGame(item, { status, skipExisting }),
+              () => processGame(item, { status, skipExisting: true }),
               itemName
             );
             break;
           
           case "movie":
+            // Always skip existing for movies to prevent duplicates
             result = await retryWithBackoff(
-              () => processMovie(item, { status, skipExisting }),
+              () => processMovie(item, { status, skipExisting: true }),
               itemName
             );
             break;
           
           case "series":
+            // Always skip existing for series to prevent duplicates
             result = await retryWithBackoff(
-              () => processSeries(item, { status, skipExisting }),
+              () => processSeries(item, { status, skipExisting: true }),
               itemName
             );
             break;
           
           case "hardware":
+            // Always skip existing for hardware to prevent duplicates
             result = await retryWithBackoff(
-              () => processHardware(item.name, { status, skipExisting }),
+              () => processHardware(item.name, { status, skipExisting: true }),
               itemName
             );
             break;
           
           case "amazon":
+            // Always skip existing for amazon products to prevent duplicates
             result = await retryWithBackoff(
-              () => processAmazonProduct(item, { status, skipExisting }),
+              () => processAmazonProduct(item, { status, skipExisting: true }),
               itemName
             );
             break;

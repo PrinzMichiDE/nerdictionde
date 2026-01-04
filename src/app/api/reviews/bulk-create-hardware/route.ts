@@ -101,14 +101,25 @@ export async function processHardware(
       },
     });
     
-    // Check if review already exists for this hardware
-    if (options.skipExisting && hardware) {
+    // ALWAYS check if review already exists for this hardware (prevent duplicates)
+    if (hardware) {
       const existingReview = await prisma.review.findFirst({
         where: { hardwareId: hardware.id },
       });
       if (existingReview) {
         return { success: false, error: "Review already exists" };
       }
+    }
+    
+    // Also check by title/name to catch duplicates even if hardware entry doesn't exist
+    const existingReviewByName = await prisma.review.findFirst({
+      where: {
+        title: { equals: hardwareName, mode: "insensitive" },
+        category: "hardware",
+      },
+    });
+    if (existingReviewByName) {
+      return { success: false, error: "Review already exists" };
     }
     
     // Create hardware entry if it doesn't exist
@@ -132,11 +143,16 @@ export async function processHardware(
       specs: hardware.specs || undefined,
     });
     
-    // Generate slug
+    // Generate slug and ensure uniqueness
     let slug = generateSlug(reviewContent.de.title);
-    const existingSlug = await prisma.review.findUnique({ where: { slug } });
-    if (existingSlug) {
-      slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+    let slugAttempts = 0;
+    while (await prisma.review.findUnique({ where: { slug } })) {
+      slugAttempts++;
+      if (slugAttempts > 10) {
+        slug = `${generateSlug(reviewContent.de.title)}-${Date.now().toString(36)}`;
+        break;
+      }
+      slug = `${generateSlug(reviewContent.de.title)}-${Math.random().toString(36).substring(2, 7)}`;
     }
     
     // Upload images if available (hardware might have images)

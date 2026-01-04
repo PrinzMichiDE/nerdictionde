@@ -235,8 +235,9 @@ async function processGamesAsync(
       }
 
       try {
+        // Always skip existing to prevent duplicates
         const result = await retryWithBackoff(
-          () => processGame(game, { status, skipExisting }),
+          () => processGame(game, { status, skipExisting: true }),
           game.name
         );
 
