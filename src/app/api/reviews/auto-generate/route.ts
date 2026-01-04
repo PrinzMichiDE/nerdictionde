@@ -9,6 +9,7 @@ import { requireAdminAuth } from "@/lib/auth";
 import { 
   generateReviewContent, 
   generateHardwareReviewContent,
+  generateAmazonReviewContent,
   generateContent 
 } from "@/lib/review-generation";
 
@@ -25,13 +26,20 @@ export async function POST(req: NextRequest) {
     }
 
     let data: any = null;
-    let category: "game" | "hardware" | "amazon" = requestedCategory || "game";
+    let category: "game" | "hardware" | "amazon" | "product" = requestedCategory || "game";
 
     // Search logic
-    if (requestedCategory === "amazon") {
-      const amazonAsin = parseAmazonUrl(input);
-      data = await scrapeAmazonProduct(input.startsWith("http") ? input : `https://www.amazon.de/dp/${amazonAsin || input}`);
-      category = "amazon";
+    if (requestedCategory === "product" || requestedCategory === "amazon") {
+      // For product category, treat input as product name directly
+      if (requestedCategory === "product") {
+        data = { name: input };
+        category = "product";
+      } else {
+        // Legacy amazon support
+        const amazonAsin = parseAmazonUrl(input);
+        data = await scrapeAmazonProduct(input.startsWith("http") ? input : `https://www.amazon.de/dp/${amazonAsin || input}`);
+        category = "amazon";
+      }
     } else if (requestedCategory === "hardware") {
       const hardwareType = detectHardwareType(input);
       const hardwareResults = await searchHardware(input);
@@ -104,8 +112,16 @@ export async function POST(req: NextRequest) {
         description: data.description || undefined,
         specs: data.specs || undefined,
       });
+    } else if (category === "product") {
+      // Use generateAmazonReviewContent for product reviews
+      result = await generateAmazonReviewContent({
+        name: data.name,
+        asin: data.asin,
+        description: data.description,
+        affiliateLink: data.affiliateLink,
+      });
     } else {
-      // Amazon or other - use generateContent directly
+      // Amazon (legacy) or other - use generateContent directly
       const prompt = `
         Schreibe eine EXTREM AUSFÜHRLICHE professionelle ${category}-Review für "${data.name}" in Deutsch UND Englisch.
         
@@ -173,9 +189,9 @@ export async function POST(req: NextRequest) {
           imageUrls.push(syncedUrl);
         } catch (err) {}
       }
-    } else if (category === "amazon" && data.cover?.url) {
+    } else if ((category === "amazon" || category === "product") && data.cover?.url) {
       try {
-        const syncedUrl = await uploadImage(data.cover.url, `${data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-amazon.jpg`);
+        const syncedUrl = await uploadImage(data.cover.url, `${data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-product.jpg`);
         imageUrls.push(syncedUrl);
       } catch (err) {}
     }
@@ -215,7 +231,7 @@ export async function POST(req: NextRequest) {
       metadata: gameMetadata,
       category,
       igdbId: category === "game" ? data.id : null,
-      amazonAsin: category === "amazon" ? data.asin : null,
+      amazonAsin: (category === "amazon" || category === "product") ? data.asin : null,
       hardwareId: category === "hardware" ? hardwareId : null,
       images: imageUrls,
       createdAt: pubDate,

@@ -7,7 +7,7 @@ import { createJob, updateJob, addToQueue, updateQueueItem } from "@/lib/job-sta
 import { randomUUID } from "crypto";
 import { getTMDBMoviesBulk, getTMDBSeriesBulk, BulkQueryOptions as TMDBBulkQueryOptions } from "@/lib/tmdb";
 
-type ReviewCategory = "game" | "movie" | "series" | "hardware" | "amazon";
+type ReviewCategory = "game" | "movie" | "series" | "hardware" | "product";
 
 interface BulkCreateMassOptions {
   category: ReviewCategory;
@@ -21,7 +21,7 @@ interface BulkCreateMassOptions {
   maxRetries?: number;
   // Category-specific options
   hardwareNames?: string[]; // For hardware category
-  amazonProducts?: Array<{ name: string; asin?: string; affiliateLink?: string }>; // For amazon category
+  productNames?: string[]; // For product category
 }
 
 /**
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       skipExisting = true,
       maxRetries = 3,
       hardwareNames = [],
-      amazonProducts = [],
+      productNames = [],
     } = body;
 
     if (!category || !count || count <= 0) {
@@ -126,14 +126,15 @@ export async function POST(req: NextRequest) {
           items = hardwareNames.slice(0, count).map((name) => ({ name }));
           break;
         
-        case "amazon":
-          if (amazonProducts.length === 0) {
+        case "product":
+          if (productNames.length === 0) {
             return NextResponse.json(
-              { error: "amazonProducts array is required for amazon category" },
+              { error: "productNames array is required for product category" },
               { status: 400 }
             );
           }
-          items = amazonProducts.slice(0, count);
+          // Convert product names to product objects
+          items = productNames.slice(0, count).map((name) => ({ name }));
           break;
         
         default:
@@ -328,8 +329,8 @@ async function processItemsAsync(
             );
             break;
           
-          case "amazon":
-            // Always skip existing for amazon products to prevent duplicates
+          case "product":
+            // Always skip existing for products to prevent duplicates
             result = await retryWithBackoff(
               () => processAmazonProduct(item, { status, skipExisting: true }),
               itemName

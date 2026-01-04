@@ -9,7 +9,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-type ReviewCategory = "game" | "hardware" | "amazon";
+type ReviewCategory = "game" | "hardware" | "product";
 
 export function QuickCreate() {
   const [input, setInput] = useState("");
@@ -55,10 +55,10 @@ export function QuickCreate() {
       placeholder: "z.B. RTX 4090, Ryzen 9 7950X..."
     },
     {
-      value: "amazon",
-      label: "Amazon",
+      value: "product",
+      label: "Produkt",
       icon: <ShoppingCart className="h-4 w-4" />,
-      placeholder: "z.B. Amazon Produkt-URL oder ASIN..."
+      placeholder: "z.B. Produktname wie 'natural elements Omega 3 – 365 Kapseln...'"
     },
   ];
 
@@ -133,7 +133,7 @@ export function QuickCreate() {
           <p>
             {category === "game" && "Unterstützt IGDB Datenbank-Suche und Steam Store Links."}
             {category === "hardware" && "Unterstützt Hardware-Produkte wie GPUs, CPUs, Peripheriegeräte und mehr."}
-            {category === "amazon" && "Unterstützt Amazon Produkt-URLs und ASINs für automatische Produktdaten."}
+            {category === "product" && "Unterstützt Produktnamen für automatische Review-Generierung."}
           </p>
         </div>
       </CardContent>

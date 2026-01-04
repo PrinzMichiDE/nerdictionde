@@ -13,7 +13,7 @@ import { Loader2, Play, Pause, CheckCircle2, XCircle, Clock, Database, TrendingU
 import axios from "axios";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-type ReviewCategory = "game" | "movie" | "series" | "hardware" | "amazon";
+type ReviewCategory = "game" | "movie" | "series" | "hardware" | "product";
 
 interface JobItem {
   name: string;
@@ -60,7 +60,7 @@ export function GameReviewMassCreation() {
   const [status, setStatus] = useState<"draft" | "published">("draft");
   const [skipExisting, setSkipExisting] = useState(true);
   const [hardwareNames, setHardwareNames] = useState<string>("");
-  const [amazonProducts, setAmazonProducts] = useState<string>("");
+  const [productNames, setProductNames] = useState<string>("");
 
   // Cleanup polling on unmount
   useEffect(() => {
@@ -146,23 +146,16 @@ export function GameReviewMassCreation() {
           .map((name) => name.trim())
           .filter((name) => name.length > 0)
           .slice(0, parseInt(count) || 200);
-      } else if (category === "amazon") {
-        if (!amazonProducts.trim()) {
-          alert("Bitte geben Sie Amazon-Produkte ein (ein Produkt pro Zeile, Format: Name|ASIN|AffiliateLink)");
+      } else if (category === "product") {
+        if (!productNames.trim()) {
+          alert("Bitte geben Sie Produktnamen ein (ein Produkt pro Zeile)");
           setLoading(false);
           return;
         }
-        requestBody.amazonProducts = amazonProducts
+        requestBody.productNames = productNames
           .split("\n")
-          .map((line) => {
-            const parts = line.trim().split("|");
-            return {
-              name: parts[0] || "",
-              asin: parts[1] || undefined,
-              affiliateLink: parts[2] || undefined,
-            };
-          })
-          .filter((product) => product.name.length > 0)
+          .map((name) => name.trim())
+          .filter((name) => name.length > 0)
           .slice(0, parseInt(count) || 200);
       }
 
@@ -260,10 +253,10 @@ export function GameReviewMassCreation() {
                       Hardware
                     </div>
                   </SelectItem>
-                  <SelectItem value="amazon">
+                  <SelectItem value="product">
                     <div className="flex items-center gap-2">
                       <ShoppingCart className="h-4 w-4" />
-                      Amazon Produkte
+                      Produkt Reviews
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -390,18 +383,18 @@ export function GameReviewMassCreation() {
                 </div>
               )}
 
-              {category === "amazon" && (
+              {category === "product" && (
                 <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="amazonProducts">Amazon-Produkte (ein Produkt pro Zeile, Format: Name|ASIN|AffiliateLink)</Label>
+                  <Label htmlFor="productNames">Produktnamen (ein Produkt pro Zeile)</Label>
                   <Textarea
-                    id="amazonProducts"
+                    id="productNames"
                     className="min-h-[100px]"
-                    placeholder="Produktname|B08XYZ123|https://amazon.de/dp/B08XYZ123?tag=affiliate"
-                    value={amazonProducts}
-                    onChange={(e) => setAmazonProducts(e.target.value)}
+                    placeholder="natural elements Omega 3 – 365 Kapseln – 2000mg Fischöl pro Tagesdosis..."
+                    value={productNames}
+                    onChange={(e) => setProductNames(e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Format: Name|ASIN|AffiliateLink (ASIN und AffiliateLink sind optional)
+                    Geben Sie einen Produktnamen pro Zeile ein. Die Review wird automatisch generiert.
                   </p>
                 </div>
               )}

@@ -1,4 +1,4 @@
-export type ReviewCategory = "game" | "hardware" | "amazon" | "movie" | "series";
+export type ReviewCategory = "game" | "hardware" | "amazon" | "product" | "movie" | "series";
 export type ReviewStatus = "draft" | "published";
 
 export interface Review {

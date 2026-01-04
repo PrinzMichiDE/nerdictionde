@@ -1192,24 +1192,22 @@ export async function processAmazonProduct(
     // ALWAYS check if review already exists by ASIN (prevent duplicates)
     if (productData.asin) {
       const existingByAsin = await prisma.review.findFirst({
-        where: { amazonAsin: productData.asin, category: "amazon" },
+        where: { amazonAsin: productData.asin, category: { in: ["amazon", "product"] } },
       });
       if (existingByAsin) {
         return { success: false, error: "Already exists" };
       }
     }
     
-    // Also check by name if no ASIN provided
-    if (!productData.asin) {
-      const existingByName = await prisma.review.findFirst({
-        where: {
-          title: { equals: productData.name, mode: "insensitive" },
-          category: "amazon",
-        },
-      });
-      if (existingByName) {
-        return { success: false, error: "Already exists" };
-      }
+    // ALWAYS check by name to prevent duplicates (case-insensitive)
+    const existingByName = await prisma.review.findFirst({
+      where: {
+        title: { equals: productData.name, mode: "insensitive" },
+        category: { in: ["amazon", "product"] },
+      },
+    });
+    if (existingByName) {
+      return { success: false, error: "Already exists" };
     }
 
     // Generate review content
@@ -1252,7 +1250,7 @@ export async function processAmazonProduct(
         title: reviewContent.de.title,
         title_en: reviewContent.en.title,
         slug,
-        category: "amazon",
+        category: "product",
         content: reviewContent.de.content,
         content_en: reviewContent.en.content,
         score: reviewContent.score,
