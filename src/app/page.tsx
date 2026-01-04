@@ -1,25 +1,11 @@
 import prisma from "@/lib/prisma";
-import { ReviewCard } from "@/components/reviews/ReviewCard";
+import { Review } from "@/types/review";
+import { ReviewHero } from "@/components/home/ReviewHero";
+import { LargeReviewCard } from "@/components/home/LargeReviewCard";
+import { CategoryFilter } from "@/components/home/CategoryFilter";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Review } from "@/types/review";
-import { Statistics } from "@/components/home/Statistics";
-import { CategoryQuickLinks } from "@/components/home/CategoryQuickLinks";
-import { TopRatedReviews } from "@/components/home/TopRatedReviews";
-import { FeaturedReview } from "@/components/home/FeaturedReview";
-import { WhyNerdiction } from "@/components/home/WhyNerdiction";
-import { CallToAction } from "@/components/home/CallToAction";
-import { HeroSection } from "@/components/home/HeroSection";
-import { TrustBadges } from "@/components/home/TrustBadges";
-import { ImageGallery } from "@/components/home/ImageGallery";
-import { VideoGallery } from "@/components/home/VideoGallery";
-import { ParallaxHighlights } from "@/components/home/ParallaxSection";
-import { SocialProof } from "@/components/home/SocialProof";
-import { FAQ } from "@/components/home/FAQ";
-import { StatsDashboard } from "@/components/home/StatsDashboard";
-import { ScoreDistribution, CategoryPieChart, TrendLine } from "@/components/home/InteractiveCharts";
-import { Card3D, FlipCard } from "@/components/home/3DCard";
-import { Card, CardContent } from "@/components/ui/card";
+import { Suspense } from "react";
 
 export const dynamic = 'force-dynamic';
 
@@ -115,147 +101,22 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="space-y-20 pb-12 animate-fade-in">
-      {/* Enhanced Hero Section */}
-      <HeroSection />
+    <div className="space-y-16 pb-16">
+      {/* Hero Review - Featured */}
+      {featuredReview && <ReviewHero review={featuredReview} />}
 
-      {/* Trust Badges Section */}
-      <TrustBadges />
+      {/* Category Filter */}
+      <CategoryFilter />
 
-      {/* Statistics Section */}
-      {statistics.totalReviews > 0 && <Statistics data={statistics} />}
-
-      {/* Stats Dashboard Section */}
-      {statistics.totalReviews > 0 && <StatsDashboard statistics={statistics} />}
-
-      {/* Interactive Charts Section */}
-      {statistics.totalReviews > 0 && (
-        <section className="space-y-8 py-16">
-          <div className="text-center space-y-2 mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-              Interaktive Statistiken
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Detaillierte Visualisierungen unserer Daten
-            </p>
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Score Distribution */}
-            <ScoreDistribution
-              scores={allReviews.map((r) => r.score)}
-            />
-
-            {/* Category Pie Chart */}
-            <CategoryPieChart
-              data={[
-                {
-                  label: "Games",
-                  value: statistics.gameReviews,
-                  color: "#3b82f6",
-                },
-                {
-                  label: "Hardware",
-                  value: statistics.hardwareReviews,
-                  color: "#a855f7",
-                },
-                {
-                  label: "Amazon",
-                  value: statistics.amazonReviews,
-                  color: "#f97316",
-                },
-                {
-                  label: "Filme",
-                  value: statistics.movieReviews,
-                  color: "#ef4444",
-                },
-                {
-                  label: "Serien",
-                  value: statistics.seriesReviews,
-                  color: "#22c55e",
-                },
-              ]}
-            />
-          </div>
-
-          {/* Trend Line - Last 6 months */}
-          {allReviews.length > 0 && (
-            <TrendLine
-              data={[
-                { month: "Jan", value: Math.floor(Math.random() * 20) + 10 },
-                { month: "Feb", value: Math.floor(Math.random() * 20) + 15 },
-                { month: "Mär", value: Math.floor(Math.random() * 20) + 20 },
-                { month: "Apr", value: Math.floor(Math.random() * 20) + 25 },
-                { month: "Mai", value: Math.floor(Math.random() * 20) + 30 },
-                { month: "Jun", value: statistics.totalReviews },
-              ]}
-            />
-          )}
-        </section>
-      )}
-
-      {/* 3D Cards Section */}
-      {featuredReview && (
-        <section className="space-y-8 py-16">
-          <div className="text-center space-y-2 mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-              3D Interactive Cards
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Bewege die Maus über die Karten für 3D-Effekte
-            </p>
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {latestReviews.slice(0, 3).map((review) => (
-              <Card3D key={review.id} intensity={15}>
-                <Card className="border-2 hover:border-primary/30 transition-all duration-500 h-full">
-                  <CardContent className="p-6 space-y-4">
-                    <h3 className="font-bold text-lg line-clamp-2">{review.title}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                      {review.content?.substring(0, 150)}...
-                    </p>
-                    <div className="flex items-center justify-between pt-4">
-                      <span className="text-2xl font-bold text-primary">
-                        {review.score}/100
-                      </span>
-                      <Link
-                        href={`/reviews/${review.slug}`}
-                        className="text-sm font-medium text-primary hover:underline"
-                      >
-                        Mehr erfahren →
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Card3D>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Social Proof Section */}
-      <SocialProof />
-
-      {/* Featured Review Section */}
-      {featuredReview && <FeaturedReview review={featuredReview} />}
-
-      {/* Category Quick Links */}
-      <CategoryQuickLinks />
-
-      {/* Why Nerdiction Section */}
-      <WhyNerdiction />
-
-      {/* Top-Rated Reviews Section */}
-      {topRatedReviews.length > 0 && <TopRatedReviews reviews={topRatedReviews} />}
-
-      {/* Latest Reviews Section */}
+      {/* Latest Reviews Grid */}
       <section className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">Neueste Reviews</h2>
-            <p className="text-muted-foreground mt-1">
-              Entdecke unsere aktuellsten Tests und Bewertungen
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-2">
+              Neueste Reviews
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Professionelle Tests und Bewertungen
             </p>
           </div>
           <Link 
@@ -268,20 +129,18 @@ export default async function HomePage() {
         </div>
         
         {latestReviews.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {latestReviews.map((review, index) => (
-              <div 
+              <LargeReviewCard 
                 key={review.id}
-                className="animate-scale-in"
-                style={{ animationDelay: `${index * 0.1}s`, animationFillMode: "both" }}
-              >
-                <ReviewCard review={review} />
-              </div>
+                review={review}
+                priority={index < 3}
+              />
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 border-2 border-dashed rounded-xl bg-muted/30">
-            <p className="text-muted-foreground text-lg">Noch keine Reviews vorhanden.</p>
+          <div className="text-center py-24 border-2 border-dashed rounded-2xl bg-muted/30">
+            <p className="text-muted-foreground text-xl font-semibold">Noch keine Reviews vorhanden.</p>
             <p className="text-muted-foreground/70 text-sm mt-2">
               Bald findest du hier die neuesten Reviews und Tests.
             </p>
@@ -289,20 +148,50 @@ export default async function HomePage() {
         )}
       </section>
 
-      {/* Image Gallery Section */}
-      {latestReviews.length > 0 && <ImageGallery reviews={latestReviews} />}
+      {/* Top Rated Reviews */}
+      {topRatedReviews.length > 0 && (
+        <section className="space-y-8 pt-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-2">
+                Top Bewertungen
+              </h2>
+              <p className="text-muted-foreground text-lg">
+                Die besten Reviews unserer Redaktion
+              </p>
+            </div>
+            <Link 
+              href="/reviews?sort=score-desc" 
+              className="hidden sm:flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors group"
+            >
+              Alle Top-Reviews
+              <span className="transition-transform group-hover:translate-x-1">→</span>
+            </Link>
+          </div>
 
-      {/* Video Gallery Section */}
-      {latestReviews.length > 0 && <VideoGallery reviews={latestReviews} />}
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {topRatedReviews.slice(0, 6).map((review) => (
+              <LargeReviewCard 
+                key={review.id}
+                review={review}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
-      {/* Parallax Highlights Section */}
-      <ParallaxHighlights />
-
-      {/* FAQ Section */}
-      <FAQ />
-
-      {/* Call to Action Section */}
-      <CallToAction />
+      {/* View All CTA */}
+      <div className="text-center py-12">
+        <Button
+          asChild
+          size="lg"
+          className="rounded-full text-lg px-8 py-6 h-auto"
+        >
+          <Link href="/reviews">
+            Alle Reviews entdecken
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 }
