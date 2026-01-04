@@ -5,6 +5,7 @@ import { QuickCreate } from "./components/QuickCreate";
 import { BulkCreate } from "./components/BulkCreate";
 import { ReviewList } from "./components/ReviewList";
 import { HardwareRSSFetcher } from "./components/HardwareRSSFetcher";
+import { GameReviewMassCreation } from "./components/GameReviewMassCreation";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 
@@ -25,12 +26,15 @@ function AdminTabs() {
 
   return (
     <Tabs value={tab} onValueChange={handleTabChange} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-4 max-w-3xl">
+      <TabsList className="grid w-full grid-cols-5 max-w-4xl">
         <TabsTrigger value="quick" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
           Quick Create
         </TabsTrigger>
         <TabsTrigger value="bulk" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
           Massen-Erstellung
+        </TabsTrigger>
+        <TabsTrigger value="mass-200" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          200 Games
         </TabsTrigger>
         <TabsTrigger value="hardware-rss" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
           Hardware RSS
@@ -44,6 +48,9 @@ function AdminTabs() {
       </TabsContent>
       <TabsContent value="bulk" className="space-y-4 mt-6">
         <BulkCreate />
+      </TabsContent>
+      <TabsContent value="mass-200" className="space-y-4 mt-6">
+        <GameReviewMassCreation />
       </TabsContent>
       <TabsContent value="hardware-rss" className="space-y-4 mt-6">
         <HardwareRSSFetcher />
