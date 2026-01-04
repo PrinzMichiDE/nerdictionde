@@ -1,14 +1,6 @@
 {
   "crons": [
     {
-      "path": "/api/cron/auto-reviews",
-      "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/fetch-hardware-rss",
-      "schedule": "0 2 * * *"
-    },
-    {
       "path": "/api/cron/generate-category-reviews",
       "schedule": "*/30 * * * *"
     }
