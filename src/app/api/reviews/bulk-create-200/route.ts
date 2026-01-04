@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     const {
       queryOptions = {
-        sortBy: "total_rating_count",
+        sortBy: "popularity",
         order: "desc",
         minRating: 50, // Only games with at least 50 rating
       },

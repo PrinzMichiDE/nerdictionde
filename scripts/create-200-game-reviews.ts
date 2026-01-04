@@ -108,7 +108,7 @@ async function main() {
 
     // Fetch games again (we'll filter out already processed ones)
     const queryOptions: BulkQueryOptions = {
-      sortBy: "total_rating_count",
+      sortBy: "popularity",
       order: "desc",
       minRating: 50, // Only games with at least 50 rating
     };
@@ -126,7 +126,7 @@ async function main() {
     }
 
     const queryOptions: BulkQueryOptions = {
-      sortBy: "total_rating_count",
+      sortBy: "popularity",
       order: "desc",
       minRating: 50, // Only games with at least 50 rating
     };

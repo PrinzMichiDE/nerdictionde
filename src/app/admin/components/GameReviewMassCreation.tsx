@@ -96,7 +96,7 @@ export function GameReviewMassCreation() {
 
     try {
       const queryOptions: any = {
-        sortBy: "total_rating_count",
+        sortBy: "popularity",
         order: "desc",
         minRating: parseFloat(minRating) || 50,
       };

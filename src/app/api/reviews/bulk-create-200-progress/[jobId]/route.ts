@@ -4,14 +4,14 @@ import { requireAdminAuth } from "@/lib/auth";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { jobId: string } }
+  { params }: { params: Promise<{ jobId: string }> }
 ) {
   // Require admin authentication
   const authError = requireAdminAuth(req);
   if (authError) return authError;
 
   try {
-    const { jobId } = params;
+    const { jobId } = await params;
 
     const job = getJob(jobId);
 
