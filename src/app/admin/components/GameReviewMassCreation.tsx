@@ -6,15 +6,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Play, Pause, CheckCircle2, XCircle, Clock, Database, TrendingUp } from "lucide-react";
+import { Loader2, Play, Pause, CheckCircle2, XCircle, Clock, Database, TrendingUp, Film, Tv, Cpu, ShoppingCart } from "lucide-react";
 import axios from "axios";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-interface GameJobItem {
+type ReviewCategory = "game" | "movie" | "series" | "hardware" | "amazon";
+
+interface JobItem {
   name: string;
   igdbId?: number;
+  tmdbId?: number;
   status: "pending" | "processing" | "completed" | "failed" | "skipped";
   error?: string;
   reviewId?: string;
@@ -28,13 +32,13 @@ interface JobStatus {
   successful: number;
   failed: number;
   skipped: number;
-  queue: GameJobItem[];
+  queue: JobItem[];
   currentBatch: number;
   totalBatches: number;
   startTime: number;
   estimatedTimeRemaining?: number;
-  errors: Array<{ game: string; igdbId?: number; error: string }>;
-  reviews: Array<{ id: string; title: string; slug: string; igdbId?: number }>;
+  errors: Array<{ item: string; error: string }>;
+  reviews: Array<{ id: string; title: string; slug: string; igdbId?: number; tmdbId?: number }>;
 }
 
 export function GameReviewMassCreation() {
@@ -45,14 +49,18 @@ export function GameReviewMassCreation() {
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Form state
+  const [category, setCategory] = useState<ReviewCategory>("game");
+  const [count, setCount] = useState<string>("200");
   const [genreId, setGenreId] = useState<string>("all");
   const [platformId, setPlatformId] = useState<string>("all");
   const [minRating, setMinRating] = useState<string>("50");
   const [batchSize, setBatchSize] = useState<string>("5");
   const [delayBetweenBatches, setDelayBetweenBatches] = useState<string>("3000");
-  const [delayBetweenGames, setDelayBetweenGames] = useState<string>("2000");
+  const [delayBetweenItems, setDelayBetweenItems] = useState<string>("2000");
   const [status, setStatus] = useState<"draft" | "published">("draft");
   const [skipExisting, setSkipExisting] = useState(true);
+  const [hardwareNames, setHardwareNames] = useState<string>("");
+  const [amazonProducts, setAmazonProducts] = useState<string>("");
 
   // Cleanup polling on unmount
   useEffect(() => {
@@ -71,7 +79,7 @@ export function GameReviewMassCreation() {
     setPolling(true);
     pollingIntervalRef.current = setInterval(async () => {
       try {
-        const response = await axios.get(`/api/reviews/bulk-create-200-progress/${id}`);
+        const response = await axios.get(`/api/reviews/bulk-create-mass-progress/${id}`);
         const job = response.data.job;
         setJobStatus(job);
 
@@ -95,27 +103,70 @@ export function GameReviewMassCreation() {
     setJobStatus(null);
 
     try {
-      const queryOptions: any = {
-        sortBy: "popularity",
-        order: "desc",
-        minRating: parseFloat(minRating) || 50,
-      };
-
-      if (genreId && genreId !== "all") {
-        queryOptions.genreId = parseInt(genreId);
-      }
-      if (platformId && platformId !== "all") {
-        queryOptions.platformId = parseInt(platformId);
-      }
-
-      const response = await axios.post("/api/reviews/bulk-create-200", {
-        queryOptions,
+      const requestBody: any = {
+        category,
+        count: parseInt(count) || 200,
         batchSize: parseInt(batchSize) || 5,
         delayBetweenBatches: parseInt(delayBetweenBatches) || 3000,
-        delayBetweenGames: parseInt(delayBetweenGames) || 2000,
+        delayBetweenItems: parseInt(delayBetweenItems) || 2000,
         status,
         skipExisting,
-      });
+      };
+
+      // Category-specific query options
+      if (category === "game") {
+        requestBody.queryOptions = {
+          sortBy: "popularity",
+          order: "desc",
+          minRating: parseFloat(minRating) || 50,
+        };
+        if (genreId && genreId !== "all") {
+          requestBody.queryOptions.genreId = parseInt(genreId);
+        }
+        if (platformId && platformId !== "all") {
+          requestBody.queryOptions.platformId = parseInt(platformId);
+        }
+      } else if (category === "movie" || category === "series") {
+        requestBody.queryOptions = {
+          sortBy: "popularity",
+          order: "desc",
+          minRating: parseFloat(minRating) || 5,
+        };
+        if (genreId && genreId !== "all") {
+          requestBody.queryOptions.genreId = parseInt(genreId);
+        }
+      } else if (category === "hardware") {
+        if (!hardwareNames.trim()) {
+          alert("Bitte geben Sie Hardware-Namen ein (ein Name pro Zeile)");
+          setLoading(false);
+          return;
+        }
+        requestBody.hardwareNames = hardwareNames
+          .split("\n")
+          .map((name) => name.trim())
+          .filter((name) => name.length > 0)
+          .slice(0, parseInt(count) || 200);
+      } else if (category === "amazon") {
+        if (!amazonProducts.trim()) {
+          alert("Bitte geben Sie Amazon-Produkte ein (ein Produkt pro Zeile, Format: Name|ASIN|AffiliateLink)");
+          setLoading(false);
+          return;
+        }
+        requestBody.amazonProducts = amazonProducts
+          .split("\n")
+          .map((line) => {
+            const parts = line.trim().split("|");
+            return {
+              name: parts[0] || "",
+              asin: parts[1] || undefined,
+              affiliateLink: parts[2] || undefined,
+            };
+          })
+          .filter((product) => product.name.length > 0)
+          .slice(0, parseInt(count) || 200);
+      }
+
+      const response = await axios.post("/api/reviews/bulk-create-mass", requestBody);
 
       const newJobId = response.data.jobId;
       setJobId(newJobId);
@@ -164,10 +215,10 @@ export function GameReviewMassCreation() {
             </div>
             <div className="min-w-0 flex-1">
               <CardTitle className="text-lg md:text-xl lg:text-2xl break-words">
-                200 Game Reviews Massenerstellung
+                Massen-Review Erstellung
               </CardTitle>
               <CardDescription className="text-xs md:text-sm mt-1">
-                Erstellt automatisch 200 Game Reviews von IGDB mit Progress-Tracking und Warteschlange
+                Erstellt automatisch Reviews für alle Kategorien mit Progress-Tracking und Warteschlange
               </CardDescription>
             </div>
           </div>
@@ -176,19 +227,83 @@ export function GameReviewMassCreation() {
           {/* Configuration */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Konfiguration</h3>
+            
+            {/* Category Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="category">Kategorie</Label>
+              <Select value={category} onValueChange={(v) => setCategory(v as ReviewCategory)}>
+                <SelectTrigger id="category">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="game">
+                    <div className="flex items-center gap-2">
+                      <Database className="h-4 w-4" />
+                      Games
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="movie">
+                    <div className="flex items-center gap-2">
+                      <Film className="h-4 w-4" />
+                      Filme
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="series">
+                    <div className="flex items-center gap-2">
+                      <Tv className="h-4 w-4" />
+                      Serien
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="hardware">
+                    <div className="flex items-center gap-2">
+                      <Cpu className="h-4 w-4" />
+                      Hardware
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="amazon">
+                    <div className="flex items-center gap-2">
+                      <ShoppingCart className="h-4 w-4" />
+                      Amazon Produkte
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="minRating">Mindest-Rating (0-100)</Label>
+                <Label htmlFor="count">Anzahl Reviews</Label>
                 <Input
-                  id="minRating"
+                  id="count"
                   type="number"
-                  placeholder="50"
-                  value={minRating}
-                  onChange={(e) => setMinRating(e.target.value)}
-                  min="0"
-                  max="100"
+                  placeholder="200"
+                  value={count}
+                  onChange={(e) => setCount(e.target.value)}
+                  min="1"
+                  max="1000"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Anzahl der zu erstellenden Reviews
+                </p>
               </div>
+
+              {(category === "game" || category === "movie" || category === "series") && (
+                <div className="space-y-2">
+                  <Label htmlFor="minRating">
+                    Mindest-Rating ({category === "game" ? "0-100" : "0-10"})
+                  </Label>
+                  <Input
+                    id="minRating"
+                    type="number"
+                    placeholder={category === "game" ? "50" : "5"}
+                    value={minRating}
+                    onChange={(e) => setMinRating(e.target.value)}
+                    min="0"
+                    max={category === "game" ? "100" : "10"}
+                    step={category === "game" ? "1" : "0.1"}
+                  />
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="batchSize">Batch-Größe</Label>
@@ -217,17 +332,79 @@ export function GameReviewMassCreation() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="delayGames">Delay zwischen Games (ms)</Label>
+                <Label htmlFor="delayItems">Delay zwischen Items (ms)</Label>
                 <Input
-                  id="delayGames"
+                  id="delayItems"
                   type="number"
                   placeholder="2000"
-                  value={delayBetweenGames}
-                  onChange={(e) => setDelayBetweenGames(e.target.value)}
+                  value={delayBetweenItems}
+                  onChange={(e) => setDelayBetweenItems(e.target.value)}
                   min="0"
                   max="10000"
                 />
               </div>
+
+              {category === "game" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="genreId">Genre</Label>
+                    <Select value={genreId} onValueChange={setGenreId}>
+                      <SelectTrigger id="genreId">
+                        <SelectValue placeholder="Alle Genres" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Alle Genres</SelectItem>
+                        {/* Genres would be loaded from API */}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="platformId">Plattform</Label>
+                    <Select value={platformId} onValueChange={setPlatformId}>
+                      <SelectTrigger id="platformId">
+                        <SelectValue placeholder="Alle Plattformen" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Alle Plattformen</SelectItem>
+                        {/* Platforms would be loaded from API */}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {category === "hardware" && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="hardwareNames">Hardware-Namen (ein Name pro Zeile)</Label>
+                  <Textarea
+                    id="hardwareNames"
+                    className="min-h-[100px]"
+                    placeholder="RTX 4090&#10;Ryzen 9 7950X&#10;PlayStation 5"
+                    value={hardwareNames}
+                    onChange={(e) => setHardwareNames(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Geben Sie einen Hardware-Namen pro Zeile ein
+                  </p>
+                </div>
+              )}
+
+              {category === "amazon" && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="amazonProducts">Amazon-Produkte (ein Produkt pro Zeile, Format: Name|ASIN|AffiliateLink)</Label>
+                  <Textarea
+                    id="amazonProducts"
+                    className="min-h-[100px]"
+                    placeholder="Produktname|B08XYZ123|https://amazon.de/dp/B08XYZ123?tag=affiliate"
+                    value={amazonProducts}
+                    onChange={(e) => setAmazonProducts(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Format: Name|ASIN|AffiliateLink (ASIN und AffiliateLink sind optional)
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
@@ -281,8 +458,8 @@ export function GameReviewMassCreation() {
             ) : (
               <>
                 <Play className="mr-2 h-4 w-4 md:h-5 md:w-5" />
-                <span className="hidden sm:inline">Job starten (200 Reviews)</span>
-                <span className="sm:hidden">Start (200)</span>
+                <span className="hidden sm:inline">Job starten ({count} {category === "game" ? "Games" : category === "movie" ? "Filme" : category === "series" ? "Serien" : category === "hardware" ? "Hardware" : "Produkte"})</span>
+                <span className="sm:hidden">Start ({count})</span>
               </>
             )}
           </Button>
@@ -375,7 +552,7 @@ export function GameReviewMassCreation() {
             {jobStatus.queue && jobStatus.queue.length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-semibold text-sm md:text-base">
-                  Warteschlange ({jobStatus.queue.length} Games)
+                  Warteschlange ({jobStatus.queue.length} Items)
                 </h4>
                 <ScrollArea className="h-[300px] md:h-[400px] border rounded-lg p-2 md:p-4">
                   <div className="space-y-2">
@@ -392,6 +569,11 @@ export function GameReviewMassCreation() {
                           {item.igdbId && (
                             <Badge variant="outline" className="text-[10px] md:text-xs hidden sm:inline-flex">
                               IGDB: {item.igdbId}
+                            </Badge>
+                          )}
+                          {item.tmdbId && (
+                            <Badge variant="outline" className="text-[10px] md:text-xs hidden sm:inline-flex">
+                              TMDB: {item.tmdbId}
                             </Badge>
                           )}
                         </div>
@@ -448,7 +630,7 @@ export function GameReviewMassCreation() {
                   <div className="space-y-2">
                     {jobStatus.errors.map((error, index) => (
                       <div key={index} className="p-2 md:p-3 bg-red-500/10 rounded text-xs md:text-sm">
-                        <div className="font-medium break-words">{error.game}</div>
+                        <div className="font-medium break-words">{error.item}</div>
                         <div className="text-[10px] md:text-xs text-muted-foreground break-words mt-1">{error.error}</div>
                       </div>
                     ))}

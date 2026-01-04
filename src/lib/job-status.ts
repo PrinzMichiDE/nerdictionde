@@ -1,9 +1,10 @@
 // Simple in-memory job status store
 // In production, this could be replaced with Redis or database
 
-interface GameJobItem {
+interface JobItem {
   name: string;
   igdbId?: number;
+  tmdbId?: number;
   status: "pending" | "processing" | "completed" | "failed" | "skipped";
   error?: string;
   reviewId?: string;
@@ -17,13 +18,13 @@ interface JobStatus {
   successful: number;
   failed: number;
   skipped: number;
-  queue: GameJobItem[];
+  queue: JobItem[];
   currentBatch: number;
   totalBatches: number;
   startTime: number;
   estimatedTimeRemaining?: number; // in seconds
-  errors: Array<{ game: string; igdbId?: number; error: string }>;
-  reviews: Array<{ id: string; title: string; slug: string; igdbId?: number }>;
+  errors: Array<{ item: string; igdbId?: number; tmdbId?: number; error: string }>;
+  reviews: Array<{ id: string; title: string; slug: string; igdbId?: number; tmdbId?: number }>;
 }
 
 const jobStore = new Map<string, JobStatus>();
@@ -76,20 +77,20 @@ export function updateJob(
 
 export function updateQueueItem(
   jobId: string,
-  gameName: string,
-  updates: Partial<GameJobItem>
+  itemName: string,
+  updates: Partial<JobItem>
 ): void {
   const job = jobStore.get(jobId);
   if (!job) return;
 
-  const itemIndex = job.queue.findIndex((item) => item.name === gameName);
+  const itemIndex = job.queue.findIndex((item) => item.name === itemName);
   if (itemIndex >= 0) {
     job.queue[itemIndex] = { ...job.queue[itemIndex], ...updates };
     jobStore.set(jobId, job);
   }
 }
 
-export function addToQueue(jobId: string, items: GameJobItem[]): void {
+export function addToQueue(jobId: string, items: JobItem[]): void {
   const job = jobStore.get(jobId);
   if (!job) return;
 

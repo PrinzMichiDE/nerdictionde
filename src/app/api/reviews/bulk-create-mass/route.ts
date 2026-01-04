@@ -1,0 +1,405 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getIGDBGamesBulkLarge, BulkQueryOptions } from "@/lib/igdb";
+import { processGame, processMovie, processSeries, processAmazonProduct, generateSlug } from "@/lib/review-generation";
+import { processHardware } from "@/app/api/reviews/bulk-create-hardware/route";
+import { requireAdminAuth } from "@/lib/auth";
+import { createJob, updateJob, addToQueue, updateQueueItem } from "@/lib/job-status";
+import { randomUUID } from "crypto";
+import { getTMDBMoviesBulk, getTMDBSeriesBulk, BulkQueryOptions as TMDBBulkQueryOptions } from "@/lib/tmdb";
+
+type ReviewCategory = "game" | "movie" | "series" | "hardware" | "amazon";
+
+interface BulkCreateMassOptions {
+  category: ReviewCategory;
+  count: number;
+  queryOptions?: BulkQueryOptions | any;
+  status?: "draft" | "published";
+  skipExisting?: boolean;
+  batchSize?: number;
+  delayBetweenBatches?: number;
+  delayBetweenItems?: number;
+  maxRetries?: number;
+  // Category-specific options
+  hardwareNames?: string[]; // For hardware category
+  amazonProducts?: Array<{ name: string; asin?: string; affiliateLink?: string }>; // For amazon category
+}
+
+/**
+ * Generic API endpoint for creating mass reviews for any category
+ * with progress tracking and queue management.
+ */
+export async function POST(req: NextRequest) {
+  // Require admin authentication
+  const authError = requireAdminAuth(req);
+  if (authError) return authError;
+
+  try {
+    const body: BulkCreateMassOptions = await req.json();
+
+    const {
+      category,
+      count,
+      queryOptions = {},
+      batchSize = 5,
+      delayBetweenBatches = 3000,
+      delayBetweenItems = 2000,
+      status = "draft",
+      skipExisting = true,
+      maxRetries = 3,
+      hardwareNames = [],
+      amazonProducts = [],
+    } = body;
+
+    if (!category || !count || count <= 0) {
+      return NextResponse.json(
+        { error: "Category and count are required" },
+        { status: 400 }
+      );
+    }
+
+    console.log(`🚀 Starting mass creation of ${count} ${category} Reviews`);
+    console.log(`⚙️  Settings: Batch size=${batchSize}, Delay batches=${delayBetweenBatches}ms, Delay items=${delayBetweenItems}ms`);
+
+    // Fetch items based on category
+    let items: any[] = [];
+    
+    try {
+      switch (category) {
+        case "game":
+          const gameQueryOptions: BulkQueryOptions = {
+            sortBy: "popularity",
+            order: "desc",
+            minRating: 50,
+            ...queryOptions,
+          };
+          items = await getIGDBGamesBulkLarge(count, gameQueryOptions);
+          break;
+        
+        case "movie":
+          // Fetch movies in batches if count > 20 (TMDB limit per page)
+          const movieQueryOptions: TMDBBulkQueryOptions = {
+            limit: Math.min(count, 20),
+            ...queryOptions,
+          };
+          items = await getTMDBMoviesBulk(movieQueryOptions);
+          // If we need more, fetch additional pages
+          if (count > 20) {
+            const additionalPages = Math.ceil((count - 20) / 20);
+            for (let page = 2; page <= additionalPages + 1 && items.length < count; page++) {
+              const pageOptions = { ...movieQueryOptions, offset: (page - 1) * 20 };
+              const pageItems = await getTMDBMoviesBulk(pageOptions);
+              items.push(...pageItems);
+              if (pageItems.length < 20) break; // No more items available
+            }
+          }
+          items = items.slice(0, count);
+          break;
+        
+        case "series":
+          // Fetch series in batches if count > 20 (TMDB limit per page)
+          const seriesQueryOptions: TMDBBulkQueryOptions = {
+            limit: Math.min(count, 20),
+            ...queryOptions,
+          };
+          items = await getTMDBSeriesBulk(seriesQueryOptions);
+          // If we need more, fetch additional pages
+          if (count > 20) {
+            const additionalPages = Math.ceil((count - 20) / 20);
+            for (let page = 2; page <= additionalPages + 1 && items.length < count; page++) {
+              const pageOptions = { ...seriesQueryOptions, offset: (page - 1) * 20 };
+              const pageItems = await getTMDBSeriesBulk(pageOptions);
+              items.push(...pageItems);
+              if (pageItems.length < 20) break; // No more items available
+            }
+          }
+          items = items.slice(0, count);
+          break;
+        
+        case "hardware":
+          if (hardwareNames.length === 0) {
+            return NextResponse.json(
+              { error: "hardwareNames array is required for hardware category" },
+              { status: 400 }
+            );
+          }
+          // For hardware, we use the provided names
+          items = hardwareNames.slice(0, count).map((name) => ({ name }));
+          break;
+        
+        case "amazon":
+          if (amazonProducts.length === 0) {
+            return NextResponse.json(
+              { error: "amazonProducts array is required for amazon category" },
+              { status: 400 }
+            );
+          }
+          items = amazonProducts.slice(0, count);
+          break;
+        
+        default:
+          return NextResponse.json(
+            { error: `Unsupported category: ${category}` },
+            { status: 400 }
+          );
+      }
+    } catch (error: any) {
+      console.error(`Error fetching ${category} items:`, error);
+      return NextResponse.json(
+        { error: `Failed to fetch ${category} items: ${error.message}` },
+        { status: 400 }
+      );
+    }
+
+    if (!items || items.length === 0) {
+      return NextResponse.json(
+        { error: `No ${category} items found matching the criteria` },
+        { status: 404 }
+      );
+    }
+
+    // Create job for progress tracking
+    const jobId = randomUUID();
+    const totalBatches = Math.ceil(items.length / batchSize);
+    const job = createJob(jobId, items.length, totalBatches);
+    
+    // Initialize queue with all items
+    const queueItems = items.map((item) => ({
+      name: item.name || item.title || item.title_en || "Unknown",
+      igdbId: item.id || item.igdbId,
+      tmdbId: item.id || item.tmdbId,
+      status: "pending" as const,
+    }));
+    addToQueue(jobId, queueItems);
+    
+    // Update job status to running
+    updateJob(jobId, { status: "running" });
+
+    // Start processing asynchronously
+    processItemsAsync(jobId, items, category, {
+      batchSize,
+      delayBetweenBatches,
+      delayBetweenItems,
+      status,
+      skipExisting,
+      maxRetries,
+    }).catch((error) => {
+      console.error("Error in async processing:", error);
+      updateJob(jobId, {
+        status: "failed",
+      });
+    });
+
+    // Return job ID immediately so client can poll for progress
+    return NextResponse.json({
+      message: "Job started",
+      jobId,
+      total: items.length,
+      category,
+    });
+  } catch (error: any) {
+    console.error("Bulk create mass error:", error);
+    return NextResponse.json(
+      { error: error.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+// Async processing function for all categories
+async function processItemsAsync(
+  jobId: string,
+  items: any[],
+  category: ReviewCategory,
+  options: {
+    batchSize: number;
+    delayBetweenBatches: number;
+    delayBetweenItems: number;
+    status: "draft" | "published";
+    skipExisting: boolean;
+    maxRetries: number;
+  }
+) {
+  const {
+    batchSize,
+    delayBetweenBatches,
+    delayBetweenItems,
+    status,
+    skipExisting,
+    maxRetries,
+  } = options;
+
+  const results = {
+    successful: 0,
+    failed: 0,
+    skipped: 0,
+    reviews: [] as Array<{ id: string; title: string; slug: string; igdbId?: number; tmdbId?: number }>,
+    errors: [] as Array<{ item: string; error: string }>,
+  };
+
+  // Retry wrapper with exponential backoff
+  const retryWithBackoff = async (
+    fn: () => Promise<{ success: boolean; reviewId?: string; error?: string }>,
+    itemName: string
+  ): Promise<{ success: boolean; reviewId?: string; error?: string }> => {
+    let lastError: Error | null = null;
+    const baseDelay = 2000;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error: any) {
+        lastError = error;
+        
+        if (error.message?.includes("Already exists")) {
+          return { success: false, error: "Already exists" };
+        }
+
+        if (error.message?.includes("validation") || error.message?.includes("invalid")) {
+          return { success: false, error: error.message };
+        }
+
+        if (attempt < maxRetries - 1) {
+          const delay = baseDelay * Math.pow(2, attempt);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
+    }
+
+    return {
+      success: false,
+      error: lastError?.message || "Unknown error after retries",
+    };
+  };
+
+  // Process items in batches sequentially
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const batchNumber = Math.floor(i / batchSize) + 1;
+    const totalBatches = Math.ceil(items.length / batchSize);
+    
+    console.log(`📦 Processing batch ${batchNumber}/${totalBatches} (Items ${i + 1}-${Math.min(i + batch.length, items.length)})`);
+    
+    updateJob(jobId, { currentBatch: batchNumber });
+    
+    // Process batch sequentially
+    for (let j = 0; j < batch.length; j++) {
+      const item = batch[j];
+      const itemName = item.name || item.title || item.title_en || "Unknown";
+      
+      updateQueueItem(jobId, itemName, { status: "processing" });
+      
+      if (j > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delayBetweenItems));
+      }
+
+      try {
+        let result: { success: boolean; reviewId?: string; error?: string };
+        
+        switch (category) {
+          case "game":
+            result = await retryWithBackoff(
+              () => processGame(item, { status, skipExisting }),
+              itemName
+            );
+            break;
+          
+          case "movie":
+            result = await retryWithBackoff(
+              () => processMovie(item, { status, skipExisting }),
+              itemName
+            );
+            break;
+          
+          case "series":
+            result = await retryWithBackoff(
+              () => processSeries(item, { status, skipExisting }),
+              itemName
+            );
+            break;
+          
+          case "hardware":
+            result = await retryWithBackoff(
+              () => processHardware(item.name, { status, skipExisting }),
+              itemName
+            );
+            break;
+          
+          case "amazon":
+            result = await retryWithBackoff(
+              () => processAmazonProduct(item, { status, skipExisting }),
+              itemName
+            );
+            break;
+          
+          default:
+            result = { success: false, error: `Unsupported category: ${category}` };
+        }
+
+        if (result.success && result.reviewId) {
+          results.successful++;
+          results.reviews.push({
+            id: result.reviewId,
+            title: itemName,
+            slug: generateSlug(itemName),
+            igdbId: item.id || item.igdbId,
+            tmdbId: item.id || item.tmdbId,
+          });
+          updateQueueItem(jobId, itemName, {
+            status: "completed",
+            reviewId: result.reviewId,
+          });
+          console.log(`   ✅ ${itemName}`);
+        } else if (result.error === "Already exists") {
+          results.skipped++;
+          updateQueueItem(jobId, itemName, { status: "skipped" });
+          console.log(`   ⏭️  ${itemName} (already exists)`);
+        } else {
+          results.failed++;
+          results.errors.push({
+            item: itemName,
+            error: result.error || "Unknown error",
+          });
+          updateQueueItem(jobId, itemName, {
+            status: "failed",
+            error: result.error || "Unknown error",
+          });
+          console.log(`   ❌ ${itemName}: ${result.error}`);
+        }
+      } catch (error: any) {
+        results.failed++;
+        results.errors.push({
+          item: itemName,
+          error: error.message || "Processing failed",
+        });
+        updateQueueItem(jobId, itemName, {
+          status: "failed",
+          error: error.message || "Processing failed",
+        });
+        console.log(`   ❌ ${itemName}: ${error.message}`);
+      }
+
+      // Update job progress
+      const processed = results.successful + results.failed + results.skipped;
+      updateJob(jobId, {
+        processed,
+        successful: results.successful,
+        failed: results.failed,
+        skipped: results.skipped,
+        reviews: results.reviews,
+        errors: results.errors,
+      });
+    }
+
+    // Delay between batches
+    if (i + batchSize < items.length) {
+      await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches));
+    }
+  }
+
+  // Mark job as completed
+  updateJob(jobId, {
+    status: "completed",
+  });
+
+  console.log(`\n✅ Job ${jobId} completed: ${results.successful} successful, ${results.failed} failed, ${results.skipped} skipped`);
+}

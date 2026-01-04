@@ -170,7 +170,7 @@ async function processGamesAsync(
     failed: 0,
     skipped: 0,
     reviews: [] as Array<{ id: string; title: string; slug: string; igdbId?: number }>,
-    errors: [] as Array<{ game: string; igdbId?: number; error: string }>,
+    errors: [] as Array<{ item: string; igdbId?: number; error: string }>,
   };
 
   // Retry wrapper with exponential backoff
@@ -260,7 +260,7 @@ async function processGamesAsync(
         } else {
           results.failed++;
           results.errors.push({
-            game: game.name,
+            item: game.name,
             igdbId: game.id,
             error: result.error || "Unknown error",
           });
@@ -272,11 +272,11 @@ async function processGamesAsync(
         }
       } catch (error: any) {
         results.failed++;
-        results.errors.push({
-          game: game.name,
-          igdbId: game.id,
-          error: error.message || "Processing failed",
-        });
+          results.errors.push({
+            item: game.name,
+            igdbId: game.id,
+            error: error.message || "Processing failed",
+          });
         updateQueueItem(jobId, game.name, {
           status: "failed",
           error: error.message || "Processing failed",
