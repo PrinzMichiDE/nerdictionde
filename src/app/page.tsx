@@ -17,7 +17,6 @@ import { ParallaxHighlights } from "@/components/home/ParallaxSection";
 import { SocialProof } from "@/components/home/SocialProof";
 import { FAQ } from "@/components/home/FAQ";
 import { StatsDashboard } from "@/components/home/StatsDashboard";
-import { PressMentions } from "@/components/home/PressMentions";
 
 export const dynamic = 'force-dynamic';
 
@@ -182,9 +181,6 @@ export default async function HomePage() {
 
       {/* Parallax Highlights Section */}
       <ParallaxHighlights />
-
-      {/* Press Mentions Section */}
-      <PressMentions />
 
       {/* FAQ Section */}
       <FAQ />
