@@ -25,22 +25,42 @@ function AdminTabs() {
   };
 
   return (
-    <Tabs value={tab} onValueChange={handleTabChange} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-5 max-w-4xl">
-        <TabsTrigger value="quick" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-          Quick Create
+    <Tabs value={tab} onValueChange={handleTabChange} className="space-y-4 md:space-y-6">
+      <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 max-w-4xl">
+        <TabsTrigger 
+          value="quick" 
+          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
+        >
+          <span className="hidden sm:inline">Quick Create</span>
+          <span className="sm:hidden">Quick</span>
         </TabsTrigger>
-        <TabsTrigger value="bulk" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-          Massen-Erstellung
+        <TabsTrigger 
+          value="bulk" 
+          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
+        >
+          <span className="hidden sm:inline">Massen-Erstellung</span>
+          <span className="sm:hidden">Massen</span>
         </TabsTrigger>
-        <TabsTrigger value="mass-200" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-          200 Games
+        <TabsTrigger 
+          value="mass-200" 
+          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
+        >
+          <span className="hidden lg:inline">200 Games</span>
+          <span className="lg:hidden">200</span>
         </TabsTrigger>
-        <TabsTrigger value="hardware-rss" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-          Hardware RSS
+        <TabsTrigger 
+          value="hardware-rss" 
+          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
+        >
+          <span className="hidden md:inline">Hardware RSS</span>
+          <span className="md:hidden">RSS</span>
         </TabsTrigger>
-        <TabsTrigger value="list" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-          Alle Beiträge
+        <TabsTrigger 
+          value="list" 
+          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
+        >
+          <span className="hidden sm:inline">Alle Beiträge</span>
+          <span className="sm:hidden">Liste</span>
         </TabsTrigger>
       </TabsList>
       <TabsContent value="quick" className="space-y-4 mt-6">
@@ -64,12 +84,12 @@ function AdminTabs() {
 
 export default function AdminPage() {
   return (
-    <div className="space-y-8 pb-12 animate-fade-in">
-      <div className="flex flex-col space-y-3">
-        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+    <div className="space-y-4 md:space-y-8 pb-8 md:pb-12 animate-fade-in px-4 md:px-0">
+      <div className="flex flex-col space-y-2 md:space-y-3">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
           Admin Dashboard
         </h1>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-muted-foreground text-sm md:text-base lg:text-lg">
           Erstelle und verwalte deine Reviews professionell und effizient.
         </p>
       </div>

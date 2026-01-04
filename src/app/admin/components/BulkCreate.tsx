@@ -132,34 +132,34 @@ export function BulkCreate() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <Card className="border-2 border-primary/20 shadow-xl">
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center">
-              <Database className="text-primary h-6 w-6" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div className="bg-primary/10 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0">
+              <Database className="text-primary h-5 w-5 md:h-6 md:w-6" />
             </div>
-            <div>
-              <CardTitle className="text-2xl">Massen-Erstellung</CardTitle>
-              <CardDescription>
+            <div className="min-w-0 flex-1">
+              <CardTitle className="text-lg md:text-xl lg:text-2xl">Massen-Erstellung</CardTitle>
+              <CardDescription className="text-xs md:text-sm mt-1">
                 Erstelle mehrere Reviews gleichzeitig basierend auf Datenbank-Kriterien
               </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 md:space-y-6">
           <Tabs value={category} onValueChange={(v) => setCategory(v as Category)}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="game" className="flex items-center gap-2">
-                <Database className="h-4 w-4" />
+            <TabsList className="grid w-full grid-cols-3 gap-1 md:gap-2">
+              <TabsTrigger value="game" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-4">
+                <Database className="h-3 w-3 md:h-4 md:w-4" />
                 Games
               </TabsTrigger>
-              <TabsTrigger value="movie" className="flex items-center gap-2">
-                <Film className="h-4 w-4" />
+              <TabsTrigger value="movie" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-4">
+                <Film className="h-3 w-3 md:h-4 md:w-4" />
                 Filme
               </TabsTrigger>
-              <TabsTrigger value="series" className="flex items-center gap-2">
-                <Tv className="h-4 w-4" />
+              <TabsTrigger value="series" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-4">
+                <Tv className="h-3 w-3 md:h-4 md:w-4" />
                 Serien
               </TabsTrigger>
             </TabsList>
@@ -336,18 +336,20 @@ export function BulkCreate() {
               <Button
                 onClick={handleBulkCreate}
                 disabled={loading || !limit}
-                className="w-full h-12 text-lg font-bold"
+                className="w-full h-10 md:h-12 text-sm md:text-base lg:text-lg font-bold"
                 size="lg"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Erstelle Reviews...
+                    <Loader2 className="mr-2 h-4 w-4 md:h-5 md:w-5 animate-spin" />
+                    <span className="hidden sm:inline">Erstelle Reviews...</span>
+                    <span className="sm:hidden">Erstelle...</span>
                   </>
                 ) : (
                   <>
-                    <Database className="mr-2 h-5 w-5" />
-                    Massenerstellung starten
+                    <Database className="mr-2 h-4 w-4 md:h-5 md:w-5" />
+                    <span className="hidden sm:inline">Massenerstellung starten</span>
+                    <span className="sm:hidden">Starten</span>
                   </>
                 )}
               </Button>
@@ -684,32 +686,32 @@ export function BulkCreate() {
       {result && (
         <Card className="border-2 shadow-xl">
           <CardHeader>
-            <CardTitle>Ergebnisse</CardTitle>
-            <CardDescription>Zusammenfassung der Massenerstellung</CardDescription>
+            <CardTitle className="text-lg md:text-xl">Ergebnisse</CardTitle>
+            <CardDescription className="text-xs md:text-sm">Zusammenfassung der Massenerstellung</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-muted rounded-lg">
-                <div className="text-2xl font-bold">{result.total}</div>
-                <div className="text-sm text-muted-foreground">Gesamt</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+              <div className="text-center p-3 md:p-4 bg-muted rounded-lg">
+                <div className="text-xl md:text-2xl font-bold">{result.total}</div>
+                <div className="text-xs md:text-sm text-muted-foreground">Gesamt</div>
               </div>
-              <div className="text-center p-4 bg-green-500/10 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">{result.successful}</div>
-                <div className="text-sm text-muted-foreground">Erfolgreich</div>
+              <div className="text-center p-3 md:p-4 bg-green-500/10 rounded-lg">
+                <div className="text-xl md:text-2xl font-bold text-green-600">{result.successful}</div>
+                <div className="text-xs md:text-sm text-muted-foreground">Erfolgreich</div>
               </div>
-              <div className="text-center p-4 bg-yellow-500/10 rounded-lg">
-                <div className="text-2xl font-bold text-yellow-600">{result.skipped}</div>
-                <div className="text-sm text-muted-foreground">Übersprungen</div>
+              <div className="text-center p-3 md:p-4 bg-yellow-500/10 rounded-lg">
+                <div className="text-xl md:text-2xl font-bold text-yellow-600">{result.skipped}</div>
+                <div className="text-xs md:text-sm text-muted-foreground">Übersprungen</div>
               </div>
-              <div className="text-center p-4 bg-red-500/10 rounded-lg">
-                <div className="text-2xl font-bold text-red-600">{result.failed}</div>
-                <div className="text-sm text-muted-foreground">Fehlgeschlagen</div>
+              <div className="text-center p-3 md:p-4 bg-red-500/10 rounded-lg">
+                <div className="text-xl md:text-2xl font-bold text-red-600">{result.failed}</div>
+                <div className="text-xs md:text-sm text-muted-foreground">Fehlgeschlagen</div>
               </div>
             </div>
 
             {result.reviews.length > 0 && (
               <div className="space-y-2">
-                <h4 className="font-semibold flex items-center gap-2">
+                <h4 className="font-semibold flex items-center gap-2 text-sm md:text-base">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   Erstellte Reviews ({result.reviews.length})
                 </h4>
@@ -717,10 +719,10 @@ export function BulkCreate() {
                   {result.reviews.map((review) => (
                     <div
                       key={review.id}
-                      className="flex items-center justify-between p-2 bg-muted/50 rounded text-sm"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 p-2 bg-muted/50 rounded text-xs md:text-sm"
                     >
-                      <span>{review.title}</span>
-                      <Badge variant="outline">{review.slug}</Badge>
+                      <span className="truncate">{review.title}</span>
+                      <Badge variant="outline" className="text-[10px] md:text-xs w-fit">{review.slug}</Badge>
                     </div>
                   ))}
                 </div>
@@ -729,7 +731,7 @@ export function BulkCreate() {
 
             {result.errors.length > 0 && (
               <div className="space-y-2">
-                <h4 className="font-semibold flex items-center gap-2">
+                <h4 className="font-semibold flex items-center gap-2 text-sm md:text-base">
                   <XCircle className="h-4 w-4 text-red-600" />
                   Fehler ({result.errors.length})
                 </h4>
@@ -737,12 +739,12 @@ export function BulkCreate() {
                   {result.errors.map((error, index) => (
                     <div
                       key={index}
-                      className="p-2 bg-red-500/10 rounded text-sm"
+                      className="p-2 bg-red-500/10 rounded text-xs md:text-sm"
                     >
-                      <div className="font-medium">
+                      <div className="font-medium break-words">
                         {error.game || error.movie || error.series}
                       </div>
-                      <div className="text-xs text-muted-foreground">{error.error}</div>
+                      <div className="text-[10px] md:text-xs text-muted-foreground break-words mt-1">{error.error}</div>
                     </div>
                   ))}
                 </div>

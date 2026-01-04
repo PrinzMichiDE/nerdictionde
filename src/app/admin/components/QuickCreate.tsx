@@ -64,19 +64,19 @@ export function QuickCreate() {
 
   return (
     <Card className="max-w-2xl mx-auto border-2 border-primary/20 shadow-xl">
-      <CardHeader className="text-center">
-        <div className="mx-auto bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
-            <Rocket className="text-primary h-6 w-6" />
+      <CardHeader className="text-center px-4 md:px-6">
+        <div className="mx-auto bg-primary/10 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center mb-3 md:mb-4">
+            <Rocket className="text-primary h-5 w-5 md:h-6 md:w-6" />
         </div>
-        <CardTitle className="text-2xl">Quick Review Generator</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-xl md:text-2xl">Quick Review Generator</CardTitle>
+        <CardDescription className="text-xs md:text-sm mt-2">
           Wähle eine Kategorie und gib einen Namen oder Link ein, 
           um sofort ein professionelles Review zu generieren.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-4 md:px-6">
         {/* Category Selection */}
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           {categoryOptions.map((option) => (
             <Button
               key={option.value}
@@ -111,15 +111,19 @@ export function QuickCreate() {
           <Button 
             onClick={handleGenerate} 
             disabled={loading || !input}
-            className="rounded-full h-11 px-6 font-bold"
+            className="rounded-full h-11 px-4 md:px-6 font-bold text-sm md:text-base"
           >
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generiere...
+                <span className="hidden sm:inline">Generiere...</span>
+                <span className="sm:hidden">...</span>
               </>
             ) : (
-              "Review erstellen"
+              <>
+                <span className="hidden sm:inline">Review erstellen</span>
+                <span className="sm:hidden">Erstellen</span>
+              </>
             )}
           </Button>
         </div>
