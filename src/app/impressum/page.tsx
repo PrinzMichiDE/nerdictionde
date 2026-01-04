@@ -31,17 +31,17 @@ export default function ImpressumPage() {
             <p>
               <strong className="text-foreground">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:</strong>
               <br />
-              Nerdiction
+              Michel Fritzsch
             </p>
             <p>
               <strong className="text-foreground">Anschrift:</strong>
               <br />
-              [Ihre Adresse hier eintragen]
+              [Anschrift wird auf Anfrage mitgeteilt]
             </p>
             <p>
               <strong className="text-foreground">Kontakt:</strong>
               <br />
-              E-Mail: <a href="mailto:kontakt@nerdiction.de" className="text-primary hover:underline">kontakt@nerdiction.de</a>
+              E-Mail: <a href="mailto:michel@michelfritzsch.de" className="text-primary hover:underline">michel@michelfritzsch.de</a>
             </p>
           </div>
         </section>
