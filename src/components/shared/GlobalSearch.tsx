@@ -1,212 +1,273 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { Search, X, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Review } from "@/types/review";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Search, X, Filter, Gamepad2, Cpu, ShoppingCart, Film, Tv } from "lucide-react";
 import Link from "next/link";
+import { Review } from "@/types/review";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-interface SearchResult {
-  reviews: Review[];
+interface GlobalSearchProps {
+  reviews?: Review[];
 }
 
-export function GlobalSearch() {
+const categoryIcons = {
+  game: Gamepad2,
+  hardware: Cpu,
+  amazon: ShoppingCart,
+  movie: Film,
+  series: Tv,
+};
+
+export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Review[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set());
+  const [results, setResults] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  // Close dropdown when clicking outside
+  // Fetch reviews if not provided
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    if (reviews.length === 0) {
+      fetch("/api/reviews")
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setReviews(data.slice(0, 100)); // Limit for performance
+          }
+        })
+        .catch(() => {
+          // Silently fail
+        });
+    }
+  }, [reviews.length]);
+
+  const categories = ["game", "hardware", "amazon", "movie", "series"];
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        setSelectedIndex(-1);
       }
-    }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setIsOpen(true);
+        inputRef.current?.focus();
+      }
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
-  // Handle keyboard navigation
   useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (!isOpen || results.length === 0) return;
-
-      switch (event.key) {
-        case "ArrowDown":
-          event.preventDefault();
-          setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : prev));
-          break;
-        case "ArrowUp":
-          event.preventDefault();
-          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
-          break;
-        case "Enter":
-          event.preventDefault();
-          if (selectedIndex >= 0 && results[selectedIndex]) {
-            router.push(`/reviews/${results[selectedIndex].slug}`);
-            setIsOpen(false);
-            setQuery("");
-          }
-          break;
-        case "Escape":
-          setIsOpen(false);
-          setSelectedIndex(-1);
-          inputRef.current?.blur();
-          break;
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, results, selectedIndex, router]);
-
-  // Debounced search
-  useEffect(() => {
-    if (!query.trim()) {
+    if (!query.trim() && selectedFilters.size === 0) {
       setResults([]);
-      setIsOpen(false);
       return;
     }
 
-    const timeoutId = setTimeout(async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`/api/reviews?query=${encodeURIComponent(query)}&limit=5`);
-        if (response.ok) {
-          const data: Review[] = await response.json();
-          setResults(data.slice(0, 5)); // Limit to 5 results
-          setIsOpen(data.length > 0);
-        } else {
-          setResults([]);
-          setIsOpen(false);
-        }
-      } catch (error) {
-        console.error("Search error:", error);
-        setResults([]);
-        setIsOpen(false);
-      } finally {
-        setIsLoading(false);
-      }
-    }, 300);
+    let filtered = reviews;
 
-    return () => clearTimeout(timeoutId);
-  }, [query]);
+    // Filter by category
+    if (selectedFilters.size > 0) {
+      filtered = filtered.filter((review) =>
+        selectedFilters.has(review.category)
+      );
+    }
+
+    // Filter by query
+    if (query.trim()) {
+      const lowerQuery = query.toLowerCase();
+      filtered = filtered.filter(
+        (review) =>
+          review.title.toLowerCase().includes(lowerQuery) ||
+          review.content?.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    setResults(filtered.slice(0, 8));
+  }, [query, selectedFilters, reviews]);
+
+  const toggleFilter = (category: string) => {
+    const newFilters = new Set(selectedFilters);
+    if (newFilters.has(category)) {
+      newFilters.delete(category);
+    } else {
+      newFilters.add(category);
+    }
+    setSelectedFilters(newFilters);
+  };
 
   const handleResultClick = (slug: string) => {
     router.push(`/reviews/${slug}`);
     setIsOpen(false);
     setQuery("");
-    setSelectedIndex(-1);
-  };
-
-  const clearSearch = () => {
-    setQuery("");
-    setResults([]);
-    setIsOpen(false);
-    setSelectedIndex(-1);
-    inputRef.current?.focus();
   };
 
   return (
-    <div ref={searchRef} className="relative w-full max-w-md">
+    <div ref={searchRef} className="relative w-full max-w-2xl">
+      {/* Search Input */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           ref={inputRef}
-          type="search"
-          placeholder="Reviews durchsuchen..."
+          type="text"
+          placeholder="Suche nach Reviews... (⌘K)"
           value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setSelectedIndex(-1);
-          }}
-          onFocus={() => {
-            if (results.length > 0) setIsOpen(true);
-          }}
-          className="pl-9 pr-9 h-9 w-full"
-          aria-label="Globale Suche"
-          aria-expanded={isOpen}
-          aria-controls="search-results"
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setIsOpen(true)}
+          className="pl-12 pr-12 h-12 text-base border-2 focus:border-primary"
         />
         {query && (
-          <button
-            onClick={clearSearch}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-            aria-label="Suche zurücksetzen"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+            onClick={() => {
+              setQuery("");
+              inputRef.current?.focus();
+            }}
           >
-            <X className="size-4" />
-          </button>
-        )}
-        {isLoading && (
-          <div className="absolute right-9 top-1/2 -translate-y-1/2">
-            <Loader2 className="size-4 animate-spin text-muted-foreground" />
-          </div>
+            <X className="h-4 w-4" />
+          </Button>
         )}
       </div>
 
-      {isOpen && results.length > 0 && (
-        <div
-          id="search-results"
-          className="absolute z-50 w-full mt-2 bg-popover border rounded-md shadow-lg max-h-[400px] overflow-auto"
-          role="listbox"
-        >
-          {results.map((review, index) => (
-            <Link
-              key={review.id}
-              href={`/reviews/${review.slug}`}
-              onClick={() => handleResultClick(review.slug)}
-              className={cn(
-                "block px-4 py-3 hover:bg-accent transition-colors border-b last:border-b-0",
-                selectedIndex === index && "bg-accent"
-              )}
-              role="option"
-              aria-selected={selectedIndex === index}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm line-clamp-1">{review.title}</p>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                    {review.content.replace(/[#*`]/g, "").substring(0, 100)}...
+      {/* Search Results Dropdown */}
+      {isOpen && (
+        <Card className="absolute top-full mt-2 w-full border-2 shadow-2xl z-50 max-h-[600px] overflow-hidden">
+          <CardContent className="p-0">
+            {/* Filter Tags */}
+            <div className="p-4 border-b border-border">
+              <div className="flex items-center gap-2 mb-3">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  Filter:
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {categories.map((category) => {
+                  const Icon = categoryIcons[category as keyof typeof categoryIcons];
+                  const isSelected = selectedFilters.has(category);
+
+                  return (
+                    <button
+                      key={category}
+                      onClick={() => toggleFilter(category)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                        isSelected
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      }`}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Results */}
+            <div className="max-h-[400px] overflow-y-auto">
+              {results.length > 0 ? (
+                <div className="p-2">
+                  {results.map((review) => {
+                    const Icon =
+                      categoryIcons[review.category as keyof typeof categoryIcons];
+
+                    return (
+                      <button
+                        key={review.id}
+                        onClick={() => handleResultClick(review.slug)}
+                        className="w-full p-3 rounded-lg hover:bg-muted transition-colors text-left group"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold group-hover:text-primary transition-colors line-clamp-1">
+                              {review.title}
+                            </h4>
+                            <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                              {review.content?.substring(0, 100)}...
+                            </p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="text-xs font-medium text-primary">
+                                Score: {review.score}/100
+                              </span>
+                              <span className="text-xs text-muted-foreground">•</span>
+                              <span className="text-xs text-muted-foreground capitalize">
+                                {review.category}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : query || selectedFilters.size > 0 ? (
+                <div className="p-8 text-center">
+                  <p className="text-muted-foreground">Keine Ergebnisse gefunden</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Versuche andere Suchbegriffe oder Filter
                   </p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded capitalize">
-                      {review.category}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Score: {review.score}/100
-                    </span>
-                  </div>
+                </div>
+              ) : (
+                <div className="p-8 text-center">
+                  <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground">Beginne mit der Suche...</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Verwende Filter oder gib einen Suchbegriff ein
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Actions */}
+            {!query && selectedFilters.size === 0 && (
+              <div className="p-4 border-t border-border bg-muted/30">
+                <p className="text-xs font-medium text-muted-foreground mb-2">
+                  Quick Actions:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href="/reviews"
+                    className="px-3 py-1.5 rounded-lg bg-background border border-border hover:border-primary hover:text-primary text-sm font-medium transition-colors"
+                  >
+                    Alle Reviews
+                  </Link>
+                  <Link
+                    href="/reviews?sort=score-desc"
+                    className="px-3 py-1.5 rounded-lg bg-background border border-border hover:border-primary hover:text-primary text-sm font-medium transition-colors"
+                  >
+                    Top Reviews
+                  </Link>
                 </div>
               </div>
-            </Link>
-          ))}
-          {results.length >= 5 && (
-            <Link
-              href={`/reviews?query=${encodeURIComponent(query)}`}
-              onClick={() => setIsOpen(false)}
-              className="block px-4 py-3 text-center text-sm font-medium text-primary hover:bg-accent border-t transition-colors"
-            >
-              Alle Ergebnisse anzeigen →
-            </Link>
-          )}
-        </div>
-      )}
-
-      {isOpen && !isLoading && query.trim() && results.length === 0 && (
-        <div className="absolute z-50 w-full mt-2 bg-popover border rounded-md shadow-lg p-4 text-center text-sm text-muted-foreground">
-          Keine Ergebnisse gefunden
-        </div>
+            )}
+          </CardContent>
+        </Card>
       )}
     </div>
   );
 }
-

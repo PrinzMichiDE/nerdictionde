@@ -24,7 +24,7 @@ export function Header() {
             </span>
           </Link>
           <div className="hidden md:flex flex-1 max-w-md mx-4">
-            <GlobalSearch />
+            <GlobalSearch reviews={reviews} />
           </div>
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
             <Navigation />

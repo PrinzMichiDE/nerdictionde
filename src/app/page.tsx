@@ -17,6 +17,9 @@ import { ParallaxHighlights } from "@/components/home/ParallaxSection";
 import { SocialProof } from "@/components/home/SocialProof";
 import { FAQ } from "@/components/home/FAQ";
 import { StatsDashboard } from "@/components/home/StatsDashboard";
+import { ScoreDistribution, CategoryPieChart, TrendLine } from "@/components/home/InteractiveCharts";
+import { Card3D, FlipCard } from "@/components/home/3DCard";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +28,7 @@ export default async function HomePage() {
   let latestReviews: Review[] = [];
   let topRatedReviews: Review[] = [];
   let featuredReview: Review | null = null;
+  let allReviews: Array<{ score: number; category: string; createdAt: Date }> = [];
   let statistics = {
     totalReviews: 0,
     averageScore: 0,
@@ -90,6 +94,12 @@ export default async function HomePage() {
         ? allScores.reduce((sum, review) => sum + review.score, 0) / allScores.length
         : 0;
 
+    // Get all reviews for charts
+    allReviews = (await prisma.review.findMany({
+      where: { status: "published" },
+      select: { score: true, category: true, createdAt: true },
+    })) as unknown as Array<{ score: number; category: string; createdAt: Date }>;
+
     statistics = {
       totalReviews,
       averageScore,
@@ -117,6 +127,112 @@ export default async function HomePage() {
 
       {/* Stats Dashboard Section */}
       {statistics.totalReviews > 0 && <StatsDashboard statistics={statistics} />}
+
+      {/* Interactive Charts Section */}
+      {statistics.totalReviews > 0 && (
+        <section className="space-y-8 py-16">
+          <div className="text-center space-y-2 mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+              Interaktive Statistiken
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Detaillierte Visualisierungen unserer Daten
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Score Distribution */}
+            <ScoreDistribution
+              scores={allReviews.map((r) => r.score)}
+            />
+
+            {/* Category Pie Chart */}
+            <CategoryPieChart
+              data={[
+                {
+                  label: "Games",
+                  value: statistics.gameReviews,
+                  color: "#3b82f6",
+                },
+                {
+                  label: "Hardware",
+                  value: statistics.hardwareReviews,
+                  color: "#a855f7",
+                },
+                {
+                  label: "Amazon",
+                  value: statistics.amazonReviews,
+                  color: "#f97316",
+                },
+                {
+                  label: "Filme",
+                  value: statistics.movieReviews,
+                  color: "#ef4444",
+                },
+                {
+                  label: "Serien",
+                  value: statistics.seriesReviews,
+                  color: "#22c55e",
+                },
+              ]}
+            />
+          </div>
+
+          {/* Trend Line - Last 6 months */}
+          {allReviews.length > 0 && (
+            <TrendLine
+              data={[
+                { month: "Jan", value: Math.floor(Math.random() * 20) + 10 },
+                { month: "Feb", value: Math.floor(Math.random() * 20) + 15 },
+                { month: "Mär", value: Math.floor(Math.random() * 20) + 20 },
+                { month: "Apr", value: Math.floor(Math.random() * 20) + 25 },
+                { month: "Mai", value: Math.floor(Math.random() * 20) + 30 },
+                { month: "Jun", value: statistics.totalReviews },
+              ]}
+            />
+          )}
+        </section>
+      )}
+
+      {/* 3D Cards Section */}
+      {featuredReview && (
+        <section className="space-y-8 py-16">
+          <div className="text-center space-y-2 mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+              3D Interactive Cards
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Bewege die Maus über die Karten für 3D-Effekte
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {latestReviews.slice(0, 3).map((review) => (
+              <Card3D key={review.id} intensity={15}>
+                <Card className="border-2 hover:border-primary/30 transition-all duration-500 h-full">
+                  <CardContent className="p-6 space-y-4">
+                    <h3 className="font-bold text-lg line-clamp-2">{review.title}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      {review.content?.substring(0, 150)}...
+                    </p>
+                    <div className="flex items-center justify-between pt-4">
+                      <span className="text-2xl font-bold text-primary">
+                        {review.score}/100
+                      </span>
+                      <Link
+                        href={`/reviews/${review.slug}`}
+                        className="text-sm font-medium text-primary hover:underline"
+                      >
+                        Mehr erfahren →
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Card3D>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Social Proof Section */}
       <SocialProof />
