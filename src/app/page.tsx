@@ -14,6 +14,12 @@ import { TrustBadges } from "@/components/home/TrustBadges";
 import { ImageGallery } from "@/components/home/ImageGallery";
 import { VideoGallery } from "@/components/home/VideoGallery";
 import { ParallaxHighlights } from "@/components/home/ParallaxSection";
+import { Partners } from "@/components/home/Partners";
+import { Awards } from "@/components/home/Awards";
+import { SocialProof } from "@/components/home/SocialProof";
+import { FAQ } from "@/components/home/FAQ";
+import { StatsDashboard } from "@/components/home/StatsDashboard";
+import { PressMentions } from "@/components/home/PressMentions";
 
 export const dynamic = 'force-dynamic';
 
@@ -112,6 +118,12 @@ export default async function HomePage() {
       {/* Statistics Section */}
       {statistics.totalReviews > 0 && <Statistics data={statistics} />}
 
+      {/* Stats Dashboard Section */}
+      {statistics.totalReviews > 0 && <StatsDashboard statistics={statistics} />}
+
+      {/* Social Proof Section */}
+      <SocialProof />
+
       {/* Featured Review Section */}
       {featuredReview && <FeaturedReview review={featuredReview} />}
 
@@ -172,6 +184,18 @@ export default async function HomePage() {
 
       {/* Parallax Highlights Section */}
       <ParallaxHighlights />
+
+      {/* Partners Section */}
+      <Partners />
+
+      {/* Awards Section */}
+      <Awards />
+
+      {/* Press Mentions Section */}
+      <PressMentions />
+
+      {/* FAQ Section */}
+      <FAQ />
 
       {/* Call to Action Section */}
       <CallToAction />
