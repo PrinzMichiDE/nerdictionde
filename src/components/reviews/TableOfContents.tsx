@@ -101,7 +101,9 @@ export function TableOfContents({ headings, isEn }: TableOfContentsProps) {
                 ? "font-bold text-foreground"
                 : heading.level === 2
                 ? "font-semibold text-foreground/90 pl-4"
-                : "text-foreground/80 pl-8"
+                : heading.level === 3
+                ? "text-foreground/80 pl-8"
+                : "text-foreground/70 pl-12"
             }`}
           >
             {heading.text}

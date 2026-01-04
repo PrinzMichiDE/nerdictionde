@@ -31,6 +31,8 @@ async function main() {
   }
 
   // Improved content with better headings and matching table of contents
+  // Note: H1, H2, H3 can all be used in the content. The first H1 is the main title and won't appear in TOC.
+  // All other H1, H2, H3 headings will appear in the table of contents.
   const improvedContent = `# Buen Camino - Eine emotionale Reise zwischen Komik und Familiendramen
 
 ## Inhaltsverzeichnis
@@ -93,12 +95,29 @@ Besonders gelungen ist die Art, wie der Film zeigt, dass wahre Veränderung Zeit
 
   // Verify that all TOC links match the generated IDs
   const tocLinks = improvedContent.match(/\[([^\]]+)\]\(#([^\)]+)\)/g) || [];
-  const allHeadings = improvedContent.match(/^## (.+)$/gm) || [];
+  // Match all headings (H1-H6), but we'll filter them
+  const allHeadings = improvedContent.match(/^(#{1,6})\s+(.+)$/gm) || [];
   
-  // Filter out the "Inhaltsverzeichnis" heading
+  // Filter out the first H1 (main title) and "Inhaltsverzeichnis" heading
+  let firstH1Found = false;
   const contentHeadings = allHeadings.filter(h => {
-    const text = h.replace(/^## /, '').trim().toLowerCase();
-    return !text.includes('inhaltsverzeichnis') && !text.includes('table of contents');
+    const match = h.match(/^(#{1,6})\s+(.+)$/);
+    if (!match) return false;
+    const level = match[1].length;
+    const text = match[2].trim().toLowerCase();
+    
+    // Skip first H1 (main title)
+    if (level === 1 && !firstH1Found) {
+      firstH1Found = true;
+      return false;
+    }
+    
+    // Skip "Inhaltsverzeichnis" heading
+    if (text.includes('inhaltsverzeichnis') || text.includes('table of contents')) {
+      return false;
+    }
+    
+    return true;
   });
   
   console.log("Verifying table of contents links...");
@@ -109,7 +128,9 @@ Besonders gelungen ist die Art, wie der Film zeigt, dass wahre Veränderung Zeit
     const linkId = tocLink.match(/\(#([^\)]+)\)/)?.[1];
     
     if (index < contentHeadings.length) {
-      const headingText = contentHeadings[index].replace(/^## /, '').trim();
+      const match = contentHeadings[index].match(/^(#{1,6})\s+(.+)$/);
+      if (!match) continue;
+      const headingText = match[2].trim();
       const expectedId = generateSlug(headingText);
       
       if (linkId !== expectedId) {

@@ -92,6 +92,7 @@ export default async function ReviewDetailPage({
     const headingRegex = /^(#{1,6})\s+(.+)$/gm;
     const headings: Array<{ level: number; text: string; id: string }> = [];
     let match;
+    let firstH1Found = false;
 
     while ((match = headingRegex.exec(markdown)) !== null) {
       const level = match[1].length;
@@ -100,8 +101,13 @@ export default async function ReviewDetailPage({
       // Remove markdown links from heading text
       text = text.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
       
-      // Skip the main title (H1) and the table of contents heading itself
-      if (level === 1) continue;
+      // Skip the first H1 (main title) - it's already displayed at the top
+      if (level === 1 && !firstH1Found) {
+        firstH1Found = true;
+        continue;
+      }
+      
+      // Skip the table of contents heading itself
       const tocHeadingText = isEn ? "Table of Contents" : "Inhaltsverzeichnis";
       if (text.toLowerCase() === tocHeadingText.toLowerCase()) continue;
       
