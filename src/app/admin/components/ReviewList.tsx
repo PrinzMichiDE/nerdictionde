@@ -7,17 +7,42 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Edit, Eye, Search, Filter, Loader2 } from "lucide-react";
+import { Edit, Eye, Search, Filter, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { ScoreBadge } from "@/components/reviews/ScoreBadge";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export function ReviewList() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") || "all");
+  const [categoryFilter, setCategoryFilter] = useState<string>(searchParams.get("category") || "all");
+
+  // Sync URL params with state
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (searchQuery) {
+      params.set("search", searchQuery);
+    } else {
+      params.delete("search");
+    }
+    if (statusFilter !== "all") {
+      params.set("status", statusFilter);
+    } else {
+      params.delete("status");
+    }
+    if (categoryFilter !== "all") {
+      params.set("category", categoryFilter);
+    } else {
+      params.delete("category");
+    }
+    params.set("tab", "list");
+    router.replace(`/admin?${params.toString()}`, { scroll: false });
+  }, [searchQuery, statusFilter, categoryFilter, router, searchParams]);
 
   useEffect(() => {
     fetchReviews();
@@ -42,10 +67,23 @@ export function ReviewList() {
   };
 
   const filteredReviews = reviews.filter((review) => {
-    const matchesSearch =
-      review.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      review.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (review.title_en?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+    const query = searchQuery.toLowerCase().trim();
+    let matchesSearch = true;
+
+    if (query) {
+      const searchInContent = review.content?.toLowerCase().replace(/[#*`\[\]()]/g, "") || "";
+      const searchInContentEn = review.content_en?.toLowerCase().replace(/[#*`\[\]()]/g, "") || "";
+      
+      matchesSearch =
+        review.title.toLowerCase().includes(query) ||
+        review.slug.toLowerCase().includes(query) ||
+        (review.title_en?.toLowerCase().includes(query) ?? false) ||
+        searchInContent.includes(query) ||
+        searchInContentEn.includes(query) ||
+        review.category.toLowerCase().includes(query) ||
+        (review.pros?.some(pro => pro.toLowerCase().includes(query)) ?? false) ||
+        (review.cons?.some(con => con.toLowerCase().includes(query)) ?? false);
+    }
 
     const matchesStatus = statusFilter === "all" || review.status === statusFilter;
     const matchesCategory = categoryFilter === "all" || review.category === categoryFilter;
@@ -71,17 +109,32 @@ export function ReviewList() {
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Nach Titel oder Slug suchen..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 rounded-lg"
-          />
-        </div>
+      {/* Search and Filters */}
+      <Card className="p-4">
+        <div className="flex flex-col gap-4">
+          {/* Search Bar */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder="Nach Titel, Slug, Inhalt oder Kategorie suchen..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10 rounded-lg h-11 text-base"
+              autoFocus
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Suche zurücksetzen"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Filters Row */}
+          <div className="flex flex-col sm:flex-row gap-4">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full sm:w-[180px] rounded-lg">
             <Filter className="mr-2 h-4 w-4" />
@@ -93,20 +146,22 @@ export function ReviewList() {
             <SelectItem value="draft">Entwurf</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-full sm:w-[180px] rounded-lg">
-            <SelectValue placeholder="Kategorie" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle Kategorien</SelectItem>
-            <SelectItem value="game">Game</SelectItem>
-            <SelectItem value="hardware">Hardware</SelectItem>
-            <SelectItem value="movie">Movie</SelectItem>
-            <SelectItem value="series">Series</SelectItem>
-            <SelectItem value="amazon">Amazon</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-full sm:w-[180px] rounded-lg">
+                <SelectValue placeholder="Kategorie" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alle Kategorien</SelectItem>
+                <SelectItem value="game">Game</SelectItem>
+                <SelectItem value="hardware">Hardware</SelectItem>
+                <SelectItem value="movie">Movie</SelectItem>
+                <SelectItem value="series">Series</SelectItem>
+                <SelectItem value="amazon">Amazon</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </Card>
 
       {/* Results Count */}
       <div className="flex items-center justify-between text-sm text-muted-foreground">
