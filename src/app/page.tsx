@@ -10,8 +10,6 @@ import { FeaturedReview } from "@/components/home/FeaturedReview";
 import { WhyNerdiction } from "@/components/home/WhyNerdiction";
 import { CallToAction } from "@/components/home/CallToAction";
 import { HeroSection } from "@/components/home/HeroSection";
-import { Testimonials } from "@/components/home/Testimonials";
-import { Newsletter } from "@/components/home/Newsletter";
 import { TrustBadges } from "@/components/home/TrustBadges";
 
 export const dynamic = 'force-dynamic';
@@ -162,12 +160,6 @@ export default async function HomePage() {
           </div>
         )}
       </section>
-
-      {/* Testimonials Section */}
-      <Testimonials />
-
-      {/* Newsletter Section */}
-      <Newsletter />
 
       {/* Call to Action Section */}
       <CallToAction />
