@@ -224,7 +224,7 @@ export async function generateContent(
       model: OPENAI_MODEL,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
-      max_tokens: 4000,
+      max_tokens: 16000, // Increased for longer content (5000-10000 words per language)
     });
 
     let contentRaw = aiResponse.choices[0].message.content || "{}";
@@ -387,21 +387,21 @@ export async function generateHardwareReviewContent(
   ].slice(0, 5);
   
   const prompt = `
-    Schreibe eine EXTREM AUSFÜHRLICHE und DETAILLIERTE professionelle Hardware-Review für "${hardwareData.name}" in Deutsch UND Englisch.
+    Schreibe eine EXTREM AUSFÜHRLICHE und ULTRA-DETAILLIERTE professionelle Hardware-Review für "${hardwareData.name}" in Deutsch UND Englisch.
     
-    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 1000-1200 Wörter pro Sprache), damit das JSON vollständig ist." : "KRITISCHE ANFORDERUNGEN:\n1. Der Text muss MASSIV AUSFÜHRLICH sein (MINDESTENS 1500-2000 Wörter pro Sprache - NICHT weniger!).\n2. Nutze eine tiefgehende journalistische Struktur mit vielen aussagekräftigen H2- und H3-Überschriften.\n3. Nutze die recherchierten Informationen aus den Tavily-Suchergebnissen für authentische Details.\n4. WICHTIG: Schreibe KEINE kurzen Reviews! Jeder Abschnitt muss ausführlich sein.\n5. Erwähne NIEMALS, dass dieser Text von einer KI generiert wurde. Der Text muss so klingen, als wäre er von einem passionierten Hardware-Experten geschrieben worden."}
+    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 3000-4000 Wörter pro Sprache), damit das JSON vollständig ist." : "KRITISCHE ANFORDERUNGEN:\n1. Der Text muss MASSIV AUSFÜHRLICH sein (MINDESTENS 5000-10000 Wörter pro Sprache - NICHT weniger!).\n2. Nutze eine tiefgehende journalistische Struktur mit vielen aussagekräftigen H2- und H3-Überschriften.\n3. Nutze die recherchierten Informationen aus den Tavily-Suchergebnissen für authentische Details.\n4. WICHTIG: Schreibe KEINE kurzen Reviews! Jeder Abschnitt muss SEHR ausführlich sein mit vielen Details.\n5. Erwähne NIEMALS, dass dieser Text von einer KI generiert wurde. Der Text muss so klingen, als wäre er von einem passionierten Hardware-Experten geschrieben worden.\n6. Gehe in JEDEM Abschnitt sehr tief ins Detail - beschreibe nicht nur oberflächlich, sondern analysiere gründlich."}
     
     Antworte EXKLUSIV im JSON-Format mit folgendem Schema:
     {
       "de": {
         "title": "...",
-        "content": "Markdown mit:\n- Inhaltsverzeichnis\n- AUSFÜHRLICHER Einleitung (mindestens 3-4 Absätze über das Produkt, seine Bedeutung, Marktposition)\n- MEHREREN tiefgehenden Analyse-Abschnitten mit Überschriften wie:\n  * Design & Verarbeitung (ausführlich beschreiben)\n  * Technische Spezifikationen im Detail (jede wichtige Spec erklären)\n  * Performance & Benchmarks (detaillierte Leistungsanalyse)\n  * Features & Innovationen (alle wichtigen Features beschreiben)\n  * Vergleich mit Konkurrenzprodukten\n  * Preis-Leistungs-Verhältnis\n  * Einsatzgebiete & Zielgruppe\n  * Vor- und Nachteile im Detail\n- BILD-PLATZHALTERN (![[IMAGE_X]]) an passenden Stellen\n- AUSFÜHRLICHEM Fazit (mindestens 2-3 Absätze mit Zusammenfassung, Empfehlung, Zielgruppe)\n\nWICHTIG: Jeder Abschnitt muss ausführlich sein! Keine kurzen Sätze oder oberflächliche Beschreibungen!",
+        "content": "Markdown mit:\n- Inhaltsverzeichnis\n- SEHR AUSFÜHRLICHER Einleitung (mindestens 8-10 Absätze über das Produkt, seine Bedeutung, Marktposition, historischer Kontext, Hersteller)\n- VIELE tiefgehenden Analyse-Abschnitten mit Überschriften wie:\n  * Design & Verarbeitung (SEHR ausführlich - mindestens 5-6 Absätze)\n  * Technische Spezifikationen im Detail (jede wichtige Spec SEHR detailliert erklären - mindestens 10-15 Absätze)\n  * Performance & Benchmarks (SEHR detaillierte Leistungsanalyse mit vielen Beispielen - mindestens 8-10 Absätze)\n  * Features & Innovationen (alle wichtigen Features SEHR ausführlich beschreiben - mindestens 6-8 Absätze)\n  * Vergleich mit Konkurrenzprodukten (detaillierter Vergleich - mindestens 5-6 Absätze)\n  * Preis-Leistungs-Verhältnis (ausführliche Analyse - mindestens 4-5 Absätze)\n  * Einsatzgebiete & Zielgruppe (detaillierte Beschreibung - mindestens 4-5 Absätze)\n  * Installation & Setup (falls relevant - mindestens 3-4 Absätze)\n  * Software & Treiber (falls relevant - mindestens 3-4 Absätze)\n  * Vor- und Nachteile im Detail (jeder Punkt ausführlich erklärt - mindestens 6-8 Absätze)\n- BILD-PLATZHALTERN (![[IMAGE_X]]) an passenden Stellen\n- SEHR AUSFÜHRLICHEM Fazit (mindestens 5-6 Absätze mit Zusammenfassung, Empfehlung, Zielgruppe, Ausblick)\n\nKRITISCH WICHTIG: Diese Review muss MINDESTENS 5000-10000 Wörter lang sein! Jeder Abschnitt muss SEHR ausführlich sein mit vielen Details, Beispielen und Erklärungen! Keine kurzen Sätze oder oberflächliche Beschreibungen!",
         "pros": ["...", "...", "...", "...", "..."],
         "cons": ["...", "...", "...", "...", "..."]
       },
       "en": {
         "title": "...",
-        "content": "Markdown with:\n- Table of Contents\n- DETAILED Introduction (at least 3-4 paragraphs about the product, its significance, market position)\n- SEVERAL deep-dive analysis sections with headings like:\n  * Design & Build Quality (describe in detail)\n  * Technical Specifications in Detail (explain every important spec)\n  * Performance & Benchmarks (detailed performance analysis)\n  * Features & Innovations (describe all important features)\n  * Comparison with Competitors\n  * Value for Money\n  * Use Cases & Target Audience\n  * Detailed Pros and Cons\n- IMAGE PLACEHOLDERS (![[IMAGE_X]]) at appropriate places\n- DETAILED Conclusion (at least 2-3 paragraphs with summary, recommendation, target audience)\n\nIMPORTANT: Each section must be detailed! No short sentences or superficial descriptions!",
+        "content": "Markdown with:\n- Table of Contents\n- VERY DETAILED Introduction (at least 8-10 paragraphs about the product, its significance, market position, historical context, manufacturer)\n- MANY deep-dive analysis sections with headings like:\n  * Design & Build Quality (VERY detailed - at least 5-6 paragraphs)\n  * Technical Specifications in Detail (explain every important spec VERY thoroughly - at least 10-15 paragraphs)\n  * Performance & Benchmarks (VERY detailed performance analysis with many examples - at least 8-10 paragraphs)\n  * Features & Innovations (describe all important features VERY thoroughly - at least 6-8 paragraphs)\n  * Comparison with Competitors (detailed comparison - at least 5-6 paragraphs)\n  * Value for Money (thorough analysis - at least 4-5 paragraphs)\n  * Use Cases & Target Audience (detailed description - at least 4-5 paragraphs)\n  * Installation & Setup (if relevant - at least 3-4 paragraphs)\n  * Software & Drivers (if relevant - at least 3-4 paragraphs)\n  * Detailed Pros and Cons (each point thoroughly explained - at least 6-8 paragraphs)\n- IMAGE PLACEHOLDERS (![[IMAGE_X]]) at appropriate places\n- VERY DETAILED Conclusion (at least 5-6 paragraphs with summary, recommendation, target audience, outlook)\n\nCRITICALLY IMPORTANT: This review must be AT LEAST 5000-10000 words long! Each section must be VERY detailed with many details, examples, and explanations! No short sentences or superficial descriptions!",
         "pros": ["...", "...", "...", "...", "..."],
         "cons": ["...", "...", "...", "...", "..."]
       },
@@ -427,7 +427,7 @@ export async function generateHardwareReviewContent(
     ${tavilyData?.price ? `Preis: ${tavilyData.price}` : ""}
     ${tavilyData?.rating ? `Bewertung: ${tavilyData.rating}/10` : ""}
     
-    WICHTIGER HINWEIS: Diese Review muss ausführlich und detailliert sein. Schreibe KEINE kurzen Absätze! Jeder Abschnitt sollte mindestens mehrere Sätze enthalten und tiefgehende Informationen bieten.
+    KRITISCH WICHTIGER HINWEIS: Diese Review muss MINDESTENS 5000-10000 Wörter pro Sprache lang sein! Schreibe KEINE kurzen Absätze! Jeder Abschnitt sollte viele Absätze enthalten (mindestens 4-6 Absätze pro Hauptabschnitt) und SEHR tiefgehende Informationen bieten. Gehe in jedes Detail, erkläre Hintergründe, gebe Beispiele, vergleiche mit Alternativen. Die Review muss so ausführlich sein wie eine professionelle Hardware-Testseite!
   `;
 
   try {
