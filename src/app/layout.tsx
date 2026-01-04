@@ -5,6 +5,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import { BackToTop } from "@/components/shared/BackToTop";
+import { SupportTopBanner } from "@/components/shared/SupportTopBanner";
+import { SupportBanner } from "@/components/shared/SupportBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,12 +37,14 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ThemeProvider>
+          <SupportTopBanner />
           <Header />
           <main className="flex-1 container mx-auto py-8 px-4 md:px-6 lg:px-8">
             {children}
           </main>
           <Footer />
           <BackToTop />
+          <SupportBanner />
         </ThemeProvider>
       </body>
     </html>
