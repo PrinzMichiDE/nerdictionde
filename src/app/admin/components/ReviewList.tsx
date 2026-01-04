@@ -98,6 +98,8 @@ export function ReviewList() {
             <SelectItem value="all">Alle Kategorien</SelectItem>
             <SelectItem value="game">Game</SelectItem>
             <SelectItem value="hardware">Hardware</SelectItem>
+            <SelectItem value="movie">Movie</SelectItem>
+            <SelectItem value="series">Series</SelectItem>
             <SelectItem value="amazon">Amazon</SelectItem>
           </SelectContent>
         </Select>
