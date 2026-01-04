@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getIGDBGamesBulk, BulkQueryOptions } from "@/lib/igdb";
+import { getIGDBGamesBulk, getIGDBGamesBulkLarge, BulkQueryOptions } from "@/lib/igdb";
 import { processGame, generateSlug } from "@/lib/review-generation";
 import { requireAdminAuth } from "@/lib/auth";
 
 interface BulkCreateOptions {
   queryOptions: BulkQueryOptions;
+  totalLimit?: number; // Total number of games to fetch (uses getIGDBGamesBulkLarge if > 500)
   batchSize?: number;
   delayBetweenBatches?: number;
+  delayBetweenGames?: number;
   status?: "draft" | "published";
   skipExisting?: boolean;
+  maxRetries?: number; // Max retries per game
 }
 
 export async function POST(req: NextRequest) {
@@ -28,16 +31,28 @@ export async function POST(req: NextRequest) {
 
     const {
       queryOptions,
+      totalLimit,
       batchSize = 5,
-      delayBetweenBatches = 2000,
+      delayBetweenBatches = 3000,
+      delayBetweenGames = 2000,
       status = "draft",
       skipExisting = true,
+      maxRetries = 3,
     } = body;
 
     // Fetch games from IGDB
     let games;
     try {
-      games = await getIGDBGamesBulk(queryOptions);
+      if (totalLimit && totalLimit > 500) {
+        // Use bulk large function for requests > 500
+        games = await getIGDBGamesBulkLarge(totalLimit, queryOptions);
+      } else {
+        // Use regular bulk function
+        games = await getIGDBGamesBulk({
+          ...queryOptions,
+          limit: totalLimit || queryOptions.limit || 50,
+        });
+      }
     } catch (error: any) {
       console.error("Error fetching games from IGDB:", error);
       return NextResponse.json(
@@ -62,41 +77,81 @@ export async function POST(req: NextRequest) {
       errors: [] as Array<{ game: string; error: string }>,
     };
 
+    // Retry wrapper with exponential backoff
+    const retryWithBackoff = async (
+      fn: () => Promise<{ success: boolean; reviewId?: string; error?: string }>,
+      gameName: string
+    ): Promise<{ success: boolean; reviewId?: string; error?: string }> => {
+      let lastError: Error | null = null;
+      const baseDelay = 2000;
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          return await fn();
+        } catch (error: any) {
+          lastError = error;
+          
+          // Don't retry on "Already exists" errors
+          if (error.message?.includes("Already exists")) {
+            return { success: false, error: "Already exists" };
+          }
+
+          if (attempt < maxRetries - 1) {
+            const delay = baseDelay * Math.pow(2, attempt);
+            console.log(`  ⚠️  Retrying ${gameName} (attempt ${attempt + 2}/${maxRetries}) in ${delay}ms...`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+          }
+        }
+      }
+
+      return {
+        success: false,
+        error: lastError?.message || "Unknown error after retries",
+      };
+    };
+
     // Process games in batches
     for (let i = 0; i < games.length; i += batchSize) {
       const batch = games.slice(i, i + batchSize);
+      const batchNumber = Math.floor(i / batchSize) + 1;
+      const totalBatches = Math.ceil(games.length / batchSize);
       
-      const batchPromises = batch.map((game: any) =>
-        processGame(game, { status, skipExisting })
-      );
+      console.log(`Processing batch ${batchNumber}/${totalBatches} (${batch.length} games)`);
+      
+      // Process batch sequentially with delays to avoid rate limits
+      const batchResults = [];
+      for (let j = 0; j < batch.length; j++) {
+        const game = batch[j];
+        
+        // Delay between games in batch
+        if (j > 0) {
+          await new Promise((resolve) => setTimeout(resolve, delayBetweenGames));
+        }
 
-      const batchResults = await Promise.allSettled(batchPromises);
+        const result = await retryWithBackoff(
+          () => processGame(game, { status, skipExisting }),
+          game.name
+        );
+        
+        batchResults.push({ result, game });
+      }
 
-      batchResults.forEach((result, index) => {
-        const game = batch[index];
-        if (result.status === "fulfilled") {
-          const processResult = result.value;
-          if (processResult.success && processResult.reviewId) {
-            results.successful++;
-            results.reviews.push({
-              id: processResult.reviewId,
-              title: game.name,
-              slug: generateSlug(game.name),
-            });
-          } else if (processResult.error === "Already exists") {
-            results.skipped++;
-          } else {
-            results.failed++;
-            results.errors.push({
-              game: game.name,
-              error: processResult.error || "Unknown error",
-            });
-          }
+      // Process results
+      batchResults.forEach(({ result, game }) => {
+        if (result.success && result.reviewId) {
+          results.successful++;
+          results.reviews.push({
+            id: result.reviewId,
+            title: game.name,
+            slug: generateSlug(game.name),
+          });
+        } else if (result.error === "Already exists") {
+          results.skipped++;
         } else {
           results.failed++;
           results.errors.push({
             game: game.name,
-            error: result.reason?.message || "Processing failed",
+            error: result.error || "Unknown error",
           });
         }
       });

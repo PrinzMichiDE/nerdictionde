@@ -13,7 +13,8 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
     "db:apply-tmdb-migration": "tsx scripts/apply-tmdb-migration.ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "create-game-reviews": "tsx scripts/create-200-game-reviews.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

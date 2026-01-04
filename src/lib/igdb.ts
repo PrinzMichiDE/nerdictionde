@@ -196,6 +196,66 @@ export async function getIGDBGamesBulk(options: BulkQueryOptions = {}) {
   }
 }
 
+/**
+ * Fetches a large number of games from IGDB by making multiple requests if needed.
+ * IGDB has a limit of 500 games per request, so this function handles pagination automatically.
+ */
+export async function getIGDBGamesBulkLarge(
+  totalLimit: number,
+  options: Omit<BulkQueryOptions, "limit" | "offset"> = {}
+): Promise<any[]> {
+  const IGDB_MAX_LIMIT = 500;
+  const allGames: any[] = [];
+  let offset = 0;
+  const requestDelay = 1000; // 1 second delay between requests to respect rate limits
+
+  while (allGames.length < totalLimit) {
+    const remaining = totalLimit - allGames.length;
+    const currentLimit = Math.min(remaining, IGDB_MAX_LIMIT);
+
+    try {
+      const games = await getIGDBGamesBulk({
+        ...options,
+        limit: currentLimit,
+        offset,
+      });
+
+      if (games.length === 0) {
+        // No more games available
+        break;
+      }
+
+      allGames.push(...games);
+
+      // If we got fewer games than requested, we've reached the end
+      if (games.length < currentLimit) {
+        break;
+      }
+
+      offset += games.length;
+
+      // Rate limiting: wait between requests (except for the last one)
+      if (allGames.length < totalLimit) {
+        await new Promise((resolve) => setTimeout(resolve, requestDelay));
+      }
+    } catch (error: any) {
+      console.error(`Error fetching games at offset ${offset}:`, error.message);
+      
+      // If it's a rate limit error, wait longer before retrying
+      if (error.response?.status === 429 || error.message.includes("rate limit")) {
+        console.log("Rate limit hit, waiting 10 seconds...");
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        continue; // Retry the same request
+      }
+      
+      // For other errors, throw to let the caller handle it
+      throw error;
+    }
+  }
+
+  return allGames.slice(0, totalLimit);
+}
+
 export async function getIGDBGameById(id: number) {
   const token = await getAccessToken();
   const response = await axios.post(
