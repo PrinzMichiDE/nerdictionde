@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Rocket, Search, Gamepad2, Cpu, ShoppingCart } from "lucide-react";
 import axios from "axios";
@@ -58,7 +59,7 @@ export function QuickCreate() {
       value: "product",
       label: "Produkt",
       icon: <ShoppingCart className="h-4 w-4" />,
-      placeholder: "z.B. natural elements Omega 3 – 365 Kapseln – 2000mg Fischöl..."
+      placeholder: "natural elements Omega 3 – 365 Kapseln – 2000mg Fischöl pro Tagesdosis – mit EPA und DHA in Triglycerid-Form – Laborgeprüft, aufwendig aufgereinigt und aus nachhaltigem Fischfang"
     },
   ];
 
@@ -96,22 +97,32 @@ export function QuickCreate() {
         </div>
 
         {/* Input and Generate Button */}
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
+        <div className="space-y-2">
+          {category === "product" ? (
+            <Textarea
               placeholder={categoryOptions.find(opt => opt.value === category)?.placeholder || "Eingabe..."}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="pl-9 rounded-full h-11"
-              onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
+              className="min-h-[100px] resize-none"
               disabled={loading}
             />
-          </div>
+          ) : (
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={categoryOptions.find(opt => opt.value === category)?.placeholder || "Eingabe..."}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                className="pl-9 rounded-full h-11"
+                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleGenerate()}
+                disabled={loading}
+              />
+            </div>
+          )}
           <Button 
             onClick={handleGenerate} 
             disabled={loading || !input}
-            className="rounded-full h-11 px-4 md:px-6 font-bold text-sm md:text-base"
+            className="w-full rounded-full h-11 px-4 md:px-6 font-bold text-sm md:text-base"
           >
             {loading ? (
               <>
