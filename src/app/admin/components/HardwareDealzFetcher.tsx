@@ -23,7 +23,19 @@ export function HardwareDealzFetcher({ onComplete }: HardwareDealzFetcherProps) 
   const [useAI, setUseAI] = useState(true);
 
   const handleScrape = async () => {
-    // ... logic ...
+    setLoading(true);
+    setError(null);
+    setScrapedData(null);
+    setResult(null);
+
+    try {
+      const response = await axios.get("/api/admin/import-hardwaredealz");
+      setScrapedData(response.data);
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.message || "Fehler beim Laden von HardwareDealz");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleImport = async () => {
