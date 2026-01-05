@@ -10,11 +10,15 @@ export async function GET(
     const { price } = await params;
     const isAdmin = checkAdminAuth(req);
 
-    // Try to find by pricePoint first (if it's a number), then by slug
+    // Try to find by ID, pricePoint (if it's a number), or slug
     const pricePoint = parseInt(price);
-    const where: any = isNaN(pricePoint) 
-      ? { slug: price } 
-      : { pricePoint };
+    const where: any = {
+      OR: [
+        { id: price },
+        { slug: price },
+        ...(isNaN(pricePoint) ? [] : [{ pricePoint }]),
+      ],
+    };
 
     if (!isAdmin) {
       where.status = "published";
@@ -53,10 +57,14 @@ export async function PATCH(
     const { price } = await params;
     const body = await req.json();
 
-    const pricePoint = parseInt(price);
-    const where: any = isNaN(pricePoint) 
-      ? { slug: price } 
-      : { pricePoint };
+    const pricePointParam = parseInt(price);
+    const where: any = {
+      OR: [
+        { id: price },
+        { slug: price },
+        ...(isNaN(pricePointParam) ? [] : [{ pricePoint: pricePointParam }]),
+      ],
+    };
 
     const existingBuild = await prisma.pCBuild.findFirst({ where });
     if (!existingBuild) {
@@ -64,7 +72,6 @@ export async function PATCH(
     }
 
     // Handle components update: delete all and recreate for simplicity
-    // A more sophisticated approach would be to update existing and delete missing
     if (body.components) {
       await prisma.pCComponent.deleteMany({
         where: { pcBuildId: existingBuild.id },
@@ -124,10 +131,14 @@ export async function DELETE(
 
   try {
     const { price } = await params;
-    const pricePoint = parseInt(price);
-    const where: any = isNaN(pricePoint) 
-      ? { slug: price } 
-      : { pricePoint };
+    const pricePointParam = parseInt(price);
+    const where: any = {
+      OR: [
+        { id: price },
+        { slug: price },
+        ...(isNaN(pricePointParam) ? [] : [{ pricePoint: pricePointParam }]),
+      ],
+    };
 
     const existingBuild = await prisma.pCBuild.findFirst({ where });
     if (!existingBuild) {
@@ -144,4 +155,3 @@ export async function DELETE(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

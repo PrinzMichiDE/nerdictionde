@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { 
   Loader2, Play, Pause, CheckCircle2, XCircle, Clock, Database, 
-  TrendingUp, Film, Tv, Cpu, ShoppingCart, RefreshCcw, List, ChevronDown, ChevronUp, ExternalLink 
+  TrendingUp, Film, Tv, Cpu, ShoppingCart, RefreshCcw, List, ChevronDown, ChevronUp, ExternalLink, Plus
 } from "lucide-react";
 import axios from "axios";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -56,121 +56,53 @@ export function MassReviewCreation() {
   const [showQueue, setShowQueue] = useState(true);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Form state
-  const [category, setCategory] = useState<ReviewCategory>("game");
-  const [count, setCount] = useState<string>("50");
-  const [genreId, setGenreId] = useState<string>("all");
-  const [platformId, setPlatformId] = useState<string>("all");
-  const [minRating, setMinRating] = useState<string>("50");
-  const [batchSize, setBatchSize] = useState<string>("5");
-  const [delayBetweenBatches, setDelayBetweenBatches] = useState<string>("3000");
-  const [delayBetweenItems, setDelayBetweenItems] = useState<string>("2000");
-  const [status, setStatus] = useState<"draft" | "published">("published");
-  const [skipExisting, setSkipExisting] = useState(true);
-  const [hardwareNames, setHardwareNames] = useState<string>("");
-  const [productNames, setProductNames] = useState<string>("");
-
-  // Options
-  const [genres, setGenres] = useState<any[]>([]);
-  const [tmdbMovieGenres, setTmdbMovieGenres] = useState<any[]>([]);
-  const [tmdbSeriesGenres, setTmdbSeriesGenres] = useState<any[]>([]);
-  const [platforms, setPlatforms] = useState<any[]>([]);
-  const [loadingOptions, setLoadingOptions] = useState(false);
-
-  // Reset filters when category changes
+  // Auto-poll for all jobs if any are running
   useEffect(() => {
-    if (category === "game") {
-      setMinRating("50");
-    } else if (category === "movie" || category === "series") {
-      setMinRating("5");
-    }
-    setGenreId("all");
-    setPlatformId("all");
-  }, [category]);
-
-  // Initial load: Fetch all jobs and auto-resume if necessary
-  useEffect(() => {
-    fetchJobs();
-    loadOptions();
+    const hasActiveJobs = jobs.some(j => j.status === "running" || j.status === "pending");
     
+    if (hasActiveJobs && !pollingIntervalRef.current) {
+      pollingIntervalRef.current = setInterval(() => {
+        fetchJobs(false); // Silent update
+      }, 3000);
+    } else if (!hasActiveJobs && pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
       }
     };
+  }, [jobs]);
+
+  // Update selected jobStatus when jobs list changes
+  useEffect(() => {
+    if (jobId) {
+      const updatedJob = jobs.find(j => j.jobId === jobId);
+      if (updatedJob) {
+        setJobStatus(updatedJob);
+      }
+    }
+  }, [jobs, jobId]);
+
+  // Initial load: Fetch all jobs
+  useEffect(() => {
+    fetchJobs();
   }, []);
 
-  const fetchJobs = async () => {
-    setLoadingJobs(true);
+  const fetchJobs = async (showLoading = true) => {
+    if (showLoading) setLoadingJobs(true);
     try {
       const response = await axios.get("/api/reviews/jobs");
       const fetchedJobs = response.data.jobs;
       setJobs(fetchedJobs);
-
-      // Auto-resume: Find first running or pending job and start polling if not already polling
-      const activeJob = fetchedJobs.find((j: JobStatus) => j.status === "running" || j.status === "pending");
-      if (activeJob && !polling) {
-        setJobId(activeJob.jobId);
-        setJobStatus(activeJob);
-        startPolling(activeJob.jobId);
-      }
     } catch (error) {
       console.error("Error fetching jobs:", error);
     } finally {
-      setLoadingJobs(false);
+      if (showLoading) setLoadingJobs(false);
     }
-  };
-
-  const loadOptions = async () => {
-    try {
-      setLoadingOptions(true);
-      const [genresRes, platformsRes, movieGenresRes, seriesGenresRes] = await Promise.allSettled([
-        axios.post("/api/igdb/genres"),
-        axios.post("/api/igdb/platforms"),
-        axios.post("/api/tmdb/genres", { type: "movie" }),
-        axios.post("/api/tmdb/genres", { type: "series" }),
-      ]);
-      
-      if (genresRes.status === "fulfilled") setGenres(genresRes.value.data || []);
-      if (platformsRes.status === "fulfilled") setPlatforms(platformsRes.value.data || []);
-      if (movieGenresRes.status === "fulfilled") setTmdbMovieGenres(movieGenresRes.value.data || []);
-      if (seriesGenresRes.status === "fulfilled") setTmdbSeriesGenres(seriesGenresRes.value.data || []);
-    } catch (error) {
-      console.error("Error loading options:", error);
-    } finally {
-      setLoadingOptions(false);
-    }
-  };
-
-  const startPolling = (id: string) => {
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current);
-    }
-
-    setPolling(true);
-    pollingIntervalRef.current = setInterval(async () => {
-      try {
-        const response = await axios.get(`/api/reviews/bulk-create-mass-progress/${id}`);
-        const job = response.data.job;
-        setJobStatus(job);
-
-        // Update jobs list with current status
-        setJobs(prev => prev.map(j => j.jobId === job.jobId ? job : j));
-
-        // Stop polling if job is completed or failed
-        if (job.status === "completed" || job.status === "failed") {
-          setPolling(false);
-          if (pollingIntervalRef.current) {
-            clearInterval(pollingIntervalRef.current);
-            pollingIntervalRef.current = null;
-          }
-          // Refresh list to make sure everything is in sync
-          fetchJobs();
-        }
-      } catch (error) {
-        console.error("Error polling job status:", error);
-      }
-    }, 2000);
   };
 
   const handleStart = async () => {
@@ -228,7 +160,6 @@ export function MassReviewCreation() {
       
       setJobId(newJobId);
       fetchJobs(); // Refresh the list to include the new job
-      startPolling(newJobId);
     } catch (error: any) {
       console.error("Error starting job:", error);
       alert("Fehler beim Starten des Jobs: " + (error.response?.data?.error || error.message));
@@ -240,15 +171,6 @@ export function MassReviewCreation() {
   const selectJob = (job: JobStatus) => {
     setJobId(job.jobId);
     setJobStatus(job);
-    if (job.status === "running" || job.status === "pending") {
-      startPolling(job.jobId);
-    } else {
-      setPolling(false);
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
-    }
   };
 
   const formatTime = (seconds?: number): string => {
@@ -412,7 +334,7 @@ export function MassReviewCreation() {
 
             <Button 
               onClick={handleStart} 
-              disabled={loading || polling} 
+              disabled={loading} 
               className="w-full"
             >
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
@@ -428,9 +350,27 @@ export function MassReviewCreation() {
               <CardTitle className="text-lg">Job Historie</CardTitle>
               <CardDescription>Die letzten 50 Jobs</CardDescription>
             </div>
-            <Button variant="ghost" size="icon" onClick={fetchJobs} disabled={loadingJobs}>
-              <RefreshCcw className={cn("h-4 w-4", loadingJobs && "animate-spin")} />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => {
+                  setJobId(null);
+                  setJobStatus(null);
+                  setPolling(false);
+                  if (pollingIntervalRef.current) {
+                    clearInterval(pollingIntervalRef.current);
+                    pollingIntervalRef.current = null;
+                  }
+                }}
+                title="Neuen Job konfigurieren"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={fetchJobs} disabled={loadingJobs}>
+                <RefreshCcw className={cn("h-4 w-4", loadingJobs && "animate-spin")} />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             <ScrollArea className="h-[400px]">
