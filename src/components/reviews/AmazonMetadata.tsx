@@ -1,9 +1,12 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShoppingCart, Star, DollarSign, Package, Hash } from "lucide-react";
+import { ShoppingCart, Star, DollarSign, Package, Hash, RefreshCcw, ExternalLink } from "lucide-react";
 import { generateAmazonAffiliateLinkFromASIN } from "@/lib/amazon-search";
+import axios from "axios";
+import { cn } from "@/lib/utils";
 
 interface AmazonMetadataProps {
   asin?: string | null;
@@ -21,26 +24,46 @@ interface AmazonMetadataProps {
 }
 
 export function AmazonMetadata({ asin, specs, affiliateLink, amazonData, isEn = false }: AmazonMetadataProps) {
-  // Prioritize Amazon API data over specs
-  const price = amazonData?.price || specs?.price;
-  const currency = amazonData?.currency || "EUR";
-  
+  const [currentPrice, setCurrentPrice] = useState<string | null>(null);
+  const [loadingPrice, setLoadingPrice] = useState(false);
+  const [priceSource, setPriceSource] = useState<"paapi" | "scraping" | "static">("static");
+
   // Format price - handle different formats
-  let formattedPrice: string | null = null;
-  if (price) {
-    // If price is already formatted (e.g., "€35,99" or "$35.99"), use it directly
+  const formatPriceString = (price: any, currency: string = "EUR") => {
+    if (!price) return null;
     if (typeof price === "string" && (price.includes("€") || price.includes("$") || price.includes(",") || price.includes("."))) {
-      formattedPrice = price;
-    } else {
-      // Otherwise, format it
-      const numericPrice = typeof price === "string" ? parseFloat(price.replace(/[^\d.,]/g, "").replace(",", ".")) : Number(price);
-      if (!isNaN(numericPrice)) {
-        formattedPrice = currency === "EUR" || currency === "€" 
-          ? `€${numericPrice.toFixed(2).replace(".", ",")}`
-          : `$${numericPrice.toFixed(2)}`;
-      }
+      return price;
     }
-  }
+    const numericPrice = typeof price === "string" ? parseFloat(price.replace(/[^\d.,]/g, "").replace(",", ".")) : Number(price);
+    if (isNaN(numericPrice)) return price.toString();
+    
+    return currency === "EUR" || currency === "€" 
+      ? `€${numericPrice.toFixed(2).replace(".", ",")}`
+      : `$${numericPrice.toFixed(2)}`;
+  };
+
+  useEffect(() => {
+    const staticPrice = amazonData?.price || specs?.price;
+    if (staticPrice) {
+      setCurrentPrice(formatPriceString(staticPrice, amazonData?.currency || "EUR"));
+    }
+  }, [amazonData, specs]);
+
+  const fetchCurrentPrice = async () => {
+    if (!asin) return;
+    setLoadingPrice(true);
+    try {
+      const response = await axios.get(`/api/amazon/price?asin=${asin}`);
+      if (response.data.price) {
+        setCurrentPrice(formatPriceString(response.data.price, response.data.currency));
+        setPriceSource(response.data.source);
+      }
+    } catch (error) {
+      console.error("Error fetching current price:", error);
+    } finally {
+      setLoadingPrice(false);
+    }
+  };
 
   // Extract rating - prioritize Amazon API data
   const rating = amazonData?.rating !== undefined ? amazonData.rating : specs?.rating;
@@ -72,16 +95,40 @@ export function AmazonMetadata({ asin, specs, affiliateLink, amazonData, isEn = 
         )}
 
         {/* Price */}
-        {formattedPrice && (
-          <Card className="border-2">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-primary" />
-                {isEn ? "Price" : "Preis"}
+        {(currentPrice || loadingPrice) && (
+          <Card className="border-2 overflow-hidden group">
+            <CardHeader className="pb-3 bg-muted/30">
+              <CardTitle className="text-sm font-bold uppercase tracking-wider flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-primary" />
+                  {isEn ? "Price" : "Preis"}
+                </div>
+                {asin && (
+                  <button 
+                    onClick={fetchCurrentPrice}
+                    disabled={loadingPrice}
+                    className="text-[10px] text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCcw className={cn("h-3 w-3", loadingPrice && "animate-spin")} />
+                    {isEn ? "Check Price" : "Preis prüfen"}
+                  </button>
+                )}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold text-primary">{formattedPrice}</p>
+            <CardContent className="pt-4 flex flex-col gap-2">
+              <div className="flex items-baseline justify-between">
+                <p className="text-3xl font-black text-primary tracking-tighter">
+                  {loadingPrice ? "..." : currentPrice}
+                </p>
+                {priceSource !== "static" && !loadingPrice && (
+                  <Badge variant="outline" className="text-[9px] h-4 px-1 uppercase font-bold">
+                    Live via {priceSource}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-[10px] text-muted-foreground italic">
+                {isEn ? "Prices may change since the last update." : "Preise können sich seit dem letzten Update geändert haben."}
+              </p>
             </CardContent>
           </Card>
         )}

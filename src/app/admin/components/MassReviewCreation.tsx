@@ -352,6 +352,9 @@ export function MassReviewCreation() {
                     value={keywords} 
                     onChange={(e) => setKeywords(e.target.value)}
                   />
+                  <p className="text-[10px] text-muted-foreground italic">
+                    Hinweis: Erfordert aktive Amazon PA API Zugangsdaten. Falls nicht vorhanden, werden Standard-Produkte verwendet.
+                  </p>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {["Gaming Zubehör", "Smart Home", "PC Komponenten", "Streaming Setup"].map(kw => (
                       <Badge 
