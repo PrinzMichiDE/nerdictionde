@@ -35,9 +35,12 @@ export async function GET(req: NextRequest) {
       try {
         results.attempted++;
 
-        // Check if a build already exists for this price point
-        const existingBuild = await prisma.pCBuild.findUnique({
-          where: { pricePoint },
+        // Check if a build already exists for this price point and type
+        const existingBuild = await prisma.pCBuild.findFirst({
+          where: { 
+            pricePoint,
+            type: "desktop" // Default to desktop for generated builds
+          },
         });
 
         // Generate new build

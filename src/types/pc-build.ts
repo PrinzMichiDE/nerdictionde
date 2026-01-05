@@ -9,6 +9,7 @@ export type PCComponentType =
   | "Cooler" 
   | "Monitor" 
   | "Display"
+  | "Laptop"
   | "Keyboard" 
   | "Mouse" 
   | "Headset" 

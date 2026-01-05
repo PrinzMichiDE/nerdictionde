@@ -72,22 +72,13 @@ export async function GET(req: NextRequest) {
           const hasTypeField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "type");
           const hasImageField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "image");
 
-          // Find existing build
-          let existingBuild = null;
-          if (hasTypeField) {
-            existingBuild = await (prisma.pCBuild as any).findUnique({
-              where: { 
-                pricePoint_type: {
-                  pricePoint: buildData.pricePoint,
-                  type: category
-                }
-              },
-            });
-          } else {
-            existingBuild = await prisma.pCBuild.findUnique({
-              where: { pricePoint: buildData.pricePoint },
-            });
-          }
+          // Find existing build - use findFirst for maximum compatibility during schema sync
+          const existingBuild = await prisma.pCBuild.findFirst({
+            where: { 
+              pricePoint: buildData.pricePoint,
+              ...(hasTypeField ? { type: category } : {})
+            },
+          });
 
           const buildDataToSave: any = {
             title: buildData.title,

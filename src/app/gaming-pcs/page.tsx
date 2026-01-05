@@ -1,7 +1,7 @@
-import { PCBuildCard } from "@/components/gaming-pcs/PCBuildCard";
 import prisma from "@/lib/prisma";
 import { Metadata } from "next";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { GamingPCsTabs } from "@/components/gaming-pcs/GamingPCsTabs";
+import { PCBuild } from "@/types/pc-build";
 
 export const metadata: Metadata = {
   title: "Beste Gaming PCs & Laptops 2026 | Nerdiction",
@@ -9,30 +9,63 @@ export const metadata: Metadata = {
 };
 
 async function getBuilds(type: "desktop" | "laptop" = "desktop") {
-  // Check if 'type' field exists in the Prisma model at runtime
-  const hasTypeField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "type");
-  
-  const where: any = {
-    status: "published",
-  };
-  
-  if (hasTypeField) {
-    where.type = type;
-  }
-
-  return await prisma.pCBuild.findMany({
-    where,
-    include: {
-      components: {
-        orderBy: {
-          sortOrder: "asc",
+  try {
+    // Try to filter by type field directly
+    // Prisma automatically excludes null values when filtering by a specific value
+    const builds = await prisma.pCBuild.findMany({
+      where: {
+        status: "published",
+        type: type,
+      },
+      include: {
+        components: {
+          orderBy: {
+            sortOrder: "asc",
+          },
         },
       },
-    },
-    orderBy: {
-      pricePoint: "asc",
-    },
-  });
+      orderBy: {
+        pricePoint: "asc",
+      },
+    });
+    
+    return builds;
+  } catch (error: any) {
+    // Fallback: If type field doesn't exist or has issues, filter by checking components
+    console.warn("Could not filter by type field, using component-based fallback:", error.message);
+    
+    const where: any = {
+      status: "published",
+    };
+    
+    if (type === "laptop") {
+      where.components = {
+        some: {
+          type: "Laptop",
+        },
+      };
+    } else {
+      where.components = {
+        none: {
+          type: "Laptop",
+        },
+      };
+    }
+    
+    return await prisma.pCBuild.findMany({
+      where,
+      include: {
+        components: {
+          orderBy: {
+            sortOrder: "asc",
+          },
+        },
+      },
+      orderBy: {
+        pricePoint: "asc",
+      },
+    });
+  }
 }
 
 export default async function GamingPCsPage() {
@@ -64,48 +97,7 @@ export default async function GamingPCsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="desktop" className="space-y-12">
-        <div className="flex justify-center">
-          <TabsList className="bg-muted/50 p-1 h-14 rounded-2xl border">
-            <TabsTrigger value="desktop" className="px-8 rounded-xl font-black uppercase tracking-tight text-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              Gaming PCs
-            </TabsTrigger>
-            <TabsTrigger value="laptop" className="px-8 rounded-xl font-black uppercase tracking-tight text-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              Gaming Laptops
-            </TabsTrigger>
-          </TabsList>
-        </div>
-
-        <TabsContent value="desktop">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {desktops.length > 0 ? (
-              desktops.map((build) => (
-                <PCBuildCard key={build.id} build={build as any} />
-              ))
-            ) : (
-              <div className="col-span-full py-20 text-center space-y-4">
-                <h2 className="text-2xl font-bold">Noch keine PC-Builds veröffentlicht.</h2>
-                <p className="text-muted-foreground">Schau bald wieder vorbei!</p>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="laptop">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {laptops.length > 0 ? (
-              laptops.map((build) => (
-                <PCBuildCard key={build.id} build={build as any} />
-              ))
-            ) : (
-              <div className="col-span-full py-20 text-center space-y-4">
-                <h2 className="text-2xl font-bold">Noch keine Laptop-Empfehlungen veröffentlicht.</h2>
-                <p className="text-muted-foreground">Schau bald wieder vorbei!</p>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+      <GamingPCsTabs desktops={desktops as PCBuild[]} laptops={laptops as PCBuild[]} />
 
       {/* Info Section */}
       <div className="max-w-3xl mx-auto bg-muted/30 p-8 md:p-12 rounded-3xl border space-y-6">

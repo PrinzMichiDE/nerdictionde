@@ -131,22 +131,14 @@ export async function POST(req: NextRequest) {
         const hasTypeField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "type");
         const hasImageField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "image");
 
-        // Find existing build
-        let existingBuild = null;
-        if (hasTypeField) {
-          existingBuild = await (prisma.pCBuild as any).findUnique({
-            where: { 
-              pricePoint_type: {
-                pricePoint: buildData.pricePoint,
-                type: buildData.type || "desktop"
-              }
-            },
-          });
-        } else {
-          existingBuild = await prisma.pCBuild.findUnique({
-            where: { pricePoint: buildData.pricePoint },
-          });
-        }
+        // Find existing build - MUST use findFirst (not findUnique) because pricePoint alone is no longer unique
+        // The unique constraint is now on [pricePoint, type] compound key
+        const existingBuild = await prisma.pCBuild.findFirst({
+          where: { 
+            pricePoint: buildData.pricePoint,
+            ...(hasTypeField ? { type: buildData.type || "desktop" } : {})
+          },
+        });
 
         const buildDataToSave: any = {
           title: buildData.title,

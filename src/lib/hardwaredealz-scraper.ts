@@ -92,7 +92,92 @@ export async function scrapeHardwareDealz(category: "desktop" | "laptop" = "desk
           components: [],
         };
 
-        // Look for component rows in tables or lists
+        // SPECIAL HANDLING FOR LAPTOPS: Parse description or table if found
+        if (category === "laptop") {
+          const fullText = $d.text();
+          
+          // 1. Try to find the laptop name more broadly
+          const nameMatch = fullText.match(/(?:ist|ist derzeit|ist aktuell|Wahl.*?ist|Wahl.*?ist aktuell|Wahl.*?ist derzeit)\s+(?:der|das)\s+([^.!]+?)(?:\.|\!|\s+mit|\s+Mit)/i) ||
+                           fullText.match(/(?:ist|ist derzeit|ist aktuell)\s+(?:der|das)\s+([^.!]+?)$/im);
+          
+          const laptopName = nameMatch ? nameMatch[1].trim() : info.title;
+
+          // 2. Try to find a configuration table first (often more reliable)
+          const configTable = $d("table").filter((_, table) => {
+            const head = $(table).find("th, td").first().text().toLowerCase();
+            return head.includes("teil") || head.includes("komponente") || head.includes("modell");
+          }).first();
+
+          if (configTable.length) {
+            console.log(`Found config table for ${info.pricePoint}€ laptop.`);
+            configTable.find("tr").each((_, tr) => {
+              const cells = $(tr).find("td");
+              if (cells.length >= 2) {
+                const type = $(cells[0]).text().trim();
+                const name = $(cells[1]).text().trim();
+                if (type && name && !type.toLowerCase().includes("teil")) {
+                  build.components.push({
+                    type: guessComponentType(type + " " + name),
+                    name: name,
+                    price: 0,
+                  });
+                }
+              }
+            });
+          }
+
+          // 3. Fallback/Supplement: Try to find the specs line
+          let specLine = "";
+          $d("p, div, li").each((_, p) => {
+            const t = $(p).text().trim();
+            const mitMatch = t.match(/Mit\s+([^.!]*?(?:GB|RTX|Ryzen|Core|Display|Graphics|Intel|AMD)[^.!]*?)(?:\!|\.|$)/i);
+            if (mitMatch) {
+              specLine = mitMatch[0];
+              return false; // break
+            }
+          });
+
+          if (specLine) {
+            console.log(`Found spec line for ${info.pricePoint}€: ${specLine.substring(0, 50)}...`);
+            
+            const specsStr = specLine.replace(/^Mit\s+/i, "").replace(/[!.]+$/, "");
+            
+            // Split by comma or " und "
+            const specList = specsStr.split(/,|\sund\s/).map(s => s.trim()).filter(s => s.length > 2);
+            
+            // Add specs as components if they aren't already there from the table
+            specList.forEach(spec => {
+              if (spec.toLowerCase().includes("euro")) return;
+              if (spec.toLowerCase().includes("gaming")) return;
+              // Check if already exists (prevent duplicates from table and text)
+              const alreadyExists = build.components.some(c => 
+                c.name.toLowerCase().includes(spec.toLowerCase()) || 
+                spec.toLowerCase().includes(c.name.toLowerCase())
+              );
+              
+              if (!alreadyExists) {
+                build.components.push({
+                  type: guessComponentType(spec),
+                  name: spec,
+                  price: 0,
+                });
+              }
+            });
+          }
+
+          // 4. Ensure the Laptop itself is added as the first component if not present
+          if (!build.components.some(c => c.type === "Laptop")) {
+            const amazonLink = $d("a[href*='amazon']").first().attr("href");
+            build.components.unshift({
+              type: "Laptop",
+              name: laptopName,
+              price: info.pricePoint,
+              affiliateLink: amazonLink,
+            });
+          }
+        }
+
+        // Look for component rows in tables or lists (Desktop & Laptop fallback)
         $d("tr, li, div.component-row").each((__, el) => {
           const text = $(el).text().trim();
           // Pattern: "Component Name (ab 123,45 €)"
@@ -115,7 +200,7 @@ export async function scrapeHardwareDealz(category: "desktop" | "laptop" = "desk
                 }
 
                 const isAmazon = finalLink && (finalLink.includes("amazon.de") || finalLink.includes("amzn.to"));
-                const asinMatch = isAmazon ? finalLink.match(/\/([A-Z0-9]{10})(?:[\/?]|$)/i) : null;
+                const asinMatch = isAmazon && finalLink ? finalLink.match(/\/([A-Z0-9]{10})(?:[\/?]|$)/i) : null;
                 const asin = asinMatch ? asinMatch[1] : null;
 
                 if (asin) {
@@ -139,7 +224,7 @@ export async function scrapeHardwareDealz(category: "desktop" | "laptop" = "desk
           }
         });
 
-        if (build.components.length >= 3) {
+        if (build.components.length >= 2) { // Changed from 3 to 2 for laptops
           console.log(`✅ Successfully scraped ${build.components.length} components for ${info.pricePoint}€`);
           builds.push(build);
         } else {
@@ -163,11 +248,12 @@ export async function scrapeHardwareDealz(category: "desktop" | "laptop" = "desk
 
 function guessComponentType(name: string): PCComponentType {
   const n = name.toLowerCase();
-  if (n.includes("ryzen") || n.includes("intel core") || n.includes("i3-") || n.includes("i5-") || n.includes("i7-") || n.includes("i9-") || n.includes("pentium")) return "CPU";
-  if (n.includes("rtx") || n.includes("radeon") || n.includes("geforce") || n.includes("arc a") || n.includes("gpu") || n.includes("rx ")) return "GPU";
+  if (n.includes("laptop") || n.includes("notebook")) return "Laptop";
+  if (n.includes("prozessor") || n.includes("cpu") || n.includes("ryzen") || n.includes("intel core") || n.includes("i3-") || n.includes("i5-") || n.includes("i7-") || n.includes("i9-") || n.includes("pentium")) return "CPU";
+  if (n.includes("grafik") || n.includes("gpu") || n.includes("rtx") || n.includes("radeon") || n.includes("geforce") || n.includes("arc a") || n.includes("rx ")) return "GPU";
   if (n.includes("b450") || n.includes("b550") || n.includes("b650") || n.includes("z790") || n.includes("b760") || n.includes("a620") || n.includes("x670") || n.includes("motherboard") || n.includes("mainboard")) return "Motherboard";
-  if (n.includes("ram") || n.includes("ddr4") || n.includes("ddr5") || n.includes("gb ddr") || n.includes("ripjaws") || n.includes("vengeance") || n.includes("fury")) return "RAM";
-  if (n.includes("ssd") || n.includes("nvme") || n.includes("m.2") || n.includes("kingston nv") || n.includes("wd blue") || n.includes("crucial p") || n.includes("lexar")) return "SSD";
+  if (n.includes("ram") || n.includes("arbeitsspeicher") || n.includes("ddr4") || n.includes("ddr5") || n.includes("gb ddr") || n.includes("ripjaws") || n.includes("vengeance") || n.includes("fury")) return "RAM";
+  if (n.includes("ssd") || n.includes("festplatte") || n.includes("nvme") || n.includes("m.2") || n.includes("kingston nv") || n.includes("wd blue") || n.includes("crucial p") || n.includes("lexar")) return "SSD";
   if (n.includes("psu") || n.includes("be quiet") || n.includes("seasonic") || n.includes("watt") || n.includes("netzteil") || n.includes("corsair rm") || n.includes("kolink")) return "PSU";
   if (n.includes("gehäuse") || n.includes("case") || n.includes("masterbox") || n.includes("pure base") || n.includes("fractal") || n.includes("lian li") || n.includes("endorfy") || n.includes("nx200")) return "Case";
   if (n.includes("kühler") || n.includes("cooler") || n.includes("arctic") || n.includes("nh-d15") || n.includes("dark rock") || n.includes("freezer")) return "Cooler";
