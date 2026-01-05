@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { PCBuild } from "@/types/pc-build";
 import { PCBuildList } from "./PCBuildList";
 import { PCBuildEditor } from "./PCBuildEditor";
+import { PCBuildGenerator } from "./PCBuildGenerator";
 
 export function GamingPCManager() {
   const [view, setView] = useState<"list" | "edit" | "new">("list");
   const [currentBuild, setCurrentBuild] = useState<any>(null);
+  const refreshListRef = useRef<(() => void) | null>(null);
 
   const handleEdit = (build: PCBuild) => {
     setCurrentBuild(build);
@@ -45,8 +47,24 @@ export function GamingPCManager() {
     setCurrentBuild(null);
   };
 
+  const handleGenerationComplete = () => {
+    // Refresh the list after successful generation
+    if (refreshListRef.current) {
+      refreshListRef.current();
+    }
+  };
+
   if (view === "list") {
-    return <PCBuildList onEdit={handleEdit} onNew={handleNew} />;
+    return (
+      <div className="space-y-6">
+        <PCBuildGenerator onComplete={handleGenerationComplete} />
+        <PCBuildList 
+          onEdit={handleEdit} 
+          onNew={handleNew}
+          refreshRef={refreshListRef}
+        />
+      </div>
+    );
   }
 
   return (

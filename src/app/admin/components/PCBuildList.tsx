@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type React from "react";
 import { PCBuild } from "@/types/pc-build";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, Globe, FileText } from "lucide-react";
@@ -12,9 +13,10 @@ import Link from "next/link";
 interface PCBuildListProps {
   onEdit: (build: PCBuild) => void;
   onNew: () => void;
+  refreshRef?: React.MutableRefObject<(() => void) | null>;
 }
 
-export function PCBuildList({ onEdit, onNew }: PCBuildListProps) {
+export function PCBuildList({ onEdit, onNew, refreshRef }: PCBuildListProps) {
   const [builds, setBuilds] = useState<PCBuild[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,6 +35,13 @@ export function PCBuildList({ onEdit, onNew }: PCBuildListProps) {
   useEffect(() => {
     fetchBuilds();
   }, []);
+
+  // Expose refresh function via ref
+  useEffect(() => {
+    if (refreshRef) {
+      refreshRef.current = fetchBuilds;
+    }
+  }, [refreshRef]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Bist du sicher, dass du diesen PC-Build löschen möchtest?")) return;

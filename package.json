@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "prebuild": "npm run db:apply-tmdb-migration",
     "build": "prisma generate && next build --webpack",
     "start": "next start",
