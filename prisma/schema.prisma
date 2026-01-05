@@ -213,21 +213,24 @@ model PCBuild {
 }
 
 model PCComponent {
-  id            String   @id @default(cuid())
-  pcBuildId     String
-  type          String // "CPU", "GPU", "Motherboard", "RAM", "SSD", "PSU", "Case", "Cooler"
-  name          String
-  manufacturer  String?
-  model         String?
-  price         Float?
-  currency      String   @default("EUR")
-  affiliateLink String?
-  reviewId      String?
-  specs         Json?
-  sortOrder     Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  pcBuild       PCBuild  @relation(fields: [pcBuildId], references: [id], onDelete: Cascade)
+  id             String   @id @default(cuid())
+  pcBuildId      String
+  type           String // "CPU", "GPU", "Motherboard", "RAM", "SSD", "PSU", "Case", "Cooler"
+  name           String
+  manufacturer   String?
+  model          String?
+  image          String?
+  description    String?
+  description_en String?
+  price          Float?
+  currency       String   @default("EUR")
+  affiliateLink  String?
+  reviewId       String?
+  specs          Json?
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  pcBuild        PCBuild  @relation(fields: [pcBuildId], references: [id], onDelete: Cascade)
 
   @@index([pcBuildId])
   @@index([type])

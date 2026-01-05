@@ -20,6 +20,9 @@ export interface PCComponent {
   name: string;
   manufacturer?: string | null;
   model?: string | null;
+  image?: string | null;
+  description?: string | null;
+  description_en?: string | null;
   price?: number | null;
   currency: string;
   affiliateLink?: string | null;

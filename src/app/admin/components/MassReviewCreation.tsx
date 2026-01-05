@@ -70,9 +70,28 @@ export function MassReviewCreation() {
   const [hardwareNames, setHardwareNames] = useState<string>("");
   const [productNames, setProductNames] = useState<string>("");
 
+  // Options
+  const [genres, setGenres] = useState<any[]>([]);
+  const [tmdbMovieGenres, setTmdbMovieGenres] = useState<any[]>([]);
+  const [tmdbSeriesGenres, setTmdbSeriesGenres] = useState<any[]>([]);
+  const [platforms, setPlatforms] = useState<any[]>([]);
+  const [loadingOptions, setLoadingOptions] = useState(false);
+
+  // Reset filters when category changes
+  useEffect(() => {
+    if (category === "game") {
+      setMinRating("50");
+    } else if (category === "movie" || category === "series") {
+      setMinRating("5");
+    }
+    setGenreId("all");
+    setPlatformId("all");
+  }, [category]);
+
   // Initial load: Fetch all jobs and auto-resume if necessary
   useEffect(() => {
     fetchJobs();
+    loadOptions();
     
     return () => {
       if (pollingIntervalRef.current) {
@@ -99,6 +118,27 @@ export function MassReviewCreation() {
       console.error("Error fetching jobs:", error);
     } finally {
       setLoadingJobs(false);
+    }
+  };
+
+  const loadOptions = async () => {
+    try {
+      setLoadingOptions(true);
+      const [genresRes, platformsRes, movieGenresRes, seriesGenresRes] = await Promise.allSettled([
+        axios.post("/api/igdb/genres"),
+        axios.post("/api/igdb/platforms"),
+        axios.post("/api/tmdb/genres", { type: "movie" }),
+        axios.post("/api/tmdb/genres", { type: "series" }),
+      ]);
+      
+      if (genresRes.status === "fulfilled") setGenres(genresRes.value.data || []);
+      if (platformsRes.status === "fulfilled") setPlatforms(platformsRes.value.data || []);
+      if (movieGenresRes.status === "fulfilled") setTmdbMovieGenres(movieGenresRes.value.data || []);
+      if (seriesGenresRes.status === "fulfilled") setTmdbSeriesGenres(seriesGenresRes.value.data || []);
+    } catch (error) {
+      console.error("Error loading options:", error);
+    } finally {
+      setLoadingOptions(false);
     }
   };
 
@@ -156,10 +196,15 @@ export function MassReviewCreation() {
         if (genreId && genreId !== "all") requestBody.queryOptions.genreId = parseInt(genreId);
         if (platformId && platformId !== "all") requestBody.queryOptions.platformId = parseInt(platformId);
       } else if (category === "movie" || category === "series") {
+        // TMDB uses 0-10 scale, IGDB uses 0-100.
+        // If minRating is > 10, it's likely the IGDB default, so we scale it down.
+        const rating = parseFloat(minRating);
+        const adjustedRating = rating > 10 ? rating / 10 : rating;
+        
         requestBody.queryOptions = {
           sortBy: "popularity",
           order: "desc",
-          minRating: parseFloat(minRating) || 5,
+          minRating: adjustedRating || 5,
         };
         if (genreId && genreId !== "all") requestBody.queryOptions.genreId = parseInt(genreId);
       } else if (category === "hardware") {
@@ -292,6 +337,54 @@ export function MassReviewCreation() {
                 <Input type="number" value={batchSize} onChange={(e) => setBatchSize(e.target.value)} />
               </div>
             </div>
+
+            {(category === "game" || category === "movie" || category === "series") && (
+              <div className="space-y-4 border-t pt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Genre</Label>
+                    <Select value={genreId} onValueChange={setGenreId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Alle Genres" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Alle Genres</SelectItem>
+                        {(category === "game" ? genres : (category === "movie" ? tmdbMovieGenres : tmdbSeriesGenres)).map((g) => (
+                          <SelectItem key={g.id} value={g.id.toString()}>{g.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {category === "game" && (
+                    <div className="space-y-2">
+                      <Label>Plattform</Label>
+                      <Select value={platformId} onValueChange={setPlatformId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Alle Plattformen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Alle Plattformen</SelectItem>
+                          {platforms.map((p) => (
+                            <SelectItem key={p.id} value={p.id.toString()}>{p.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label>Mindest-Rating ({category === "game" ? "0-100" : "0-10"})</Label>
+                    <Input 
+                      type="number" 
+                      value={minRating} 
+                      onChange={(e) => setMinRating(e.target.value)} 
+                      step={category === "game" ? "1" : "0.1"}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {(category === "hardware") && (
               <div className="space-y-2">

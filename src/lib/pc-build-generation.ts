@@ -328,6 +328,7 @@ Important:
       name: componentData.name || amazonData?.name || amazonData?.title || `${componentType} Component`,
       manufacturer: componentData.manufacturer || amazonData?.manufacturer,
       model: componentData.model || amazonData?.model,
+      image: amazonData?.images?.[0] || amazonData?.cover?.url || null,
       price: Math.round(finalPrice),
       specs: finalSpecs,
       description: componentData.description || amazonData?.description || productInfo.description,

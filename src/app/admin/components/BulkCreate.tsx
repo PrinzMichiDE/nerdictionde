@@ -35,6 +35,8 @@ type Category = "game" | "movie" | "series";
 export function BulkCreate() {
   const [category, setCategory] = useState<Category>("game");
   const [genres, setGenres] = useState<Genre[]>([]);
+  const [tmdbMovieGenres, setTmdbMovieGenres] = useState<Genre[]>([]);
+  const [tmdbSeriesGenres, setTmdbSeriesGenres] = useState<Genre[]>([]);
   const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingOptions, setLoadingOptions] = useState(true);
@@ -53,6 +55,18 @@ export function BulkCreate() {
   const [status, setStatus] = useState<"draft" | "published">("published");
   const [skipExisting, setSkipExisting] = useState(true);
 
+  // Reset filters when category changes
+  useEffect(() => {
+    if (category === "game") {
+      setMinRating("70");
+    } else {
+      setMinRating("7.0");
+    }
+    setGenreId("all");
+    setPlatformId("all");
+    setReleaseYear("");
+  }, [category]);
+
   useEffect(() => {
     loadOptions();
   }, []);
@@ -60,22 +74,28 @@ export function BulkCreate() {
   const loadOptions = async () => {
     try {
       setLoadingOptions(true);
-      // Load genres and platforms from IGDB
-      const [genresResponse, platformsResponse] = await Promise.allSettled([
+      // Load genres and platforms
+      const [genresResponse, platformsResponse, movieGenresRes, seriesGenresRes] = await Promise.allSettled([
         axios.post("/api/igdb/genres"),
         axios.post("/api/igdb/platforms"),
+        axios.post("/api/tmdb/genres", { type: "movie" }),
+        axios.post("/api/tmdb/genres", { type: "series" }),
       ]);
       
       if (genresResponse.status === "fulfilled") {
         setGenres(genresResponse.value.data || []);
-      } else {
-        console.error("Error loading genres:", genresResponse.reason);
       }
       
       if (platformsResponse.status === "fulfilled") {
         setPlatforms(platformsResponse.value.data || []);
-      } else {
-        console.error("Error loading platforms:", platformsResponse.reason);
+      }
+
+      if (movieGenresRes.status === "fulfilled") {
+        setTmdbMovieGenres(movieGenresRes.value.data || []);
+      }
+
+      if (seriesGenresRes.status === "fulfilled") {
+        setTmdbSeriesGenres(seriesGenresRes.value.data || []);
       }
     } catch (error) {
       console.error("Error loading options:", error);
@@ -333,6 +353,23 @@ export function BulkCreate() {
                 <h3 className="text-lg font-semibold">TMDB Filter</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
+                    <Label htmlFor="movie-genre">Genre</Label>
+                    <Select value={genreId} onValueChange={setGenreId}>
+                      <SelectTrigger id="movie-genre">
+                        <SelectValue placeholder="Alle Genres" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Alle Genres</SelectItem>
+                        {tmdbMovieGenres.map((genre) => (
+                          <SelectItem key={genre.id} value={genre.id.toString()}>
+                            {genre.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="movie-releaseYear">Erscheinungsjahr</Label>
                     <Input
                       id="movie-releaseYear"
@@ -464,6 +501,23 @@ export function BulkCreate() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">TMDB Filter</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="series-genre">Genre</Label>
+                    <Select value={genreId} onValueChange={setGenreId}>
+                      <SelectTrigger id="series-genre">
+                        <SelectValue placeholder="Alle Genres" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Alle Genres</SelectItem>
+                        {tmdbSeriesGenres.map((genre) => (
+                          <SelectItem key={genre.id} value={genre.id.toString()}>
+                            {genre.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="series-releaseYear">Erstausstrahlungsjahr</Label>
                     <Input
