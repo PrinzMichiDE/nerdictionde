@@ -118,7 +118,11 @@ export function MovieSeriesMetadata({ metadata, category, isEn = false }: MovieS
               {isEn ? "TMDB Rating" : "TMDB Bewertung"}
             </div>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-bold text-foreground">{Number(metadata.tmdb_score).toFixed(1)}</p>
+              <p className="text-2xl font-bold text-foreground">
+                {metadata.tmdb_score != null && !isNaN(Number(metadata.tmdb_score)) 
+                  ? Number(metadata.tmdb_score).toFixed(1) 
+                  : "N/A"}
+              </p>
               <span className="text-sm text-muted-foreground">/ 10</span>
               {metadata.vote_count && (
                 <span className="text-xs text-muted-foreground ml-2">
@@ -136,7 +140,11 @@ export function MovieSeriesMetadata({ metadata, category, isEn = false }: MovieS
               <TrendingUp className="h-4 w-4" />
               {isEn ? "Popularity" : "Popularität"}
             </div>
-            <p className="text-lg font-semibold text-foreground">{Number(metadata.popularity).toFixed(1)}</p>
+            <p className="text-lg font-semibold text-foreground">
+              {metadata.popularity != null && !isNaN(Number(metadata.popularity)) 
+                ? Number(metadata.popularity).toFixed(1) 
+                : "N/A"}
+            </p>
           </div>
         )}
       </div>

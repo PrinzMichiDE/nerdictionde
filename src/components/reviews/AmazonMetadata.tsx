@@ -97,7 +97,9 @@ export function AmazonMetadata({ asin, specs, affiliateLink, amazonData, isEn = 
             </CardHeader>
             <CardContent>
               <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-foreground">{Number(rating).toFixed(1)}</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {rating != null && !isNaN(Number(rating)) ? Number(rating).toFixed(1) : "N/A"}
+                </p>
                 <span className="text-sm text-muted-foreground">/ 5</span>
                 {amazonData?.reviewCount && (
                   <span className="text-xs text-muted-foreground ml-2">
