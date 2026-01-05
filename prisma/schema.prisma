@@ -198,10 +198,13 @@ model PCBuild {
   slug           String        @unique
   description    String?
   description_en String?
+  image          String?
+  image_en       String?
   totalPrice     Float
   currency       String        @default("EUR")
   status         String        @default("draft")
   affiliateLink  String?
+  lastScrapedAt  DateTime?
   metadata       Json?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt

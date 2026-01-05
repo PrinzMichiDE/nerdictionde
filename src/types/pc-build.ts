@@ -41,10 +41,13 @@ export interface PCBuild {
   slug: string;
   description?: string | null;
   description_en?: string | null;
+  image?: string | null;
+  image_en?: string | null;
   totalPrice: number;
   currency: string;
   status: "draft" | "published";
   affiliateLink?: string | null;
+  lastScrapedAt?: Date | null;
   metadata?: any | null;
   createdAt: Date;
   updatedAt: Date;

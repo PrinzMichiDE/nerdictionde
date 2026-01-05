@@ -15,9 +15,20 @@ interface PCBuildCardProps {
 export function PCBuildCard({ build, isEn = false }: PCBuildCardProps) {
   const cpu = build.components?.find(c => c.type === "CPU");
   const gpu = build.components?.find(c => c.type === "GPU");
+  const displayImage = isEn && build.image_en ? build.image_en : build.image;
 
   return (
     <Card className="flex flex-col h-full border-2 hover:border-primary/50 transition-all group overflow-hidden bg-gradient-to-br from-background to-muted/20">
+      {displayImage && (
+        <div className="relative aspect-video overflow-hidden">
+          <img 
+            src={displayImage} 
+            alt={isEn && build.title_en ? build.title_en : build.title}
+            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-60" />
+        </div>
+      )}
       <CardHeader className="pb-4 relative">
         <div className="absolute top-0 right-0 p-4">
           <Badge variant="outline" className="bg-primary/5 text-[10px] uppercase tracking-tighter font-black border-primary/20 flex gap-1 items-center">

@@ -62,6 +62,18 @@ export function PCBuildDetail({ build, isEn = false }: PCBuildDetailProps) {
         </div>
       </div>
 
+      {/* Main Image */}
+      {(isEn ? build.image_en || build.image : build.image) && (
+        <div className="relative aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden border-4 border-muted shadow-2xl">
+          <img 
+            src={(isEn ? build.image_en || build.image : build.image)!} 
+            alt={isEn && build.title_en ? build.title_en : build.title}
+            className="object-cover w-full h-full"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent" />
+        </div>
+      )}
+
       {/* Description */}
       {build.description && (
         <div className="prose prose-neutral dark:prose-invert max-w-none bg-muted/30 p-6 rounded-2xl border">

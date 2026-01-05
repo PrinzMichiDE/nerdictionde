@@ -2,11 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { scrapeHardwareDealz } from "@/lib/hardwaredealz-scraper";
 import { requireAdminAuth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import openai, { OPENAI_MODEL } from "@/lib/openai";
 
 export async function GET(req: NextRequest) {
   const authError = requireAdminAuth(req);
@@ -43,7 +39,7 @@ async function generateAIContent(buildData: any) {
     `;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: OPENAI_MODEL,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
     });
@@ -120,8 +116,10 @@ export async function POST(req: NextRequest) {
             data: {
               title: buildData.title,
               description,
+              image: buildData.image,
               totalPrice,
               updatedAt: new Date(),
+              lastScrapedAt: new Date(),
               components: {
                 create: componentsData,
               },
@@ -136,8 +134,10 @@ export async function POST(req: NextRequest) {
               title: buildData.title,
               slug,
               description,
+              image: buildData.image,
               totalPrice,
               status: "published", // Automatically publish imported builds
+              lastScrapedAt: new Date(),
               components: {
                 create: componentsData,
               },

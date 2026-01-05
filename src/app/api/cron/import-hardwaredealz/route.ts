@@ -2,11 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { scrapeHardwareDealz } from "@/lib/hardwaredealz-scraper";
 import { checkAdminAuth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import openai, { OPENAI_MODEL } from "@/lib/openai";
 
 /**
  * Cron Job: Importiert monatlich die aktuellsten Gaming PC Setups von HardwareDealz
@@ -79,8 +75,10 @@ export async function GET(req: NextRequest) {
             data: {
               title: buildData.title,
               description,
+              image: buildData.image,
               totalPrice,
               updatedAt: new Date(),
+              lastScrapedAt: new Date(),
               components: {
                 create: componentsData,
               },
@@ -95,8 +93,10 @@ export async function GET(req: NextRequest) {
               title: buildData.title,
               slug,
               description,
+              image: buildData.image,
               totalPrice,
               status: "published",
+              lastScrapedAt: new Date(),
               components: {
                 create: componentsData,
               },
@@ -146,7 +146,7 @@ async function generateAIContent(buildData: any) {
     `;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: OPENAI_MODEL,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
     });

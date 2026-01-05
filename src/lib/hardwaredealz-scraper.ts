@@ -6,6 +6,7 @@ export interface ScrapedPCBuild {
   pricePoint: number;
   title: string;
   description: string;
+  image?: string;
   components: Array<{
     type: PCComponentType;
     name: string;
@@ -44,12 +45,19 @@ export async function scrapeHardwareDealz(): Promise<ScrapedPCBuild[]> {
         const pricePoint = parseInt(priceMatch[1].replace(".", "").replace(",", ""));
         const detailUrl = $card.find("a.btn-warning").filter((_, a) => $(a).text().includes("Details")).attr("href");
         
+        // Find the image in the card
+        let image = $card.find("img").first().attr("src");
+        if (image && !image.startsWith("http")) {
+          image = `https://www.hardwaredealz.com${image}`;
+        }
+
         if (detailUrl) {
           buildInfos.push({
             pricePoint,
             title,
             detailUrl: detailUrl.startsWith("http") ? detailUrl : `https://www.hardwaredealz.com${detailUrl}`,
             description: $card.find(".card-body p").first().text().trim(),
+            image,
           });
         }
       }
@@ -72,6 +80,7 @@ export async function scrapeHardwareDealz(): Promise<ScrapedPCBuild[]> {
           pricePoint: info.pricePoint,
           title: info.title,
           description: info.description || $d(".entry-content p").first().text().trim(),
+          image: info.image,
           components: [],
         };
 
