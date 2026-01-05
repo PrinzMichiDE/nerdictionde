@@ -15,6 +15,8 @@ export async function GET(req: NextRequest) {
       where.status = status;
     }
 
+    const hasImageField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "image");
+    
     const pcBuilds = await prisma.pCBuild.findMany({
       where,
       include: {
