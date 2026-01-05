@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getIGDBGamesBulkLarge, BulkQueryOptions } from "@/lib/igdb";
-import { processGame, processMovie, processSeries, processAmazonProduct, generateSlug } from "@/lib/review-generation";
+import { 
+  processGame, 
+  processMovie, 
+  processSeries, 
+  processAmazonProduct, 
+  generateSlug,
+  generateProductListWithAI 
+} from "@/lib/review-generation";
 import { processHardware } from "@/app/api/reviews/bulk-create-hardware/route";
 import { requireAdminAuth } from "@/lib/auth";
 import { createJob, updateJob, addToQueue, updateQueueItem, getJob, getAllJobs } from "@/lib/job-status";
@@ -127,33 +134,26 @@ export async function POST(req: NextRequest) {
                 }));
                 console.log(`✅ Found ${items.length} products via PA API search`);
               } else {
-                console.warn("⚠️ No Amazon PA API credentials found, falling back to predefined list.");
-                // Use a fallback list if no credentials
-                items = [
-                  { name: "Echo Dot (5. Generation)", asin: "B09B8V1LZ3" },
-                  { name: "Sony WH-1000XM5", asin: "B09XS7JWHH" },
-                  { name: "Logitech G502 LIGHTSPEED", asin: "B07QKC4WWD" },
-                  { name: "Kindle Paperwhite", asin: "B08KTZ8249" },
-                  { name: "Elgato Stream Deck MK.2", asin: "B09738CV2G" }
-                ].slice(0, count);
+                console.warn("⚠️ No Amazon PA API credentials found, falling back to OpenAI generation.");
+                items = await generateProductListWithAI(searchKeywords, count);
+                console.log(`✅ Generated ${items.length} products via OpenAI`);
               }
             } catch (searchError: any) {
-              console.error(`❌ PA API Search failed: ${searchError.message}`);
-              
-              // If PA API fails (e.g. Unauthorized), fall back to common popular products
-              // instead of failing the whole job
+              console.error(`❌ PA API Search failed: ${searchError.message}. Falling back to OpenAI generation.`);
+              items = await generateProductListWithAI(searchKeywords, count);
+              console.log(`✅ Generated ${items.length} products via OpenAI after search error`);
+            }
+            
+            // Final fallback if OpenAI also fails
+            if (items.length === 0) {
+              console.warn("⚠️ OpenAI generation also failed, using hardcoded fallback list.");
               items = [
                 { name: "Echo Dot (5. Generation)", asin: "B09B8V1LZ3" },
                 { name: "Sony WH-1000XM5", asin: "B09XS7JWHH" },
                 { name: "Logitech G502 LIGHTSPEED", asin: "B07QKC4WWD" },
                 { name: "Kindle Paperwhite", asin: "B08KTZ8249" },
-                { name: "Elgato Stream Deck MK.2", asin: "B09738CV2G" },
-                { name: "Anker 735 Charger", asin: "B09W2N774C" },
-                { name: "SteelSeries Arctis Nova 7", asin: "B09ZWCYQSX" },
-                { name: "Philips Hue Smart Button", asin: "B07XSB4PD9" }
+                { name: "Elgato Stream Deck MK.2", asin: "B09738CV2G" }
               ].slice(0, count);
-              
-              console.log(`⚠️ Falling back to ${items.length} popular products after search error.`);
             }
           } else {
             // Convert product names to product objects

@@ -289,6 +289,41 @@ export async function generateContent(
   }
 }
 
+// Helper function to generate a list of products using OpenAI based on keywords
+export async function generateProductListWithAI(
+  keywords: string,
+  count: number = 10
+): Promise<Array<{ name: string; asin?: string; description?: string }>> {
+  const prompt = `
+    Erstelle eine Liste von ${count} populären und aktuell relevanten Amazon-Produkten für den Suchbegriff "${keywords}".
+    
+    Antworte EXKLUSIV im JSON-Format:
+    {
+      "products": [
+        { "name": "Produktname", "asin": "10-stellige ASIN falls bekannt (optional)", "description": "Kurze Beschreibung des Produkts" },
+        ...
+      ]
+    }
+    
+    WICHTIG: Erfinde KEINE ASINs, wenn du sie nicht sicher kennst. Gib nur echte, existierende Produkte zurück.
+  `;
+
+  try {
+    const aiResponse = await openai.chat.completions.create({
+      model: OPENAI_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+    });
+
+    const contentRaw = aiResponse.choices[0].message.content || "{}";
+    const parsed = JSON.parse(contentRaw);
+    return (parsed.products || []).slice(0, count);
+  } catch (error) {
+    console.error("Error generating product list with AI:", error);
+    return [];
+  }
+}
+
 // Helper function to generate review content using OpenAI with built-in auto-repair
 export async function generateReviewContent(gameData: any, retryCount = 0): Promise<{
   de: { title: string; content: string; pros: string[]; cons: string[] };
@@ -739,6 +774,8 @@ export async function generateAmazonReviewContent(
     Specs: ${JSON.stringify(mergedSpecs)}
     ${enrichedData.price ? `Preis: ${enrichedData.price}` : ""}
     ${enrichedData.rating ? `Bewertung: ${enrichedData.rating}/5` : ""}
+    
+    WICHTIG: Wenn kein Preis angegeben ist, erfinde KEINEN Preis. Lass Preisangaben im Text einfach weg.
   `;
 
   try {
