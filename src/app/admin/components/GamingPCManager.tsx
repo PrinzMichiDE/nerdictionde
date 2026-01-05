@@ -5,6 +5,7 @@ import { PCBuild } from "@/types/pc-build";
 import { PCBuildList } from "./PCBuildList";
 import { PCBuildEditor } from "./PCBuildEditor";
 import { PCBuildGenerator } from "./PCBuildGenerator";
+import { HardwareDealzFetcher } from "./HardwareDealzFetcher";
 
 export function GamingPCManager() {
   const [view, setView] = useState<"list" | "edit" | "new">("list");
@@ -57,7 +58,10 @@ export function GamingPCManager() {
   if (view === "list") {
     return (
       <div className="space-y-6">
-        <PCBuildGenerator onComplete={handleGenerationComplete} />
+        <div className="grid md:grid-cols-2 gap-6">
+          <PCBuildGenerator onComplete={handleGenerationComplete} />
+          <HardwareDealzFetcher onComplete={handleGenerationComplete} />
+        </div>
         <PCBuildList 
           onEdit={handleEdit} 
           onNew={handleNew}
