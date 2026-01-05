@@ -75,7 +75,9 @@ export async function GET(req: NextRequest) {
           },
         };
 
-        if (buildData.image) {
+        // Safer way to handle the 'image' field if Prisma hasn't synchronized yet
+        const hasImageField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "image");
+        if (buildData.image && hasImageField) {
           buildDataToSave.image = buildData.image;
         }
 
@@ -151,9 +153,14 @@ async function generateAIContent(buildData: any) {
 
     let contentString = response.choices[0].message.content || "{}";
     
-    // Robust cleaning of markdown code blocks
-    if (contentString.includes("```")) {
-      contentString = contentString.replace(/```json\n?|```/g, "").trim();
+    // Improved robust cleaning of markdown code blocks and invisible characters
+    contentString = contentString.replace(/```(?:json)?/g, "").replace(/```/g, "").trim();
+    
+    // Find the first { and last } to extract only the JSON object
+    const firstBrace = contentString.indexOf("{");
+    const lastBrace = contentString.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      contentString = contentString.substring(firstBrace, lastBrace + 1);
     }
 
     const content = JSON.parse(contentString);
