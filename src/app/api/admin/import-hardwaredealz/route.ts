@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { scrapeHardwareDealz } from "@/lib/hardwaredealz-scraper";
 import { requireAdminAuth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function GET(req: NextRequest) {
   const authError = requireAdminAuth(req);
@@ -15,13 +20,49 @@ export async function GET(req: NextRequest) {
   }
 }
 
+async function generateAIContent(buildData: any) {
+  try {
+    const componentList = buildData.components.map((c: any) => `${c.type}: ${c.name}`).join(", ");
+    
+    const prompt = `
+      Du bist ein Hardware-Experte für Gaming-PCs. Ich habe ein PC-Setup von HardwareDealz für ${buildData.pricePoint}€ gescrapt.
+      Komponenten: ${componentList}
+      
+      Aufgabe:
+      1. Erstelle eine packende, SEO-optimierte Beschreibung (ca. 3-4 Sätze, max 300 Zeichen) für diesen PC. Erwähne, welche Spiele (z.B. Fortnite, Valorant, AAA-Titel) in welcher Auflösung (FullHD, QHD) flüssig laufen.
+      2. Erstelle für jede Komponente eine kurze Erklärung (max 150 Zeichen), warum diese Komponente für dieses Budget gewählt wurde (z.B. Preis-Leistungs-Sieger, Zukunftssicherheit).
+      
+      Antworte NUR im JSON-Format:
+      {
+        "description": "...",
+        "componentExplanations": {
+          "Name der Komponente": "Erklärung...",
+          ...
+        }
+      }
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+    });
+
+    const content = JSON.parse(response.choices[0].message.content || "{}");
+    return content;
+  } catch (error) {
+    console.error("AI Content Generation failed:", error);
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
   const authError = requireAdminAuth(req);
   if (authError) return authError;
 
   try {
     const body = await req.json();
-    const { builds } = body;
+    const { builds, useAI = true } = body;
 
     if (!builds || !Array.isArray(builds)) {
       return NextResponse.json({ error: "Builds array is required" }, { status: 400 });
@@ -36,7 +77,32 @@ export async function POST(req: NextRequest) {
     for (const buildData of builds) {
       try {
         const slug = buildData.slug || `bester-${buildData.pricePoint}-euro-gaming-pc`;
-        const totalPrice = buildData.components.reduce((acc: number, comp: any) => acc + comp.price, 0);
+        const totalPrice = buildData.components.reduce((acc: number, comp: any) => acc + (comp.price || 0), 0);
+
+        let aiContent = null;
+        if (useAI) {
+          aiContent = await generateAIContent(buildData);
+        }
+
+        const description = aiContent?.description || buildData.description;
+
+        const componentsData = buildData.components.map((comp: any, index: number) => {
+          // Fallback to specific Amazon search link if no affiliate link provided
+          let affiliateLink = comp.affiliateLink;
+          if (!affiliateLink) {
+            const encodedName = encodeURIComponent(comp.name);
+            affiliateLink = `https://www.amazon.de/s?k=${encodedName}&tag=michelfritzschde-21&linkCode=ll2&linkId=38ed3b9216199de826066e1da9e63e2d&language=de_DE&ref_=as_li_ss_tl`;
+          }
+
+          return {
+            type: comp.type,
+            name: comp.name,
+            price: comp.price,
+            affiliateLink,
+            description: aiContent?.componentExplanations?.[comp.name] || null,
+            sortOrder: index,
+          };
+        });
 
         // Find existing build by pricePoint
         const existingBuild = await prisma.pCBuild.findUnique({
@@ -53,17 +119,11 @@ export async function POST(req: NextRequest) {
             where: { id: existingBuild.id },
             data: {
               title: buildData.title,
-              description: buildData.description,
+              description,
               totalPrice,
               updatedAt: new Date(),
               components: {
-                create: buildData.components.map((comp: any, index: number) => ({
-                  type: comp.type,
-                  name: comp.name,
-                  price: comp.price,
-                  affiliateLink: comp.affiliateLink,
-                  sortOrder: index,
-                })),
+                create: componentsData,
               },
             },
           });
@@ -75,17 +135,11 @@ export async function POST(req: NextRequest) {
               pricePoint: buildData.pricePoint,
               title: buildData.title,
               slug,
-              description: buildData.description,
+              description,
               totalPrice,
-              status: "draft",
+              status: "published", // Automatically publish imported builds
               components: {
-                create: buildData.components.map((comp: any, index: number) => ({
-                  type: comp.type,
-                  name: comp.name,
-                  price: comp.price,
-                  affiliateLink: comp.affiliateLink,
-                  sortOrder: index,
-                })),
+                create: componentsData,
               },
             },
           });

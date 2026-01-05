@@ -18,77 +18,124 @@ const HARDWAREDEALZ_URL = "https://www.hardwaredealz.com/die-besten-gaming-deskt
 
 export async function scrapeHardwareDealz(): Promise<ScrapedPCBuild[]> {
   try {
+    console.log(`🔍 Scraping HardwareDealz from ${HARDWAREDEALZ_URL}...`);
     const { data } = await axios.get(HARDWAREDEALZ_URL, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+        "Accept-Language": "de-DE,de;q=0.9,en-US;q=0.8",
       },
     });
 
     const $ = cheerio.load(data);
     const builds: ScrapedPCBuild[] = [];
-
-    // HardwareDealz structure: 
-    // Usually H3 for build titles
-    // Followed by description paragraphs
-    // Then components are listed, often in divs or tables
     
-    $("h3").each((_, element) => {
-      const title = $(element).text().trim();
-      const priceMatch = title.match(/(\d+(?:\.\d+)?)\s*Euro/i);
+    // Collect all build links and initial info
+    const buildInfos: Array<{ pricePoint: number, title: string, detailUrl: string, description: string }> = [];
+
+    $(".card").each((i, card) => {
+      const $card = $(card);
+      const h3 = $card.find("h3").first();
+      if (!h3.length) return;
+
+      const title = h3.text().trim();
+      const priceMatch = title.match(/(\d+(?:\.\d+)?)\s*(?:Euro|€)/i);
       
       if (priceMatch) {
-        const pricePoint = parseInt(priceMatch[1].replace(".", ""));
-        const build: ScrapedPCBuild = {
-          pricePoint,
-          title,
-          description: "",
-          components: [],
-        };
-
-        // Find description (usually next few paragraphs)
-        let nextEl = $(element).next();
-        while (nextEl.length && !nextEl.is("h3") && build.components.length === 0) {
-          if (nextEl.is("p")) {
-            build.description += nextEl.text().trim() + " ";
-          }
-          
-          // Look for components in this section
-          // HardwareDealz often uses specific patterns for component names and prices
-          // e.g., "AMD Ryzen 5 5600GT(ab 128,03 €)"
-          const text = nextEl.text();
-          
-          // Try to find components in links or paragraphs
-          nextEl.find("a").each((__, link) => {
-            const linkText = $(link).text().trim();
-            const componentPriceMatch = linkText.match(/(.*?)\(ab\s*([\d,]+)\s*€\)/i);
-            
-            if (componentPriceMatch) {
-              const name = componentPriceMatch[1].trim();
-              const price = parseFloat(componentPriceMatch[2].replace(",", "."));
-              const affiliateLink = $(link).attr("href");
-              
-              // Guess component type based on name
-              const type = guessComponentType(name);
-              
-              build.components.push({
-                type,
-                name,
-                price,
-                affiliateLink,
-              });
-            }
+        const pricePoint = parseInt(priceMatch[1].replace(".", "").replace(",", ""));
+        const detailUrl = $card.find("a.btn-warning").filter((_, a) => $(a).text().includes("Details")).attr("href");
+        
+        if (detailUrl) {
+          buildInfos.push({
+            pricePoint,
+            title,
+            detailUrl: detailUrl.startsWith("http") ? detailUrl : `https://www.hardwaredealz.com${detailUrl}`,
+            description: $card.find(".card-body p").first().text().trim(),
           });
-
-          nextEl = nextEl.next();
-        }
-
-        build.description = build.description.trim();
-        if (build.components.length > 0) {
-          builds.push(build);
         }
       }
     });
 
+    console.log(`Found ${buildInfos.length} builds to scrape in detail...`);
+
+    // Scrape each build detail page
+    for (const info of buildInfos) {
+      try {
+        console.log(`📄 Scraping details for ${info.pricePoint}€: ${info.detailUrl}`);
+        const { data: detailData } = await axios.get(info.detailUrl, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+          },
+        });
+        
+        const $d = cheerio.load(detailData);
+        const build: ScrapedPCBuild = {
+          pricePoint: info.pricePoint,
+          title: info.title,
+          description: info.description || $d(".entry-content p").first().text().trim(),
+          components: [],
+        };
+
+        // Look for component rows in tables or lists
+        $d("tr, li, div.component-row").each((__, el) => {
+          const text = $(el).text().trim();
+          // Pattern: "Component Name (ab 123,45 €)"
+          const match = text.match(/(.*?)\s*\(?ab\s*([\d,.]+)\s*[€E?]/i);
+          
+          if (match) {
+            const name = match[1].replace(/^[|\s•-]+/, "").trim();
+            if (name.length > 2 && !name.toLowerCase().includes("gaming pc") && name.length < 150) {
+              const priceStr = match[2].replace(".", "").replace(",", ".");
+              const price = parseFloat(priceStr);
+              
+              const link = $(el).find("a").attr("href") || $(el).closest("a").attr("href") || $(el).find("a[href*='amazon'], a[href*='geizhals']").attr("href");
+              
+              if (!build.components.some(c => c.name === name)) {
+                let finalLink = link;
+                
+                // Prefix relative links
+                if (finalLink && finalLink.startsWith("/")) {
+                  finalLink = `https://www.hardwaredealz.com${finalLink}`;
+                }
+
+                if (finalLink && (finalLink.includes("amazon.de") || finalLink.includes("amzn.to"))) {
+                  const asinMatch = finalLink.match(/\/([A-Z0-9]{10})(?:[\/?]|$)/i);
+                  const asin = asinMatch ? asinMatch[1] : null;
+                  
+                  if (asin) {
+                    finalLink = `https://www.amazon.de/dp/${asin}?tag=michelfritzschde-21`;
+                  } else {
+                    // Use the specific search link format provided by user
+                    const encodedName = encodeURIComponent(name);
+                    finalLink = `https://www.amazon.de/s?k=${encodedName}&__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=1HY4329FCCD5J&sprefix=${encodedName}%2Caps%2C124&linkCode=ll2&tag=michelfritzschde-21&linkId=38ed3b9216199de826066e1da9e63e2d&language=de_DE&ref_=as_li_ss_tl`;
+                  }
+                }
+
+                build.components.push({
+                  type: guessComponentType(name),
+                  name,
+                  price,
+                  affiliateLink: finalLink,
+                });
+              }
+            }
+          }
+        });
+
+        if (build.components.length >= 3) {
+          console.log(`✅ Successfully scraped ${build.components.length} components for ${info.pricePoint}€`);
+          builds.push(build);
+        } else {
+          console.log(`⚠️ Only found ${build.components.length} components for ${info.pricePoint}€ on detail page, skipping.`);
+        }
+        
+        // Small delay to be polite
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (err: any) {
+        console.error(`Failed to scrape details for ${info.pricePoint}€:`, err.message);
+      }
+    }
+
+    console.log(`📊 Scraped total of ${builds.length} builds`);
     return builds;
   } catch (error: any) {
     console.error("Scraping HardwareDealz failed:", error.message);

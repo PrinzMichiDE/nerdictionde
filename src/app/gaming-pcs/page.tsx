@@ -40,8 +40,11 @@ export default async function GamingPCsPage() {
           Unsere Konfigurationen werden regelmäßig aktualisiert, um dir das beste Preis-Leistungs-Verhältnis zu garantieren.
         </p>
         <div className="flex flex-wrap justify-center gap-4 pt-4">
+          <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full border border-primary/20 text-sm font-bold text-primary">
+            <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+            HardwareDealz Empfehlungen
+          </div>
           <div className="flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-full border text-sm font-medium">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             Januar 2026 Update
           </div>
           <div className="bg-muted/50 px-4 py-2 rounded-full border text-sm font-medium">

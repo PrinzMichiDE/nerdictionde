@@ -59,8 +59,8 @@ export function GamingPCManager() {
     return (
       <div className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
-          <PCBuildGenerator onComplete={handleGenerationComplete} />
           <HardwareDealzFetcher onComplete={handleGenerationComplete} />
+          <PCBuildGenerator onComplete={handleGenerationComplete} />
         </div>
         <PCBuildList 
           onEdit={handleEdit} 

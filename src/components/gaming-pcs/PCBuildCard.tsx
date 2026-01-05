@@ -4,7 +4,7 @@ import { PCBuild } from "@/types/pc-build";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Cpu, Monitor, ChevronRight, ShoppingCart, Info } from "lucide-react";
+import { Cpu, Monitor, ChevronRight, ShoppingCart, Info, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 interface PCBuildCardProps {
@@ -17,13 +17,19 @@ export function PCBuildCard({ build, isEn = false }: PCBuildCardProps) {
   const gpu = build.components?.find(c => c.type === "GPU");
 
   return (
-    <Card className="flex flex-col h-full border-2 hover:border-primary/50 transition-all group overflow-hidden">
-      <CardHeader className="pb-4">
-        <div className="flex justify-between items-start mb-2">
-          <Badge className="bg-primary text-primary-foreground font-bold">
-            {build.pricePoint}€ Build
+    <Card className="flex flex-col h-full border-2 hover:border-primary/50 transition-all group overflow-hidden bg-gradient-to-br from-background to-muted/20">
+      <CardHeader className="pb-4 relative">
+        <div className="absolute top-0 right-0 p-4">
+          <Badge variant="outline" className="bg-primary/5 text-[10px] uppercase tracking-tighter font-black border-primary/20 flex gap-1 items-center">
+            <Sparkles className="h-2 w-2 text-primary" />
+            HardwareDealz
           </Badge>
-          <div className="text-2xl font-black text-primary">
+        </div>
+        <div className="flex justify-between items-start mb-2 pt-2">
+          <Badge className="bg-primary text-primary-foreground font-black text-lg px-3 py-1">
+            {build.pricePoint}€
+          </Badge>
+          <div className="text-xl font-black text-primary/80">
             ~{build.totalPrice.toLocaleString(isEn ? "en-US" : "de-DE", {
               style: "currency",
               currency: build.currency,
@@ -31,7 +37,7 @@ export function PCBuildCard({ build, isEn = false }: PCBuildCardProps) {
             })}
           </div>
         </div>
-        <CardTitle className="text-xl md:text-2xl font-black group-hover:text-primary transition-colors">
+        <CardTitle className="text-xl md:text-2xl font-black group-hover:text-primary transition-colors leading-tight">
           {isEn && build.title_en ? build.title_en : build.title}
         </CardTitle>
       </CardHeader>
