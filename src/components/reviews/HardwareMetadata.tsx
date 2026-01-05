@@ -126,7 +126,7 @@ export function HardwareMetadata({ hardware, specs, affiliateLink, isEn = false 
         )}
 
         {/* Rating */}
-        {rating !== undefined && (
+        {rating !== undefined && rating !== null && !isNaN(Number(rating)) && (
           <Card className="border-2">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
@@ -136,7 +136,7 @@ export function HardwareMetadata({ hardware, specs, affiliateLink, isEn = false 
             </CardHeader>
             <CardContent>
               <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-foreground">{rating.toFixed(1)}</p>
+                <p className="text-2xl font-bold text-foreground">{Number(rating).toFixed(1)}</p>
                 <span className="text-sm text-muted-foreground">/ 10</span>
               </div>
             </CardContent>

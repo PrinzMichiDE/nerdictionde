@@ -111,14 +111,14 @@ export function MovieSeriesMetadata({ metadata, category, isEn = false }: MovieS
         )}
 
         {/* TMDB Score */}
-        {metadata.tmdb_score !== undefined && (
+        {metadata.tmdb_score !== undefined && metadata.tmdb_score !== null && !isNaN(Number(metadata.tmdb_score)) && (
           <div className="p-6 rounded-2xl bg-muted/30 border-2 border-border/50 space-y-3">
             <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground/70">
               <Star className="h-4 w-4" />
               {isEn ? "TMDB Rating" : "TMDB Bewertung"}
             </div>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-bold text-foreground">{metadata.tmdb_score.toFixed(1)}</p>
+              <p className="text-2xl font-bold text-foreground">{Number(metadata.tmdb_score).toFixed(1)}</p>
               <span className="text-sm text-muted-foreground">/ 10</span>
               {metadata.vote_count && (
                 <span className="text-xs text-muted-foreground ml-2">
@@ -130,13 +130,13 @@ export function MovieSeriesMetadata({ metadata, category, isEn = false }: MovieS
         )}
 
         {/* Popularity */}
-        {metadata.popularity !== undefined && (
+        {metadata.popularity !== undefined && metadata.popularity !== null && !isNaN(Number(metadata.popularity)) && (
           <div className="p-6 rounded-2xl bg-muted/30 border-2 border-border/50 space-y-3">
             <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground/70">
               <TrendingUp className="h-4 w-4" />
               {isEn ? "Popularity" : "Popularität"}
             </div>
-            <p className="text-lg font-semibold text-foreground">{metadata.popularity.toFixed(1)}</p>
+            <p className="text-lg font-semibold text-foreground">{Number(metadata.popularity).toFixed(1)}</p>
           </div>
         )}
       </div>

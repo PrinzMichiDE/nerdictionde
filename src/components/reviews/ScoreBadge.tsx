@@ -6,6 +6,10 @@ interface ScoreBadgeProps {
 }
 
 export function ScoreBadge({ score, className }: ScoreBadgeProps) {
+  // Ensure score is a valid number
+  const numericScore = typeof score === 'number' ? score : Number(score) || 0;
+  const safeScore = isNaN(numericScore) ? 0 : Math.max(0, Math.min(100, numericScore));
+
   const getColorClasses = (score: number) => {
     if (score >= 90) return "bg-gradient-to-br from-green-500 to-green-600 text-white border-green-400/50";
     if (score >= 75) return "bg-gradient-to-br from-green-400 to-green-500 text-white border-green-300/50";
@@ -20,14 +24,14 @@ export function ScoreBadge({ score, className }: ScoreBadgeProps) {
         "relative flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold",
         "border-2 shadow-xl backdrop-blur-sm",
         "transition-all duration-300 hover:scale-110",
-        getColorClasses(score),
+        getColorClasses(safeScore),
         className
       )}
       role="img"
-      aria-label={`Score: ${score} von 100`}
+      aria-label={`Score: ${safeScore} von 100`}
     >
       <div className="absolute inset-0 rounded-full bg-white/20 blur-sm" />
-      <span className="relative z-10">{score}</span>
+      <span className="relative z-10">{safeScore}</span>
     </div>
   );
 }

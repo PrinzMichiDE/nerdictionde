@@ -22,6 +22,7 @@ import { ShareButtons } from "@/components/reviews/ShareButtons";
 import { YouTubeEmbed } from "@/components/reviews/YouTubeEmbed";
 import { HardwareSpecs } from "@/components/reviews/HardwareSpecs";
 import { Clock, ShoppingCart } from "lucide-react";
+import { getAmazonProductData } from "@/lib/amazon";
 
 export async function generateMetadata({
   params,
@@ -93,6 +94,18 @@ export default async function ReviewDetailPage({
   });
 
   const specs = review.specs as any;
+
+  // Load Amazon product data if ASIN is available
+  let amazonProductData: any = null;
+  if ((review.category === "product" || review.category === "amazon") && review.amazonAsin) {
+    try {
+      const result = await getAmazonProductData(review.title, review.amazonAsin);
+      amazonProductData = result.data;
+    } catch (error) {
+      console.warn(`Failed to load Amazon data for ASIN ${review.amazonAsin}:`, error);
+      // Continue without Amazon data - will use specs as fallback
+    }
+  }
 
   // Extract headings from markdown content to generate table of contents
   function extractHeadings(markdown: string): Array<{ level: number; text: string; id: string }> {
@@ -331,6 +344,7 @@ export default async function ReviewDetailPage({
               asin={review.amazonAsin}
               specs={review.specs || specs}
               affiliateLink={review.affiliateLink}
+              amazonData={amazonProductData}
               isEn={isEn}
             />
           )}
@@ -426,21 +440,10 @@ export default async function ReviewDetailPage({
                 </div>
             </div>
 
-            {/* Amazon Affiliate Link - Only show in sidebar if not shown in metadata section */}
-            {review.category === "hardware" && !review.affiliateLink && (
-              <div className="w-full pt-6 border-t border-primary/20">
-                <div className="text-center p-4 rounded-lg bg-muted/50 border border-dashed">
-                  <p className="text-sm text-muted-foreground">
-                    {isEn 
-                      ? "Amazon link not available" 
-                      : "Amazon-Link nicht verfügbar"}
-                  </p>
-                </div>
-              </div>
-            )}
-            
-            {/* Other affiliate links (for non-hardware, non-amazon) */}
-            {review.category !== "hardware" && review.category !== "amazon" && review.category !== "product" && review.affiliateLink && (
+            {/* Amazon Affiliate Link in Sidebar - Show for hardware reviews or if no metadata section */}
+            {(review.category === "hardware" || 
+              (review.category !== "product" && review.category !== "amazon")) && 
+              review.affiliateLink && (
               <div className="w-full pt-6 border-t border-primary/20">
                 <a 
                   href={review.affiliateLink} 
@@ -448,6 +451,7 @@ export default async function ReviewDetailPage({
                   rel="nofollow sponsored"
                   className="flex items-center justify-center w-full bg-[#FF9900] hover:bg-[#E68A00] text-black font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] group"
                 >
+                  <ShoppingCart className="mr-2 h-5 w-5" />
                   <span>{isEn ? "View on Amazon" : "Auf Amazon ansehen"}</span>
                   <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
                 </a>
