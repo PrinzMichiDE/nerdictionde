@@ -1,5 +1,5 @@
 import { searchHardwareProduct, extractProductSpecs, searchAmazonProduct } from "@/lib/tavily";
-import { getAmazonProductData, parseAmazonUrl } from "@/lib/amazon";
+import { getAmazonProductData, parseAmazonUrl, hasPAAPICredentials } from "@/lib/amazon";
 import { generateAmazonAffiliateLinkFromASIN, generateAmazonAffiliateLink, searchAmazonHardware } from "@/lib/amazon-search";
 import openai, { OPENAI_MODEL } from "@/lib/openai";
 import { PCComponentType } from "@/types/pc-build";
@@ -133,12 +133,23 @@ export async function searchComponentRecommendation(
         return null;
     }
 
-    // Step 1: Search using Tavily for general hardware info
+    // Step 1: Try to search Amazon directly via PA API if credentials available
+    let paApiResults: any[] = [];
+    if (hasPAAPICredentials()) {
+      try {
+        console.log(`📡 Attempting PA API SearchItems for "${searchQuery}"...`);
+        paApiResults = await searchAmazonProducts(searchQuery, 3);
+      } catch (error: any) {
+        console.warn(`⚠️ PA API search failed for "${searchQuery}":`, error.message);
+      }
+    }
+
+    // Step 2: Search using Tavily for general hardware info
     const searchResults = await searchHardwareProduct(searchQuery);
     
     if (!searchResults.results || searchResults.results.length === 0) {
       console.warn(`No results found for ${componentType} with budget ${budget}€`);
-      return null;
+      if (paApiResults.length === 0) return null;
     }
 
     // Extract product information
@@ -150,9 +161,16 @@ export async function searchComponentRecommendation(
       searchResults.results.map(r => r.content).join("\n\n").substring(0, 2000) ||
       "No summary available";
 
-    const prompt = `Based on the following search results for a ${componentType} component with a budget of approximately ${budget}€, extract the best recommendation:
+    const paApiContent = paApiResults.map(r => 
+      `Amazon Product: ${r.title}\nPrice: ${r.price}\nASIN: ${r.asin}\nFeatures: ${r.features.join(", ")}`
+    ).join("\n\n");
 
-Search Results Summary:
+    const prompt = `Based on the following search results and official Amazon product data for a ${componentType} component with a budget of approximately ${budget}€, extract the best recommendation:
+
+Amazon Data (PA API):
+${paApiContent || "No direct Amazon API data available."}
+
+General Web Search Summary:
 ${searchContent}
 
 Product Specs Found:
@@ -164,11 +182,14 @@ Please provide a JSON response with the following structure:
   "manufacturer": "Manufacturer name (e.g., 'AMD', 'Intel', 'NVIDIA', 'ASUS')",
   "model": "Model number if available",
   "price": ${Math.round(budget * 0.9)}, 
-  "description": "Brief description (max 100 chars) of why this component is good for this budget"
+  "description": "Brief description (max 100 chars) of why this component is good for this budget",
+  "asin": "ASIN from the Amazon Data if it matches the recommendation"
 }
 
-Important: The price should be realistic and close to the budget. Extract actual prices from the search results if available.
-Only return valid JSON, no additional text or markdown.`;
+Important: 
+1. If one of the Amazon products fits the budget well, prefer it.
+2. The price should be realistic and close to the budget. 
+3. Only return valid JSON, no additional text or markdown.`;
 
     const completion = await openai.chat.completions.create({
       model: OPENAI_MODEL,
@@ -233,62 +254,55 @@ Only return valid JSON, no additional text or markdown.`;
       };
     }
 
-    // Step 2: Try to find Amazon products using Tavily Amazon search
+    // Step 2: Try to find Amazon products if not already found via PA API
     let amazonData: any = null;
-    let amazonASIN: string | undefined = undefined;
+    let amazonASIN: string | undefined = componentData.asin || undefined;
     let amazonAffiliateLink: string | undefined = undefined;
-    let usedAmazonAPI = false;
+    let usedAmazonAPI = paApiResults.length > 0;
     
-    try {
-      // Build Amazon-specific search query from extracted component data
-      const amazonSearchQuery = componentData.name || 
-        `${componentType} ${componentData.manufacturer || ""} ${componentData.model || ""} gaming`.trim();
-      
-      // Search Amazon via Tavily
-      const amazonSearchResults = await searchAmazonProduct(amazonSearchQuery);
-      
-      // Try to extract ASIN from search results
-      for (const result of amazonSearchResults.results || []) {
-        if (result.url) {
-          const extractedASIN = parseAmazonUrl(result.url);
-          if (extractedASIN) {
-            amazonASIN = extractedASIN;
-            break;
-          }
-        }
+    // If AI found an ASIN from PA API data, use it
+    if (amazonASIN && paApiResults.length > 0) {
+      const match = paApiResults.find(r => r.asin === amazonASIN);
+      if (match) {
+        amazonData = match;
+        amazonAffiliateLink = generateAmazonAffiliateLinkFromASIN(amazonASIN);
       }
-      
-      // If we found an ASIN, try to get product data from Amazon
-      if (amazonASIN) {
-        try {
-          const amazonProductResult = await getAmazonProductData(amazonSearchQuery, amazonASIN);
-          amazonData = amazonProductResult.data;
-          usedAmazonAPI = amazonProductResult.source === "paapi";
-          
-          // Generate affiliate link from ASIN
-          amazonAffiliateLink = generateAmazonAffiliateLinkFromASIN(amazonASIN);
-          
-          // Use Amazon price if available and within budget
-          if (amazonData.price) {
-            const amazonPriceStr = amazonData.price.replace(/[^\d,.-]/g, "").replace(",", ".");
-            const amazonPrice = parseFloat(amazonPriceStr);
-            if (!isNaN(amazonPrice) && amazonPrice > 0 && amazonPrice <= budget * 1.2) {
-              // Use Amazon price if it's reasonable
-              componentData.price = Math.round(amazonPrice);
+    }
+
+    try {
+      // If we don't have an ASIN yet, try searching via Tavily as fallback
+      if (!amazonASIN) {
+        const amazonSearchQuery = componentData.name || 
+          `${componentType} ${componentData.manufacturer || ""} ${componentData.model || ""} gaming`.trim();
+        
+        const amazonSearchResults = await searchAmazonProduct(amazonSearchQuery);
+        
+        for (const result of amazonSearchResults.results || []) {
+          if (result.url) {
+            const extractedASIN = parseAmazonUrl(result.url);
+            if (extractedASIN) {
+              amazonASIN = extractedASIN;
+              break;
             }
           }
-        } catch (error: any) {
-          console.warn(`Amazon product fetch failed for ${amazonASIN}:`, error.message);
-          // Fallback to search link
+        }
+        
+        if (amazonASIN) {
+          try {
+            const amazonProductResult = await getAmazonProductData(amazonSearchQuery, amazonASIN);
+            amazonData = amazonProductResult.data;
+            usedAmazonAPI = amazonProductResult.source === "paapi";
+            amazonAffiliateLink = generateAmazonAffiliateLinkFromASIN(amazonASIN);
+          } catch (error: any) {
+            console.warn(`Amazon product fetch failed for ${amazonASIN}:`, error.message);
+            amazonAffiliateLink = generateAmazonAffiliateLink(amazonSearchQuery);
+          }
+        } else {
           amazonAffiliateLink = generateAmazonAffiliateLink(amazonSearchQuery);
         }
-      } else {
-        // No ASIN found, generate search affiliate link
-        amazonAffiliateLink = generateAmazonAffiliateLink(amazonSearchQuery);
       }
     } catch (error: any) {
       console.warn(`Amazon search failed for ${componentType}:`, error.message);
-      // Fallback: generate search affiliate link
       const fallbackQuery = `${componentType} ${componentData.manufacturer || ""} gaming`.trim();
       amazonAffiliateLink = generateAmazonAffiliateLink(fallbackQuery);
     }

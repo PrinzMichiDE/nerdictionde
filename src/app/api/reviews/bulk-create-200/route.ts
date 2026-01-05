@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       batchSize = 5, // Process 5 games at a time for stability
       delayBetweenBatches = 3000, // 3 seconds between batches
       delayBetweenGames = 2000, // 2 seconds between individual games
-      status = "draft",
+      status = "published",
       skipExisting = true,
       maxRetries = 3,
     } = body;

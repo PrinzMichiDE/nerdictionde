@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       queryOptions,
       batchSize = 5,
       delayBetweenBatches = 2000,
-      status = "draft",
+      status = "published",
       skipExisting = true,
     } = body;
 

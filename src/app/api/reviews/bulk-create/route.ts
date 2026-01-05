@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       batchSize = 5,
       delayBetweenBatches = 3000,
       delayBetweenGames = 2000,
-      status = "draft",
+      status = "published",
       skipExisting = true,
       maxRetries = 3,
     } = body;

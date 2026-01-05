@@ -65,7 +65,7 @@ export function MassReviewCreation() {
   const [batchSize, setBatchSize] = useState<string>("5");
   const [delayBetweenBatches, setDelayBetweenBatches] = useState<string>("3000");
   const [delayBetweenItems, setDelayBetweenItems] = useState<string>("2000");
-  const [status, setStatus] = useState<"draft" | "published">("draft");
+  const [status, setStatus] = useState<"draft" | "published">("published");
   const [skipExisting, setSkipExisting] = useState(true);
   const [hardwareNames, setHardwareNames] = useState<string>("");
   const [productNames, setProductNames] = useState<string>("");

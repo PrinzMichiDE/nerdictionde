@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ExternalLink, Info, Search } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface PCComponentItemProps {
   component: PCComponent;
@@ -60,11 +61,22 @@ export function PCComponentItem({ component, isEn = false }: PCComponentItemProp
                 </Button>
               )}
               {component.affiliateLink && (
-                <Button size="sm" asChild className="gap-2 bg-[#FF9900] hover:bg-[#E68A00] text-black border-none">
+                <Button 
+                  size="sm" 
+                  asChild 
+                  className={cn(
+                    "gap-2 border-none",
+                    component.affiliateLink.includes("amazon") 
+                      ? "bg-[#FF9900] hover:bg-[#E68A00] text-black" 
+                      : "bg-[#0055aa] hover:bg-[#004488] text-white"
+                  )}
+                >
                   <a href={component.affiliateLink} target="_blank" rel="nofollow sponsored">
                     <ExternalLink className="h-4 w-4" />
                     <span>
-                      {isEn ? "Geizhals" : "Geizhals"}
+                      {component.affiliateLink.includes("amazon") 
+                        ? "Amazon" 
+                        : (isEn ? "Geizhals" : "Geizhals")}
                     </span>
                   </a>
                 </Button>

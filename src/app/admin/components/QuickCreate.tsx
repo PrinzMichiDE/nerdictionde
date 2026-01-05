@@ -30,7 +30,7 @@ export function QuickCreate() {
       
       const saveResponse = await axios.post("/api/reviews", {
         ...data,
-        status: "draft",
+        status: "published",
       });
       
       router.push(`/admin/reviews/${saveResponse.data.id}/edit`);

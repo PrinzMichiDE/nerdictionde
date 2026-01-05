@@ -21,7 +21,7 @@ export function GamingPCManager() {
       pricePoint: 0,
       title: "",
       slug: "",
-      status: "draft",
+      status: "published",
       totalPrice: 0,
       currency: "EUR",
       components: [

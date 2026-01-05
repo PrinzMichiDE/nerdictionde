@@ -70,7 +70,7 @@ export function PCBuildGenerator({ onComplete }: PCBuildGeneratorProps) {
             </CardTitle>
             <CardDescription className="mt-2">
               Generiert automatisch neue Gaming PC Setups für alle Preiskategorien (300€ - 4.500€).
-              Nutzt Tavily für aktuelle Hardware-Recherche und OpenAI für Titel/Beschreibungen.
+              Nutzt die offizielle Amazon PA API, Tavily für Hardware-Recherche und OpenAI für Titel/Beschreibungen.
             </CardDescription>
           </div>
         </div>

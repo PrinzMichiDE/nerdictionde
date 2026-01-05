@@ -50,7 +50,7 @@ export function BulkCreate() {
   const [order, setOrder] = useState<"asc" | "desc">("desc");
   const [batchSize, setBatchSize] = useState<string>("5");
   const [delay, setDelay] = useState<string>("2000");
-  const [status, setStatus] = useState<"draft" | "published">("draft");
+  const [status, setStatus] = useState<"draft" | "published">("published");
   const [skipExisting, setSkipExisting] = useState(true);
 
   useEffect(() => {
@@ -301,35 +301,6 @@ export function BulkCreate() {
                       Pause zwischen Batches (verhindert Rate-Limiting)
                     </p>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select value={status} onValueChange={(v) => setStatus(v as any)}>
-                      <SelectTrigger id="status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="draft">Entwurf</SelectItem>
-                        <SelectItem value="published">Veröffentlicht</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="skipExisting">Bereits vorhandene überspringen</Label>
-                    <Select
-                      value={skipExisting ? "true" : "false"}
-                      onValueChange={(v) => setSkipExisting(v === "true")}
-                    >
-                      <SelectTrigger id="skipExisting">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nein</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
               </div>
 
@@ -466,35 +437,6 @@ export function BulkCreate() {
                       Pause zwischen Batches (verhindert Rate-Limiting)
                     </p>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="movie-status">Status</Label>
-                    <Select value={status} onValueChange={(v) => setStatus(v as any)}>
-                      <SelectTrigger id="movie-status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="draft">Entwurf</SelectItem>
-                        <SelectItem value="published">Veröffentlicht</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="movie-skipExisting">Bereits vorhandene überspringen</Label>
-                    <Select
-                      value={skipExisting ? "true" : "false"}
-                      onValueChange={(v) => setSkipExisting(v === "true")}
-                    >
-                      <SelectTrigger id="movie-skipExisting">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nein</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
               </div>
 
@@ -626,35 +568,6 @@ export function BulkCreate() {
                     <p className="text-xs text-muted-foreground">
                       Pause zwischen Batches (verhindert Rate-Limiting)
                     </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="series-status">Status</Label>
-                    <Select value={status} onValueChange={(v) => setStatus(v as any)}>
-                      <SelectTrigger id="series-status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="draft">Entwurf</SelectItem>
-                        <SelectItem value="published">Veröffentlicht</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="series-skipExisting">Bereits vorhandene überspringen</Label>
-                    <Select
-                      value={skipExisting ? "true" : "false"}
-                      onValueChange={(v) => setSkipExisting(v === "true")}
-                    >
-                      <SelectTrigger id="series-skipExisting">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="true">Ja</SelectItem>
-                        <SelectItem value="false">Nein</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                 </div>
               </div>

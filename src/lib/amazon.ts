@@ -1,7 +1,9 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { getAmazonProductByASIN, hasPAAPICredentials, AmazonProductData } from "./amazon-paapi";
+import { getAmazonProductByASIN, hasPAAPICredentials, AmazonProductData, searchAmazonProducts } from "./amazon-paapi";
 import { searchAmazonProduct, extractProductSpecs } from "./tavily";
+
+export { hasPAAPICredentials };
 
 export function parseAmazonUrl(url: string): string | null {
   const patterns = [
@@ -127,14 +129,22 @@ export async function getAmazonProductData(
   data: any;
   source: "paapi" | "tavily" | "scraping";
 }> {
-  // 1. Try PA API first (if credentials available and ASIN provided)
-  if (asin && hasPAAPICredentials()) {
+  // 1. Try PA API first (if credentials available)
+  if (hasPAAPICredentials()) {
     try {
-      console.log(`📡 Attempting PA API for ${asin}...`);
-      const data = await getAmazonProductByASIN(asin);
-      return { data, source: "paapi" };
+      if (asin) {
+        console.log(`📡 Attempting PA API GetItems for ${asin}...`);
+        const data = await getAmazonProductByASIN(asin);
+        return { data, source: "paapi" };
+      } else {
+        console.log(`📡 Attempting PA API SearchItems for "${productName}"...`);
+        const results = await searchAmazonProducts(productName, 1);
+        if (results.length > 0) {
+          return { data: results[0], source: "paapi" };
+        }
+      }
     } catch (error: any) {
-      console.warn(`⚠️ PA API failed for ${asin}:`, error.message);
+      console.warn(`⚠️ PA API failed for ${asin || productName}:`, error.message);
     }
   }
   
