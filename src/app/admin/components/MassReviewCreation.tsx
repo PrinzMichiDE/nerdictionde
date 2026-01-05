@@ -55,6 +55,25 @@ export function MassReviewCreation() {
   const [loadingJobs, setLoadingJobs] = useState(false);
   const [showQueue, setShowQueue] = useState(true);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Form state
+  const [category, setCategory] = useState<ReviewCategory>("game");
+  const [count, setCount] = useState<string>("200");
+  const [batchSize, setBatchSize] = useState<string>("5");
+  const [delayBetweenBatches, setDelayBetweenBatches] = useState<string>("3000");
+  const [delayBetweenItems, setDelayBetweenItems] = useState<string>("2000");
+  const [status, setStatus] = useState<"draft" | "published">("draft");
+  const [skipExisting, setSkipExisting] = useState<boolean>(true);
+  const [genreId, setGenreId] = useState<string>("all");
+  const [platformId, setPlatformId] = useState<string>("all");
+  const [minRating, setMinRating] = useState<string>("");
+  const [maxRating, setMaxRating] = useState<string>("");
+  const [genres, setGenres] = useState<Array<{ id: number; name: string }>>([]);
+  const [platforms, setPlatforms] = useState<Array<{ id: number; name: string }>>([]);
+  const [tmdbMovieGenres, setTmdbMovieGenres] = useState<Array<{ id: number; name: string }>>([]);
+  const [tmdbSeriesGenres, setTmdbSeriesGenres] = useState<Array<{ id: number; name: string }>>([]);
+  const [hardwareNames, setHardwareNames] = useState<string>("");
+  const [productNames, setProductNames] = useState<string>("");
 
   // Auto-poll for all jobs if any are running
   useEffect(() => {
@@ -367,7 +386,7 @@ export function MassReviewCreation() {
               >
                 <Plus className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={fetchJobs} disabled={loadingJobs}>
+              <Button variant="ghost" size="icon" onClick={() => fetchJobs()} disabled={loadingJobs}>
                 <RefreshCcw className={cn("h-4 w-4", loadingJobs && "animate-spin")} />
               </Button>
             </div>

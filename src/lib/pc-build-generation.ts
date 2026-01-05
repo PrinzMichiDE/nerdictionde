@@ -167,7 +167,7 @@ export async function searchComponentRecommendation(
       `Amazon Product: ${r.title}\nPrice: ${r.price}\nASIN: ${r.asin}\nFeatures: ${r.features.join(", ")}`
     ).join("\n\n");
 
-    const prompt = `Based on the following search results and official Amazon product data for a ${componentType} component with a budget of approximately ${budget}€, extract the best recommendation:
+    const prompt = `Based on the following search results and official Amazon product data for a ${componentType} component with a budget of STRICTLY ${budget}€, extract the best recommendation:
 
 Amazon Data (PA API):
 ${paApiContent || "No direct Amazon API data available."}
@@ -188,10 +188,11 @@ Please provide a JSON response with the following structure:
   "asin": "ASIN from the Amazon Data if it matches the recommendation"
 }
 
-Important: 
-1. If one of the Amazon products fits the budget well, prefer it.
-2. The price should be realistic and close to the budget. 
-3. Only return valid JSON, no additional text or markdown.`;
+CRITICAL INSTRUCTIONS:
+1. The price MUST BE BELOW OR CLOSE TO ${budget}€. Do not recommend a ${componentType} that costs significantly more than ${budget}€.
+2. If the Amazon results are too expensive, look at the Web Search Summary for a cheaper alternative.
+3. If no specific price is found, use a realistic estimate based on the hardware tier.
+4. Only return valid JSON, no additional text or markdown.`;
 
     const completion = await openai.chat.completions.create({
       model: OPENAI_MODEL,
@@ -315,9 +316,19 @@ Important:
       ...(amazonData?.specs || {}),
     };
     
-    const finalPrice = amazonData?.price 
-      ? parseFloat(amazonData.price.replace(/[^\d,.-]/g, "").replace(",", ".")) || componentData.price || budget
-      : componentData.price || budget;
+    let finalPrice = componentData.price || budget;
+    if (amazonData?.price) {
+      const amazonPriceStr = amazonData.price.replace(/[^\d,.-]/g, "").replace(",", ".");
+      const amazonPrice = parseFloat(amazonPriceStr);
+      if (!isNaN(amazonPrice) && amazonPrice > 0) {
+        // Only use Amazon price if it's not insanely over budget (max 30% over component budget)
+        if (amazonPrice <= budget * 1.3) {
+          finalPrice = amazonPrice;
+        } else {
+          console.warn(`⚠️ Ignoring Amazon price for ${componentType} (${amazonPrice}€) as it exceeds component budget (${budget}€) too much.`);
+        }
+      }
+    }
     
     // Add delay to avoid rate limiting (Amazon PA API has 1 req/sec limit)
     // Longer delay when Amazon API is used
