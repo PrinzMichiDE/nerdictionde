@@ -54,6 +54,7 @@ declare module 'paapi5-nodejs-sdk' {
 
   export class DefaultApi {
     getItems(request: GetItemsRequest, callback: (error: any, data: any) => void): void;
+    searchItems(request: SearchItemsRequest, callback: (error: any, data: any) => void): void;
   }
 
   export class GetItemsRequest {
@@ -72,6 +73,31 @@ declare module 'paapi5-nodejs-sdk' {
     };
   }
 
+  export interface SearchItemsRequest {
+    PartnerTag: string;
+    PartnerType: string;
+    Keywords: string;
+    ItemCount: number;
+    Resources: string[];
+  }
+
+  export class SearchItemsRequest {
+    constructor();
+    PartnerTag: string;
+    PartnerType: string;
+    Keywords: string;
+    ItemCount: number;
+    Resources: string[];
+  }
+
+  export class SearchItemsResponse {
+    static constructFromObject(data: any): SearchItemsResponse;
+    Errors?: Array<{ Message: string }>;
+    SearchResult?: {
+      Items: any[];
+    };
+  }
+
   const ApiClient: {
     instance: ApiClient;
   };
@@ -81,6 +107,8 @@ declare module 'paapi5-nodejs-sdk' {
     DefaultApi: typeof DefaultApi;
     GetItemsRequest: typeof GetItemsRequest;
     GetItemsResponse: typeof GetItemsResponse;
+    SearchItemsRequest: typeof SearchItemsRequest;
+    SearchItemsResponse: typeof SearchItemsResponse;
   };
 
   export default ProductAdvertisingAPIv1;

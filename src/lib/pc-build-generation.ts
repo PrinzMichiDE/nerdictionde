@@ -1,5 +1,6 @@
 import { searchHardwareProduct, extractProductSpecs, searchAmazonProduct } from "@/lib/tavily";
 import { getAmazonProductData, parseAmazonUrl, hasPAAPICredentials } from "@/lib/amazon";
+import { searchAmazonProducts } from "@/lib/amazon-paapi";
 import { generateAmazonAffiliateLinkFromASIN, generateAmazonAffiliateLink, searchAmazonHardware } from "@/lib/amazon-search";
 import openai, { OPENAI_MODEL } from "@/lib/openai";
 import { PCComponentType } from "@/types/pc-build";
