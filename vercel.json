@@ -5,8 +5,8 @@
       "schedule": "0 0 * * *"
     },
     {
-      "path": "/api/cron/generate-gaming-pc-builds",
-      "schedule": "0 2 1 * *"
+      "path": "/api/cron/import-hardwaredealz",
+      "schedule": "0 3 1 * *"
     }
   ]
 }
