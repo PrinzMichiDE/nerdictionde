@@ -8,8 +8,11 @@ export async function GET(req: NextRequest) {
   const authError = requireAdminAuth(req);
   if (authError) return authError;
 
+  const url = new URL(req.url);
+  const category = (url.searchParams.get("category") as "desktop" | "laptop") || "desktop";
+
   try {
-    const builds = await scrapeHardwareDealz();
+    const builds = await scrapeHardwareDealz(category);
     return NextResponse.json(builds);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -19,14 +22,18 @@ export async function GET(req: NextRequest) {
 async function generateAIContent(buildData: any) {
   try {
     const componentList = buildData.components.map((c: any) => `${c.type}: ${c.name}`).join(", ");
+    const typeLabel = buildData.type === "laptop" ? "Gaming Laptop" : "Gaming PC";
     
     const prompt = `
-      Du bist ein Hardware-Experte für Gaming-PCs. Ich habe ein PC-Setup von HardwareDealz für ${buildData.pricePoint}€ gescrapt.
+      Du bist ein Hardware-Experte für Gaming-Hardware. Ich habe ein ${typeLabel}-Setup von Nerdiction für ${buildData.pricePoint}€ zusammengestellt.
       Komponenten: ${componentList}
       
       Aufgabe:
-      1. Erstelle eine packende, SEO-optimierte Beschreibung (ca. 3-4 Sätze, max 300 Zeichen) für diesen PC. Erwähne, welche Spiele (z.B. Fortnite, Valorant, AAA-Titel) in welcher Auflösung (FullHD, QHD) flüssig laufen.
-      2. Erstelle für jede Komponente eine kurze Erklärung (max 150 Zeichen), warum diese Komponente für dieses Budget gewählt wurde (z.B. Preis-Leistungs-Sieger, Zukunftssicherheit).
+      1. Erstelle eine packende, SEO-optimierte Beschreibung (ca. 3-4 Sätze, max 300 Zeichen) für dieses Gerät.
+      2. Erstelle für JEDE Komponente eine kurze Erklärung (max 150 Zeichen), warum diese Komponente für dieses Budget gewählt wurde.
+      3. Erstelle 4-5 ausführliche Abschnitte für die Sektion "Hardware im Detail". 
+         Jeder Abschnitt sollte einen Titel (z.B. "Der Prozessor", "Die Grafikkarte", "Gaming Performance", "Das Display" bei Laptops) und einen ausführlichen Text (3-5 Sätze) haben.
+         Gehe auf die Leistung, die Synergie der Teile und die Zielgruppe ein.
       
       Antworte NUR im JSON-Format:
       {
@@ -34,7 +41,11 @@ async function generateAIContent(buildData: any) {
         "componentExplanations": {
           "Name der Komponente": "Erklärung...",
           ...
-        }
+        },
+        "detailSections": [
+          { "title": "Titel", "content": "Ausführlicher Text..." },
+          ...
+        ]
       }
     `;
 
@@ -84,7 +95,8 @@ export async function POST(req: NextRequest) {
 
     for (const buildData of builds) {
       try {
-        const slug = buildData.slug || `bester-${buildData.pricePoint}-euro-gaming-pc`;
+        const typeSuffix = buildData.type === "laptop" ? "-laptop" : "";
+        const slug = buildData.slug || `bester-${buildData.pricePoint}-euro-gaming-pc${typeSuffix}`;
         const totalPrice = buildData.components.reduce((acc: number, comp: any) => acc + (comp.price || 0), 0);
 
         let aiContent = null;
@@ -95,9 +107,12 @@ export async function POST(req: NextRequest) {
         const description = aiContent?.description || buildData.description;
 
         const componentsData = buildData.components.map((comp: any, index: number) => {
-          // Fallback to specific Amazon search link if no affiliate link provided
           let affiliateLink = comp.affiliateLink;
-          if (!affiliateLink) {
+          
+          // Force Amazon search link if not already a direct Amazon link
+          const isAmazonDirect = affiliateLink && (affiliateLink.includes("amazon.de/dp/") || affiliateLink.includes("amzn.to"));
+          
+          if (!isAmazonDirect) {
             const encodedName = encodeURIComponent(comp.name);
             affiliateLink = `https://www.amazon.de/s?k=${encodedName}&tag=michelfritzschde-21&linkCode=ll2&linkId=38ed3b9216199de826066e1da9e63e2d&language=de_DE&ref_=as_li_ss_tl`;
           }
@@ -112,10 +127,26 @@ export async function POST(req: NextRequest) {
           };
         });
 
-        // Find existing build by pricePoint
-        const existingBuild = await prisma.pCBuild.findUnique({
-          where: { pricePoint: buildData.pricePoint },
-        });
+        // Safer way to handle the 'type' and 'image' field if Prisma hasn't synchronized yet
+        const hasTypeField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "type");
+        const hasImageField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "image");
+
+        // Find existing build
+        let existingBuild = null;
+        if (hasTypeField) {
+          existingBuild = await (prisma.pCBuild as any).findUnique({
+            where: { 
+              pricePoint_type: {
+                pricePoint: buildData.pricePoint,
+                type: buildData.type || "desktop"
+              }
+            },
+          });
+        } else {
+          existingBuild = await prisma.pCBuild.findUnique({
+            where: { pricePoint: buildData.pricePoint },
+          });
+        }
 
         const buildDataToSave: any = {
           title: buildData.title,
@@ -123,14 +154,16 @@ export async function POST(req: NextRequest) {
           totalPrice,
           updatedAt: new Date(),
           lastScrapedAt: new Date(),
+          metadata: aiContent?.detailSections ? { detailSections: aiContent.detailSections } : undefined,
           components: {
             create: componentsData,
           },
         };
 
-        // Safer way to handle the 'image' field if Prisma hasn't synchronized yet
-        // We check the internal DMMF model to see if the field is actually there
-        const hasImageField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "image");
+        if (hasTypeField) {
+          buildDataToSave.type = buildData.type || "desktop";
+        }
+
         if (buildData.image && hasImageField) {
           buildDataToSave.image = buildData.image;
         }

@@ -20,102 +20,131 @@ export async function GET(req: NextRequest) {
     }
 
     console.log("🚀 Starting HardwareDealz Cron Import...");
-    const builds = await scrapeHardwareDealz();
     
-    if (!builds || builds.length === 0) {
-      return NextResponse.json({ message: "Keine Builds zum Importieren gefunden." });
-    }
-
-    const results = {
+    const categories: Array<"desktop" | "laptop"> = ["desktop", "laptop"];
+    const allResults = {
       created: 0,
       updated: 0,
       failed: 0,
     };
 
-    for (const buildData of builds) {
-      try {
-        const slug = `bester-${buildData.pricePoint}-euro-gaming-pc`;
-        const totalPrice = buildData.components.reduce((acc: number, comp: any) => acc + (comp.price || 0), 0);
+    for (const category of categories) {
+      console.log(`Scraping category: ${category}`);
+      const builds = await scrapeHardwareDealz(category);
+      
+      if (!builds || builds.length === 0) {
+        console.log(`Keine ${category} Builds zum Importieren gefunden.`);
+        continue;
+      }
 
-        // AI Content Generation
-        const aiContent = await generateAIContent(buildData);
-        const description = aiContent?.description || buildData.description;
+      for (const buildData of builds) {
+        try {
+          const typeSuffix = category === "laptop" ? "-laptop" : "";
+          const slug = `bester-${buildData.pricePoint}-euro-gaming-pc${typeSuffix}`;
+          const totalPrice = buildData.components.reduce((acc: number, comp: any) => acc + (comp.price || 0), 0);
 
-        const componentsData = buildData.components.map((comp: any, index: number) => {
-          // Fallback to specific Amazon search link
-          let affiliateLink = comp.affiliateLink;
-          if (!affiliateLink) {
-            const encodedName = encodeURIComponent(comp.name);
-            affiliateLink = `https://www.amazon.de/s?k=${encodedName}&tag=michelfritzschde-21&linkCode=ll2&linkId=38ed3b9216199de826066e1da9e63e2d&language=de_DE&ref_=as_li_ss_tl`;
+          // AI Content Generation
+          const aiContent = await generateAIContent(buildData);
+          const description = aiContent?.description || buildData.description;
+
+          const componentsData = buildData.components.map((comp: any, index: number) => {
+            let affiliateLink = comp.affiliateLink;
+            
+            // Force Amazon search link if not already a direct Amazon link
+            const isAmazonDirect = affiliateLink && (affiliateLink.includes("amazon.de/dp/") || affiliateLink.includes("amzn.to"));
+            
+            if (!isAmazonDirect) {
+              const encodedName = encodeURIComponent(comp.name);
+              affiliateLink = `https://www.amazon.de/s?k=${encodedName}&tag=michelfritzschde-21&linkCode=ll2&linkId=38ed3b9216199de826066e1da9e63e2d&language=de_DE&ref_=as_li_ss_tl`;
+            }
+
+            return {
+              type: comp.type,
+              name: comp.name,
+              price: comp.price,
+              affiliateLink,
+              description: aiContent?.componentExplanations?.[comp.name] || null,
+              sortOrder: index,
+            };
+          });
+
+          // Safer way to handle the 'type' and 'image' field if Prisma hasn't synchronized yet
+          const hasTypeField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "type");
+          const hasImageField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "image");
+
+          // Find existing build
+          let existingBuild = null;
+          if (hasTypeField) {
+            existingBuild = await (prisma.pCBuild as any).findUnique({
+              where: { 
+                pricePoint_type: {
+                  pricePoint: buildData.pricePoint,
+                  type: category
+                }
+              },
+            });
+          } else {
+            existingBuild = await prisma.pCBuild.findUnique({
+              where: { pricePoint: buildData.pricePoint },
+            });
           }
 
-          return {
-            type: comp.type,
-            name: comp.name,
-            price: comp.price,
-            affiliateLink,
-            description: aiContent?.componentExplanations?.[comp.name] || null,
-            sortOrder: index,
-          };
-        });
-
-        // Find existing build by pricePoint
-        const existingBuild = await prisma.pCBuild.findUnique({
-          where: { pricePoint: buildData.pricePoint },
-        });
-
-        const buildDataToSave: any = {
-          title: buildData.title,
-          description,
-          totalPrice,
-          updatedAt: new Date(),
-          lastScrapedAt: new Date(),
-          components: {
-            create: componentsData,
-          },
-        };
-
-        // Safer way to handle the 'image' field if Prisma hasn't synchronized yet
-        const hasImageField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "image");
-        if (buildData.image && hasImageField) {
-          buildDataToSave.image = buildData.image;
-        }
-
-        if (existingBuild) {
-          // Update existing
-          await prisma.pCComponent.deleteMany({
-            where: { pcBuildId: existingBuild.id },
-          });
-
-          await prisma.pCBuild.update({
-            where: { id: existingBuild.id },
-            data: buildDataToSave,
-          });
-          results.updated++;
-        } else {
-          // Create new
-          await prisma.pCBuild.create({
-            data: {
-              ...buildDataToSave,
-              pricePoint: buildData.pricePoint,
-              slug,
-              status: "published",
+          const buildDataToSave: any = {
+            title: buildData.title,
+            description,
+            totalPrice,
+            updatedAt: new Date(),
+            lastScrapedAt: new Date(),
+            metadata: aiContent?.detailSections ? { detailSections: aiContent.detailSections } : undefined,
+            components: {
+              create: componentsData,
             },
-          });
-          results.created++;
-        }
+          };
 
-        // Delay to avoid rate limits
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (error) {
-        console.error(`Failed to import build for ${buildData.pricePoint}€:`, error);
-        results.failed++;
+          if (hasTypeField) {
+            buildDataToSave.type = category;
+          }
+
+          if (buildData.image && hasImageField) {
+            buildDataToSave.image = buildData.image;
+          }
+
+          if (existingBuild) {
+            // Update existing
+            await prisma.pCComponent.deleteMany({
+              where: { pcBuildId: existingBuild.id },
+            });
+
+            await prisma.pCBuild.update({
+              where: { id: existingBuild.id },
+              data: buildDataToSave,
+            });
+            allResults.updated++;
+          } else {
+            // Create new
+            await prisma.pCBuild.create({
+              data: {
+                ...buildDataToSave,
+                pricePoint: buildData.pricePoint,
+                slug,
+                status: "published",
+              },
+            });
+            allResults.created++;
+          }
+
+          // Delay to avoid rate limits
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error) {
+          console.error(`Failed to import build for ${buildData.pricePoint}€ ${category}:`, error);
+          allResults.failed++;
+        }
       }
     }
 
     return NextResponse.json({
-      message: `Cron Import abgeschlossen. ${results.created} erstellt, ${results.updated} aktualisiert, ${results.failed} fehlgeschlagen.`,
-      results,
+      message: `Cron Import abgeschlossen. ${allResults.created} erstellt, ${allResults.updated} aktualisiert, ${allResults.failed} fehlgeschlagen.`,
+      results: allResults,
     });
   } catch (error: any) {
     console.error("Cron HardwareDealz Import Error:", error);
@@ -128,12 +157,15 @@ async function generateAIContent(buildData: any) {
     const componentList = buildData.components.map((c: any) => `${c.type}: ${c.name}`).join(", ");
     
     const prompt = `
-      Du bist ein Hardware-Experte für Gaming-PCs. Ich habe ein PC-Setup von HardwareDealz für ${buildData.pricePoint}€ gescrapt.
+      Du bist ein Hardware-Experte für Gaming-PCs. Ich habe ein PC-Setup von Nerdiction für ${buildData.pricePoint}€ zusammengestellt.
       Komponenten: ${componentList}
       
       Aufgabe:
-      1. Erstelle eine packende, SEO-optimierte Beschreibung (ca. 3-4 Sätze, max 300 Zeichen) für diesen PC. Erwähne, welche Spiele (z.B. Fortnite, Valorant, AAA-Titel) in welcher Auflösung (FullHD, QHD) flüssig laufen.
-      2. Erstelle für jede Komponente eine kurze Erklärung (max 150 Zeichen), warum diese Komponente für dieses Budget gewählt wurde.
+      1. Erstelle eine packende, SEO-optimierte Beschreibung (ca. 3-4 Sätze, max 300 Zeichen) für diesen PC.
+      2. Erstelle für JEDE Komponente eine kurze Erklärung (max 150 Zeichen), warum diese Komponente für dieses Budget gewählt wurde.
+      3. Erstelle 4-5 ausführliche Abschnitte für die Sektion "Der Gaming PC im Detail". 
+         Jeder Abschnitt sollte einen Titel (z.B. "Der Prozessor", "Die Grafikkarte", "Gaming Performance") und einen ausführlichen Text (3-5 Sätze) haben.
+         Gehe auf die Leistung, die Synergie der Teile und die Zielgruppe ein.
       
       Antworte NUR im JSON-Format:
       {
@@ -141,7 +173,11 @@ async function generateAIContent(buildData: any) {
         "componentExplanations": {
           "Name der Komponente": "Erklärung...",
           ...
-        }
+        },
+        "detailSections": [
+          { "title": "Titel", "content": "Ausführlicher Text..." },
+          ...
+        ]
       }
     `;
 

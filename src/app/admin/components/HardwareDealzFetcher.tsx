@@ -8,6 +8,7 @@ import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrapedPCBuild } from "@/lib/hardwaredealz-scraper";
 
 interface HardwareDealzFetcherProps {
@@ -21,6 +22,7 @@ export function HardwareDealzFetcher({ onComplete }: HardwareDealzFetcherProps) 
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
   const [useAI, setUseAI] = useState(true);
+  const [category, setCategory] = useState<"desktop" | "laptop">("desktop");
 
   const handleScrape = async () => {
     setLoading(true);
@@ -29,7 +31,7 @@ export function HardwareDealzFetcher({ onComplete }: HardwareDealzFetcherProps) 
     setResult(null);
 
     try {
-      const response = await axios.get("/api/admin/import-hardwaredealz");
+      const response = await axios.get(`/api/admin/import-hardwaredealz?category=${category}`);
       setScrapedData(response.data);
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || "Fehler beim Laden von HardwareDealz");
@@ -59,6 +61,17 @@ export function HardwareDealzFetcher({ onComplete }: HardwareDealzFetcherProps) 
     }
   };
 
+  const handleCategoryChange = (val: string) => {
+    setCategory(val as "desktop" | "laptop");
+    setScrapedData(null);
+    setResult(null);
+    setError(null);
+  };
+
+  const originalUrl = category === "desktop" 
+    ? "https://www.hardwaredealz.com/die-besten-gaming-desktop-pcs" 
+    : "https://www.hardwaredealz.com/die-besten-gaming-laptops-und-notebooks";
+
   return (
     <Card className="border-primary/20 bg-primary/5">
       <CardHeader>
@@ -66,10 +79,10 @@ export function HardwareDealzFetcher({ onComplete }: HardwareDealzFetcherProps) 
           <div>
             <CardTitle className="flex items-center gap-2 text-primary">
               <Download className="h-5 w-5" />
-              HardwareDealz Import (Empfohlen)
+              Nerdiction Empfehlungen Import
             </CardTitle>
             <CardDescription className="mt-2">
-              Importiert die aktuellsten Gaming PC Setups von hardwaredealz.com. 
+              Importiert die aktuellsten Gaming PC & Laptop Setups von hardwaredealz.com. 
               Dies überschreibt bestehende Komponenten für die entsprechenden Preiskategorien.
             </CardDescription>
           </div>
@@ -78,7 +91,7 @@ export function HardwareDealzFetcher({ onComplete }: HardwareDealzFetcherProps) 
             size="sm"
             asChild
           >
-            <a href="https://www.hardwaredealz.com/die-besten-gaming-desktop-pcs" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+            <a href={originalUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
               Original öffnen
               <ExternalLink className="h-3 w-3" />
             </a>
@@ -87,6 +100,13 @@ export function HardwareDealzFetcher({ onComplete }: HardwareDealzFetcherProps) 
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex flex-wrap items-center gap-6">
+          <Tabs value={category} onValueChange={handleCategoryChange} className="w-auto">
+            <TabsList>
+              <TabsTrigger value="desktop">Gaming PCs</TabsTrigger>
+              <TabsTrigger value="laptop">Gaming Laptops</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
           <div className="flex items-center gap-4">
             <Button
               onClick={handleScrape}

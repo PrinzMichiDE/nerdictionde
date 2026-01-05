@@ -70,10 +70,10 @@ export function PCBuildList({ onEdit, onNew, refreshRef }: PCBuildListProps) {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Typ</TableHead>
               <TableHead>Preisklasse</TableHead>
               <TableHead>Titel</TableHead>
               <TableHead>Komponenten</TableHead>
-              <TableHead>Gesamtpreis</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Aktionen</TableHead>
             </TableRow>
@@ -88,10 +88,14 @@ export function PCBuildList({ onEdit, onNew, refreshRef }: PCBuildListProps) {
             ) : (
               builds.map((build) => (
                 <TableRow key={build.id}>
+                  <TableCell>
+                    <Badge variant="outline" className="capitalize">
+                      {(build as any).type || "desktop"}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="font-bold">{build.pricePoint}€</TableCell>
                   <TableCell>{build.title}</TableCell>
                   <TableCell>{build.components?.length || 0}</TableCell>
-                  <TableCell>{build.totalPrice.toLocaleString("de-DE", { style: "currency", currency: build.currency })}</TableCell>
                   <TableCell>
                     <Badge variant={build.status === "published" ? "default" : "secondary"}>
                       {build.status === "published" ? "Veröffentlicht" : "Entwurf"}
@@ -100,7 +104,7 @@ export function PCBuildList({ onEdit, onNew, refreshRef }: PCBuildListProps) {
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button variant="ghost" size="icon" asChild>
-                        <Link href={`/gaming-pcs/${build.pricePoint}`} target="_blank">
+                        <Link href={`/gaming-pcs/${build.slug}`} target="_blank">
                           <Globe className="h-4 w-4" />
                         </Link>
                       </Button>

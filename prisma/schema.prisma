@@ -192,7 +192,8 @@ model UserPreference {
 
 model PCBuild {
   id             String        @id @default(cuid())
-  pricePoint     Int           @unique
+  pricePoint     Int
+  type           String        @default("desktop") // "desktop" | "laptop"
   title          String
   title_en       String?
   slug           String        @unique
@@ -210,7 +211,9 @@ model PCBuild {
   updatedAt      DateTime      @updatedAt
   components     PCComponent[]
 
+  @@unique([pricePoint, type])
   @@index([pricePoint])
+  @@index([type])
   @@index([slug])
   @@index([status])
 }

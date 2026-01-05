@@ -33,20 +33,13 @@ export function PCBuildCard({ build, isEn = false }: PCBuildCardProps) {
         <div className="absolute top-0 right-0 p-4">
           <Badge variant="outline" className="bg-primary/5 text-[10px] uppercase tracking-tighter font-black border-primary/20 flex gap-1 items-center">
             <Sparkles className="h-2 w-2 text-primary" />
-            HardwareDealz
+            Nerdiction
           </Badge>
         </div>
         <div className="flex justify-between items-start mb-2 pt-2">
           <Badge className="bg-primary text-primary-foreground font-black text-lg px-3 py-1">
             {build.pricePoint}€
           </Badge>
-          <div className="text-xl font-black text-primary/80">
-            ~{build.totalPrice.toLocaleString(isEn ? "en-US" : "de-DE", {
-              style: "currency",
-              currency: build.currency,
-              maximumFractionDigits: 0,
-            })}
-          </div>
         </div>
         <CardTitle className="text-xl md:text-2xl font-black group-hover:text-primary transition-colors leading-tight">
           {isEn && build.title_en ? build.title_en : build.title}
@@ -82,7 +75,7 @@ export function PCBuildCard({ build, isEn = false }: PCBuildCardProps) {
 
       <CardFooter className="grid grid-cols-2 gap-3 pt-4 border-t bg-muted/30">
         <Button variant="outline" asChild className="w-full gap-2">
-          <Link href={`/gaming-pcs/${build.pricePoint}`}>
+          <Link href={`/gaming-pcs/${build.slug}`}>
             <Info className="h-4 w-4" />
             <span>Details</span>
           </Link>

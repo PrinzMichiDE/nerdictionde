@@ -4,7 +4,7 @@ import { PCBuild } from "@/types/pc-build";
 import { PCComponentItem } from "./PCComponentItem";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Share2, Printer, ArrowLeft } from "lucide-react";
+import { ShoppingCart, Share2, Printer, ArrowLeft, Info } from "lucide-react";
 import Link from "next/link";
 
 interface PCBuildDetailProps {
@@ -46,18 +46,6 @@ export function PCBuildDetail({ build, isEn = false }: PCBuildDetailProps) {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-none">
               {isEn && build.title_en ? build.title_en : build.title}
             </h1>
-          </div>
-
-          <div className="flex flex-col items-start md:items-end gap-2">
-            <p className="text-sm text-muted-foreground uppercase font-bold tracking-widest">
-              {isEn ? "Total Price approx." : "Gesamtpreis ca."}
-            </p>
-            <div className="text-4xl md:text-5xl font-black text-primary">
-              {build.totalPrice.toLocaleString(isEn ? "en-US" : "de-DE", {
-                style: "currency",
-                currency: build.currency,
-              })}
-            </div>
           </div>
         </div>
       </div>
@@ -109,6 +97,33 @@ export function PCBuildDetail({ build, isEn = false }: PCBuildDetailProps) {
           ))}
         </div>
       </div>
+
+      {/* AI Generated Detail Section */}
+      {build.metadata && (build.metadata as any).detailSections && (
+        <div className="space-y-8 py-8 border-y">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Info className="h-6 w-6 text-primary" />
+            </div>
+            <h2 className="text-3xl font-black uppercase tracking-tight">
+              {isEn ? "The Gaming PC in Detail" : "Der Gaming PC im Detail"}
+            </h2>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-2">
+            {(build.metadata as any).detailSections.map((section: any, idx: number) => (
+              <div key={idx} className="space-y-3 p-6 rounded-2xl bg-muted/50 border hover:bg-muted/80 transition-colors">
+                <h3 className="text-xl font-black uppercase tracking-tight text-primary">
+                  {section.title}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {section.content}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* CTA Section */}
       {build.affiliateLink && (

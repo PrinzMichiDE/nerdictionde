@@ -58,21 +58,7 @@ export function PCComponentItem({ component, isEn = false }: PCComponentItemProp
               </div>
             </div>
 
-            <div className="flex flex-col md:items-end justify-between gap-4 shrink-0 md:min-w-[180px]">
-              {component.price && (
-                <div className="md:text-right">
-                  <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
-                    {isEn ? "Price approx." : "Preis ca."}
-                  </p>
-                  <p className="text-2xl font-black text-primary leading-none">
-                    {component.price.toLocaleString(isEn ? "en-US" : "de-DE", {
-                      style: "currency",
-                      currency: component.currency,
-                    })}
-                  </p>
-                </div>
-              )}
-
+            <div className="flex flex-col md:items-end justify-center gap-4 shrink-0 md:min-w-[180px]">
               <div className="flex flex-wrap gap-2">
                 {component.reviewId && (
                   <Button variant="outline" size="sm" asChild className="h-9 gap-2">

@@ -4,6 +4,7 @@ import { PCComponentType } from "@/types/pc-build";
 
 export interface ScrapedPCBuild {
   pricePoint: number;
+  type: "desktop" | "laptop";
   title: string;
   description: string;
   image?: string;
@@ -15,12 +16,14 @@ export interface ScrapedPCBuild {
   }>;
 }
 
-const HARDWAREDEALZ_URL = "https://www.hardwaredealz.com/die-besten-gaming-desktop-pcs";
+const HARDWAREDEALZ_DESKTOP_URL = "https://www.hardwaredealz.com/die-besten-gaming-desktop-pcs";
+const HARDWAREDEALZ_LAPTOP_URL = "https://www.hardwaredealz.com/die-besten-gaming-laptops-und-notebooks";
 
-export async function scrapeHardwareDealz(): Promise<ScrapedPCBuild[]> {
+export async function scrapeHardwareDealz(category: "desktop" | "laptop" = "desktop"): Promise<ScrapedPCBuild[]> {
   try {
-    console.log(`🔍 Scraping HardwareDealz from ${HARDWAREDEALZ_URL}...`);
-    const { data } = await axios.get(HARDWAREDEALZ_URL, {
+    const url = category === "desktop" ? HARDWAREDEALZ_DESKTOP_URL : HARDWAREDEALZ_LAPTOP_URL;
+    console.log(`🔍 Scraping HardwareDealz ${category} from ${url}...`);
+    const { data } = await axios.get(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
         "Accept-Language": "de-DE,de;q=0.9,en-US;q=0.8",
@@ -31,7 +34,7 @@ export async function scrapeHardwareDealz(): Promise<ScrapedPCBuild[]> {
     const builds: ScrapedPCBuild[] = [];
     
     // Collect all build links and initial info
-    const buildInfos: Array<{ pricePoint: number, title: string, detailUrl: string, description: string }> = [];
+    const buildInfos: Array<{ pricePoint: number, title: string, detailUrl: string, description: string, image?: string }> = [];
 
     $(".card").each((i, card) => {
       const $card = $(card);
@@ -39,11 +42,15 @@ export async function scrapeHardwareDealz(): Promise<ScrapedPCBuild[]> {
       if (!h3.length) return;
 
       const title = h3.text().trim();
-      const priceMatch = title.match(/(\d+(?:\.\d+)?)\s*(?:Euro|€)/i);
+      // Improved regex to handle different price formats (e.g. 1.000, 1500)
+      const priceMatch = title.match(/(\d+(?:[.,]\d+)?)\s*(?:Euro|€)/i);
       
       if (priceMatch) {
         const pricePoint = parseInt(priceMatch[1].replace(".", "").replace(",", ""));
-        const detailUrl = $card.find("a.btn-warning").filter((_, a) => $(a).text().includes("Details")).attr("href");
+        const detailUrl = $card.find("a.btn-warning, a.btn-primary").filter((_, a) => {
+          const text = $(a).text().toLowerCase();
+          return text.includes("details") || text.includes("testbericht") || text.includes("zum laptop") || text.includes("konfiguration");
+        }).attr("href");
         
         // Find the image in the card
         let image = $card.find("img").first().attr("src");
@@ -63,12 +70,12 @@ export async function scrapeHardwareDealz(): Promise<ScrapedPCBuild[]> {
       }
     });
 
-    console.log(`Found ${buildInfos.length} builds to scrape in detail...`);
+    console.log(`Found ${buildInfos.length} ${category} builds to scrape in detail...`);
 
     // Scrape each build detail page
     for (const info of buildInfos) {
       try {
-        console.log(`📄 Scraping details for ${info.pricePoint}€: ${info.detailUrl}`);
+        console.log(`📄 Scraping details for ${info.pricePoint}€ ${category}: ${info.detailUrl}`);
         const { data: detailData } = await axios.get(info.detailUrl, {
           headers: {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
@@ -78,6 +85,7 @@ export async function scrapeHardwareDealz(): Promise<ScrapedPCBuild[]> {
         const $d = cheerio.load(detailData);
         const build: ScrapedPCBuild = {
           pricePoint: info.pricePoint,
+          type: category,
           title: info.title,
           description: info.description || $d(".entry-content p").first().text().trim(),
           image: info.image,
@@ -101,22 +109,23 @@ export async function scrapeHardwareDealz(): Promise<ScrapedPCBuild[]> {
               if (!build.components.some(c => c.name === name)) {
                 let finalLink = link;
                 
-                // Prefix relative links
+                // Prefix relative links for initial check
                 if (finalLink && finalLink.startsWith("/")) {
                   finalLink = `https://www.hardwaredealz.com${finalLink}`;
                 }
 
-                if (finalLink && (finalLink.includes("amazon.de") || finalLink.includes("amzn.to"))) {
-                  const asinMatch = finalLink.match(/\/([A-Z0-9]{10})(?:[\/?]|$)/i);
-                  const asin = asinMatch ? asinMatch[1] : null;
-                  
-                  if (asin) {
-                    finalLink = `https://www.amazon.de/dp/${asin}?tag=michelfritzschde-21`;
-                  } else {
-                    // Use the specific search link format provided by user
-                    const encodedName = encodeURIComponent(name);
-                    finalLink = `https://www.amazon.de/s?k=${encodedName}&__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=1HY4329FCCD5J&sprefix=${encodedName}%2Caps%2C124&linkCode=ll2&tag=michelfritzschde-21&linkId=38ed3b9216199de826066e1da9e63e2d&language=de_DE&ref_=as_li_ss_tl`;
-                  }
+                const isAmazon = finalLink && (finalLink.includes("amazon.de") || finalLink.includes("amzn.to"));
+                const asinMatch = isAmazon ? finalLink.match(/\/([A-Z0-9]{10})(?:[\/?]|$)/i) : null;
+                const asin = asinMatch ? asinMatch[1] : null;
+
+                if (asin) {
+                  // If we have a direct Amazon link with ASIN, use it
+                  finalLink = `https://www.amazon.de/dp/${asin}?tag=michelfritzschde-21`;
+                } else {
+                  // For EVERYTHING ELSE (Geizhals, non-ASIN Amazon, internal links), 
+                  // force the specific Amazon search link format
+                  const encodedName = encodeURIComponent(name);
+                  finalLink = `https://www.amazon.de/s?k=${encodedName}&__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=1HY4329FCCD5J&sprefix=${encodedName}%2Caps%2C124&linkCode=ll2&tag=michelfritzschde-21&linkId=38ed3b9216199de826066e1da9e63e2d&language=de_DE&ref_=as_li_ss_tl`;
                 }
 
                 build.components.push({
@@ -162,6 +171,7 @@ function guessComponentType(name: string): PCComponentType {
   if (n.includes("psu") || n.includes("be quiet") || n.includes("seasonic") || n.includes("watt") || n.includes("netzteil") || n.includes("corsair rm") || n.includes("kolink")) return "PSU";
   if (n.includes("gehäuse") || n.includes("case") || n.includes("masterbox") || n.includes("pure base") || n.includes("fractal") || n.includes("lian li") || n.includes("endorfy") || n.includes("nx200")) return "Case";
   if (n.includes("kühler") || n.includes("cooler") || n.includes("arctic") || n.includes("nh-d15") || n.includes("dark rock") || n.includes("freezer")) return "Cooler";
+  if (n.includes("display") || n.includes("zoll") || n.includes("bildschirm") || n.includes("hz") || n.includes("ips") || n.includes("oled") || n.includes("qhd") || n.includes("full-hd")) return "Display";
   return "Other";
 }
 

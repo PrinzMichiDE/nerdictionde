@@ -8,6 +8,7 @@ export type PCComponentType =
   | "Case" 
   | "Cooler" 
   | "Monitor" 
+  | "Display"
   | "Keyboard" 
   | "Mouse" 
   | "Headset" 
@@ -36,6 +37,7 @@ export interface PCComponent {
 export interface PCBuild {
   id: string;
   pricePoint: number;
+  type: "desktop" | "laptop";
   title: string;
   title_en?: string | null;
   slug: string;
