@@ -783,18 +783,53 @@ export async function processAmazonProduct(
       return { success: false, error: `Validierungsfehler: ${validation.errors.join(", ")}` };
     }
 
-    // 2. Duplicate check
+    // 2. Duplicate check - improved to catch duplicates even with different titles
+    // Normalize product name for comparison (remove special chars, lowercase)
+    const normalizedProductName = productData.name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    
+    // Extract key words from product name (first 2-3 words usually identify the product)
+    const nameWords = normalizedProductName.split(" ").filter(w => w.length > 2);
+    const keyWords = nameWords.slice(0, Math.min(3, nameWords.length)).join(" ");
+    
     if (productData.asin) {
       const existingByAsin = await prisma.review.findFirst({
         where: { amazonAsin: productData.asin, category: { in: ["amazon", "product"] } },
       });
-      if (existingByAsin && options.skipExisting) return { success: false, error: "Already exists (ASIN)" };
+      if (existingByAsin) {
+        if (options.skipExisting) return { success: false, error: "Already exists (ASIN)" };
+        // Even if not skipping, warn about duplicate ASIN
+        console.warn(`⚠️ Duplicate ASIN detected: ${productData.asin} (existing review: ${existingByAsin.title})`);
+      }
     }
     
+    // Check by exact name match
     const existingByName = await prisma.review.findFirst({
       where: { title: { equals: productData.name, mode: "insensitive" }, category: { in: ["amazon", "product"] } },
     });
-    if (existingByName && options.skipExisting) return { success: false, error: "Already exists (Name)" };
+    if (existingByName) {
+      if (options.skipExisting) return { success: false, error: "Already exists (Exact Name)" };
+      console.warn(`⚠️ Duplicate exact name detected: ${productData.name}`);
+    }
+    
+    // Check by product name contained in title (catches variations like "Sony WH-1000XM5: Review..." vs "Sony WH-1000XM5: Test...")
+    if (keyWords.length > 5) {
+      const existingByTitleContains = await prisma.review.findFirst({
+        where: {
+          AND: [
+            { title: { contains: keyWords, mode: "insensitive" as const } },
+            { category: { in: ["amazon", "product"] } },
+          ],
+        },
+      });
+      if (existingByTitleContains) {
+        if (options.skipExisting) return { success: false, error: `Already exists (Similar title: "${existingByTitleContains.title}")` };
+        console.warn(`⚠️ Similar product review found: "${existingByTitleContains.title}" (searching for: ${keyWords})`);
+      }
+    }
 
     // 3. Generate review content
     const reviewContent = await generateAmazonReviewContent(productData);
@@ -844,6 +879,12 @@ export async function processAmazonProduct(
     }
 
     // 6. Create review
+    // Generate a realistic publication date (random date within last 2 years)
+    const now = new Date();
+    const twoYearsAgo = new Date(now.getTime() - 2 * 365 * 24 * 60 * 60 * 1000);
+    const randomTime = twoYearsAgo.getTime() + Math.random() * (now.getTime() - twoYearsAgo.getTime());
+    const publicationDate = new Date(randomTime);
+    
     const review = await prisma.review.create({
       data: {
         title: reviewContent.de.title,
@@ -862,6 +903,7 @@ export async function processAmazonProduct(
         amazonAsin: productData.asin || null,
         affiliateLink: productData.affiliateLink || null,
         specs: reviewContent.specs || null,
+        createdAt: publicationDate,
       },
     });
 

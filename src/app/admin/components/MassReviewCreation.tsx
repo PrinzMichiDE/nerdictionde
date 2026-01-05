@@ -74,6 +74,7 @@ export function MassReviewCreation() {
   const [tmdbSeriesGenres, setTmdbSeriesGenres] = useState<Array<{ id: number; name: string }>>([]);
   const [hardwareNames, setHardwareNames] = useState<string>("");
   const [productNames, setProductNames] = useState<string>("");
+  const [keywords, setKeywords] = useState<string>("Gaming Zubehör");
 
   // Auto-poll for all jobs if any are running
   useEffect(() => {
@@ -166,12 +167,12 @@ export function MassReviewCreation() {
         }
         requestBody.hardwareNames = hardwareNames.split("\n").map(n => n.trim()).filter(n => n.length > 0);
       } else if (category === "product") {
-        if (!productNames.trim()) {
-          alert("Bitte geben Sie Produktnamen ein");
-          setLoading(false);
-          return;
+        if (productNames.trim()) {
+          requestBody.productNames = productNames.split("\n").map(n => n.trim()).filter(n => n.length > 0);
+        } else {
+          // Automatic search via keywords
+          requestBody.keywords = keywords || "Gaming Zubehör";
         }
-        requestBody.productNames = productNames.split("\n").map(n => n.trim()).filter(n => n.length > 0);
       }
 
       const response = await axios.post("/api/reviews/bulk-create-mass", requestBody);
@@ -340,14 +341,49 @@ export function MassReviewCreation() {
             )}
 
             {(category === "product") && (
-              <div className="space-y-2">
-                <Label>Produktnamen (einer pro Zeile)</Label>
-                <Textarea 
-                  placeholder="iPhone 15..." 
-                  value={productNames} 
-                  onChange={(e) => setProductNames(e.target.value)}
-                  className="min-h-[100px]"
-                />
+              <div className="space-y-4 border-t pt-4">
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Database className="h-3 w-3" />
+                    Amazon Suchbegriffe (Automatik)
+                  </Label>
+                  <Input 
+                    placeholder="z.B. Gaming Maus, Smart Home..." 
+                    value={keywords} 
+                    onChange={(e) => setKeywords(e.target.value)}
+                  />
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {["Gaming Zubehör", "Smart Home", "PC Komponenten", "Streaming Setup"].map(kw => (
+                      <Badge 
+                        key={kw} 
+                        variant="secondary" 
+                        className="text-[9px] cursor-pointer hover:bg-primary/20"
+                        onClick={() => setKeywords(kw)}
+                      >
+                        {kw}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="relative py-2">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-[10px] uppercase font-bold">
+                    <span className="bg-background px-2 text-muted-foreground">ODER</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Spezifische Produktnamen / ASINs</Label>
+                  <Textarea 
+                    placeholder="iPhone 15, B09B8V1LZ3..." 
+                    value={productNames} 
+                    onChange={(e) => setProductNames(e.target.value)}
+                    className="min-h-[80px] text-xs"
+                  />
+                </div>
               </div>
             )}
 

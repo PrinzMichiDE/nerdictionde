@@ -8,6 +8,7 @@ import { resumeRunningJobs } from "@/lib/job-resume";
 import { randomUUID } from "crypto";
 import { BulkQueryOptions as TMDBBulkQueryOptions } from "@/lib/tmdb";
 import { getTMDBMoviesBulkLarge, getTMDBSeriesBulkLarge } from "@/lib/tmdb-large";
+import { searchAmazonProducts, hasPAAPICredentials } from "@/lib/amazon-paapi";
 
 type ReviewCategory = "game" | "movie" | "series" | "hardware" | "product";
 
@@ -24,6 +25,7 @@ interface BulkCreateMassOptions {
   // Category-specific options
   hardwareNames?: string[]; // For hardware category
   productNames?: string[]; // For product category
+  keywords?: string; // For automatic product search
 }
 
 /**
@@ -111,13 +113,28 @@ export async function POST(req: NextRequest) {
         
         case "product":
           if (productNames.length === 0) {
-            return NextResponse.json(
-              { error: "productNames array is required for product category" },
-              { status: 400 }
-            );
+            // Try automatic search if no names provided
+            const searchKeywords = body.keywords || "Gaming Zubehör";
+            console.log(`🔍 No product names provided, searching for "${searchKeywords}" via PA API...`);
+            
+            if (hasPAAPICredentials()) {
+              const searchResults = await searchAmazonProducts(searchKeywords, count);
+              items = searchResults.map(p => ({
+                name: p.title,
+                asin: p.asin,
+                description: p.description
+              }));
+              console.log(`✅ Found ${items.length} products via PA API search`);
+            } else {
+              return NextResponse.json(
+                { error: "Amazon PA API credentials are required for automatic product search" },
+                { status: 400 }
+              );
+            }
+          } else {
+            // Convert product names to product objects
+            items = productNames.slice(0, count).map((name) => ({ name }));
           }
-          // Convert product names to product objects
-          items = productNames.slice(0, count).map((name) => ({ name }));
           break;
         
         default:
