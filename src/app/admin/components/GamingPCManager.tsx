@@ -25,13 +25,13 @@ export function GamingPCManager() {
       totalPrice: 0,
       currency: "EUR",
       components: [
-        { type: "CPU", name: "", price: 0, currency: "EUR", sortOrder: 0 },
-        { type: "GPU", name: "", price: 0, currency: "EUR", sortOrder: 1 },
-        { type: "Motherboard", name: "", price: 0, currency: "EUR", sortOrder: 2 },
-        { type: "RAM", name: "", price: 0, currency: "EUR", sortOrder: 3 },
-        { type: "SSD", name: "", price: 0, currency: "EUR", sortOrder: 4 },
-        { type: "PSU", name: "", price: 0, currency: "EUR", sortOrder: 5 },
-        { type: "Case", name: "", price: 0, currency: "EUR", sortOrder: 6 },
+        { type: "CPU", name: "", price: 0, currency: "EUR", sortOrder: 0, image: "", description: "" },
+        { type: "GPU", name: "", price: 0, currency: "EUR", sortOrder: 1, image: "", description: "" },
+        { type: "Motherboard", name: "", price: 0, currency: "EUR", sortOrder: 2, image: "", description: "" },
+        { type: "RAM", name: "", price: 0, currency: "EUR", sortOrder: 3, image: "", description: "" },
+        { type: "SSD", name: "", price: 0, currency: "EUR", sortOrder: 4, image: "", description: "" },
+        { type: "PSU", name: "", price: 0, currency: "EUR", sortOrder: 5, image: "", description: "" },
+        { type: "Case", name: "", price: 0, currency: "EUR", sortOrder: 6, image: "", description: "" },
       ]
     });
     setView("new");

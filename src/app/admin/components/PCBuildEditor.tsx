@@ -221,7 +221,7 @@ export function PCBuildEditor({ build: initialBuild, onSave, onCancel }: PCBuild
                     </Button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 flex-grow">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 flex-grow">
                     <div className="space-y-1 col-span-1 sm:col-span-1">
                       <Label className="text-xs">Typ</Label>
                       <Select value={comp.type} onValueChange={(v) => handleComponentChange(index, "type", v)}>
@@ -242,12 +242,30 @@ export function PCBuildEditor({ build: initialBuild, onSave, onCancel }: PCBuild
                       />
                     </div>
 
+                    <div className="space-y-1 col-span-1 sm:col-span-2">
+                      <Label className="text-xs">Bild URL</Label>
+                      <Input 
+                        value={comp.image || ""} 
+                        onChange={(e) => handleComponentChange(index, "image", e.target.value)}
+                        placeholder="https://..."
+                      />
+                    </div>
+
                     <div className="space-y-1 col-span-1">
                       <Label className="text-xs">Preis (€)</Label>
                       <Input 
                         type="number"
                         value={comp.price || ""} 
                         onChange={(e) => handleComponentChange(index, "price", parseFloat(e.target.value))}
+                      />
+                    </div>
+
+                    <div className="space-y-1 col-span-1 sm:col-span-3">
+                      <Label className="text-xs">Beschreibung / Erklärung</Label>
+                      <Input 
+                        value={comp.description || ""} 
+                        onChange={(e) => handleComponentChange(index, "description", e.target.value)}
+                        placeholder="Warum dieses Teil?"
                       />
                     </div>
 

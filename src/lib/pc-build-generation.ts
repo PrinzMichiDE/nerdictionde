@@ -10,6 +10,7 @@ export interface ComponentRecommendation {
   name: string;
   manufacturer?: string;
   model?: string;
+  image?: string | null;
   price: number;
   specs?: any;
   description?: string;
@@ -183,7 +184,7 @@ Please provide a JSON response with the following structure:
   "manufacturer": "Manufacturer name (e.g., 'AMD', 'Intel', 'NVIDIA', 'ASUS')",
   "model": "Model number if available",
   "price": ${Math.round(budget * 0.9)}, 
-  "description": "Brief description (max 100 chars) of why this component is good for this budget",
+  "description": "Brief German hardware explanation (max 150 chars) why this component was chosen for this specific budget and its performance benefits.",
   "asin": "ASIN from the Amazon Data if it matches the recommendation"
 }
 
@@ -416,7 +417,7 @@ export async function generatePCBuild(pricePoint: number): Promise<{
     const title = titleCompletion.choices[0]?.message?.content?.trim() || 
       `Bester ${pricePoint}€ Gaming PC - Optimale Preis-Leistung`;
 
-    const descriptionPrompt = `Write a brief German description (2-3 sentences) for a ${pricePoint}€ gaming PC build. Mention key components and performance expectations. Maximum 200 characters.`;
+    const descriptionPrompt = `Write a detailed German description (3-4 sentences) for a ${pricePoint}€ gaming PC build. Explain what kind of games/settings this PC can handle (e.g. 1080p high, E-Sports etc.) and why it's a great value. Maximum 300 characters.`;
     
     const descriptionCompletion = await openai.chat.completions.create({
       model: OPENAI_MODEL,
