@@ -13,16 +13,24 @@ import { Suspense } from "react";
 function AdminTabs() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const tab = searchParams.get("tab") || "quick";
+  // Get tab parameter, ignoring empty values
+  const tabParam = searchParams.get("tab");
+  const tab = (tabParam && tabParam.trim() !== "") ? tabParam : "quick";
 
   const handleTabChange = (value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (value === "quick") {
-      params.delete("tab");
-    } else {
+    const params = new URLSearchParams();
+    // Preserve all non-empty query parameters except 'tab'
+    searchParams.forEach((value, key) => {
+      if (key !== "tab" && value && value.trim() !== "") {
+        params.set(key, value);
+      }
+    });
+    // Add tab parameter if not "quick"
+    if (value !== "quick") {
       params.set("tab", value);
     }
-    router.push(`/admin?${params.toString()}`);
+    const queryString = params.toString();
+    router.push(queryString ? `/admin?${queryString}` : "/admin");
   };
 
   return (

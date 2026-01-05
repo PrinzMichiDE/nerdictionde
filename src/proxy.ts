@@ -17,8 +17,15 @@ export function proxy(request: NextRequest) {
     const tokenFromCookie = request.cookies.get('admin_token')?.value;
 
     // 1. If token is in query, set cookie and redirect to remove token from URL
-    if (tokenFromQuery === adminToken) {
-      const response = NextResponse.redirect(new URL(pathname, request.url));
+    if (tokenFromQuery && tokenFromQuery === adminToken) {
+      // Preserve other query parameters (like tab) when redirecting
+      const newUrl = new URL(pathname, request.url);
+      searchParams.forEach((value, key) => {
+        if (key !== 'token') {
+          newUrl.searchParams.set(key, value);
+        }
+      });
+      const response = NextResponse.redirect(newUrl);
       response.cookies.set('admin_token', adminToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
