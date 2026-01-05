@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getIGDBGamesBulkLarge, BulkQueryOptions } from "@/lib/igdb";
 import { processGame, generateSlug } from "@/lib/review-generation";
 import { requireAdminAuth } from "@/lib/auth";
-import { createJob, updateJob, addToQueue, updateQueueItem } from "@/lib/job-status";
+import { createJob, updateJob, addToQueue, updateQueueItem, getJob } from "@/lib/job-status";
+import { resumeRunningJobs } from "@/lib/job-resume";
 import { randomUUID } from "crypto";
 
 interface BulkCreate200Options {
@@ -23,6 +24,9 @@ export async function POST(req: NextRequest) {
   // Require admin authentication
   const authError = requireAdminAuth(req);
   if (authError) return authError;
+
+  // Resume any running jobs in the background (only runs once per server instance)
+  resumeRunningJobs().catch(err => console.error("Error resuming jobs:", err));
 
   try {
     const body: BulkCreate200Options = await req.json();
@@ -70,7 +74,15 @@ export async function POST(req: NextRequest) {
     // Create job for progress tracking
     const jobId = randomUUID();
     const totalBatches = Math.ceil(games.length / batchSize);
-    const job = createJob(jobId, games.length, totalBatches);
+    await createJob(jobId, games.length, totalBatches, "game", {
+      batchSize,
+      delayBetweenBatches,
+      delayBetweenGames,
+      status,
+      skipExisting,
+      maxRetries,
+      items: games, // Store games in config for resume capability
+    });
     
     // Initialize queue with all games
     const queueItems = games.map((game) => ({
@@ -78,10 +90,10 @@ export async function POST(req: NextRequest) {
       igdbId: game.id,
       status: "pending" as const,
     }));
-    addToQueue(jobId, queueItems);
+    await addToQueue(jobId, queueItems);
     
     // Update job status to running
-    updateJob(jobId, { status: "running" });
+    await updateJob(jobId, { status: "running" });
 
     // Start processing asynchronously (don't await - return job ID immediately)
     processGamesAsync(jobId, games, {
@@ -91,9 +103,9 @@ export async function POST(req: NextRequest) {
       status,
       skipExisting,
       maxRetries,
-    }).catch((error) => {
+    }).catch(async (error) => {
       console.error("Error in async processing:", error);
-      updateJob(jobId, {
+      await updateJob(jobId, {
         status: "failed",
       });
     });
@@ -211,7 +223,15 @@ async function processGamesAsync(
     };
   };
 
+  // Get current job state to determine where to resume
+  const job = await getJob(jobId);
+  if (!job) {
+    console.error(`Job ${jobId} not found, cannot process`);
+    return;
+  }
+
   // Process games in batches sequentially for better stability
+  // Skip already processed games based on queue status
   for (let i = 0; i < games.length; i += batchSize) {
     const batch = games.slice(i, i + batchSize);
     const batchNumber = Math.floor(i / batchSize) + 1;
@@ -220,14 +240,21 @@ async function processGamesAsync(
     console.log(`📦 Processing batch ${batchNumber}/${totalBatches} (Games ${i + 1}-${Math.min(i + batch.length, games.length)})`);
     
     // Update job with current batch
-    updateJob(jobId, { currentBatch: batchNumber });
+    await updateJob(jobId, { currentBatch: batchNumber });
     
     // Process batch sequentially with delays to avoid rate limits
     for (let j = 0; j < batch.length; j++) {
       const game = batch[j];
       
+      // Check if this game was already processed
+      const queueItem = job.queue.find(q => q.name === game.name);
+      if (queueItem && (queueItem.status === "completed" || queueItem.status === "skipped")) {
+        console.log(`   ⏭️  Skipping already processed: ${game.name}`);
+        continue;
+      }
+      
       // Update queue item status to processing
-      updateQueueItem(jobId, game.name, { status: "processing" });
+      await updateQueueItem(jobId, game.name, { status: "processing" });
       
       // Delay between games in batch
       if (j > 0) {
@@ -249,14 +276,14 @@ async function processGamesAsync(
             slug: generateSlug(game.name),
             igdbId: game.id,
           });
-          updateQueueItem(jobId, game.name, {
+          await updateQueueItem(jobId, game.name, {
             status: "completed",
             reviewId: result.reviewId,
           });
           console.log(`   ✅ ${game.name}`);
         } else if (result.error === "Already exists") {
           results.skipped++;
-          updateQueueItem(jobId, game.name, { status: "skipped" });
+          await updateQueueItem(jobId, game.name, { status: "skipped" });
           console.log(`   ⏭️  ${game.name} (already exists)`);
         } else {
           results.failed++;
@@ -265,7 +292,7 @@ async function processGamesAsync(
             igdbId: game.id,
             error: result.error || "Unknown error",
           });
-          updateQueueItem(jobId, game.name, {
+          await updateQueueItem(jobId, game.name, {
             status: "failed",
             error: result.error || "Unknown error",
           });
@@ -278,7 +305,7 @@ async function processGamesAsync(
             igdbId: game.id,
             error: error.message || "Processing failed",
           });
-        updateQueueItem(jobId, game.name, {
+        await updateQueueItem(jobId, game.name, {
           status: "failed",
           error: error.message || "Processing failed",
         });
@@ -287,7 +314,7 @@ async function processGamesAsync(
 
       // Update job progress
       const processed = results.successful + results.failed + results.skipped;
-      updateJob(jobId, {
+      await updateJob(jobId, {
         processed,
         successful: results.successful,
         failed: results.failed,
@@ -304,7 +331,7 @@ async function processGamesAsync(
   }
 
   // Mark job as completed
-  updateJob(jobId, {
+  await updateJob(jobId, {
     status: "completed",
   });
 

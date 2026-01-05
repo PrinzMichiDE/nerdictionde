@@ -46,7 +46,7 @@ interface JobStatus {
   reviews: Array<{ id: string; title: string; slug: string; igdbId?: number; tmdbId?: number }>;
 }
 
-export function GameReviewMassCreation() {
+export function MassReviewCreation() {
   const [loading, setLoading] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
   const [jobStatus, setJobStatus] = useState<JobStatus | null>(null);

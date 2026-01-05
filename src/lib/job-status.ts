@@ -1,7 +1,6 @@
-// Simple in-memory job status store
-// In production, this could be replaced with Redis or database
+import prisma from "./prisma";
 
-interface JobItem {
+export interface JobItem {
   name: string;
   igdbId?: number;
   tmdbId?: number;
@@ -10,9 +9,10 @@ interface JobItem {
   reviewId?: string;
 }
 
-interface JobStatus {
+export interface JobStatus {
   jobId: string;
   status: "pending" | "running" | "completed" | "failed";
+  category: string;
   total: number;
   processed: number;
   successful: number;
@@ -25,98 +25,296 @@ interface JobStatus {
   estimatedTimeRemaining?: number; // in seconds
   errors: Array<{ item: string; igdbId?: number; tmdbId?: number; error: string }>;
   reviews: Array<{ id: string; title: string; slug: string; igdbId?: number; tmdbId?: number }>;
+  config?: any;
 }
 
-const jobStore = new Map<string, JobStatus>();
+export async function createJob(
+  jobId: string, 
+  total: number, 
+  totalBatches: number, 
+  category: string = "game",
+  config?: any
+): Promise<JobStatus> {
+  const job = await prisma.bulkJob.create({
+    data: {
+      jobId,
+      status: "pending",
+      category,
+      total,
+      totalBatches,
+      currentBatch: 0,
+      processed: 0,
+      successful: 0,
+      failed: 0,
+      skipped: 0,
+      startTime: new Date(),
+      config: config || {},
+      errors: [],
+      reviews: [],
+    },
+  });
 
-export function createJob(jobId: string, total: number, totalBatches: number): JobStatus {
-  const job: JobStatus = {
-    jobId,
-    status: "pending",
-    total,
-    processed: 0,
-    successful: 0,
-    failed: 0,
-    skipped: 0,
+  return {
+    jobId: job.jobId,
+    status: job.status as any,
+    category: job.category,
+    total: job.total,
+    processed: job.processed,
+    successful: job.successful,
+    failed: job.failed,
+    skipped: job.skipped,
     queue: [],
-    currentBatch: 0,
-    totalBatches,
-    startTime: Date.now(),
-    errors: [],
-    reviews: [],
+    currentBatch: job.currentBatch,
+    totalBatches: job.totalBatches,
+    startTime: job.startTime.getTime(),
+    estimatedTimeRemaining: job.estimatedTimeRemaining || undefined,
+    errors: (job.errors as any) || [],
+    reviews: (job.reviews as any) || [],
+    config: job.config,
   };
-  
-  jobStore.set(jobId, job);
-  return job;
 }
 
-export function getJob(jobId: string): JobStatus | undefined {
-  return jobStore.get(jobId);
-}
+export async function getJob(jobId: string): Promise<JobStatus | undefined> {
+  const job = await prisma.bulkJob.findUnique({
+    where: { jobId },
+    include: {
+      queue: {
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
 
-export function updateJob(
-  jobId: string,
-  updates: Partial<JobStatus>
-): JobStatus | undefined {
-  const job = jobStore.get(jobId);
   if (!job) return undefined;
 
-  const updated = { ...job, ...updates };
-  
-  // Calculate estimated time remaining
-  if (updated.processed > 0 && updated.status === "running") {
-    const elapsed = (Date.now() - updated.startTime) / 1000; // seconds
-    const avgTimePerItem = elapsed / updated.processed;
-    const remaining = updated.total - updated.processed;
-    updated.estimatedTimeRemaining = Math.ceil(remaining * avgTimePerItem);
-  }
-
-  jobStore.set(jobId, updated);
-  return updated;
+  return {
+    jobId: job.jobId,
+    status: job.status as any,
+    category: job.category,
+    total: job.total,
+    processed: job.processed,
+    successful: job.successful,
+    failed: job.failed,
+    skipped: job.skipped,
+    queue: job.queue.map(item => ({
+      name: item.name,
+      igdbId: item.igdbId || undefined,
+      tmdbId: item.tmdbId || undefined,
+      status: item.status as any,
+      error: item.error || undefined,
+      reviewId: item.reviewId || undefined,
+    })),
+    currentBatch: job.currentBatch,
+    totalBatches: job.totalBatches,
+    startTime: job.startTime.getTime(),
+    estimatedTimeRemaining: job.estimatedTimeRemaining || undefined,
+    errors: (job.errors as any) || [],
+    reviews: (job.reviews as any) || [],
+    config: job.config,
+  };
 }
 
-export function updateQueueItem(
+export async function getAllJobs(limit: number = 50): Promise<JobStatus[]> {
+  const jobs = await prisma.bulkJob.findMany({
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    include: {
+      queue: {
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+
+  return jobs.map(job => ({
+    jobId: job.jobId,
+    status: job.status as any,
+    category: job.category,
+    total: job.total,
+    processed: job.processed,
+    successful: job.successful,
+    failed: job.failed,
+    skipped: job.skipped,
+    queue: job.queue.map(item => ({
+      name: item.name,
+      igdbId: item.igdbId || undefined,
+      tmdbId: item.tmdbId || undefined,
+      status: item.status as any,
+      error: item.error || undefined,
+      reviewId: item.reviewId || undefined,
+    })),
+    currentBatch: job.currentBatch,
+    totalBatches: job.totalBatches,
+    startTime: job.startTime.getTime(),
+    estimatedTimeRemaining: job.estimatedTimeRemaining || undefined,
+    errors: (job.errors as any) || [],
+    reviews: (job.reviews as any) || [],
+    config: job.config,
+  }));
+}
+
+export async function updateJob(
+  jobId: string,
+  updates: Partial<JobStatus>
+): Promise<JobStatus | undefined> {
+  const currentJob = await prisma.bulkJob.findUnique({ where: { jobId } });
+  if (!currentJob) return undefined;
+
+  const prismaUpdates: any = { ...updates };
+  
+  // Convert startTime if present
+  if (updates.startTime) {
+    prismaUpdates.startTime = new Date(updates.startTime);
+  }
+
+  // Handle status based estimated time remaining
+  if (updates.processed !== undefined || updates.status === "running") {
+    const processed = updates.processed ?? currentJob.processed;
+    const status = updates.status ?? currentJob.status;
+    const startTime = updates.startTime ? new Date(updates.startTime) : currentJob.startTime;
+    
+    if (processed > 0 && status === "running") {
+      const elapsed = (Date.now() - startTime.getTime()) / 1000; // seconds
+      const avgTimePerItem = elapsed / processed;
+      const remaining = currentJob.total - processed;
+      prismaUpdates.estimatedTimeRemaining = Math.ceil(remaining * avgTimePerItem);
+    }
+  }
+
+  if (updates.status === "completed" || updates.status === "failed") {
+    prismaUpdates.endTime = new Date();
+  }
+
+  const updated = await prisma.bulkJob.update({
+    where: { jobId },
+    data: prismaUpdates,
+    include: {
+      queue: {
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+
+  return {
+    jobId: updated.jobId,
+    status: updated.status as any,
+    category: updated.category,
+    total: updated.total,
+    processed: updated.processed,
+    successful: updated.successful,
+    failed: updated.failed,
+    skipped: updated.skipped,
+    queue: updated.queue.map(item => ({
+      name: item.name,
+      igdbId: item.igdbId || undefined,
+      tmdbId: item.tmdbId || undefined,
+      status: item.status as any,
+      error: item.error || undefined,
+      reviewId: item.reviewId || undefined,
+    })),
+    currentBatch: updated.currentBatch,
+    totalBatches: updated.totalBatches,
+    startTime: updated.startTime.getTime(),
+    estimatedTimeRemaining: updated.estimatedTimeRemaining || undefined,
+    errors: (updated.errors as any) || [],
+    reviews: (updated.reviews as any) || [],
+    config: updated.config,
+  };
+}
+
+export async function updateQueueItem(
   jobId: string,
   itemName: string,
   updates: Partial<JobItem>
-): void {
-  const job = jobStore.get(jobId);
-  if (!job) return;
+): Promise<void> {
+  // We identify the item by jobId and name (name should be unique within a job's queue)
+  // First find the item to get its ID
+  const item = await prisma.bulkJobItem.findFirst({
+    where: {
+      jobId,
+      name: itemName,
+    },
+  });
 
-  const itemIndex = job.queue.findIndex((item) => item.name === itemName);
-  if (itemIndex >= 0) {
-    job.queue[itemIndex] = { ...job.queue[itemIndex], ...updates };
-    jobStore.set(jobId, job);
+  if (item) {
+    await prisma.bulkJobItem.update({
+      where: { id: item.id },
+      data: updates as any,
+    });
   }
 }
 
-export function addToQueue(jobId: string, items: JobItem[]): void {
-  const job = jobStore.get(jobId);
-  if (!job) return;
-
-  job.queue.push(...items);
-  jobStore.set(jobId, job);
+export async function addToQueue(jobId: string, items: JobItem[]): Promise<void> {
+  await prisma.bulkJobItem.createMany({
+    data: items.map(item => ({
+      jobId,
+      name: item.name,
+      igdbId: item.igdbId,
+      tmdbId: item.tmdbId,
+      status: item.status,
+      error: item.error,
+      reviewId: item.reviewId,
+    })),
+  });
 }
 
-export function deleteJob(jobId: string): void {
-  jobStore.delete(jobId);
+export async function deleteJob(jobId: string): Promise<void> {
+  await prisma.bulkJob.delete({
+    where: { jobId },
+  });
 }
 
-// Clean up old completed jobs (older than 1 hour)
-export function cleanupOldJobs(): void {
-  const oneHourAgo = Date.now() - 60 * 60 * 1000;
+export async function cleanupOldJobs(): Promise<void> {
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
   
-  for (const [jobId, job] of jobStore.entries()) {
-    if (
-      (job.status === "completed" || job.status === "failed") &&
-      job.startTime < oneHourAgo
-    ) {
-      jobStore.delete(jobId);
-    }
-  }
+  await prisma.bulkJob.deleteMany({
+    where: {
+      OR: [
+        { status: "completed" },
+        { status: "failed" },
+      ],
+      startTime: {
+        lt: oneHourAgo,
+      },
+    },
+  });
 }
 
-// Run cleanup every 30 minutes
-if (typeof setInterval !== "undefined") {
-  setInterval(cleanupOldJobs, 30 * 60 * 1000);
+export async function getRunningJobs(): Promise<JobStatus[]> {
+  const jobs = await prisma.bulkJob.findMany({
+    where: {
+      status: {
+        in: ["running", "pending"],
+      },
+    },
+    include: {
+      queue: {
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+
+  return jobs.map(job => ({
+    jobId: job.jobId,
+    status: job.status as any,
+    category: job.category,
+    total: job.total,
+    processed: job.processed,
+    successful: job.successful,
+    failed: job.failed,
+    skipped: job.skipped,
+    queue: job.queue.map(item => ({
+      name: item.name,
+      igdbId: item.igdbId || undefined,
+      tmdbId: item.tmdbId || undefined,
+      status: item.status as any,
+      error: item.error || undefined,
+      reviewId: item.reviewId || undefined,
+    })),
+    currentBatch: job.currentBatch,
+    totalBatches: job.totalBatches,
+    startTime: job.startTime.getTime(),
+    estimatedTimeRemaining: job.estimatedTimeRemaining || undefined,
+    errors: (job.errors as any) || [],
+    reviews: (job.reviews as any) || [],
+    config: job.config,
+  }));
 }

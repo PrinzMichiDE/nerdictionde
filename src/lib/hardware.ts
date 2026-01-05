@@ -107,56 +107,104 @@ export async function createHardware(data: {
 /**
  * Detects hardware type from search query
  * This is a simple heuristic - can be improved with ML/NLP
+ * Order matters: more specific patterns should be checked first
  */
 export function detectHardwareType(query: string): HardwareType | null {
   const lowerQuery = query.toLowerCase();
 
-  // GPU detection
-  if (
-    lowerQuery.includes("gpu") ||
-    lowerQuery.includes("grafikkarte") ||
-    lowerQuery.includes("graphics card") ||
-    lowerQuery.includes("rtx") ||
-    lowerQuery.includes("gtx") ||
-    lowerQuery.includes("rx ") ||
-    lowerQuery.includes("radeon") ||
-    lowerQuery.includes("geforce")
-  ) {
-    return "gpu";
-  }
-
-  // CPU detection
-  if (
-    lowerQuery.includes("cpu") ||
-    lowerQuery.includes("prozessor") ||
-    lowerQuery.includes("processor") ||
-    lowerQuery.includes("intel") ||
-    lowerQuery.includes("amd") ||
-    lowerQuery.includes("ryzen") ||
-    lowerQuery.includes("core i") ||
-    lowerQuery.includes("xeon")
-  ) {
-    return "cpu";
-  }
-
-  // Console detection
+  // Console detection (check early as it's very specific)
   if (
     lowerQuery.includes("playstation") ||
     lowerQuery.includes("ps5") ||
     lowerQuery.includes("ps4") ||
+    lowerQuery.includes("ps3") ||
     lowerQuery.includes("xbox") ||
     lowerQuery.includes("nintendo") ||
     lowerQuery.includes("switch") ||
-    lowerQuery.includes("steam deck")
+    lowerQuery.includes("steam deck") ||
+    lowerQuery.includes("wii") ||
+    lowerQuery.includes("gamecube")
   ) {
     return "console";
+  }
+
+  // GPU detection (check before CPU to avoid false positives)
+  if (
+    lowerQuery.includes("gpu") ||
+    lowerQuery.includes("grafikkarte") ||
+    lowerQuery.includes("graphics card") ||
+    lowerQuery.includes("videokarte") ||
+    lowerQuery.includes("video card") ||
+    lowerQuery.match(/\brtx\s*\d/i) ||
+    lowerQuery.match(/\bgtx\s*\d/i) ||
+    lowerQuery.match(/\brx\s*\d/i) ||
+    lowerQuery.includes("radeon") ||
+    lowerQuery.includes("geforce") ||
+    lowerQuery.includes("titan") ||
+    lowerQuery.includes("quadro") ||
+    lowerQuery.includes("tesla")
+  ) {
+    return "gpu";
+  }
+
+  // CPU detection (more specific patterns first)
+  if (
+    lowerQuery.includes("cpu") ||
+    lowerQuery.includes("prozessor") ||
+    lowerQuery.includes("processor") ||
+    lowerQuery.match(/\bcore\s*i[-\s]?\d/i) ||
+    lowerQuery.match(/\bryzen\s*\d/i) ||
+    lowerQuery.match(/\bthreadripper/i) ||
+    lowerQuery.match(/\bepyc/i) ||
+    lowerQuery.includes("xeon") ||
+    lowerQuery.includes("pentium") ||
+    lowerQuery.includes("celeron") ||
+    lowerQuery.includes("atom") ||
+    lowerQuery.match(/\bathlon/i) ||
+    lowerQuery.match(/\bfx\s*\d/i)
+  ) {
+    return "cpu";
+  }
+
+  // PSU detection
+  if (
+    lowerQuery.includes("psu") ||
+    lowerQuery.includes("netzteil") ||
+    lowerQuery.includes("power supply") ||
+    lowerQuery.includes("stromversorgung")
+  ) {
+    return "psu";
+  }
+
+  // Case detection
+  if (
+    lowerQuery.includes("gehäuse") ||
+    lowerQuery.includes("case") ||
+    lowerQuery.includes("chassis") ||
+    lowerQuery.includes("tower")
+  ) {
+    return "case";
+  }
+
+  // Cooler detection
+  if (
+    lowerQuery.includes("kühler") ||
+    lowerQuery.includes("cooler") ||
+    lowerQuery.includes("lüfter") ||
+    lowerQuery.includes("fan") ||
+    lowerQuery.includes("wasserkühlung") ||
+    lowerQuery.includes("water cooling") ||
+    lowerQuery.includes("aio")
+  ) {
+    return "cooler";
   }
 
   // Monitor detection
   if (
     lowerQuery.includes("monitor") ||
     lowerQuery.includes("bildschirm") ||
-    lowerQuery.includes("display")
+    lowerQuery.includes("display") ||
+    lowerQuery.includes("screen")
   ) {
     return "monitor";
   }
@@ -164,7 +212,8 @@ export function detectHardwareType(query: string): HardwareType | null {
   // Keyboard detection
   if (
     lowerQuery.includes("tastatur") ||
-    lowerQuery.includes("keyboard")
+    lowerQuery.includes("keyboard") ||
+    lowerQuery.includes("mechanical keyboard")
   ) {
     return "keyboard";
   }
@@ -172,7 +221,8 @@ export function detectHardwareType(query: string): HardwareType | null {
   // Mouse detection
   if (
     lowerQuery.includes("maus") ||
-    lowerQuery.includes("mouse")
+    lowerQuery.includes("mouse") ||
+    lowerQuery.includes("gaming mouse")
   ) {
     return "mouse";
   }
@@ -180,7 +230,9 @@ export function detectHardwareType(query: string): HardwareType | null {
   // Headset detection
   if (
     lowerQuery.includes("headset") ||
-    lowerQuery.includes("kopfhörer")
+    lowerQuery.includes("kopfhörer") ||
+    lowerQuery.includes("headphones") ||
+    lowerQuery.includes("headphone")
   ) {
     return "headset";
   }
@@ -188,36 +240,44 @@ export function detectHardwareType(query: string): HardwareType | null {
   // Controller detection
   if (
     lowerQuery.includes("controller") ||
+    lowerQuery.includes("gamepad") ||
     lowerQuery.includes("gamepad")
   ) {
     return "controller";
   }
 
-  // Webcam detection
+  // Webcam detection (keep as monitor for now, could add new type later)
   if (
     lowerQuery.includes("webcam") ||
     lowerQuery.includes("kamera") ||
     lowerQuery.includes("camera") ||
-    lowerQuery.includes("obsbot")
+    lowerQuery.includes("obsbot") ||
+    lowerQuery.includes("streaming camera")
   ) {
     return "monitor"; // Use monitor as closest match for now
   }
 
   // RAM detection
   if (
-    lowerQuery.includes("ram") ||
-    lowerQuery.includes("ddr") ||
-    lowerQuery.includes("speicher")
+    lowerQuery.match(/\bram\b/i) ||
+    lowerQuery.match(/\bddr\d/i) ||
+    lowerQuery.includes("speicher") ||
+    lowerQuery.includes("memory") ||
+    lowerQuery.match(/\b\d+\s*gb?\s*(ddr|ram)/i)
   ) {
     return "ram";
   }
 
   // Storage detection
   if (
-    lowerQuery.includes("ssd") ||
-    lowerQuery.includes("hdd") ||
+    lowerQuery.match(/\bssd\b/i) ||
+    lowerQuery.match(/\bhdd\b/i) ||
     lowerQuery.includes("festplatte") ||
-    lowerQuery.includes("storage")
+    lowerQuery.includes("hard drive") ||
+    lowerQuery.includes("harddisk") ||
+    lowerQuery.includes("storage") ||
+    lowerQuery.match(/\bnvme/i) ||
+    lowerQuery.match(/\bm\.2/i)
   ) {
     return "storage";
   }
@@ -226,6 +286,7 @@ export function detectHardwareType(query: string): HardwareType | null {
   if (
     lowerQuery.includes("mainboard") ||
     lowerQuery.includes("motherboard") ||
+    lowerQuery.includes("mobo") ||
     lowerQuery.includes("mainboard")
   ) {
     return "motherboard";

@@ -3,7 +3,8 @@ import { getIGDBGamesBulkLarge, BulkQueryOptions } from "@/lib/igdb";
 import { processGame, processMovie, processSeries, processAmazonProduct, generateSlug } from "@/lib/review-generation";
 import { processHardware } from "@/app/api/reviews/bulk-create-hardware/route";
 import { requireAdminAuth } from "@/lib/auth";
-import { createJob, updateJob, addToQueue, updateQueueItem } from "@/lib/job-status";
+import { createJob, updateJob, addToQueue, updateQueueItem, getJob, getAllJobs } from "@/lib/job-status";
+import { resumeRunningJobs } from "@/lib/job-resume";
 import { randomUUID } from "crypto";
 import { BulkQueryOptions as TMDBBulkQueryOptions } from "@/lib/tmdb";
 import { getTMDBMoviesBulkLarge, getTMDBSeriesBulkLarge } from "@/lib/tmdb-large";
@@ -33,6 +34,9 @@ export async function POST(req: NextRequest) {
   // Require admin authentication
   const authError = requireAdminAuth(req);
   if (authError) return authError;
+
+  // Resume any running jobs in the background (only runs once per server instance)
+  resumeRunningJobs().catch(err => console.error("Error resuming jobs:", err));
 
   try {
     const body: BulkCreateMassOptions = await req.json();
@@ -140,7 +144,15 @@ export async function POST(req: NextRequest) {
     // Create job for progress tracking
     const jobId = randomUUID();
     const totalBatches = Math.ceil(items.length / batchSize);
-    const job = createJob(jobId, items.length, totalBatches);
+    await createJob(jobId, items.length, totalBatches, category, {
+      batchSize,
+      delayBetweenBatches,
+      delayBetweenItems,
+      status,
+      skipExisting,
+      maxRetries,
+      items: items, // Store items in config for resume capability
+    });
     
     // Initialize queue with all items
     const queueItems = items.map((item) => ({
@@ -149,12 +161,12 @@ export async function POST(req: NextRequest) {
       tmdbId: item.id || item.tmdbId,
       status: "pending" as const,
     }));
-    addToQueue(jobId, queueItems);
+    await addToQueue(jobId, queueItems);
     
     // Update job status to running
-    updateJob(jobId, { status: "running" });
+    await updateJob(jobId, { status: "running" });
 
-    // Start processing asynchronously
+    // Start processing asynchronously (runs independently of client)
     processItemsAsync(jobId, items, category, {
       batchSize,
       delayBetweenBatches,
@@ -162,9 +174,9 @@ export async function POST(req: NextRequest) {
       status,
       skipExisting,
       maxRetries,
-    }).catch((error) => {
+    }).catch(async (error) => {
       console.error("Error in async processing:", error);
-      updateJob(jobId, {
+      await updateJob(jobId, {
         status: "failed",
       });
     });
@@ -186,6 +198,7 @@ export async function POST(req: NextRequest) {
 }
 
 // Async processing function for all categories
+// This runs independently in the background, even if no client is connected
 async function processItemsAsync(
   jobId: string,
   items: any[],
@@ -251,7 +264,15 @@ async function processItemsAsync(
     };
   };
 
+  // Get current job state to determine where to resume
+  const job = await getJob(jobId);
+  if (!job) {
+    console.error(`Job ${jobId} not found, cannot process`);
+    return;
+  }
+
   // Process items in batches sequentially
+  // Skip already processed items based on queue status
   for (let i = 0; i < items.length; i += batchSize) {
     const batch = items.slice(i, i + batchSize);
     const batchNumber = Math.floor(i / batchSize) + 1;
@@ -259,14 +280,21 @@ async function processItemsAsync(
     
     console.log(`📦 Processing batch ${batchNumber}/${totalBatches} (Items ${i + 1}-${Math.min(i + batch.length, items.length)})`);
     
-    updateJob(jobId, { currentBatch: batchNumber });
+    await updateJob(jobId, { currentBatch: batchNumber });
     
     // Process batch sequentially
     for (let j = 0; j < batch.length; j++) {
       const item = batch[j];
       const itemName = item.name || item.title || item.title_en || "Unknown";
       
-      updateQueueItem(jobId, itemName, { status: "processing" });
+      // Check if this item was already processed
+      const queueItem = job.queue.find(q => q.name === itemName);
+      if (queueItem && (queueItem.status === "completed" || queueItem.status === "skipped")) {
+        console.log(`   ⏭️  Skipping already processed: ${itemName}`);
+        continue;
+      }
+      
+      await updateQueueItem(jobId, itemName, { status: "processing" });
       
       if (j > 0) {
         await new Promise((resolve) => setTimeout(resolve, delayBetweenItems));
@@ -329,14 +357,14 @@ async function processItemsAsync(
             igdbId: item.id || item.igdbId,
             tmdbId: item.id || item.tmdbId,
           });
-          updateQueueItem(jobId, itemName, {
+          await updateQueueItem(jobId, itemName, {
             status: "completed",
             reviewId: result.reviewId,
           });
           console.log(`   ✅ ${itemName}`);
         } else if (result.error === "Already exists") {
           results.skipped++;
-          updateQueueItem(jobId, itemName, { status: "skipped" });
+          await updateQueueItem(jobId, itemName, { status: "skipped" });
           console.log(`   ⏭️  ${itemName} (already exists)`);
         } else {
           results.failed++;
@@ -344,7 +372,7 @@ async function processItemsAsync(
             item: itemName,
             error: result.error || "Unknown error",
           });
-          updateQueueItem(jobId, itemName, {
+          await updateQueueItem(jobId, itemName, {
             status: "failed",
             error: result.error || "Unknown error",
           });
@@ -356,7 +384,7 @@ async function processItemsAsync(
           item: itemName,
           error: error.message || "Processing failed",
         });
-        updateQueueItem(jobId, itemName, {
+        await updateQueueItem(jobId, itemName, {
           status: "failed",
           error: error.message || "Processing failed",
         });
@@ -365,7 +393,7 @@ async function processItemsAsync(
 
       // Update job progress
       const processed = results.successful + results.failed + results.skipped;
-      updateJob(jobId, {
+      await updateJob(jobId, {
         processed,
         successful: results.successful,
         failed: results.failed,
@@ -382,7 +410,7 @@ async function processItemsAsync(
   }
 
   // Mark job as completed
-  updateJob(jobId, {
+  await updateJob(jobId, {
     status: "completed",
   });
 

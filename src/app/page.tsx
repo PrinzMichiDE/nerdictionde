@@ -124,7 +124,7 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="space-y-16 pb-16">
+    <div className="space-y-16 md:space-y-20 lg:space-y-24 pb-16 md:pb-24 lg:pb-32 max-w-7xl mx-auto">
       {/* Hero Review - Featured */}
       {featuredReview && <ReviewHero review={featuredReview} />}
 
@@ -132,19 +132,19 @@ export default async function HomePage() {
       <CategoryFilter />
 
       {/* Latest Reviews Grid */}
-      <section className="space-y-8">
+      <section className="space-y-8 md:space-y-10 lg:space-y-12">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-2">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-2 md:mb-3">
               Neueste Reviews
             </h2>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-lg md:text-xl lg:text-2xl">
               Professionelle Tests und Bewertungen
             </p>
           </div>
           <Link 
             href="/reviews" 
-            className="hidden sm:flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors group"
+            className="hidden sm:flex items-center gap-2 text-sm md:text-base font-medium text-primary hover:text-primary/80 transition-colors group"
           >
             Alle ansehen
             <span className="transition-transform group-hover:translate-x-1">→</span>
@@ -152,7 +152,7 @@ export default async function HomePage() {
         </div>
         
         {latestReviews.length > 0 ? (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:gap-8 lg:gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
             {latestReviews.map((review, index) => (
               <LargeReviewCard 
                 key={review.id}
@@ -162,9 +162,9 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 border-2 border-dashed rounded-2xl bg-muted/30">
-            <p className="text-muted-foreground text-xl font-semibold">Noch keine Reviews vorhanden.</p>
-            <p className="text-muted-foreground/70 text-sm mt-2">
+          <div className="text-center py-24 md:py-32 border-2 border-dashed rounded-2xl bg-muted/30">
+            <p className="text-muted-foreground text-xl md:text-2xl font-semibold">Noch keine Reviews vorhanden.</p>
+            <p className="text-muted-foreground/70 text-sm md:text-base mt-2">
               Bald findest du hier die neuesten Reviews und Tests.
             </p>
           </div>
@@ -173,26 +173,26 @@ export default async function HomePage() {
 
       {/* Top Rated Reviews */}
       {topRatedReviews.length > 0 && (
-        <section className="space-y-8 pt-8">
+        <section className="space-y-8 md:space-y-10 lg:space-y-12 pt-8 md:pt-12 lg:pt-16">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-2">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-2 md:mb-3">
                 Top Bewertungen
               </h2>
-              <p className="text-muted-foreground text-lg">
+              <p className="text-muted-foreground text-lg md:text-xl lg:text-2xl">
                 Die besten Reviews unserer Redaktion
               </p>
             </div>
             <Link 
               href="/reviews?sort=score-desc" 
-              className="hidden sm:flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors group"
+              className="hidden sm:flex items-center gap-2 text-sm md:text-base font-medium text-primary hover:text-primary/80 transition-colors group"
             >
               Alle Top-Reviews
               <span className="transition-transform group-hover:translate-x-1">→</span>
             </Link>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:gap-8 lg:gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
             {topRatedReviews.slice(0, 6).map((review) => (
               <LargeReviewCard 
                 key={review.id}
@@ -204,11 +204,11 @@ export default async function HomePage() {
       )}
 
       {/* View All CTA */}
-      <div className="text-center py-12">
+      <div className="text-center py-12 md:py-16 lg:py-20">
         <Button
           asChild
           size="lg"
-          className="rounded-full text-lg px-8 py-6 h-auto"
+          className="rounded-full text-lg md:text-xl lg:text-2xl px-8 md:px-10 lg:px-12 py-6 md:py-7 lg:py-8 h-auto"
         >
           <Link href="/reviews">
             Alle Reviews entdecken

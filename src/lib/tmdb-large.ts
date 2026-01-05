@@ -1,6 +1,9 @@
 import axios from "axios";
 import { TMDBMovie, TMDBSeries, BulkQueryOptions } from "./tmdb";
 
+// Re-export BulkQueryOptions for convenience
+export type { BulkQueryOptions };
+
 const TMDB_API_BASE = "https://api.themoviedb.org/3";
 
 let tmdbApiKey: string | null = null;

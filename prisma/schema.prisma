@@ -4,85 +4,274 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Review {
-  id          String   @id @default(cuid())
-  title       String
-  title_en    String?
-  slug        String   @unique
-  category    String   // "game" | "hardware" | "amazon" | "movie" | "series"
-  content     String   // Markdown
-  content_en  String?  // Markdown English
-  score       Int      // 0-100
-  pros        String[]
-  pros_en     String[]
-  cons        String[]
-  cons_en     String[]
-  images      String[] // Vercel Blob URLs
-  youtubeVideos String[] // YouTube video IDs or URLs (e.g., "dQw4w9WgXcQ" or "https://youtube.com/watch?v=dQw4w9WgXcQ")
-  status      String   @default("draft") // "draft" | "published"
-  igdbId      Int?
-  tmdbId      Int?     // TMDB ID for movies and series
-  steamAppId  String?
-  amazonAsin  String?  // Amazon Product ASIN
-  affiliateLink String? // Amazon Affiliate Link
-  hardwareId  String?  // Reference to Hardware model
-  specs       Json?    // Hardware requirements or technical specs
-  metadata    Json?    // Additional IGDB metadata (developer, publisher, modes, etc.)
-  hardware    Hardware? @relation(fields: [hardwareId], references: [id], onDelete: SetNull)
-  comments    Comment[]
-  userRatings UserRating[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String             @id @default(cuid())
+  title            String
+  title_en         String?
+  slug             String             @unique
+  category         String
+  content          String
+  content_en       String?
+  score            Int
+  pros             String[]
+  pros_en          String[]
+  cons             String[]
+  cons_en          String[]
+  images           String[]
+  status           String             @default("draft")
+  igdbId           Int?
+  steamAppId       String?
+  amazonAsin       String?
+  affiliateLink    String?
+  hardwareId       String?
+  specs            Json?
+  metadata         Json?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  youtubeVideos    String[]
+  viewCount        Int                @default(0)
+  tmdbId           Int?
+  comments         Comment[]
+  PriceHistory     PriceHistory[]
+  hardware         Hardware?          @relation(fields: [hardwareId], references: [id])
+  ReviewCollection ReviewCollection[]
+  ReviewTag        ReviewTag[]
+  userRatings      UserRating?
 
   @@index([slug])
   @@index([category, status])
   @@index([amazonAsin])
   @@index([tmdbId])
+  @@index([createdAt])
+  @@index([score])
 }
 
 model Comment {
   id        String   @id @default(cuid())
   text      String
-  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   reviewId  String
   author    String
   createdAt DateTime @default(now())
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
   @@index([reviewId])
 }
 
 model UserRating {
   id        String   @id @default(cuid())
-  score     Int     // 0-10
-  review    Review  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-  reviewId  String
+  score     Int
+  reviewId  String   @unique
   createdAt DateTime @default(now())
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
-  @@unique([reviewId]) // Ein Rating pro Review (später mit User-ID erweitern)
   @@index([reviewId])
 }
 
 model Hardware {
-  id          String   @id @default(cuid())
-  name        String
-  name_en     String?
-  slug        String   @unique
-  type        String   // "gpu" | "cpu" | "motherboard" | "ram" | "storage" | "psu" | "case" | "cooler" | "monitor" | "keyboard" | "mouse" | "headset" | "controller" | "console"
-  manufacturer String? // e.g. "NVIDIA", "AMD", "Intel", "Sony", "Microsoft"
-  model       String? // e.g. "RTX 4090", "Ryzen 9 7950X", "PlayStation 5"
-  specs       Json?    // Technical specifications (varies by type)
-  images      String[] // Product images URLs
-  description String?  // Short description
+  id             String    @id @default(cuid())
+  name           String
+  name_en        String?
+  slug           String    @unique
+  type           String
+  manufacturer   String?
+  model          String?
+  specs          Json?
+  images         String[]
+  description    String?
   description_en String?
-  releaseDate DateTime?
-  msrp        Float?   // Manufacturer's suggested retail price
-  reviews     Review[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  releaseDate    DateTime?
+  msrp           Float?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  reviews        Review[]
 
   @@index([slug])
   @@index([type, manufacturer])
   @@index([name])
+}
+
+model Collection {
+  id               String             @id
+  name             String
+  name_en          String?
+  slug             String             @unique
+  description      String?
+  description_en   String?
+  type             String             @default("manual")
+  autoRules        Json?
+  featured         Boolean            @default(false)
+  sortOrder        Int                @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime
+  ReviewCollection ReviewCollection[]
+
+  @@index([featured])
+  @@index([slug])
+  @@index([sortOrder])
+}
+
+model PriceHistory {
+  id           String   @id
+  reviewId     String
+  price        Float
+  currency     String   @default("EUR")
+  source       String   @default("amazon")
+  availability String?
+  url          String?
+  recordedAt   DateTime @default(now())
+  Review       Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([recordedAt])
+  @@index([reviewId])
+  @@index([reviewId, recordedAt])
+}
+
+model ReviewCollection {
+  id           String     @id
+  reviewId     String
+  collectionId String
+  sortOrder    Int        @default(0)
+  createdAt    DateTime   @default(now())
+  Collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  Review       Review     @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, collectionId])
+  @@index([collectionId])
+  @@index([reviewId])
+  @@index([sortOrder])
+}
+
+model ReviewTag {
+  id        String   @id
+  reviewId  String
+  tagId     String
+  createdAt DateTime @default(now())
+  Review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  Tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, tagId])
+  @@index([reviewId])
+  @@index([tagId])
+}
+
+model Tag {
+  id          String      @id
+  name        String      @unique
+  slug        String      @unique
+  category    String?
+  description String?
+  reviewCount Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime
+  ReviewTag   ReviewTag[]
+
+  @@index([category])
+  @@index([name])
+  @@index([slug])
+}
+
+model UserPreference {
+  id                String   @id
+  sessionId         String?  @unique
+  userId            String?  @unique
+  categories        String[]
+  tags              String[]
+  minScore          Int?
+  maxScore          Int?
+  viewedReviews     String[]
+  bookmarkedReviews String[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime
+
+  @@index([sessionId])
+  @@index([userId])
+}
+
+model PCBuild {
+  id             String        @id @default(cuid())
+  pricePoint     Int           @unique
+  title          String
+  title_en       String?
+  slug           String        @unique
+  description    String?
+  description_en String?
+  totalPrice     Float
+  currency       String        @default("EUR")
+  status         String        @default("draft")
+  affiliateLink  String?
+  metadata       Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  components     PCComponent[]
+
+  @@index([pricePoint])
+  @@index([slug])
+  @@index([status])
+}
+
+model PCComponent {
+  id            String   @id @default(cuid())
+  pcBuildId     String
+  type          String // "CPU", "GPU", "Motherboard", "RAM", "SSD", "PSU", "Case", "Cooler"
+  name          String
+  manufacturer  String?
+  model         String?
+  price         Float?
+  currency      String   @default("EUR")
+  affiliateLink String?
+  reviewId      String?
+  specs         Json?
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  pcBuild       PCBuild  @relation(fields: [pcBuildId], references: [id], onDelete: Cascade)
+
+  @@index([pcBuildId])
+  @@index([type])
+}
+
+model BulkJob {
+  id                     String        @id @default(cuid())
+  jobId                  String        @unique // UUID for API access
+  status                 String        // "pending" | "running" | "completed" | "failed"
+  category               String        // "game" | "movie" | "series" | etc.
+  total                  Int
+  processed              Int           @default(0)
+  successful             Int           @default(0)
+  failed                 Int           @default(0)
+  skipped                Int           @default(0)
+  currentBatch           Int           @default(0)
+  totalBatches           Int           @default(0)
+  config                 Json?         // Stores batchSize, delays, etc.
+  startTime              DateTime      @default(now())
+  endTime                DateTime?
+  estimatedTimeRemaining Int?          // in seconds
+  errors                 Json?         // Array of errors
+  reviews                Json?         // Array of created reviews
+  queue                  BulkJobItem[]
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model BulkJobItem {
+  id         String   @id @default(cuid())
+  jobId      String   // Reference to BulkJob.jobId
+  job        BulkJob  @relation(fields: [jobId], references: [jobId], onDelete: Cascade)
+  name       String
+  igdbId     Int?
+  tmdbId     Int?
+  status     String   @default("pending") // "pending" | "processing" | "completed" | "failed" | "skipped"
+  error      String?
+  reviewId   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([jobId])
+  @@index([status])
 }

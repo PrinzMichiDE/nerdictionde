@@ -7,11 +7,12 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "@/components/shared/GlobalSearch";
 import { cn } from "@/lib/utils";
-import { Home, FileText } from "lucide-react";
+import { Home, FileText, Monitor } from "lucide-react";
 
 const links = [
   { href: "/", label: "Home", icon: Home },
   { href: "/reviews", label: "Reviews", icon: FileText },
+  { href: "/gaming-pcs", label: "Gaming PCs", icon: Monitor },
 ];
 
 export function MobileNav() {

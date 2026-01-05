@@ -121,10 +121,10 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
   };
 
   return (
-    <div ref={searchRef} className="relative w-full max-w-2xl">
+    <div ref={searchRef} className="relative w-full max-w-2xl lg:max-w-3xl">
       {/* Search Input */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Search className="absolute left-4 md:left-5 lg:left-6 top-1/2 -translate-y-1/2 h-5 w-5 md:h-6 md:w-6 text-muted-foreground" />
         <Input
           ref={inputRef}
           type="text"
@@ -132,7 +132,7 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsOpen(true)}
-          className="pl-12 pr-12 h-12 text-base border-2 focus:border-primary"
+          className="pl-12 md:pl-14 lg:pl-16 pr-12 md:pr-14 lg:pr-16 h-12 md:h-14 lg:h-16 text-base md:text-lg lg:text-xl border-2 focus:border-primary rounded-full"
         />
         {query && (
           <Button

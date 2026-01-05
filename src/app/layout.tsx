@@ -42,7 +42,7 @@ export default function RootLayout({
           <ReadingProgressBar />
           <SupportTopBanner />
           <Header />
-          <main className="flex-1 container mx-auto py-8 px-4 md:px-6 lg:px-8">
+          <main className="flex-1 container mx-auto py-8 md:py-12 lg:py-16 px-4 md:px-6 lg:px-8 xl:px-12 max-w-7xl">
             {children}
           </main>
           <Footer />

@@ -21,7 +21,7 @@ function CategoryFilterContent() {
   const currentCategory = searchParams.get("category") || "all";
 
   return (
-    <div className="flex flex-wrap items-center gap-3 mb-12">
+    <div className="flex flex-wrap items-center gap-3 md:gap-4 lg:gap-5 mb-12 md:mb-16 lg:mb-20">
       {categories.map((category) => {
         const Icon = category.icon;
         const isActive = currentCategory === category.value;
@@ -33,14 +33,14 @@ function CategoryFilterContent() {
             variant={isActive ? "default" : "outline"}
             size="lg"
             className={cn(
-              "rounded-full transition-all duration-300",
+              "rounded-full transition-all duration-300 text-sm md:text-base lg:text-lg px-4 md:px-6 lg:px-8 py-2 md:py-3 lg:py-4 h-auto",
               isActive
-                ? "shadow-lg scale-105"
-                : "hover:scale-105 hover:border-primary/50"
+                ? "shadow-lg scale-105 md:scale-110"
+                : "hover:scale-105 md:hover:scale-110 hover:border-primary/50"
             )}
           >
-            <Link href={category.href} className="flex items-center gap-2">
-              {Icon && <Icon className="h-4 w-4" />}
+            <Link href={category.href} className="flex items-center gap-2 md:gap-3">
+              {Icon && <Icon className="h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6" />}
               {category.name}
             </Link>
           </Button>
@@ -53,7 +53,7 @@ function CategoryFilterContent() {
 export function CategoryFilter() {
   return (
     <Suspense fallback={
-      <div className="flex flex-wrap items-center gap-3 mb-12">
+      <div className="flex flex-wrap items-center gap-3 md:gap-4 lg:gap-5 mb-12 md:mb-16 lg:mb-20">
         {categories.map((category) => {
           const Icon = category.icon;
           return (
@@ -62,10 +62,10 @@ export function CategoryFilter() {
               asChild
               variant="outline"
               size="lg"
-              className="rounded-full"
+              className="rounded-full text-sm md:text-base lg:text-lg px-4 md:px-6 lg:px-8 py-2 md:py-3 lg:py-4 h-auto"
             >
-              <Link href={category.href} className="flex items-center gap-2">
-                {Icon && <Icon className="h-4 w-4" />}
+              <Link href={category.href} className="flex items-center gap-2 md:gap-3">
+                {Icon && <Icon className="h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6" />}
                 {category.name}
               </Link>
             </Button>

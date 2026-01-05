@@ -10,7 +10,8 @@ import {
   generateReviewContent, 
   generateHardwareReviewContent,
   generateAmazonReviewContent,
-  generateContent 
+  generateContent,
+  validateProductInput
 } from "@/lib/review-generation";
 
 export async function POST(req: NextRequest) {
@@ -23,6 +24,18 @@ export async function POST(req: NextRequest) {
 
     if (!input) {
       return NextResponse.json({ error: "Input is required" }, { status: 400 });
+    }
+
+    // Input validation for products
+    if (requestedCategory === "product" || requestedCategory === "amazon") {
+      const asin = parseAmazonUrl(input);
+      const validation = validateProductInput({ 
+        name: input.startsWith("http") ? "Amazon Product" : input, 
+        asin: asin || undefined 
+      });
+      if (!validation.valid) {
+        return NextResponse.json({ error: validation.errors.join(", ") }, { status: 400 });
+      }
     }
 
     let data: any = null;

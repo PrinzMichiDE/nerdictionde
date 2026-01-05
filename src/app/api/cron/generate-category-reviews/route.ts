@@ -7,18 +7,25 @@ import prisma from "@/lib/prisma";
 
 /**
  * Cron Job: Generates reviews from all categories daily
- * Categories: game, hardware, amazon, movie, series
+ * Categories: game, hardware, amazon, movie, series, product
  * Schedule: Daily at midnight (0 0 * * *)
  */
 export async function GET(req: NextRequest) {
+  const startTime = Date.now();
+  
   try {
-    // No authorization required - API can be called publicly
-    // Note: For production, consider adding rate limiting or authentication
+    // 1. Check for authorization (Vercel Cron Secret)
+    const authHeader = req.headers.get('authorization');
+    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      console.warn("⚠️ Unauthorized cron job attempt");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const results = {
       game: { success: false, reviewId: null as string | null, error: null as string | null },
       hardware: { success: false, reviewId: null as string | null, error: null as string | null },
       amazon: { success: false, reviewId: null as string | null, error: null as string | null },
+      product: { success: false, reviewId: null as string | null, error: null as string | null },
       movie: { success: false, reviewId: null as string | null, error: null as string | null },
       series: { success: false, reviewId: null as string | null, error: null as string | null },
     };
@@ -33,29 +40,17 @@ export async function GET(req: NextRequest) {
       });
 
       if (games && games.length > 0) {
-        // Filter out games that already have reviews
         const existingIgdbIds = await prisma.review.findMany({
-          where: {
-            igdbId: {
-              in: games.map((g: any) => g.id),
-            },
-            category: "game",
-          },
-          select: {
-            igdbId: true,
-          },
+          where: { igdbId: { in: games.map((g: any) => g.id) }, category: "game" },
+          select: { igdbId: true },
         });
 
         const existingIdsSet = new Set(existingIgdbIds.map((r: { igdbId: number | null }) => r.igdbId));
         const newGames = games.filter((g: any) => !existingIdsSet.has(g.id));
 
         if (newGames.length > 0) {
-          // Take the first available game
           const game = newGames[0];
-          const result = await processGame(game, {
-            status: "published",
-            skipExisting: true,
-          });
+          const result = await processGame(game, { status: "published", skipExisting: true });
 
           if (result.success && result.reviewId) {
             results.game.success = true;
@@ -63,11 +58,9 @@ export async function GET(req: NextRequest) {
             console.log(`✅ Game review created: ${game.name}`);
           } else {
             results.game.error = result.error || "Unknown error";
-            console.error(`❌ Failed to create game review: ${result.error}`);
           }
         } else {
           results.game.error = "No new games available";
-          console.log("⚠️  No new games available for review");
         }
       } else {
         results.game.error = "No games found";
@@ -77,231 +70,134 @@ export async function GET(req: NextRequest) {
       console.error("Error generating game review:", error);
     }
 
+    // Delay between categories to avoid rate limits
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
     // 3. Generate Hardware Review
     try {
       console.log("💻 Generating hardware review...");
-      
-      // Get a list of popular hardware items to choose from
-      // Generate multiple reviews per day to compensate for daily schedule
       const popularHardware = [
-        "NVIDIA RTX 4090",
-        "AMD Ryzen 9 7950X",
-        "Intel Core i9-14900K",
-        "ASUS ROG Strix RTX 4080",
-        "Samsung Odyssey G9",
-        "Logitech MX Master 3S",
-        "Corsair K70 RGB TKL",
-        "SteelSeries Arctis Nova Pro",
-        "PlayStation 5",
-        "Xbox Series X",
-        "AMD Ryzen 7 7800X3D",
-        "NVIDIA RTX 4070",
-        "Logitech G Pro X Superlight",
-        "Keychron Q1",
-        "HyperX Cloud Alpha",
+        "NVIDIA RTX 4090", "AMD Ryzen 9 7950X", "Intel Core i9-14900K", "Samsung Odyssey G9",
+        "Logitech MX Master 3S", "PlayStation 5 Pro", "Xbox Series X", "AMD Ryzen 7 7800X3D",
+        "NVIDIA RTX 4070 Ti Super", "Apple MacBook Pro M3 Max", "Steam Deck OLED", "Asus ROG Ally X"
       ];
 
-      // Check which hardware items already have reviews
       const existingHardwareReviews = await prisma.review.findMany({
-        where: {
-          category: "hardware",
-        },
-        include: {
-          hardware: true,
-        },
+        where: { category: "hardware" },
+        include: { hardware: true },
       });
 
       const existingHardwareNames = new Set(
-        existingHardwareReviews
-          .map((r: { hardware: { name: string } | null }) => r.hardware?.name)
-          .filter(Boolean)
+        existingHardwareReviews.map((r: any) => r.hardware?.name).filter(Boolean)
       );
 
-      // Find multiple hardware items without reviews (generate up to 3 per day)
       const hardwareToReview = popularHardware
         .filter((name) => !existingHardwareNames.has(name))
-        .slice(0, 3);
+        .slice(0, 1); // Just 1 for daily cron to keep it stable
 
       if (hardwareToReview.length > 0) {
-        let successCount = 0;
-        for (const hardwareName of hardwareToReview) {
-          const result = await processHardware(hardwareName, {
-            status: "published",
-            skipExisting: true,
-            generateImages: true,
-          });
-
-          if (result.success && result.reviewId) {
-            successCount++;
-            console.log(`✅ Hardware review created: ${hardwareName}`);
-            // Update results with first successful review ID
-            if (!results.hardware.success) {
-              results.hardware.success = true;
-              results.hardware.reviewId = result.reviewId;
-            }
-          } else {
-            console.error(`❌ Failed to create hardware review for ${hardwareName}: ${result.error}`);
-          }
-        }
-        if (successCount === 0) {
-          results.hardware.error = "Failed to create any hardware reviews";
-        } else {
-          console.log(`✅ Created ${successCount} hardware review(s)`);
-        }
-      } else {
-        // Try to get a random hardware item from database
-        const randomHardware = await prisma.hardware.findFirst({
-          where: {
-            reviews: {
-              none: {},
-            },
-          },
+        const hardwareName = hardwareToReview[0];
+        const result = await processHardware(hardwareName, {
+          status: "published",
+          skipExisting: true,
+          generateImages: true,
         });
 
-        if (randomHardware) {
-          const result = await processHardware(randomHardware.name, {
-            status: "published",
-            skipExisting: true,
-            generateImages: true,
-          });
-
-          if (result.success && result.reviewId) {
-            results.hardware.success = true;
-            results.hardware.reviewId = result.reviewId;
-            console.log(`✅ Hardware review created: ${randomHardware.name}`);
-          } else {
-            results.hardware.error = result.error || "Unknown error";
-          }
+        if (result.success && result.reviewId) {
+          results.hardware.success = true;
+          results.hardware.reviewId = result.reviewId;
+          console.log(`✅ Hardware review created: ${hardwareName}`);
         } else {
-          results.hardware.error = "No hardware available for review";
-          console.log("⚠️  No hardware available for review");
+          results.hardware.error = result.error || "Unknown error";
         }
+      } else {
+        results.hardware.error = "No new hardware available";
       }
     } catch (error: any) {
       results.hardware.error = error.message;
       console.error("Error generating hardware review:", error);
     }
 
-    // 4. Generate Amazon Review
-    try {
-      console.log("🛒 Generating Amazon review...");
-      
-      // Popular Amazon products to review
-      // Generate multiple reviews per day to compensate for daily schedule
-      const popularAmazonProducts = [
-        { name: "Echo Dot (5. Generation)", asin: "B09B8V1LZ3" },
-        { name: "Fire TV Stick 4K", asin: "B08C1W5N87" },
-        { name: "Kindle Paperwhite", asin: "B08KTZ8249" },
-        { name: "Ring Video Doorbell", asin: "B08N5NQ869" },
-        { name: "Blink Outdoor Camera", asin: "B08FM85V85" },
-        { name: "Echo Show 8", asin: "B09B8V1LZ4" },
-        { name: "Fire TV Cube", asin: "B07K89FL5Y" },
-        { name: "Ring Floodlight Cam", asin: "B08N5NQ870" },
-        { name: "Kindle Oasis", asin: "B07L5GQYYM" },
-        { name: "Echo Studio", asin: "B07N9Z9K5P" },
-      ];
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Check which products already have reviews
-      const existingAmazonReviews = await prisma.review.findMany({
-        where: {
-          category: "amazon",
-        },
-        select: {
-          amazonAsin: true,
-        },
-      });
+    // 4. Generate Product & Amazon Reviews
+    const categories: ("amazon" | "product")[] = ["amazon", "product"];
+    for (const cat of categories) {
+      try {
+        console.log(`🛒 Generating ${cat} review...`);
+        
+        const popularProducts = [
+          // Smart Home
+          { name: "Echo Dot (5. Generation)", asin: "B09B8V1LZ3" },
+          { name: "Ring Video Doorbell", asin: "B08N5NQ869" },
+          { name: "Echo Show 8", asin: "B09B8V1LZ4" },
+          { name: "Philips Hue Bridge", asin: "B016151IPI" },
+          // Tech Accessories
+          { name: "Anker USB-C Ladekabel", asin: "B08C1W5N87" },
+          { name: "SanDisk Extreme Portable SSD 1TB", asin: "B08GTYFC37" },
+          // Electronics
+          { name: "Sony WH-1000XM5", asin: "B09XS7JWHH" },
+          { name: "Kindle Paperwhite", asin: "B08KTZ8249" },
+          { name: "Fire TV Stick 4K", asin: "B08C1W5N87" },
+          { name: "Logitech C920 HD Pro Webcam", asin: "B006JH8T3S" },
+          // Gaming
+          { name: "DualSense Wireless-Controller", asin: "B08H99BPJN" },
+          { name: "SteelSeries Arctis Nova 7", asin: "B09ZWCYQSX" }
+        ];
 
-      const existingAsins = new Set(
-        existingAmazonReviews.map((r: { amazonAsin: string | null }) => r.amazonAsin).filter(Boolean)
-      );
+        const existingReviews = await prisma.review.findMany({
+          where: { category: cat },
+          select: { amazonAsin: true, title: true },
+        });
 
-      // Find multiple products without reviews (generate up to 3 per day)
-      const productsToReview = popularAmazonProducts
-        .filter((p) => !existingAsins.has(p.asin))
-        .slice(0, 3);
+        const existingAsins = new Set(existingReviews.map((r: any) => r.amazonAsin).filter(Boolean));
+        const existingTitles = new Set(existingReviews.map((r: any) => r.title.toLowerCase()));
 
-      if (productsToReview.length > 0) {
-        let successCount = 0;
-        for (const product of productsToReview) {
+        const productsToReview = popularProducts
+          .filter((p) => !existingAsins.has(p.asin) && !existingTitles.has(p.name.toLowerCase()))
+          .slice(0, 1);
+
+        if (productsToReview.length > 0) {
+          const product = productsToReview[0];
           const result = await processAmazonProduct(
-            {
-              name: product.name,
-              asin: product.asin,
-            },
-            {
-              status: "published",
-              skipExisting: true,
-              generateImages: true,
-            }
+            { name: product.name, asin: product.asin },
+            { status: "published", skipExisting: true, generateImages: true }
           );
 
           if (result.success && result.reviewId) {
-            successCount++;
-            console.log(`✅ Amazon review created: ${product.name}`);
-            // Update results with first successful review ID
-            if (!results.amazon.success) {
-              results.amazon.success = true;
-              results.amazon.reviewId = result.reviewId;
-            }
+            results[cat].success = true;
+            results[cat].reviewId = result.reviewId;
+            console.log(`✅ ${cat} review created: ${product.name}`);
           } else {
-            console.error(`❌ Failed to create Amazon review for ${product.name}: ${result.error}`);
+            results[cat].error = result.error || "Unknown error";
           }
-        }
-        if (successCount === 0) {
-          results.amazon.error = "Failed to create any Amazon reviews";
         } else {
-          console.log(`✅ Created ${successCount} Amazon review(s)`);
+          results[cat].error = `No new ${cat} products available`;
         }
-      } else {
-        results.amazon.error = "No Amazon products available for review";
-        console.log("⚠️  No Amazon products available for review");
+      } catch (error: any) {
+        results[cat].error = error.message;
+        console.error(`Error generating ${cat} review:`, error);
       }
-    } catch (error: any) {
-      results.amazon.error = error.message;
-      console.error("Error generating Amazon review:", error);
+      await new Promise(resolve => setTimeout(resolve, 3000));
     }
 
     // 5. Generate Movie Review
     try {
       console.log("🎬 Generating movie review...");
-      const movies = await getTMDBMoviesBulk({
-        sortBy: "release_date",
-        order: "desc",
-        limit: 50,
-      });
+      const movies = await getTMDBMoviesBulk({ sortBy: "release_date", order: "desc", limit: 50 });
 
       if (movies && movies.length > 0) {
-        // Filter out movies that already have reviews
-        let existingTmdbIds: any[] = [];
-        try {
-          existingTmdbIds = await prisma.review.findMany({
-            where: {
-              tmdbId: {
-                in: movies.map((m: any) => m.id),
-              },
-              category: "movie",
-            },
-            select: {
-              tmdbId: true,
-            },
-          });
-        } catch (error: any) {
-          // If column doesn't exist, processMovie will handle it
-          if (!error.message?.includes("does not exist")) {
-            throw error;
-          }
-        }
+        const existingTmdbIds = await prisma.review.findMany({
+          where: { tmdbId: { in: movies.map((m: any) => m.id) }, category: "movie" },
+          select: { tmdbId: true },
+        });
 
-        const existingIdsSet = new Set(existingTmdbIds.map((r: { tmdbId: number | null }) => r.tmdbId).filter(Boolean));
+        const existingIdsSet = new Set(existingTmdbIds.map((r: any) => r.tmdbId).filter(Boolean));
         const newMovies = movies.filter((m: any) => !existingIdsSet.has(m.id));
 
         if (newMovies.length > 0) {
-          // Take the first available movie
           const movie = newMovies[0];
-          const result = await processMovie(movie, {
-            status: "published",
-            skipExisting: true,
-          });
+          const result = await processMovie(movie, { status: "published", skipExisting: true });
 
           if (result.success && result.reviewId) {
             results.movie.success = true;
@@ -309,11 +205,9 @@ export async function GET(req: NextRequest) {
             console.log(`✅ Movie review created: ${movie.title}`);
           } else {
             results.movie.error = result.error || "Unknown error";
-            console.error(`❌ Failed to create movie review: ${result.error}`);
           }
         } else {
           results.movie.error = "No new movies available";
-          console.log("⚠️  No new movies available for review");
         }
       } else {
         results.movie.error = "No movies found";
@@ -323,47 +217,25 @@ export async function GET(req: NextRequest) {
       console.error("Error generating movie review:", error);
     }
 
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
     // 6. Generate Series Review
     try {
       console.log("📺 Generating series review...");
-      const series = await getTMDBSeriesBulk({
-        sortBy: "release_date",
-        order: "desc",
-        limit: 50,
-      });
+      const series = await getTMDBSeriesBulk({ sortBy: "release_date", order: "desc", limit: 50 });
 
       if (series && series.length > 0) {
-        // Filter out series that already have reviews
-        let existingTmdbIds: any[] = [];
-        try {
-          existingTmdbIds = await prisma.review.findMany({
-            where: {
-              tmdbId: {
-                in: series.map((s: any) => s.id),
-              },
-              category: "series",
-            },
-            select: {
-              tmdbId: true,
-            },
-          });
-        } catch (error: any) {
-          // If column doesn't exist, processSeries will handle it
-          if (!error.message?.includes("does not exist")) {
-            throw error;
-          }
-        }
+        const existingTmdbIds = await prisma.review.findMany({
+          where: { tmdbId: { in: series.map((s: any) => s.id) }, category: "series" },
+          select: { tmdbId: true },
+        });
 
-        const existingIdsSet = new Set(existingTmdbIds.map((r: { tmdbId: number | null }) => r.tmdbId).filter(Boolean));
+        const existingIdsSet = new Set(existingTmdbIds.map((r: any) => r.tmdbId).filter(Boolean));
         const newSeries = series.filter((s: any) => !existingIdsSet.has(s.id));
 
         if (newSeries.length > 0) {
-          // Take the first available series
           const serie = newSeries[0];
-          const result = await processSeries(serie, {
-            status: "published",
-            skipExisting: true,
-          });
+          const result = await processSeries(serie, { status: "published", skipExisting: true });
 
           if (result.success && result.reviewId) {
             results.series.success = true;
@@ -371,11 +243,9 @@ export async function GET(req: NextRequest) {
             console.log(`✅ Series review created: ${serie.name}`);
           } else {
             results.series.error = result.error || "Unknown error";
-            console.error(`❌ Failed to create series review: ${result.error}`);
           }
         } else {
           results.series.error = "No new series available";
-          console.log("⚠️  No new series available for review");
         }
       } else {
         results.series.error = "No series found";
@@ -386,38 +256,23 @@ export async function GET(req: NextRequest) {
     }
 
     const totalSuccessful = Object.values(results).filter((r) => r.success).length;
-    const totalFailed = Object.values(results).filter((r) => !r.success).length;
+    const duration = (Date.now() - startTime) / 1000;
 
-    // Return success response with status 200
-    return NextResponse.json(
-      {
-        success: true,
-        status: 200,
-        message: `Category review generation completed. ${totalSuccessful}/5 categories successful (game, hardware, amazon, movie, series).`,
-        results,
-        summary: {
-          totalSuccessful,
-          totalFailed,
-          game: results.game.success ? "Success" : `Failed: ${results.game.error}`,
-          hardware: results.hardware.success ? "Success" : `Failed: ${results.hardware.error}`,
-          amazon: results.amazon.success ? "Success" : `Failed: ${results.amazon.error}`,
-          movie: results.movie.success ? "Success" : `Failed: ${results.movie.error}`,
-          series: results.series.success ? "Success" : `Failed: ${results.series.error}`,
-        },
-        timestamp: new Date().toISOString(),
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      success: true,
+      status: 200,
+      message: `Cron completed. ${totalSuccessful}/6 categories successful.`,
+      duration: `${duration}s`,
+      results,
+      timestamp: new Date().toISOString(),
+    }, { status: 200 });
+
   } catch (error: any) {
     console.error("Cron category review generation error:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        status: 500,
-        error: error.message,
-        message: "An error occurred while generating category reviews",
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: false,
+      status: 500,
+      error: error.message,
+    }, { status: 500 });
   }
 }
