@@ -64,6 +64,21 @@ export async function GET(req: NextRequest) {
           where: { pricePoint: buildData.pricePoint },
         });
 
+        const buildDataToSave: any = {
+          title: buildData.title,
+          description,
+          totalPrice,
+          updatedAt: new Date(),
+          lastScrapedAt: new Date(),
+          components: {
+            create: componentsData,
+          },
+        };
+
+        if (buildData.image) {
+          buildDataToSave.image = buildData.image;
+        }
+
         if (existingBuild) {
           // Update existing
           await prisma.pCComponent.deleteMany({
@@ -72,34 +87,17 @@ export async function GET(req: NextRequest) {
 
           await prisma.pCBuild.update({
             where: { id: existingBuild.id },
-            data: {
-              title: buildData.title,
-              description,
-              image: buildData.image,
-              totalPrice,
-              updatedAt: new Date(),
-              lastScrapedAt: new Date(),
-              components: {
-                create: componentsData,
-              },
-            },
+            data: buildDataToSave,
           });
           results.updated++;
         } else {
           // Create new
           await prisma.pCBuild.create({
             data: {
+              ...buildDataToSave,
               pricePoint: buildData.pricePoint,
-              title: buildData.title,
               slug,
-              description,
-              image: buildData.image,
-              totalPrice,
               status: "published",
-              lastScrapedAt: new Date(),
-              components: {
-                create: componentsData,
-              },
             },
           });
           results.created++;
@@ -151,7 +149,14 @@ async function generateAIContent(buildData: any) {
       response_format: { type: "json_object" },
     });
 
-    const content = JSON.parse(response.choices[0].message.content || "{}");
+    let contentString = response.choices[0].message.content || "{}";
+    
+    // Robust cleaning of markdown code blocks
+    if (contentString.includes("```")) {
+      contentString = contentString.replace(/```json\n?|```/g, "").trim();
+    }
+
+    const content = JSON.parse(contentString);
     return content;
   } catch (error) {
     console.error("AI Content Generation failed in Cron:", error);
