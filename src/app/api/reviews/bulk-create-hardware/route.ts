@@ -204,6 +204,12 @@ export async function processHardware(
       // Continue without affiliate link if search fails
     }
 
+    // Check if release date is in the future - if so, set status to draft
+    const now = new Date();
+    const releaseDate = hardware.releaseDate;
+    const isFutureRelease = releaseDate && releaseDate > now;
+    const finalStatus = isFutureRelease ? "draft" : options.status;
+
     // Create review
     const review = await prisma.review.create({
       data: {
@@ -220,7 +226,7 @@ export async function processHardware(
         cons_en: reviewContent.en.cons,
         images: imageUrls,
         youtubeVideos: [],
-        status: options.status,
+        status: finalStatus,
         hardwareId: hardware.id,
         specs: reviewContent.specs || hardware.specs || null,
         affiliateLink: affiliateLink,

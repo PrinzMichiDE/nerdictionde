@@ -593,6 +593,12 @@ export async function processGame(
         igdbScore: gameData.rating,
     };
 
+    // Check if release date is in the future - if so, set status to draft
+    const now = new Date();
+    const releaseDate = gameData.first_release_date ? new Date(gameData.first_release_date * 1000) : null;
+    const isFutureRelease = releaseDate && releaseDate > now;
+    const finalStatus = isFutureRelease ? "draft" : options.status;
+
     const review = await prisma.review.create({
       data: {
         title: reviewContent.de.title,
@@ -607,7 +613,7 @@ export async function processGame(
         cons: reviewContent.de.cons,
         cons_en: reviewContent.en.cons,
         images: imageUrls,
-        status: options.status,
+        status: finalStatus,
         igdbId: gameData.id,
         specs: reviewContent.specs || null,
         metadata: gameMetadata,
@@ -690,6 +696,12 @@ export async function processMovie(
       }
     }
 
+    // Check if release date is in the future - if so, set status to draft
+    const now = new Date();
+    const releaseDate = movieData.release_date ? new Date(movieData.release_date) : null;
+    const isFutureRelease = releaseDate && releaseDate > now;
+    const finalStatus = isFutureRelease ? "draft" : options.status;
+
     const review = await prisma.review.create({
       data: {
         title: reviewContent.de.title,
@@ -704,7 +716,7 @@ export async function processMovie(
         cons: reviewContent.de.cons,
         cons_en: reviewContent.en.cons,
         images: imageUrls,
-        status: options.status,
+        status: finalStatus,
         tmdbId: movieData.id,
         createdAt: movieData.release_date ? new Date(movieData.release_date) : new Date(),
       },
@@ -972,6 +984,12 @@ export async function processSeries(
       if (posterUrl) imageUrls.push(posterUrl);
     }
 
+    // Check if release date is in the future - if so, set status to draft
+    const now = new Date();
+    const releaseDate = seriesData.first_air_date ? new Date(seriesData.first_air_date) : null;
+    const isFutureRelease = releaseDate && releaseDate > now;
+    const finalStatus = isFutureRelease ? "draft" : options.status;
+
     const review = await prisma.review.create({
       data: {
         title: reviewContent.de.title,
@@ -986,7 +1004,7 @@ export async function processSeries(
         cons: reviewContent.de.cons,
         cons_en: reviewContent.en.cons,
         images: imageUrls,
-        status: options.status,
+        status: finalStatus,
         tmdbId: seriesData.id,
         createdAt: seriesData.first_air_date ? new Date(seriesData.first_air_date) : new Date(),
       },
