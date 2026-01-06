@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllJobs } from "@/lib/job-status";
+import { getAllJobs, resetStuckJobs } from "@/lib/job-status";
 import { requireAdminAuth } from "@/lib/auth";
 import { resumeRunningJobs } from "@/lib/job-resume";
 
@@ -7,6 +7,16 @@ export async function GET(req: NextRequest) {
   // Require admin authentication
   const authError = requireAdminAuth(req);
   if (authError) return authError;
+
+  // Check for and reset stuck jobs
+  try {
+    const resetCount = await resetStuckJobs();
+    if (resetCount > 0) {
+      console.log(`🔄 Reset ${resetCount} stuck job(s)`);
+    }
+  } catch (error) {
+    console.error("Error resetting stuck jobs:", error);
+  }
 
   // Resume any running jobs in the background (only runs once per server instance)
   resumeRunningJobs().catch(err => console.error("Error resuming jobs:", err));

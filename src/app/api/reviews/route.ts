@@ -162,10 +162,15 @@ export async function POST(req: NextRequest) {
 
     let slug = body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     
-    // Check for existing slug and append suffix if necessary
-    const existingReview = await prisma.review.findUnique({ where: { slug } });
-    if (existingReview) {
-      slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
+    // Check for existing slug and ensure uniqueness
+    let slugAttempts = 0;
+    while (await prisma.review.findUnique({ where: { slug } })) {
+      slugAttempts++;
+      if (slugAttempts > 10) {
+        slug = `${body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${Date.now().toString(36)}`;
+        break;
+      }
+      slug = `${body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${Math.random().toString(36).substring(2, 7)}`;
     }
 
     const review = await prisma.review.create({

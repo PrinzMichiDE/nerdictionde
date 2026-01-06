@@ -284,12 +284,18 @@ async function processItemsAsync(
       } catch (error: any) {
         lastError = error;
         
+        // Handle specific error types that shouldn't be retried
         if (error.message?.includes("Already exists")) {
           return { success: false, error: "Already exists" };
         }
 
         if (error.message?.includes("validation") || error.message?.includes("invalid")) {
           return { success: false, error: error.message };
+        }
+
+        // Handle unique constraint errors (like duplicate slugs)
+        if (error.message?.includes("Unique constraint") || error.message?.includes("duplicate") || error.code === "P2002") {
+          return { success: false, error: "Duplicate entry (unique constraint)" };
         }
 
         if (attempt < maxRetries - 1) {

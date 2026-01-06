@@ -680,7 +680,18 @@ export async function processMovie(
     if (existingById) return { success: false, error: "Already exists" };
 
     const reviewContent = await generateMovieReviewContent(movieData);
+    
+    // Generate slug and ensure uniqueness
     let slug = generateSlug(reviewContent.de.title || movieData.title);
+    let slugAttempts = 0;
+    while (await prisma.review.findUnique({ where: { slug } })) {
+      slugAttempts++;
+      if (slugAttempts > 10) {
+        slug = `${generateSlug(reviewContent.de.title || movieData.title)}-${Date.now().toString(36)}`;
+        break;
+      }
+      slug = `${generateSlug(reviewContent.de.title || movieData.title)}-${Math.random().toString(36).substring(2, 7)}`;
+    }
     
     let imageUrls: string[] = [];
     if (movieData.poster_path) {
@@ -976,7 +987,18 @@ export async function processSeries(
     if (existingById) return { success: false, error: "Already exists" };
 
     const reviewContent = await generateSeriesReviewContent(seriesData);
+    
+    // Generate slug and ensure uniqueness
     let slug = generateSlug(reviewContent.de.title || seriesData.name);
+    let slugAttempts = 0;
+    while (await prisma.review.findUnique({ where: { slug } })) {
+      slugAttempts++;
+      if (slugAttempts > 10) {
+        slug = `${generateSlug(reviewContent.de.title || seriesData.name)}-${Date.now().toString(36)}`;
+        break;
+      }
+      slug = `${generateSlug(reviewContent.de.title || seriesData.name)}-${Math.random().toString(36).substring(2, 7)}`;
+    }
     
     let imageUrls: string[] = [];
     if (seriesData.poster_path) {

@@ -278,6 +278,48 @@ export async function cleanupOldJobs(): Promise<void> {
   });
 }
 
+/**
+ * Reset stuck jobs that have been running/pending for too long without progress
+ * Jobs are considered stuck if they haven't been updated in the last 30 minutes
+ */
+export async function resetStuckJobs(): Promise<number> {
+  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+  
+  const stuckJobs = await prisma.bulkJob.findMany({
+    where: {
+      status: {
+        in: ["running", "pending"],
+      },
+      updatedAt: {
+        lt: thirtyMinutesAgo,
+      },
+    },
+  });
+
+  let resetCount = 0;
+  for (const job of stuckJobs) {
+    // Check if job actually made progress - if not, mark as failed
+    // If it made some progress, mark as failed but keep the progress
+    if (job.processed === 0 && job.status === "pending") {
+      // Job never started - mark as failed
+      await prisma.bulkJob.update({
+        where: { jobId: job.jobId },
+        data: { status: "failed" },
+      });
+      resetCount++;
+    } else if (job.processed > 0 && job.processed < job.total) {
+      // Job made some progress but got stuck - mark as failed
+      await prisma.bulkJob.update({
+        where: { jobId: job.jobId },
+        data: { status: "failed" },
+      });
+      resetCount++;
+    }
+  }
+
+  return resetCount;
+}
+
 export async function getRunningJobs(): Promise<JobStatus[]> {
   const jobs = await prisma.bulkJob.findMany({
     where: {
