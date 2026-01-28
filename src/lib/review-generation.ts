@@ -584,6 +584,23 @@ export async function processGame(
       }
     }
 
+    // Find store IDs automatically (ALL stores from IGDB)
+    let storeIds: {
+      steamAppId?: string;
+      epicId?: string;
+      gogId?: string;
+      amazonAsin?: string;
+      stores?: Array<{ category: number; name: string; id: string; url: string }>;
+    } = {};
+
+    try {
+      const { findStoreIds } = await import("./store-search");
+      storeIds = await findStoreIds(gameData.name, gameData.id);
+      console.log(`🔍 Found store IDs for ${gameData.name}:`, storeIds);
+    } catch (error) {
+      console.warn(`⚠️  Could not fetch store IDs for ${gameData.name}:`, error);
+    }
+
     // Process metadata and create review
     const gameMetadata = {
         developers: gameData.involved_companies?.filter((c: any) => c.developer).map((c: any) => c.company.name) || [],
@@ -592,6 +609,7 @@ export async function processGame(
         genres: gameData.genres?.map((g: any) => g.name) || [],
         releaseDate: gameData.first_release_date,
         igdbScore: gameData.rating,
+        stores: storeIds.stores || [], // Store all store links in metadata
     };
 
     // Check if release date is in the future - if so, set status to draft
@@ -616,6 +634,10 @@ export async function processGame(
         images: imageUrls,
         status: finalStatus,
         igdbId: gameData.id,
+        steamAppId: storeIds.steamAppId || null,
+        epicId: storeIds.epicId || null,
+        gogId: storeIds.gogId || null,
+        amazonAsin: storeIds.amazonAsin || null,
         specs: reviewContent.specs || null,
         metadata: gameMetadata,
         createdAt: calculatePublicationDate(gameData.first_release_date),

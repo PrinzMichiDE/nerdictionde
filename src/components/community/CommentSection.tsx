@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -21,6 +22,7 @@ interface CommentSectionProps {
 export function CommentSection({ reviewId, initialComments }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState("");
+  const [authorName, setAuthorName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,14 +33,18 @@ export function CommentSection({ reviewId, initialComments }: CommentSectionProp
     setError(null);
     setIsSubmitting(true);
 
+    const author = authorName.trim() || "Besucher";
+    const savedAuthorName = authorName;
+
     const optimistic: Comment = {
       id: `opt-${Date.now()}`,
       text,
-      author: "Besucher",
+      author,
       createdAt: new Date().toISOString(),
     };
     setComments((prev) => [optimistic, ...prev]);
     setNewComment("");
+    setAuthorName("");
 
     try {
       const res = await fetch("/api/comments", {
@@ -47,7 +53,7 @@ export function CommentSection({ reviewId, initialComments }: CommentSectionProp
         body: JSON.stringify({
           reviewId,
           text,
-          author: "Besucher",
+          author: author !== "Besucher" ? author : undefined,
         }),
       });
 
@@ -62,6 +68,7 @@ export function CommentSection({ reviewId, initialComments }: CommentSectionProp
       setError(e instanceof Error ? e.message : "Ein Fehler ist aufgetreten.");
       setComments((prev) => prev.filter((c) => c.id !== optimistic.id));
       setNewComment(text);
+      setAuthorName(savedAuthorName);
     } finally {
       setIsSubmitting(false);
     }
@@ -81,6 +88,14 @@ export function CommentSection({ reviewId, initialComments }: CommentSectionProp
           onChange={(e) => setNewComment(e.target.value)}
           className="rounded-xl bg-background border-none focus-visible:ring-1 focus-visible:ring-primary h-24"
           disabled={isSubmitting}
+        />
+        <Input
+          placeholder="Name (optional)"
+          value={authorName}
+          onChange={(e) => setAuthorName(e.target.value)}
+          className="rounded-xl bg-background border-none focus-visible:ring-1 focus-visible:ring-primary"
+          disabled={isSubmitting}
+          maxLength={100}
         />
         {error && (
           <p className="text-sm text-destructive font-medium" role="alert">

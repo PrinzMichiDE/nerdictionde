@@ -298,6 +298,9 @@ export default async function ReviewDetailPage({
                   nerdictionScore={review.score}
                   title={title}
                   steamAppId={review.steamAppId}
+                  epicId={review.epicId}
+                  gogId={review.gogId}
+                  amazonAsin={review.amazonAsin}
                   isEn={isEn}
                 />
               )}

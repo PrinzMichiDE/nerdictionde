@@ -31,14 +31,18 @@ interface GameMetadataProps {
     releaseDate?: number;
     igdbScore?: number;
     criticScore?: number;
+    stores?: Array<{ category: number; name: string; id: string; url: string }>;
   };
   nerdictionScore: number;
   title?: string;
   steamAppId?: string | null;
+  epicId?: string | null;
+  gogId?: string | null;
+  amazonAsin?: string | null;
   isEn?: boolean;
 }
 
-export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, isEn }: GameMetadataProps) {
+export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, epicId, gogId, amazonAsin, isEn }: GameMetadataProps) {
   if (!metadata) return null;
 
   const formattedDate = metadata.releaseDate 
@@ -49,12 +53,58 @@ export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, isE
       })
     : "N/A";
 
-  // Generate store links
+  // Generate store links - Amazon first, then all IGDB stores
   const gameTitle = title || "";
-  const amazonLink = gameTitle ? generateAmazonAffiliateLink(gameTitle) : null;
-  const steamLink = steamAppId ? `https://store.steampowered.com/app/${steamAppId}` : (gameTitle ? `https://store.steampowered.com/search/?term=${encodeURIComponent(gameTitle)}` : null);
-  const epicLink = gameTitle ? `https://store.epicgames.com/de/search?q=${encodeURIComponent(gameTitle)}` : null;
-  const gogLink = gameTitle ? `https://www.gog.com/games?search=${encodeURIComponent(gameTitle)}` : null;
+  
+  // Amazon link (always first)
+  const amazonLink = amazonAsin 
+    ? `https://www.amazon.de/dp/${amazonAsin}?tag=michelfritzschde-21`
+    : (gameTitle ? generateAmazonAffiliateLink(gameTitle) : null);
+  
+  // Get all stores from metadata (from IGDB)
+  const stores = metadata.stores || [];
+  
+  // Fallback: Create store links from individual IDs if stores array is empty
+  const fallbackStores: Array<{ category: number; name: string; id: string; url: string }> = [];
+  
+  if (steamAppId && !stores.find(s => s.category === 1)) {
+    fallbackStores.push({
+      category: 1,
+      name: "Steam",
+      id: steamAppId,
+      url: `https://store.steampowered.com/app/${steamAppId}`,
+    });
+  }
+  
+  if (epicId && !stores.find(s => s.category === 5)) {
+    fallbackStores.push({
+      category: 5,
+      name: "Epic Games",
+      id: epicId,
+      url: `https://store.epicgames.com/de/p/${epicId}`,
+    });
+  }
+  
+  if (gogId && !stores.find(s => s.category === 7)) {
+    fallbackStores.push({
+      category: 7,
+      name: "GOG",
+      id: gogId,
+      url: `https://www.gog.com/game/${gogId}`,
+    });
+  }
+  
+  // Combine all stores
+  const allStores = [...stores, ...fallbackStores];
+  
+  // Sort stores by category (Steam, Epic, GOG first, then others)
+  const sortedStores = allStores.sort((a, b) => {
+    // Priority order: Steam (1), Epic (5), GOG (7), then others
+    const priority: Record<number, number> = { 1: 1, 5: 2, 7: 3 };
+    const aPriority = priority[a.category] || 99;
+    const bPriority = priority[b.category] || 99;
+    return aPriority - bPriority;
+  });
 
   return (
     <div className="space-y-8">
@@ -101,13 +151,14 @@ export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, isE
             </div>
 
             {/* Store Links Section */}
-            {(amazonLink || steamLink || epicLink || gogLink) && (
+            {(amazonLink || sortedStores.length > 0) && (
               <div className="pt-4 border-t border-primary/10">
                 <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center">
                   <ShoppingCart className="h-3 w-3 mr-1.5" />
                   {isEn ? "Available at" : "Erhältlich bei"}
                 </h4>
                 <div className="flex flex-wrap gap-2">
+                  {/* Amazon always first */}
                   {amazonLink && (
                     <Button
                       size="sm"
@@ -123,45 +174,21 @@ export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, isE
                       </a>
                     </Button>
                   )}
-                  {steamLink && (
+                  {/* All other stores from IGDB */}
+                  {sortedStores.map((store) => (
                     <Button
+                      key={`${store.category}-${store.id}`}
                       size="sm"
                       asChild
                       variant="outline"
                       className="h-8 gap-1.5 text-xs font-bold uppercase tracking-wider border-primary/20 hover:bg-primary/5"
                     >
-                      <a href={steamLink} target="_blank" rel="nofollow">
+                      <a href={store.url} target="_blank" rel="nofollow">
                         <ExternalLink className="h-3 w-3" />
-                        Steam
+                        {store.name}
                       </a>
                     </Button>
-                  )}
-                  {epicLink && (
-                    <Button
-                      size="sm"
-                      asChild
-                      variant="outline"
-                      className="h-8 gap-1.5 text-xs font-bold uppercase tracking-wider border-primary/20 hover:bg-primary/5"
-                    >
-                      <a href={epicLink} target="_blank" rel="nofollow">
-                        <ExternalLink className="h-3 w-3" />
-                        Epic
-                      </a>
-                    </Button>
-                  )}
-                  {gogLink && (
-                    <Button
-                      size="sm"
-                      asChild
-                      variant="outline"
-                      className="h-8 gap-1.5 text-xs font-bold uppercase tracking-wider border-primary/20 hover:bg-primary/5"
-                    >
-                      <a href={gogLink} target="_blank" rel="nofollow">
-                        <ExternalLink className="h-3 w-3" />
-                        GOG
-                      </a>
-                    </Button>
-                  )}
+                  ))}
                 </div>
               </div>
             )}

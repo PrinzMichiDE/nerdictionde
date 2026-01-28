@@ -287,6 +287,92 @@ export async function getIGDBGameById(id: number) {
   return response.data[0];
 }
 
+/**
+ * IGDB external game category mapping
+ * Based on IGDB API documentation
+ */
+export const IGDB_STORE_CATEGORIES: Record<number, { name: string; urlTemplate: (id: string) => string }> = {
+  1: { name: "Steam", urlTemplate: (id) => `https://store.steampowered.com/app/${id}` },
+  5: { name: "Epic Games", urlTemplate: (id) => `https://store.epicgames.com/de/p/${id}` },
+  7: { name: "GOG", urlTemplate: (id) => `https://www.gog.com/game/${id}` },
+  11: { name: "Xbox Store", urlTemplate: (id) => `https://www.xbox.com/de-de/games/store/${id}` },
+  12: { name: "PlayStation Store", urlTemplate: (id) => `https://store.playstation.com/de-de/product/${id}` },
+  13: { name: "Nintendo eShop", urlTemplate: (id) => `https://www.nintendo.de/Spiele/Nintendo-Switch/${id}` },
+  14: { name: "Google Play", urlTemplate: (id) => `https://play.google.com/store/apps/details?id=${id}` },
+  15: { name: "App Store", urlTemplate: (id) => `https://apps.apple.com/app/id${id}` },
+  16: { name: "itch.io", urlTemplate: (id) => `https://${id}.itch.io/` },
+  17: { name: "Twitch", urlTemplate: (id) => `https://www.twitch.tv/directory/game/${encodeURIComponent(id)}` },
+  18: { name: "Discord", urlTemplate: (id) => `https://discord.com/store/skus/${id}` },
+  19: { name: "Xbox Game Pass", urlTemplate: (id) => `https://www.xbox.com/de-de/games/store/${id}` },
+  20: { name: "PlayStation Plus", urlTemplate: (id) => `https://store.playstation.com/de-de/product/${id}` },
+};
+
+/**
+ * Fetches ALL external store IDs for a game from IGDB
+ * Returns: Array of store objects with category, name, id, and url
+ * IGDB external game categories include Steam, Epic, GOG, Xbox, PlayStation, Nintendo, etc.
+ */
+export async function getIGDBExternalStoreIds(gameId: number): Promise<{
+  steamAppId?: string;
+  epicId?: string;
+  gogId?: string;
+  stores?: Array<{ category: number; name: string; id: string; url: string }>;
+}> {
+  const token = await getAccessToken();
+  
+  try {
+    // Fetch ALL external store IDs (not just Steam, Epic, GOG)
+    const response = await axios.post(
+      "https://api.igdb.com/v4/external_games",
+      `fields category, uid; where game = ${gameId};`,
+      {
+        headers: {
+          "Client-ID": process.env.IGDB_CLIENT_ID,
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const result: {
+      steamAppId?: string;
+      epicId?: string;
+      gogId?: string;
+      stores?: Array<{ category: number; name: string; id: string; url: string }>;
+    } = {
+      stores: [],
+    };
+    
+    for (const external of response.data) {
+      const storeInfo = IGDB_STORE_CATEGORIES[external.category];
+      
+      if (storeInfo) {
+        const store = {
+          category: external.category,
+          name: storeInfo.name,
+          id: external.uid,
+          url: storeInfo.urlTemplate(external.uid),
+        };
+        
+        result.stores!.push(store);
+        
+        // Keep backward compatibility
+        if (external.category === 1) {
+          result.steamAppId = external.uid;
+        } else if (external.category === 5) {
+          result.epicId = external.uid;
+        } else if (external.category === 7) {
+          result.gogId = external.uid;
+        }
+      }
+    }
+    
+    return result;
+  } catch (error) {
+    console.error(`Error fetching external store IDs for game ${gameId}:`, error);
+    return {};
+  }
+}
+
 export async function getIGDBGenres() {
   const token = await getAccessToken();
   const response = await axios.post(

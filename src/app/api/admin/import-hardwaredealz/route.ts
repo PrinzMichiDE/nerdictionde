@@ -3,6 +3,7 @@ import { scrapeHardwareDealz } from "@/lib/hardwaredealz-scraper";
 import { requireAdminAuth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import openai, { OPENAI_MODEL } from "@/lib/openai";
+import { processHardware } from "@/app/api/reviews/bulk-create-hardware/route";
 
 export async function GET(req: NextRequest) {
   const authError = requireAdminAuth(req);
@@ -93,6 +94,9 @@ export async function POST(req: NextRequest) {
       failed: 0,
     };
 
+    // Collect all unique component names for review generation
+    const componentNames = new Set<string>();
+
     for (const buildData of builds) {
       try {
         const typeSuffix = buildData.type === "laptop" ? "-laptop" : "";
@@ -115,6 +119,11 @@ export async function POST(req: NextRequest) {
           if (!isAmazonDirect) {
             const encodedName = encodeURIComponent(comp.name);
             affiliateLink = `https://www.amazon.de/s?k=${encodedName}&tag=michelfritzschde-21&linkCode=ll2&linkId=38ed3b9216199de826066e1da9e63e2d&language=de_DE&ref_=as_li_ss_tl`;
+          }
+
+          // Collect component name for review generation (skip empty names)
+          if (comp.name && comp.name.trim()) {
+            componentNames.add(comp.name.trim());
           }
 
           return {
@@ -189,9 +198,115 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Generate reviews for all imported components (without duplicates)
+    let reviewResults = {
+      attempted: 0,
+      successful: 0,
+      failed: 0,
+      skipped: 0,
+    };
+
+    if (componentNames.size > 0) {
+      console.log(`🔄 Starting review generation for ${componentNames.size} unique components...`);
+      
+      // Check which components already have reviews to avoid duplicates
+      const componentNamesArray = Array.from(componentNames);
+      
+      // Check for existing hardware with reviews
+      const existingHardware = await prisma.hardware.findMany({
+        where: {
+          name: { in: componentNamesArray },
+        },
+        include: {
+          reviews: {
+            select: { id: true },
+            take: 1, // We only need to know if at least one review exists
+          },
+        },
+      });
+
+      // Create a set of hardware names that already have reviews
+      const hardwareWithReviews = new Set(
+        existingHardware
+          .filter((h) => h.reviews && h.reviews.length > 0)
+          .map((h) => h.name.toLowerCase())
+      );
+
+      // Also check reviews by title to catch duplicates
+      const existingReviews = await prisma.review.findMany({
+        where: {
+          title: { in: componentNamesArray },
+          category: "hardware",
+        },
+        select: { title: true },
+      });
+
+      const reviewsByTitle = new Set(
+        existingReviews.map((r) => r.title.toLowerCase())
+      );
+
+      // Filter out components that already have reviews
+      const componentsToProcess = componentNamesArray.filter((name) => {
+        const nameLower = name.toLowerCase();
+        return !hardwareWithReviews.has(nameLower) && !reviewsByTitle.has(nameLower);
+      });
+
+      console.log(`📊 Found ${componentsToProcess.length} components without reviews (${componentNames.size - componentsToProcess.length} already have reviews)`);
+
+      if (componentsToProcess.length > 0) {
+        // Process reviews in batches to avoid overwhelming the system
+        const batchSize = 3;
+        const delayBetweenBatches = 3000;
+
+        for (let i = 0; i < componentsToProcess.length; i += batchSize) {
+          const batch = componentsToProcess.slice(i, i + batchSize);
+          
+          const batchPromises = batch.map((componentName) =>
+            processHardware(componentName, {
+              status: "published",
+              skipExisting: true,
+              generateImages: true,
+            })
+          );
+
+          const batchResults = await Promise.allSettled(batchPromises);
+
+          batchResults.forEach((result) => {
+            reviewResults.attempted++;
+            if (result.status === "fulfilled") {
+              const processResult = result.value;
+              if (processResult.success) {
+                reviewResults.successful++;
+              } else if (processResult.error === "Review already exists") {
+                reviewResults.skipped++;
+              } else {
+                reviewResults.failed++;
+              }
+            } else {
+              reviewResults.failed++;
+            }
+          });
+
+          // Delay between batches (except for the last batch)
+          if (i + batchSize < componentsToProcess.length) {
+            await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches));
+          }
+        }
+
+        console.log(`✅ Review generation completed: ${reviewResults.successful} successful, ${reviewResults.failed} failed, ${reviewResults.skipped} skipped`);
+      }
+    }
+
     return NextResponse.json({
-      message: `Import abgeschlossen. ${results.created} erstellt, ${results.updated} aktualisiert, ${results.failed} fehlgeschlagen.`,
+      message: `Import abgeschlossen. ${results.created} erstellt, ${results.updated} aktualisiert, ${results.failed} fehlgeschlagen. Reviews: ${reviewResults.successful} erstellt, ${reviewResults.failed} fehlgeschlagen, ${reviewResults.skipped} übersprungen.`,
       results,
+      reviewResults: {
+        attempted: reviewResults.attempted,
+        successful: reviewResults.successful,
+        failed: reviewResults.failed,
+        skipped: reviewResults.skipped,
+        totalComponents: componentNames.size,
+      },
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
