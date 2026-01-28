@@ -285,6 +285,8 @@ export default async function ReviewDetailPage({
                 <GameMetadata 
                   metadata={review.metadata as any} 
                   nerdictionScore={review.score}
+                  title={title}
+                  steamAppId={review.steamAppId}
                   isEn={isEn}
                 />
               )}

@@ -82,6 +82,7 @@ export async function PATCH(
       where: { id: existingBuild.id },
       data: {
         pricePoint: body.pricePoint,
+        type: body.type !== undefined ? body.type : existingBuild.type,
         title: body.title,
         title_en: body.title_en,
         slug: body.slug,

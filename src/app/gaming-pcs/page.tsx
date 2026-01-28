@@ -9,63 +9,24 @@ export const metadata: Metadata = {
 };
 
 async function getBuilds(type: "desktop" | "laptop" = "desktop") {
-  try {
-    // Try to filter by type field directly
-    // Prisma automatically excludes null values when filtering by a specific value
-    const builds = await prisma.pCBuild.findMany({
-      where: {
-        status: "published",
-        type: type,
-      },
-      include: {
-        components: {
-          orderBy: {
-            sortOrder: "asc",
-          },
-        },
-      },
-      orderBy: {
-        pricePoint: "asc",
-      },
-    });
-    
-    return builds;
-  } catch (error: any) {
-    // Fallback: If type field doesn't exist or has issues, filter by checking components
-    console.warn("Could not filter by type field, using component-based fallback:", error.message);
-    
-    const where: any = {
+  const builds = await prisma.pCBuild.findMany({
+    where: {
       status: "published",
-    };
-    
-    if (type === "laptop") {
-      where.components = {
-        some: {
-          type: "Laptop",
-        },
-      };
-    } else {
-      where.components = {
-        none: {
-          type: "Laptop",
-        },
-      };
-    }
-    
-    return await prisma.pCBuild.findMany({
-      where,
-      include: {
-        components: {
-          orderBy: {
-            sortOrder: "asc",
-          },
+      type: type,
+    },
+    include: {
+      components: {
+        orderBy: {
+          sortOrder: "asc",
         },
       },
-      orderBy: {
-        pricePoint: "asc",
-      },
-    });
-  }
+    },
+    orderBy: {
+      pricePoint: "asc",
+    },
+  });
+  
+  return builds;
 }
 
 export default async function GamingPCsPage() {

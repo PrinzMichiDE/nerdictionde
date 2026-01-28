@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { 
   Building2, 
   Gamepad2, 
@@ -10,9 +11,13 @@ import {
   Eye, 
   Zap, 
   Star,
-  ShieldCheck
+  ShieldCheck,
+  ShoppingCart,
+  ExternalLink
 } from "lucide-react";
 import { ScoreBadge } from "./ScoreBadge";
+import { generateAmazonAffiliateLink } from "@/lib/amazon-search";
+import { cn } from "@/lib/utils";
 
 interface GameMetadataProps {
   metadata: {
@@ -28,10 +33,12 @@ interface GameMetadataProps {
     criticScore?: number;
   };
   nerdictionScore: number;
+  title?: string;
+  steamAppId?: string | null;
   isEn?: boolean;
 }
 
-export function GameMetadata({ metadata, nerdictionScore, isEn }: GameMetadataProps) {
+export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, isEn }: GameMetadataProps) {
   if (!metadata) return null;
 
   const formattedDate = metadata.releaseDate 
@@ -41,6 +48,13 @@ export function GameMetadata({ metadata, nerdictionScore, isEn }: GameMetadataPr
         day: "numeric",
       })
     : "N/A";
+
+  // Generate store links
+  const gameTitle = title || "";
+  const amazonLink = gameTitle ? generateAmazonAffiliateLink(gameTitle) : null;
+  const steamLink = steamAppId ? `https://store.steampowered.com/app/${steamAppId}` : (gameTitle ? `https://store.steampowered.com/search/?term=${encodeURIComponent(gameTitle)}` : null);
+  const epicLink = gameTitle ? `https://store.epicgames.com/de/search?q=${encodeURIComponent(gameTitle)}` : null;
+  const gogLink = gameTitle ? `https://www.gog.com/games?search=${encodeURIComponent(gameTitle)}` : null;
 
   return (
     <div className="space-y-8">
@@ -85,6 +99,72 @@ export function GameMetadata({ metadata, nerdictionScore, isEn }: GameMetadataPr
                 )) || "N/A"}
               </div>
             </div>
+
+            {/* Store Links Section */}
+            {(amazonLink || steamLink || epicLink || gogLink) && (
+              <div className="pt-4 border-t border-primary/10">
+                <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center">
+                  <ShoppingCart className="h-3 w-3 mr-1.5" />
+                  {isEn ? "Available at" : "Erhältlich bei"}
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {amazonLink && (
+                    <Button
+                      size="sm"
+                      asChild
+                      className={cn(
+                        "h-8 gap-1.5 text-xs font-bold uppercase tracking-wider border-none shadow-sm hover:shadow-md transition-all active:scale-95",
+                        "bg-[#FF9900] hover:bg-[#E68A00] text-black"
+                      )}
+                    >
+                      <a href={amazonLink} target="_blank" rel="nofollow sponsored">
+                        <ExternalLink className="h-3 w-3" />
+                        Amazon
+                      </a>
+                    </Button>
+                  )}
+                  {steamLink && (
+                    <Button
+                      size="sm"
+                      asChild
+                      variant="outline"
+                      className="h-8 gap-1.5 text-xs font-bold uppercase tracking-wider border-primary/20 hover:bg-primary/5"
+                    >
+                      <a href={steamLink} target="_blank" rel="nofollow">
+                        <ExternalLink className="h-3 w-3" />
+                        Steam
+                      </a>
+                    </Button>
+                  )}
+                  {epicLink && (
+                    <Button
+                      size="sm"
+                      asChild
+                      variant="outline"
+                      className="h-8 gap-1.5 text-xs font-bold uppercase tracking-wider border-primary/20 hover:bg-primary/5"
+                    >
+                      <a href={epicLink} target="_blank" rel="nofollow">
+                        <ExternalLink className="h-3 w-3" />
+                        Epic
+                      </a>
+                    </Button>
+                  )}
+                  {gogLink && (
+                    <Button
+                      size="sm"
+                      asChild
+                      variant="outline"
+                      className="h-8 gap-1.5 text-xs font-bold uppercase tracking-wider border-primary/20 hover:bg-primary/5"
+                    >
+                      <a href={gogLink} target="_blank" rel="nofollow">
+                        <ExternalLink className="h-3 w-3" />
+                        GOG
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import openai, { OPENAI_MODEL } from "@/lib/openai";
+import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
 import { uploadImage } from "@/lib/blob";
 import { calculatePublicationDate } from "@/lib/date-utils";
 import { HardwareType } from "@/lib/hardware";
@@ -621,6 +622,14 @@ export async function processGame(
       },
     });
 
+    generateAndSaveCommentsForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      score: reviewContent.score,
+      pros: reviewContent.de.pros,
+      cons: reviewContent.de.cons,
+      category: "game",
+    }).catch((e) => console.warn("Comment generation for game review failed:", e));
+
     return { success: true, reviewId: review.id };
   } catch (error: any) {
     console.error(`Error processing game ${gameData.name}:`, error);
@@ -732,6 +741,14 @@ export async function processMovie(
         createdAt: movieData.release_date ? new Date(movieData.release_date) : new Date(),
       },
     });
+
+    generateAndSaveCommentsForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      score: reviewContent.score,
+      pros: reviewContent.de.pros,
+      cons: reviewContent.de.cons,
+      category: "movie",
+    }).catch((e) => console.warn("Comment generation for movie review failed:", e));
 
     return { success: true, reviewId: review.id };
   } catch (error: any) {
@@ -967,6 +984,14 @@ export async function processAmazonProduct(
       },
     });
 
+    generateAndSaveCommentsForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      score: reviewContent.score,
+      pros: reviewContent.de.pros,
+      cons: reviewContent.de.cons,
+      category: "product",
+    }).catch((e) => console.warn("Comment generation for product review failed:", e));
+
     return { success: true, reviewId: review.id };
   } catch (error: any) {
     console.error(`Error processing Amazon product ${productData.name}:`, error);
@@ -1031,6 +1056,14 @@ export async function processSeries(
         createdAt: seriesData.first_air_date ? new Date(seriesData.first_air_date) : new Date(),
       },
     });
+
+    generateAndSaveCommentsForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      score: reviewContent.score,
+      pros: reviewContent.de.pros,
+      cons: reviewContent.de.cons,
+      category: "series",
+    }).catch((e) => console.warn("Comment generation for series review failed:", e));
 
     return { success: true, reviewId: review.id };
   } catch (error: any) {

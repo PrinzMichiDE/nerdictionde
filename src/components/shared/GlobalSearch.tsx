@@ -34,15 +34,18 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
   // Fetch reviews if not provided
   useEffect(() => {
     if (reviews.length === 0) {
-      fetch("/api/reviews")
+      fetch("/api/reviews?all=true")
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) {
             setReviews(data.slice(0, 100)); // Limit for performance
+          } else if (data?.reviews && Array.isArray(data.reviews)) {
+            // Handle paginated response format
+            setReviews(data.reviews.slice(0, 100));
           }
         })
-        .catch(() => {
-          // Silently fail
+        .catch((error) => {
+          console.error("Failed to fetch reviews for search:", error);
         });
     }
   }, [reviews.length]);
@@ -86,9 +89,16 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
 
     // Filter by category
     if (selectedFilters.size > 0) {
-      filtered = filtered.filter((review) =>
-        selectedFilters.has(review.category)
-      );
+      filtered = filtered.filter((review) => {
+        // Handle backward compatibility: "product" and "amazon" are treated as equivalent
+        if (selectedFilters.has("amazon")) {
+          return review.category === "amazon" || review.category === "product";
+        }
+        if (selectedFilters.has("product")) {
+          return review.category === "amazon" || review.category === "product";
+        }
+        return selectedFilters.has(review.category);
+      });
     }
 
     // Filter by query
@@ -189,8 +199,10 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
               {results.length > 0 ? (
                 <div className="p-2">
                   {results.map((review) => {
+                    // Map "product" to "amazon" icon for backward compatibility
+                    const categoryKey = review.category === "product" ? "amazon" : review.category;
                     const Icon =
-                      categoryIcons[review.category as keyof typeof categoryIcons];
+                      categoryIcons[categoryKey as keyof typeof categoryIcons] || ShoppingCart;
 
                     return (
                       <button

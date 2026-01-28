@@ -14,8 +14,6 @@ export async function GET(req: NextRequest) {
     } else if (status && status !== "all") {
       where.status = status;
     }
-
-    const hasImageField = (prisma as any)._baseClient?._dmmf?.modelMap?.PCBuild?.fields?.some((f: any) => f.name === "image");
     
     const pcBuilds = await prisma.pCBuild.findMany({
       where,
@@ -57,6 +55,7 @@ export async function POST(req: NextRequest) {
     const pcBuild = await prisma.pCBuild.create({
       data: {
         pricePoint: body.pricePoint,
+        type: body.type || "desktop",
         title: body.title,
         title_en: body.title_en,
         slug,
