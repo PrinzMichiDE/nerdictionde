@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Rocket, Search, Gamepad2, Cpu, ShoppingCart } from "lucide-react";
+import { Loader2, Rocket, Search, Gamepad2, Cpu, ShoppingCart, ChevronDown, ChevronUp } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,34 @@ export function QuickCreate() {
   const [input, setInput] = useState("");
   const [category, setCategory] = useState<ReviewCategory>("game");
   const [loading, setLoading] = useState(false);
+  const [showOptional, setShowOptional] = useState(false);
+  const [disclosure, setDisclosure] = useState("");
+  const [hashtags, setHashtags] = useState("");
+  const [gamePageLink, setGamePageLink] = useState("");
   const router = useRouter();
+
+  /**
+   * Appends optional disclosure, game page link, and hashtags to the content.
+   */
+  const appendOptionalContent = (content: string, lang: "de" | "en"): string => {
+    let result = content;
+    
+    if (disclosure.trim()) {
+      const disclosureHeader = lang === "de" ? "## Transparenzhinweis" : "## Disclosure";
+      result += `\n\n${disclosureHeader}\n\n${disclosure.trim()}`;
+    }
+    
+    if (gamePageLink.trim()) {
+      const linkText = lang === "de" ? "Mehr Infos auf GAME.PAGE" : "More info on GAME.PAGE";
+      result += `\n\n[${linkText}](${gamePageLink.trim()})`;
+    }
+    
+    if (hashtags.trim()) {
+      result += `\n\n---\n\n${hashtags.trim()}`;
+    }
+    
+    return result;
+  };
 
   const handleGenerate = async () => {
     if (!input) return;
@@ -28,8 +55,14 @@ export function QuickCreate() {
       });
       const data = response.data;
       
+      // Append optional disclosure and hashtags to content
+      const contentDe = appendOptionalContent(data.content || "", "de");
+      const contentEn = appendOptionalContent(data.content_en || "", "en");
+      
       const saveResponse = await axios.post("/api/reviews", {
         ...data,
+        content: contentDe,
+        content_en: contentEn,
         status: "published",
       });
       
@@ -138,6 +171,87 @@ export function QuickCreate() {
             )}
           </Button>
         </div>
+
+        {/* Optional Fields Toggle */}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowOptional(!showOptional)}
+          disabled={loading}
+          className="w-full text-muted-foreground hover:text-foreground"
+        >
+          {showOptional ? (
+            <>
+              <ChevronUp className="mr-2 h-4 w-4" />
+              Optionale Felder ausblenden
+            </>
+          ) : (
+            <>
+              <ChevronDown className="mr-2 h-4 w-4" />
+              Optionale Felder anzeigen
+            </>
+          )}
+        </Button>
+
+        {/* Optional Fields */}
+        {showOptional && (
+          <div className="space-y-4 pt-2 border-t border-border/50">
+            {/* Disclosure */}
+            <div className="space-y-2">
+              <label htmlFor="disclosure" className="text-sm font-medium text-foreground">
+                Disclosure / Transparenzhinweis
+              </label>
+              <Textarea
+                id="disclosure"
+                placeholder="z.B. Dieses Produkt wurde uns kostenlos zur Verfügung gestellt..."
+                value={disclosure}
+                onChange={(e) => setDisclosure(e.target.value)}
+                className="min-h-[80px] resize-none text-sm"
+                disabled={loading}
+              />
+              <p className="text-xs text-muted-foreground">
+                Wird am Ende des Reviews als &quot;Transparenzhinweis&quot; (DE) / &quot;Disclosure&quot; (EN) eingefügt.
+              </p>
+            </div>
+
+            {/* GAME.PAGE Link */}
+            <div className="space-y-2">
+              <label htmlFor="gamePageLink" className="text-sm font-medium text-foreground">
+                GAME.PAGE Link
+              </label>
+              <Input
+                id="gamePageLink"
+                placeholder="z.B. https://game.page/mygame"
+                value={gamePageLink}
+                onChange={(e) => setGamePageLink(e.target.value)}
+                className="text-sm"
+                disabled={loading}
+              />
+              <p className="text-xs text-muted-foreground">
+                Link zur GAME.PAGE wird als Markdown-Link am Ende eingefügt.
+              </p>
+            </div>
+
+            {/* Hashtags */}
+            <div className="space-y-2">
+              <label htmlFor="hashtags" className="text-sm font-medium text-foreground">
+                Hashtags
+              </label>
+              <Input
+                id="hashtags"
+                placeholder="z.B. #Gaming #Review #Sponsored"
+                value={hashtags}
+                onChange={(e) => setHashtags(e.target.value)}
+                className="text-sm"
+                disabled={loading}
+              />
+              <p className="text-xs text-muted-foreground">
+                Hashtags werden am Ende des Reviews nach einer Trennlinie eingefügt.
+              </p>
+            </div>
+          </div>
+        )}
         
         {/* Help Text */}
         <div className="text-xs text-center text-muted-foreground space-y-1 pt-2">
