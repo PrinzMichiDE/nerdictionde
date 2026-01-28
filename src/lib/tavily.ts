@@ -2,7 +2,7 @@ import { tavily, type TavilySearchResponse } from "@tavily/core";
 
 let tavilyClient: ReturnType<typeof tavily> | null = null;
 
-function getTavilyClient() {
+export function getTavilyClient() {
   if (!tavilyClient) {
     const apiKey = process.env.TAVILY_API_KEY;
     if (!apiKey) {

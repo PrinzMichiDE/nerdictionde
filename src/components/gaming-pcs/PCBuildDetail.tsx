@@ -2,17 +2,24 @@
 
 import { PCBuild } from "@/types/pc-build";
 import { PCComponentItem } from "./PCComponentItem";
+import { BenchmarksSection } from "./BenchmarksSection";
+import { FPSSection } from "./FPSSection";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Share2, Printer, ArrowLeft, Info } from "lucide-react";
 import Link from "next/link";
+import type { BenchmarkResult, FPSResult } from "@/lib/benchmarks";
 
 interface PCBuildDetailProps {
   build: PCBuild;
   isEn?: boolean;
+  performanceData?: {
+    benchmarks: BenchmarkResult[];
+    fpsResults: FPSResult[];
+  } | null;
 }
 
-export function PCBuildDetail({ build, isEn = false }: PCBuildDetailProps) {
+export function PCBuildDetail({ build, isEn = false, performanceData }: PCBuildDetailProps) {
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -97,6 +104,18 @@ export function PCBuildDetail({ build, isEn = false }: PCBuildDetailProps) {
           ))}
         </div>
       </div>
+
+      {/* Performance Data Section */}
+      {performanceData && (
+        <div className="space-y-6">
+          {performanceData.benchmarks && performanceData.benchmarks.length > 0 && (
+            <BenchmarksSection benchmarks={performanceData.benchmarks} isEn={isEn} />
+          )}
+          {performanceData.fpsResults && performanceData.fpsResults.length > 0 && (
+            <FPSSection fpsResults={performanceData.fpsResults} isEn={isEn} />
+          )}
+        </div>
+      )}
 
       {/* AI Generated Detail Section */}
       {build.metadata && (build.metadata as any).detailSections && (

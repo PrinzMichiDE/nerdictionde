@@ -3,34 +3,76 @@
 import { PCComponent } from "@/types/pc-build";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ExternalLink, Info, Search } from "lucide-react";
+import { ExternalLink, Info, Package } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface PCComponentItemProps {
   component: PCComponent;
   isEn?: boolean;
 }
 
+/**
+ * Generates an Amazon affiliate link for a hardware component
+ * @param componentName - The name of the hardware component
+ * @returns Amazon affiliate link URL
+ */
+function generateAmazonAffiliateLink(componentName: string): string {
+  // Replace spaces with + and encode the component name
+  const encodedName = componentName.replace(/\s+/g, "+");
+  return `https://www.amazon.de/s?k=${encodedName}&linkCode=ll2&tag=michelfritzschde-21&linkId=f5fd3285c9a0e9cc09fb4853a36e2c40&language=de_DE&ref_=as_li_ss_tl`;
+}
+
+/**
+ * Gets the affiliate link, converting non-Amazon links to Amazon format
+ * @param affiliateLink - The existing affiliate link (may be Geizhals or Amazon)
+ * @param componentName - The component name to use for Amazon link generation
+ * @returns Amazon affiliate link URL
+ */
+function getAffiliateLink(affiliateLink: string | null | undefined, componentName: string): string | null {
+  if (!affiliateLink) {
+    return generateAmazonAffiliateLink(componentName);
+  }
+  
+  // If it's already an Amazon link, use it as-is
+  if (affiliateLink.includes("amazon")) {
+    return affiliateLink;
+  }
+  
+  // Convert Geizhals or other links to Amazon format
+  return generateAmazonAffiliateLink(componentName);
+}
+
 export function PCComponentItem({ component, isEn = false }: PCComponentItemProps) {
+  const affiliateLink = getAffiliateLink(component.affiliateLink, component.name);
   return (
     <Card className="overflow-hidden border-2 hover:border-primary/50 transition-all group">
       <CardContent className="p-0">
-        <div className="flex flex-col md:flex-row min-h-[140px]">
-          {/* Component Image */}
-          <div className="w-full md:w-[160px] bg-muted/20 flex items-center justify-center p-4 border-b md:border-b-0 md:border-r">
+        <div className="flex flex-col md:flex-row min-h-[180px]">
+          {/* Component Image - Larger and more prominent */}
+          <div className="w-full md:w-[240px] lg:w-[280px] bg-gradient-to-br from-muted/30 to-muted/10 flex items-center justify-center p-6 border-b md:border-b-0 md:border-r relative overflow-hidden">
             {component.image ? (
-              <img 
-                src={component.image} 
-                alt={component.name} 
-                className="max-h-[100px] object-contain transition-transform group-hover:scale-110"
-              />
+              <div className="relative w-full h-full min-h-[160px] flex items-center justify-center">
+                <Image
+                  src={component.image}
+                  alt={component.name}
+                  fill
+                  className="object-contain transition-transform duration-300 group-hover:scale-110 p-4"
+                  sizes="(max-width: 768px) 100vw, 240px"
+                  unoptimized
+                />
+              </div>
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
-                <Info className="h-12 w-12" />
+              <div className="w-full h-full min-h-[160px] flex flex-col items-center justify-center text-muted-foreground/40 gap-3">
+                <Package className="h-16 w-16" />
+                <span className="text-xs font-medium uppercase tracking-wider text-center px-4">
+                  {component.type}
+                </span>
               </div>
             )}
+            {/* Subtle gradient overlay on hover */}
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
 
           <div className="flex-grow p-4 md:p-6 flex flex-col md:flex-row justify-between gap-6">
@@ -70,23 +112,16 @@ export function PCComponentItem({ component, isEn = false }: PCComponentItemProp
                     </Link>
                   </Button>
                 )}
-                {component.affiliateLink && (
+                {affiliateLink && (
                   <Button 
                     size="sm" 
                     asChild 
-                    className={cn(
-                      "h-9 gap-2 border-none shadow-sm hover:shadow-md transition-all active:scale-95",
-                      component.affiliateLink.includes("amazon") 
-                        ? "bg-[#FF9900] hover:bg-[#E68A00] text-black" 
-                        : "bg-[#0055aa] hover:bg-[#004488] text-white"
-                    )}
+                    className="h-9 gap-2 border-none shadow-sm hover:shadow-md transition-all active:scale-95 bg-[#FF9900] hover:bg-[#E68A00] text-black"
                   >
-                    <a href={component.affiliateLink} target="_blank" rel="nofollow sponsored">
+                    <a href={affiliateLink} target="_blank" rel="nofollow sponsored">
                       <ExternalLink className="h-4 w-4" />
                       <span className="text-xs font-bold uppercase tracking-wider">
-                        {component.affiliateLink.includes("amazon") 
-                          ? "Amazon" 
-                          : (isEn ? "Geizhals" : "Geizhals")}
+                        Amazon
                       </span>
                     </a>
                   </Button>
