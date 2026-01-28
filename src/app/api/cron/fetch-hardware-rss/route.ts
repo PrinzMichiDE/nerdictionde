@@ -31,6 +31,7 @@ const DEFAULT_MAX_ITEMS = parseInt(process.env.HARDWARE_RSS_MAX_ITEMS || "10", 1
 const DEFAULT_DELAY_MS = parseInt(process.env.HARDWARE_RSS_DELAY_MS || "2000", 10);
 const MAX_RETRIES = 3;
 const RETRY_DELAY_BASE_MS = 1000;
+const DEFAULT_RANDOM_FEEDBACK_COUNT = parseInt(process.env.RANDOM_FEEDBACK_COUNT || "5", 10);
 
 // Extract hardware name from article title with improved patterns
 function extractHardwareName(title: string): string | null {
@@ -442,14 +443,103 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Generate random community feedbacks for existing reviews
+    const randomFeedbackCount = parseInt(url.searchParams.get("randomFeedbackCount") || String(DEFAULT_RANDOM_FEEDBACK_COUNT), 10);
+    console.log(`\n💬 Generating random community feedbacks for ${randomFeedbackCount} reviews...`);
+    
+    const feedbackResults = {
+      attempted: 0,
+      successful: 0,
+      failed: 0,
+      reviews: [] as Array<{ reviewId: string; title: string; commentsGenerated: number }>,
+      errors: [] as Array<{ reviewId: string; error: string }>,
+    };
+
+    try {
+      // Select random published reviews that could benefit from more comments
+      // Prefer reviews with fewer comments (0-3 comments)
+      const allPublishedReviews = await prisma.review.findMany({
+        where: {
+          status: "published",
+        },
+        select: {
+          id: true,
+          title: true,
+          score: true,
+          pros: true,
+          cons: true,
+          category: true,
+          _count: {
+            select: {
+              comments: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 100, // Get recent 100 reviews to select from
+      });
+
+      // Filter reviews with few comments (0-5 comments) and shuffle
+      const eligibleReviews = allPublishedReviews
+        .filter((review) => review._count.comments <= 5)
+        .sort(() => Math.random() - 0.5) // Shuffle
+        .slice(0, randomFeedbackCount);
+
+      console.log(`📋 Found ${eligibleReviews.length} eligible reviews for feedback generation`);
+
+      for (const review of eligibleReviews) {
+        feedbackResults.attempted++;
+        try {
+          await generateAndSaveCommentsForReview(review.id, {
+            reviewTitle: review.title,
+            score: review.score,
+            pros: review.pros,
+            cons: review.cons,
+            category: review.category,
+          });
+
+          // Count how many comments were actually created
+          const commentCount = await prisma.comment.count({
+            where: { reviewId: review.id },
+          });
+
+          feedbackResults.successful++;
+          feedbackResults.reviews.push({
+            reviewId: review.id,
+            title: review.title,
+            commentsGenerated: commentCount,
+          });
+          console.log(`✅ Generated feedback for: ${review.title.substring(0, 50)}...`);
+        } catch (error: any) {
+          feedbackResults.failed++;
+          const errorMessage = error?.message || String(error);
+          feedbackResults.errors.push({
+            reviewId: review.id,
+            error: errorMessage,
+          });
+          console.warn(`⚠️ Failed to generate feedback for review ${review.id}:`, errorMessage);
+        }
+      }
+    } catch (error: any) {
+      console.error(`❌ Error during random feedback generation:`, error);
+      feedbackResults.errors.push({
+        reviewId: "unknown",
+        error: error?.message || String(error),
+      });
+    }
+
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(`\n✅ Hardware RSS fetch completed in ${duration}s`);
-    console.log(`📊 Results: ${results.successful} successful, ${results.failed} failed, ${results.skipped} skipped`);
+    console.log(`📊 RSS Results: ${results.successful} successful, ${results.failed} failed, ${results.skipped} skipped`);
+    console.log(`💬 Feedback Results: ${feedbackResults.successful} successful, ${feedbackResults.failed} failed`);
 
     return NextResponse.json({
-      message: `Hardware RSS fetch completed: ${results.successful} successful, ${results.failed} failed, ${results.skipped} skipped`,
+      message: `Hardware RSS fetch completed: ${results.successful} successful, ${results.failed} failed, ${results.skipped} skipped. Random feedbacks: ${feedbackResults.successful} successful, ${feedbackResults.failed} failed`,
       results: {
         ...results,
+        randomFeedbacks: feedbackResults,
         duration: parseFloat(duration),
         timestamp: new Date().toISOString(),
       },
