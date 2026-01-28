@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Database, CheckCircle2, XCircle, Film, Tv } from "lucide-react";
+import { Loader2, Database, CheckCircle2, XCircle, Film, Tv, Cpu } from "lucide-react";
 import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 
@@ -27,10 +28,10 @@ interface BulkCreateResult {
   failed: number;
   skipped: number;
   reviews: Array<{ id: string; title: string; slug: string }>;
-  errors: Array<{ game?: string; movie?: string; series?: string; error: string }>;
+  errors: Array<{ game?: string; movie?: string; series?: string; hardware?: string; error: string }>;
 }
 
-type Category = "game" | "movie" | "series";
+type Category = "game" | "movie" | "series" | "hardware";
 
 export function BulkCreate() {
   const [category, setCategory] = useState<Category>("game");
@@ -54,17 +55,21 @@ export function BulkCreate() {
   const [delay, setDelay] = useState<string>("2000");
   const [status, setStatus] = useState<"draft" | "published">("published");
   const [skipExisting, setSkipExisting] = useState(true);
+  const [hardwareNames, setHardwareNames] = useState<string>("");
 
   // Reset filters when category changes
   useEffect(() => {
     if (category === "game") {
       setMinRating("70");
+    } else if (category === "hardware") {
+      setMinRating("");
     } else {
       setMinRating("7.0");
     }
     setGenreId("all");
     setPlatformId("all");
     setReleaseYear("");
+    setHardwareNames("");
   }, [category]);
 
   useEffect(() => {
@@ -128,19 +133,42 @@ export function BulkCreate() {
       if (minRating) queryOptions.minRating = parseFloat(minRating);
 
       let endpoint = "/api/reviews/bulk-create";
-      if (category === "movie") {
-        endpoint = "/api/reviews/bulk-create-movies";
-      } else if (category === "series") {
-        endpoint = "/api/reviews/bulk-create-series";
-      }
-
-      const response = await axios.post(endpoint, {
-        queryOptions,
+      const requestBody: any = {
         batchSize: parseInt(batchSize) || 5,
         delayBetweenBatches: parseInt(delay) || 2000,
         status,
         skipExisting,
-      });
+      };
+
+      if (category === "movie") {
+        endpoint = "/api/reviews/bulk-create-movies";
+        requestBody.queryOptions = queryOptions;
+      } else if (category === "series") {
+        endpoint = "/api/reviews/bulk-create-series";
+        requestBody.queryOptions = queryOptions;
+      } else if (category === "hardware") {
+        if (!hardwareNames.trim()) {
+          alert("Bitte gib Hardware-Namen ein (ein Name pro Zeile).");
+          setLoading(false);
+          return;
+        }
+        endpoint = "/api/reviews/bulk-create-mass";
+        requestBody.category = "hardware";
+        requestBody.count = parseInt(limit) || 20;
+        requestBody.hardwareNames = hardwareNames.split("\n").map(n => n.trim()).filter(n => n.length > 0);
+        requestBody.delayBetweenItems = parseInt(delay) || 2000;
+      } else {
+        requestBody.queryOptions = queryOptions;
+      }
+
+      const response = await axios.post(endpoint, requestBody);
+
+      // Hardware uses async job system, show different message
+      if (category === "hardware" && response.data.jobId) {
+        alert(`Hardware-Massenerstellung gestartet! Job-ID: ${response.data.jobId}\n\nDu kannst den Fortschritt im Tab "Massen-Jobs" verfolgen.`);
+        setLoading(false);
+        return;
+      }
 
       setResult(response.data.results);
     } catch (error: any) {
@@ -169,7 +197,7 @@ export function BulkCreate() {
         </CardHeader>
         <CardContent className="space-y-4 md:space-y-6">
           <Tabs value={category} onValueChange={(v) => setCategory(v as Category)}>
-            <TabsList className="grid w-full grid-cols-3 gap-1 md:gap-2">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-1 md:gap-2">
               <TabsTrigger value="game" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-4">
                 <Database className="h-3 w-3 md:h-4 md:w-4" />
                 Games
@@ -181,6 +209,10 @@ export function BulkCreate() {
               <TabsTrigger value="series" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-4">
                 <Tv className="h-3 w-3 md:h-4 md:w-4" />
                 Serien
+              </TabsTrigger>
+              <TabsTrigger value="hardware" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-4">
+                <Cpu className="h-3 w-3 md:h-4 md:w-4" />
+                Hardware
               </TabsTrigger>
             </TabsList>
 
@@ -645,6 +677,103 @@ export function BulkCreate() {
                 )}
               </Button>
             </TabsContent>
+
+            <TabsContent value="hardware" className="space-y-6 mt-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Hardware Filter</h3>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="hardware-names">Hardware-Namen</Label>
+                    <Textarea
+                      id="hardware-names"
+                      placeholder="Gib Hardware-Namen ein, einen pro Zeile:&#10;RTX 4090&#10;Ryzen 9 7950X&#10;PlayStation 5"
+                      value={hardwareNames}
+                      onChange={(e) => setHardwareNames(e.target.value)}
+                      rows={8}
+                      className="font-mono text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Ein Hardware-Name pro Zeile. Der Typ wird automatisch erkannt.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="hardware-limit">Anzahl Hardware-Reviews</Label>
+                    <Input
+                      id="hardware-limit"
+                      type="number"
+                      placeholder="20"
+                      value={limit}
+                      onChange={(e) => setLimit(e.target.value)}
+                      min="1"
+                      max="100"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Maximale Anzahl der zu erstellenden Reviews (begrenzt durch Anzahl der eingegebenen Namen)
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Processing Options */}
+              <div className="space-y-4 border-t pt-4">
+                <h3 className="text-lg font-semibold">Verarbeitungs-Optionen</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="hardware-batchSize">Batch-Größe</Label>
+                    <Input
+                      id="hardware-batchSize"
+                      type="number"
+                      placeholder="5"
+                      value={batchSize}
+                      onChange={(e) => setBatchSize(e.target.value)}
+                      min="1"
+                      max="10"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Anzahl der gleichzeitig verarbeiteten Hardware-Reviews
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="hardware-delay">Verzögerung zwischen Batches (ms)</Label>
+                    <Input
+                      id="hardware-delay"
+                      type="number"
+                      placeholder="2000"
+                      value={delay}
+                      onChange={(e) => setDelay(e.target.value)}
+                      min="0"
+                      max="10000"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Pause zwischen Batches (verhindert Rate-Limiting)
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleBulkCreate}
+                disabled={loading || !limit || !hardwareNames.trim()}
+                className="w-full h-10 md:h-12 text-sm md:text-base lg:text-lg font-bold"
+                size="lg"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 md:h-5 md:w-5 animate-spin" />
+                    <span className="hidden sm:inline">Erstelle Reviews...</span>
+                    <span className="sm:hidden">Erstelle...</span>
+                  </>
+                ) : (
+                  <>
+                    <Cpu className="mr-2 h-4 w-4 md:h-5 md:w-5" />
+                    <span className="hidden sm:inline">Massenerstellung starten</span>
+                    <span className="sm:hidden">Starten</span>
+                  </>
+                )}
+              </Button>
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
@@ -709,7 +838,7 @@ export function BulkCreate() {
                       className="p-2 bg-red-500/10 rounded text-xs md:text-sm"
                     >
                       <div className="font-medium break-words">
-                        {error.game || error.movie || error.series}
+                        {error.game || error.movie || error.series || error.hardware}
                       </div>
                       <div className="text-[10px] md:text-xs text-muted-foreground break-words mt-1">{error.error}</div>
                     </div>

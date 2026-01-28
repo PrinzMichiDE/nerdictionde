@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import rehypeSlug from "rehype-slug";
+import rehypeSlugCustomId from "rehype-slug-custom-id";
 import { Monitor, Cpu, HardDrive, CpuIcon } from "lucide-react";
 import { GameMetadata } from "@/components/reviews/GameMetadata";
 import { MovieSeriesMetadata } from "@/components/reviews/MovieSeriesMetadata";
@@ -118,8 +118,30 @@ export default async function ReviewDetailPage({
       const level = match[1].length;
       let text = match[2].trim();
       
-      // Remove markdown links from heading text
+      // Remove markdown links from heading text first
       text = text.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
+      
+      // Check for explicit anchor ID like {#fazit}
+      const explicitIdMatch = text.match(/\s*\{#([^}]+)\}\s*$/);
+      let id: string;
+      
+      if (explicitIdMatch) {
+        // Use explicit anchor ID
+        id = explicitIdMatch[1];
+        // Remove the explicit anchor ID from the text
+        text = text.replace(/\s*\{#[^}]+\}\s*$/, '').trim();
+      } else {
+        // Generate ID automatically (similar to rehype-slug-custom-id)
+        id = text
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+          .replace(/[^\w\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '')
+          .trim();
+      }
       
       // Skip the first H1 (main title) - it's already displayed at the top
       if (level === 1 && !firstH1Found) {
@@ -130,17 +152,6 @@ export default async function ReviewDetailPage({
       // Skip the table of contents heading itself
       const tocHeadingText = isEn ? "Table of Contents" : "Inhaltsverzeichnis";
       if (text.toLowerCase() === tocHeadingText.toLowerCase()) continue;
-      
-      // Generate ID similar to rehype-slug (handles German umlauts and special chars)
-      const id = text
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '')
-        .trim();
       
       headings.push({ level, text, id });
     }
@@ -318,7 +329,7 @@ export default async function ReviewDetailPage({
           <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed prose-headings:scroll-mt-24">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeSlug]}
+              rehypePlugins={[[rehypeSlugCustomId, { enableCustomId: true }]]}
               components={MarkdownComponents as any}
             >
               {content || ""}

@@ -6,6 +6,7 @@ import { detectHardwareType, createHardware } from "@/lib/hardware";
 import { generateHardwareReviewContent } from "@/lib/review-generation";
 import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
 import { searchAmazonHardware } from "@/lib/amazon-search";
+import { checkAdminAuth } from "@/lib/auth";
 
 interface RSSItem {
   title: string[];
@@ -356,9 +357,12 @@ export async function GET(req: NextRequest) {
   const startTime = Date.now();
   
   try {
-    // Check for authorization (Vercel Cron Secret)
+    // Check for authorization (Vercel Cron Secret or Admin Auth)
     const authHeader = req.headers.get('authorization');
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const hasCronSecret = process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`;
+    const hasAdminAuth = checkAdminAuth(req);
+    
+    if (!hasCronSecret && !hasAdminAuth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -472,6 +476,15 @@ export async function GET(req: NextRequest) {
 // Also support POST for manual triggering with optional body parameters
 export async function POST(req: NextRequest) {
   try {
+    // Check for authorization (Vercel Cron Secret or Admin Auth)
+    const authHeader = req.headers.get('authorization');
+    const hasCronSecret = process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`;
+    const hasAdminAuth = checkAdminAuth(req);
+    
+    if (!hasCronSecret && !hasAdminAuth) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // Try to parse body for configuration
     let body: { maxItems?: number; delayMs?: number } = {};
     try {
