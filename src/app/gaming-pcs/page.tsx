@@ -9,10 +9,11 @@ export const metadata: Metadata = {
 };
 
 async function getBuilds(type: "desktop" | "laptop" = "desktop") {
-  const builds = await prisma.pCBuild.findMany({
+  // Get all published builds first, then filter by type
+  // This handles cases where type might be null or undefined
+  const allBuilds = await prisma.pCBuild.findMany({
     where: {
       status: "published",
-      type: type,
     },
     include: {
       components: {
@@ -25,13 +26,40 @@ async function getBuilds(type: "desktop" | "laptop" = "desktop") {
       pricePoint: "asc",
     },
   });
+
+  // Debug: Log what we found
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[getBuilds] Found ${allBuilds.length} published builds total`);
+    if (allBuilds.length > 0) {
+      console.log(`[getBuilds] Sample build types:`, allBuilds.slice(0, 3).map(b => ({ id: b.id, type: b.type, title: b.title })));
+    }
+  }
+
+  // Debug: Log what we found
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[getBuilds(${type})] Found ${allBuilds.length} published builds total`);
+    if (allBuilds.length > 0) {
+      console.log(`[getBuilds(${type})] Sample build types:`, allBuilds.slice(0, 3).map(b => ({ id: b.id, type: b.type || "null", title: b.title })));
+    }
+  }
+
+  // Filter by type, treating null/undefined as "desktop" (legacy builds)
+  const filteredBuilds = allBuilds.filter((build) => {
+    const buildType = build.type || "desktop"; // Default to desktop if type is null
+    return buildType === type;
+  });
   
-  return builds;
+  return filteredBuilds;
 }
 
 export default async function GamingPCsPage() {
   const desktops = await getBuilds("desktop");
   const laptops = await getBuilds("laptop");
+
+  // Debug logging (remove in production if not needed)
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[GamingPCsPage] Found ${desktops.length} desktop builds, ${laptops.length} laptop builds`);
+  }
 
   return (
     <div className="container mx-auto px-4 py-12 space-y-16">
