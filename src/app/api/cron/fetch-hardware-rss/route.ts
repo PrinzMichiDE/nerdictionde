@@ -4,6 +4,7 @@ import { parseStringPromise } from "xml2js";
 import prisma from "@/lib/prisma";
 import { detectHardwareType, createHardware } from "@/lib/hardware";
 import { generateHardwareReviewContent } from "@/lib/review-generation";
+import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
 import { searchAmazonHardware } from "@/lib/amazon-search";
 
 interface RSSItem {
@@ -333,6 +334,14 @@ async function processHardwareItem(
         affiliateLink: affiliateLink,
       },
     });
+
+    generateAndSaveCommentsForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      score: reviewContent.score,
+      pros: reviewContent.de.pros,
+      cons: reviewContent.de.cons,
+      category: "hardware",
+    }).catch((e) => console.warn("Comment generation for hardware review failed:", e));
 
     console.log(`[${itemIndex !== undefined ? itemIndex + 1 : "?"}] ✅ Successfully created review: ${review.slug}`);
     return { success: true, reviewId: review.id, hardwareName };

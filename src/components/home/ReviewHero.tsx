@@ -7,13 +7,69 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScoreBadge } from "@/components/reviews/ScoreBadge";
 import { ArrowRight, Play } from "lucide-react";
+import { useMemo } from "react";
 
 interface ReviewHeroProps {
   review: Review;
 }
 
+/**
+ * Extracts headings from markdown content for table of contents
+ */
+function extractHeadings(markdown: string): Array<{ level: number; text: string; id: string }> {
+  const headingRegex = /^(#{1,6})\s+(.+)$/gm;
+  const headings: Array<{ level: number; text: string; id: string }> = [];
+  let match;
+  let firstH1Found = false;
+
+  while ((match = headingRegex.exec(markdown)) !== null) {
+    const level = match[1].length;
+    let text = match[2].trim();
+    
+    // Remove markdown links from heading text
+    text = text.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
+    
+    // Skip the first H1 (main title) - it's already displayed at the top
+    if (level === 1 && !firstH1Found) {
+      firstH1Found = true;
+      continue;
+    }
+    
+    // Skip the table of contents heading itself
+    const tocHeadingText = "Inhaltsverzeichnis";
+    if (text.toLowerCase() === tocHeadingText.toLowerCase() || 
+        text.toLowerCase() === "table of contents") {
+      continue;
+    }
+    
+    // Generate ID similar to rehype-slug (handles German umlauts and special chars)
+    const id = text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .trim();
+    
+    headings.push({ level, text, id });
+  }
+
+  return headings;
+}
+
 export function ReviewHero({ review }: ReviewHeroProps) {
   const imageUrl = review.images?.[0];
+  
+  // Extract headings for table of contents
+  const headings = useMemo(() => {
+    if (!review.content) return [];
+    return extractHeadings(review.content);
+  }, [review.content]);
+  
+  // Limit to first 4-5 headings for hero display
+  const displayHeadings = headings.slice(0, 5);
 
   return (
     <section className="relative w-full h-[70vh] min-h-[600px] md:h-[85vh] md:min-h-[700px] lg:h-[90vh] lg:min-h-[800px] xl:min-h-[900px] max-h-[1000px] overflow-hidden rounded-3xl mb-16 md:mb-24 group">
@@ -78,6 +134,33 @@ export function ReviewHero({ review }: ReviewHeroProps) {
               </p>
             </div>
           </div>
+
+          {/* Table of Contents */}
+          {displayHeadings.length > 0 && (
+            <div className="mb-6 md:mb-8 max-w-3xl xl:max-w-4xl">
+              <h3 className="text-white/90 text-base md:text-lg font-semibold mb-2 md:mb-3 drop-shadow-lg">
+                Inhaltsverzeichnis
+              </h3>
+              <div className="text-white/80 text-sm md:text-base leading-relaxed drop-shadow-md space-y-1">
+                {displayHeadings.map((heading, index) => (
+                  <div key={heading.id} className="flex items-start gap-2">
+                    <span className="text-white/70 font-medium flex-shrink-0">{index + 1}.</span>
+                    <Link
+                      href={`/reviews/${review.slug}#${heading.id}`}
+                      className="hover:text-white transition-colors underline-offset-2 hover:underline break-words"
+                    >
+                      {heading.text}
+                    </Link>
+                  </div>
+                ))}
+                {headings.length > displayHeadings.length && (
+                  <div className="text-white/50 text-sm italic">
+                    ...
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Excerpt */}
           <p className="text-white/90 text-lg md:text-xl lg:text-2xl mb-8 md:mb-10 leading-relaxed line-clamp-3 md:line-clamp-4 max-w-3xl xl:max-w-4xl drop-shadow-lg">

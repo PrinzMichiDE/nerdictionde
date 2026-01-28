@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAdminAuth, checkAdminAuth } from "@/lib/auth";
+import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
 
 export async function GET(req: NextRequest) {
   try {
@@ -199,6 +200,15 @@ export async function POST(req: NextRequest) {
         createdAt: body.createdAt ? new Date(body.createdAt) : undefined,
       },
     });
+
+    generateAndSaveCommentsForReview(review.id, {
+      reviewTitle: body.title,
+      score: body.score ?? 0,
+      pros: body.pros ?? [],
+      cons: body.cons ?? [],
+      category: body.category ?? "game",
+    }).catch((e) => console.warn("Comment generation for review failed:", e));
+
     return NextResponse.json(review);
   } catch (error: any) {
     console.error("Create review error:", error);

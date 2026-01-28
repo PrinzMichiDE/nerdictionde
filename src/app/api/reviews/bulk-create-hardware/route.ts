@@ -5,6 +5,7 @@ import { uploadImage } from "@/lib/blob";
 import prisma from "@/lib/prisma";
 import { calculatePublicationDate } from "@/lib/date-utils";
 import { repairJson, generateHardwareReviewContent } from "@/lib/review-generation";
+import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
 import { searchAmazonHardware } from "@/lib/amazon-search";
 import { generateReviewImages } from "@/lib/image-generation";
 
@@ -233,7 +234,15 @@ export async function processHardware(
         createdAt: hardware.releaseDate || new Date(),
       },
     });
-    
+
+    generateAndSaveCommentsForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      score: reviewContent.score,
+      pros: reviewContent.de.pros,
+      cons: reviewContent.de.cons,
+      category: "hardware",
+    }).catch((e) => console.warn("Comment generation for hardware review failed:", e));
+
     return { success: true, reviewId: review.id };
   } catch (error: any) {
     console.error(`Error processing hardware ${hardwareName}:`, error);
