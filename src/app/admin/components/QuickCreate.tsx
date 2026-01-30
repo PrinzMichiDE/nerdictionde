@@ -256,7 +256,7 @@ export function QuickCreate() {
         {/* Help Text */}
         <div className="text-xs text-center text-muted-foreground space-y-1 pt-2">
           <p>
-            {category === "game" && "Unterstützt IGDB Datenbank-Suche und Steam Store Links."}
+            {category === "game" && "Unterstützt IGDB Datenbank-Suche, Steam Store Links und IGDB IDs."}
             {category === "hardware" && "Unterstützt Hardware-Produkte wie GPUs, CPUs, Peripheriegeräte und mehr."}
             {category === "product" && "Geben Sie den vollständigen Produktnamen ein. Die Review wird automatisch generiert."}
           </p>

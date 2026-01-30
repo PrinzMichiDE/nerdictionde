@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchIGDB, getIGDBGameBySteamId } from "@/lib/igdb";
+import { searchIGDB, getIGDBGameBySteamId, getIGDBGameById, parseIGDBId } from "@/lib/igdb";
 import { parseSteamUrl } from "@/lib/steam";
 import { parseAmazonUrl, scrapeAmazonProduct } from "@/lib/amazon";
 import { searchHardware, detectHardwareType, createHardware, HardwareType } from "@/lib/hardware";
@@ -70,42 +70,59 @@ export async function POST(req: NextRequest) {
         category = "hardware";
       }
     } else if (requestedCategory === "game" || !requestedCategory) {
-      const steamId = parseSteamUrl(input);
-      if (steamId) {
-        data = await getIGDBGameBySteamId(steamId);
+      // Check for IGDB ID first (pure numeric input)
+      const igdbId = parseIGDBId(input);
+      if (igdbId) {
+        data = await getIGDBGameById(igdbId);
         category = "game";
       } else {
-        const results = await searchIGDB(input);
-        if (results && results.length > 0) {
-          data = results[0];
+        // Check for Steam URL
+        const steamId = parseSteamUrl(input);
+        if (steamId) {
+          data = await getIGDBGameBySteamId(steamId);
           category = "game";
+        } else {
+          // Fallback to IGDB search by name
+          const results = await searchIGDB(input);
+          if (results && results.length > 0) {
+            data = results[0];
+            category = "game";
+          }
         }
       }
     }
 
     // Auto-detection fallback
     if (!data && !requestedCategory) {
-      const steamId = parseSteamUrl(input);
-      const amazonAsin = parseAmazonUrl(input);
-      if (steamId) {
-        data = await getIGDBGameBySteamId(steamId);
+      // Check for IGDB ID first
+      const igdbId = parseIGDBId(input);
+      if (igdbId) {
+        data = await getIGDBGameById(igdbId);
         category = "game";
-      } else if (amazonAsin || input.includes("amazon.")) {
-        category = "amazon";
-        data = await scrapeAmazonProduct(input.startsWith("http") ? input : `https://www.amazon.de/dp/${amazonAsin}`);
       } else {
-        const hardwareType = detectHardwareType(input);
-        if (hardwareType) {
-          const hardwareResults = await searchHardware(input);
-          if (hardwareResults && hardwareResults.length > 0) {
-            data = hardwareResults[0];
-            category = "hardware";
-          } else {
-            data = { name: input, type: hardwareType, description: null, specs: null, images: [] };
-            category = "hardware";
+        const steamId = parseSteamUrl(input);
+        const amazonAsin = parseAmazonUrl(input);
+        if (steamId) {
+          data = await getIGDBGameBySteamId(steamId);
+          category = "game";
+        } else if (amazonAsin || input.includes("amazon.")) {
+          category = "amazon";
+          data = await scrapeAmazonProduct(input.startsWith("http") ? input : `https://www.amazon.de/dp/${amazonAsin}`);
+        } else {
+          const hardwareType = detectHardwareType(input);
+          if (hardwareType) {
+            const hardwareResults = await searchHardware(input);
+            if (hardwareResults && hardwareResults.length > 0) {
+              data = hardwareResults[0];
+              category = "hardware";
+            } else {
+              data = { name: input, type: hardwareType, description: null, specs: null, images: [] };
+              category = "hardware";
+            }
           }
         }
       }
+    }
     }
 
     if (!data) {

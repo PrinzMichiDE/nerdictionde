@@ -272,6 +272,23 @@ export async function getIGDBGamesBulkLarge(
   return finalGames;
 }
 
+/**
+ * Parses an IGDB ID from input string.
+ * Returns the numeric ID if the input is a pure numeric string (IGDB ID).
+ */
+export function parseIGDBId(input: string): number | null {
+  // Check if input is a pure numeric string (IGDB IDs are numeric)
+  const numericMatch = input.trim().match(/^\d+$/);
+  if (numericMatch) {
+    const id = parseInt(numericMatch[0], 10);
+    // IGDB IDs are typically positive integers
+    if (id > 0) {
+      return id;
+    }
+  }
+  return null;
+}
+
 export async function getIGDBGameById(id: number) {
   const token = await getAccessToken();
   const response = await axios.post(
