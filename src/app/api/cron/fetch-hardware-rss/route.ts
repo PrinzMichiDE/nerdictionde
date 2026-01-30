@@ -330,7 +330,7 @@ async function processHardwareItem(
         cons_en: reviewContent.en.cons,
         images: [],
         youtubeVideos: [],
-        status: "draft",
+        status: "published", // Automatically publish hardware reviews from RSS feed
         hardwareId: hardware.id,
         specs: reviewContent.specs || hardware.specs || null,
         affiliateLink: affiliateLink,
@@ -441,6 +441,32 @@ export async function GET(req: NextRequest) {
       if (i < itemsToProcess.length - 1) {
         await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
+    }
+
+    // Publish any existing draft hardware reviews
+    try {
+      const draftHardwareReviews = await prisma.review.findMany({
+        where: {
+          category: "hardware",
+          status: "draft",
+        },
+        select: { id: true },
+      });
+
+      if (draftHardwareReviews.length > 0) {
+        await prisma.review.updateMany({
+          where: {
+            category: "hardware",
+            status: "draft",
+          },
+          data: {
+            status: "published",
+          },
+        });
+        console.log(`📢 Published ${draftHardwareReviews.length} existing draft hardware reviews`);
+      }
+    } catch (error: any) {
+      console.warn(`⚠️ Error publishing draft reviews:`, error?.message);
     }
 
     // Generate random community feedbacks for existing reviews

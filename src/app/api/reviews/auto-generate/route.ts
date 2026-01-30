@@ -123,7 +123,6 @@ export async function POST(req: NextRequest) {
         }
       }
     }
-    }
 
     if (!data) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });

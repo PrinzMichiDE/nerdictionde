@@ -36,6 +36,13 @@ model Review {
   hardware      Hardware?    @relation(fields: [hardwareId], references: [id], onDelete: SetNull)
   comments      Comment[]
   userRatings   UserRating[]
+  tags          ReviewTag[]
+  priceHistory  PriceHistory[]
+  deals         Deal[]
+  priceAlerts   PriceAlert[]
+  episodeReviews EpisodeReview[]
+  gameProgress  GameProgress[]
+  videoChapters VideoChapter[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
@@ -182,4 +189,129 @@ model BulkJobItem {
 
   @@index([jobId])
   @@index([status])
+}
+
+model Tag {
+  id    String      @id @default(cuid())
+  name  String      @unique
+  slug  String      @unique
+  reviews ReviewTag[]
+  createdAt DateTime @default(now())
+
+  @@index([name])
+}
+
+model ReviewTag {
+  id       String  @id @default(cuid())
+  reviewId String
+  tagId    String
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, tagId])
+  @@index([reviewId])
+  @@index([tagId])
+}
+
+model PriceHistory {
+  id        String   @id @default(cuid())
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  price     Float
+  currency  String   @default("EUR")
+  source    String // "amazon", "mydealz", etc.
+  url       String?
+  createdAt DateTime @default(now())
+
+  @@index([reviewId, createdAt])
+}
+
+model Deal {
+  id             String    @id @default(cuid())
+  title          String
+  price          Float
+  originalPrice  Float?
+  discount       Float?
+  currency       String    @default("EUR")
+  url            String
+  imageUrl       String?
+  source         String    @default("mydealz")
+  category       String?
+  reviewId       String?
+  review         Review?   @relation(fields: [reviewId], references: [id], onDelete: SetNull)
+  asin           String?
+  status         String    @default("active") // "active" | "expired" | "invalid"
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([reviewId])
+  @@index([status, createdAt])
+  @@index([asin])
+}
+
+model PriceAlert {
+  id        String   @id @default(cuid())
+  userId    String?
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  targetPrice Float
+  email     String?
+  notified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([reviewId])
+}
+
+model UserPCBuild {
+  id         String   @id @default(cuid())
+  userId     String?
+  name       String
+  components Json // Array of component IDs / config
+  totalPrice Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model EpisodeReview {
+  id        String   @id @default(cuid())
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  season    Int
+  episode   Int
+  title     String?
+  score     Int?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, season, episode])
+  @@index([reviewId])
+}
+
+model GameProgress {
+  id             String   @id @default(cuid())
+  reviewId       String
+  review         Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  playtimeHours  Float?
+  completion     Int?
+  achievements   Int?
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([reviewId])
+}
+
+model VideoChapter {
+  id          String   @id @default(cuid())
+  reviewId    String
+  review      Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  videoId     String
+  title       String
+  timestamp   Int // seconds
+  description String?
+
+  @@index([reviewId, videoId])
 }
