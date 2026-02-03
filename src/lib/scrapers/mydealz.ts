@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
+import type { AnyNode } from "domhandler";
 import prisma from "@/lib/prisma";
 import { matchDealToReview } from "@/lib/deal-matching";
 import { generateAmazonAffiliateLinkFromASIN, generateAmazonAffiliateLink } from "@/lib/amazon-search";
@@ -109,7 +110,7 @@ export async function scrapeMydealzDeals(limit = 50): Promise<ScrapedDeal[]> {
 
     const $ = cheerio.load(data);
     const seenUrls = new Set<string>();
-    const dealLinks: Array<{ dealUrl: string; container: cheerio.Cheerio }> = [];
+    const dealLinks: Array<{ dealUrl: string; container: cheerio.Cheerio<AnyNode> }> = [];
 
     // First, collect all deal links
     $('a[href*="/deals/"]').each((_, el) => {
@@ -168,11 +169,13 @@ export async function scrapeMydealzDeals(limit = 50): Promise<ScrapedDeal[]> {
         }
         
         if (foundUrl) {
+          let resolvedUrl = foundUrl;
+          
           // Handle shortened links
-          if (foundUrl.includes("amzn.to")) {
+          if (resolvedUrl.includes("amzn.to")) {
             try {
-              const response = await axios.head(foundUrl, { maxRedirects: 5, timeout: 5000 });
-              foundUrl = response.request.res.responseUrl || foundUrl;
+              const response = await axios.head(resolvedUrl, { maxRedirects: 5, timeout: 5000 });
+              resolvedUrl = response.request.res.responseUrl || resolvedUrl;
             } catch {
               await new Promise(resolve => setTimeout(resolve, 300));
               continue;
@@ -180,10 +183,10 @@ export async function scrapeMydealzDeals(limit = 50): Promise<ScrapedDeal[]> {
           }
           
           // Normalize URL
-          if (!foundUrl.startsWith("http")) {
-            foundUrl = `https://www.amazon.de${foundUrl}`;
+          if (!resolvedUrl.startsWith("http")) {
+            resolvedUrl = `https://www.amazon.de${resolvedUrl}`;
           }
-          amazonUrl = foundUrl;
+          amazonUrl = resolvedUrl;
         }
         
         if (!amazonUrl) {

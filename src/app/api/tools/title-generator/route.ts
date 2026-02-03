@@ -76,7 +76,7 @@ Antworte nur mit den 5 Titeln, jeweils in einer neuen Zeile, ohne Nummerierung o
     console.error("Title generator error:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid input", details: error.errors },
+        { error: "Invalid input", details: error.issues },
         { status: 400 }
       );
     }

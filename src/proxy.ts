@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { verifySession } from '@/lib/auth-twitch';
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
-  // Protect /admin routes
+  // Protect /admin routes with token auth
   if (pathname.startsWith('/admin')) {
     const adminToken = process.env.ADMIN_TOKEN;
     
@@ -42,12 +43,25 @@ export function proxy(request: NextRequest) {
     }
   }
 
+  // Protect /tools routes with Twitch session auth
+  if (pathname.startsWith('/tools')) {
+    const session = await verifySession(request);
+
+    if (!session) {
+      // Redirect to login with return URL
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
     '/admin/:path*',
+    '/tools/:path*',
   ],
 };
 

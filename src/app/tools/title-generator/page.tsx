@@ -31,7 +31,7 @@ export default function TitleGeneratorPage() {
   const [mood, setMood] = useState("");
   const [loading, setLoading] = useState(false);
   const [titles, setTitles] = useState<string[]>([]);
-  const { toast } = useToast();
+  const { toast, toasts } = useToast();
 
   const generateTitles = async () => {
     if (!game && !theme) {

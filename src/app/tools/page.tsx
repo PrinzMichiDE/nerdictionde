@@ -61,7 +61,6 @@ import {
   Eye,
   Timer,
   Moon,
-  Stretch,
   Mic,
   Handshake,
   CalendarCheck,
@@ -79,8 +78,8 @@ import {
   Split,
   Image as ImageIcon,
   Radio,
-  Sync,
-  Compare,
+  RefreshCw,
+  ArrowLeftRight,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
