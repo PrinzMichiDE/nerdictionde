@@ -1,6 +1,7 @@
-import prisma from "@/lib/prisma";
 import { ReviewCard } from "./ReviewCard";
 import { Review } from "@/types/review";
+import { findRelatedReviews, getReviewsByIds } from "@/lib/related-reviews";
+import prisma from "@/lib/prisma";
 
 interface RelatedReviewsProps {
   currentReviewId: string;
@@ -8,48 +9,45 @@ interface RelatedReviewsProps {
   score: number;
 }
 
-export async function RelatedReviews({ 
-  currentReviewId, 
-  category, 
-  score 
+export async function RelatedReviews({
+  currentReviewId,
+  category,
+  score,
 }: RelatedReviewsProps) {
-  // Find related reviews directly in the server component
-  const relatedReviews = (await prisma.review.findMany({
-    where: {
-      id: { not: currentReviewId },
-      category: category,
-      status: "published",
-      score: {
-        gte: Math.max(0, score - 15),
-        lte: Math.min(100, score + 15),
-      },
+  const current = await prisma.review.findUnique({
+    where: { id: currentReviewId },
+    select: {
+      tags: { select: { tagId: true } },
+      metadata: true,
     },
-    take: 3, // 3 columns looks better on most screens
-    orderBy: {
-      createdAt: "desc",
-    },
-  })) as unknown as Review[];
+  });
 
-  // Fallback to latest reviews of same category if not enough found
+  const tagIds = current?.tags?.map((t) => t.tagId) ?? [];
+  const metadataGenres = (current?.metadata as { genres?: string[] } | null)?.genres ?? [];
+
+  const relatedIds = await findRelatedReviews(
+    { reviewId: currentReviewId, category, score, tagIds, metadataGenres },
+    6
+  );
+
+  let relatedReviews = await getReviewsByIds(relatedIds);
+
   if (relatedReviews.length < 3) {
-    const additional = (await prisma.review.findMany({
+    const fallback = await prisma.review.findMany({
       where: {
-        id: { 
-          notIn: [currentReviewId, ...relatedReviews.map(r => r.id)] 
-        },
-        category: category,
+        id: { notIn: [currentReviewId, ...relatedReviews.map((r) => r.id)] },
+        category,
         status: "published",
       },
       take: 3 - relatedReviews.length,
-      orderBy: {
-        createdAt: "desc",
-      },
-    })) as unknown as Review[];
-    
-    relatedReviews.push(...additional);
+      orderBy: { createdAt: "desc" },
+    });
+    relatedReviews = [...relatedReviews, ...fallback];
   }
 
-  if (relatedReviews.length === 0) return null;
+  const toShow = relatedReviews.slice(0, 3) as unknown as Review[];
+
+  if (toShow.length === 0) return null;
 
   return (
     <div className="space-y-8 pt-12 border-t mt-12">
@@ -63,7 +61,7 @@ export async function RelatedReviews({
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {relatedReviews.map((review) => (
+        {toShow.map((review) => (
           <ReviewCard key={review.id} review={review} />
         ))}
       </div>

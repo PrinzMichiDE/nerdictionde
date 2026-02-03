@@ -8,6 +8,14 @@ import { TMDBMovie, TMDBSeries, getTMDBImageUrl } from "@/lib/tmdb";
 import { searchHardwareProduct, extractProductSpecs, extractTavilyImages } from "@/lib/tavily";
 import { generateReviewImages } from "@/lib/image-generation";
 import { getAmazonProductData, parseAmazonUrl } from "@/lib/amazon";
+import {
+  extractYouTubeVideoIdsFromIGDB,
+  extractYouTubeVideoIdsFromTMDB,
+  searchYouTubeVideoIdsTavily,
+} from "@/lib/youtube-extraction";
+import { generateAndAttachTagsForReview } from "@/lib/tag-generation";
+import { replaceImagePlaceholders } from "@/lib/image-placeholder";
+import { generateSEOMetadata } from "@/lib/seo-generation";
 
 // Helper function to generate slug from title
 export function generateSlug(title: string): string {
@@ -618,20 +626,33 @@ export async function processGame(
     const isFutureRelease = releaseDate && releaseDate > now;
     const finalStatus = isFutureRelease ? "draft" : options.status;
 
+    const youtubeVideos = extractYouTubeVideoIdsFromIGDB(gameData);
+
+    const contentDe = replaceImagePlaceholders(reviewContent.de.content, imageUrls, gameData.name);
+    const contentEn = replaceImagePlaceholders(reviewContent.en.content, imageUrls, gameData.name);
+
+    let seoMeta: { metaDescription: string; metaKeywords: string } | null = null;
+    try {
+      seoMeta = await generateSEOMetadata(reviewContent.de.title, contentDe, "game");
+    } catch {
+      // Non-blocking
+    }
+
     const review = await prisma.review.create({
       data: {
         title: reviewContent.de.title,
         title_en: reviewContent.en.title,
         slug,
         category: "game",
-        content: reviewContent.de.content,
-        content_en: reviewContent.en.content,
+        content: contentDe,
+        content_en: contentEn,
         score: reviewContent.score,
         pros: reviewContent.de.pros,
         pros_en: reviewContent.en.pros,
         cons: reviewContent.de.cons,
         cons_en: reviewContent.en.cons,
         images: imageUrls,
+        youtubeVideos,
         status: finalStatus,
         igdbId: gameData.id,
         steamAppId: storeIds.steamAppId || null,
@@ -640,6 +661,9 @@ export async function processGame(
         amazonAsin: storeIds.amazonAsin || null,
         specs: reviewContent.specs || null,
         metadata: gameMetadata,
+        metaDescription: seoMeta?.metaDescription ?? null,
+        metaKeywords: seoMeta?.metaKeywords ?? null,
+        releaseDate: releaseDate || null,
         createdAt: calculatePublicationDate(gameData.first_release_date),
       },
     });
@@ -651,6 +675,14 @@ export async function processGame(
       cons: reviewContent.de.cons,
       category: "game",
     }).catch((e) => console.warn("Comment generation for game review failed:", e));
+
+    generateAndAttachTagsForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      category: "game",
+      score: reviewContent.score,
+      metadata: gameMetadata as { genres?: string[]; platforms?: string[] },
+      contentExcerpt: reviewContent.de.content?.substring(0, 500),
+    }).catch((e) => console.warn("Tag generation for game review failed:", e));
 
     return { success: true, reviewId: review.id };
   } catch (error: any) {
@@ -744,22 +776,37 @@ export async function processMovie(
     const isFutureRelease = releaseDate && releaseDate > now;
     const finalStatus = isFutureRelease ? "draft" : options.status;
 
+    const youtubeVideos = extractYouTubeVideoIdsFromTMDB(movieData.videos);
+
+    const contentDe = replaceImagePlaceholders(reviewContent.de.content, imageUrls, movieData.title);
+    const contentEn = replaceImagePlaceholders(reviewContent.en.content, imageUrls, movieData.title);
+
+    let seoMeta: { metaDescription: string; metaKeywords: string } | null = null;
+    try {
+      seoMeta = await generateSEOMetadata(reviewContent.de.title, contentDe, "movie");
+    } catch {
+      // Non-blocking
+    }
+
     const review = await prisma.review.create({
       data: {
         title: reviewContent.de.title,
         title_en: reviewContent.en.title,
         slug,
         category: "movie",
-        content: reviewContent.de.content,
-        content_en: reviewContent.en.content,
+        content: contentDe,
+        content_en: contentEn,
         score: reviewContent.score,
         pros: reviewContent.de.pros,
         pros_en: reviewContent.en.pros,
         cons: reviewContent.de.cons,
         cons_en: reviewContent.en.cons,
         images: imageUrls,
+        youtubeVideos,
         status: finalStatus,
         tmdbId: movieData.id,
+        metaDescription: seoMeta?.metaDescription ?? null,
+        metaKeywords: seoMeta?.metaKeywords ?? null,
         createdAt: movieData.release_date ? new Date(movieData.release_date) : new Date(),
       },
     });
@@ -977,31 +1024,52 @@ export async function processAmazonProduct(
       }
     }
 
-    // 6. Create review
+    // 6. Optional: fetch YouTube videos for product (trailers/reviews via Tavily)
+    let youtubeVideos: string[] = [];
+    try {
+      youtubeVideos = await searchYouTubeVideoIdsTavily(productData.name);
+    } catch {
+      // Non-blocking; continue without YouTube videos
+    }
+
+    // 7. Create review
     // Generate a realistic publication date (random date within last 2 years)
     const now = new Date();
     const twoYearsAgo = new Date(now.getTime() - 2 * 365 * 24 * 60 * 60 * 1000);
     const randomTime = twoYearsAgo.getTime() + Math.random() * (now.getTime() - twoYearsAgo.getTime());
     const publicationDate = new Date(randomTime);
-    
+
+    const contentDe = replaceImagePlaceholders(reviewContent.de.content, imageUrls, productData.name);
+    const contentEn = replaceImagePlaceholders(reviewContent.en.content, imageUrls, productData.name);
+
+    let seoMeta: { metaDescription: string; metaKeywords: string } | null = null;
+    try {
+      seoMeta = await generateSEOMetadata(reviewContent.de.title, contentDe, "product");
+    } catch {
+      // Non-blocking
+    }
+
     const review = await prisma.review.create({
       data: {
         title: reviewContent.de.title,
         title_en: reviewContent.en.title,
         slug,
         category: "product",
-        content: reviewContent.de.content,
-        content_en: reviewContent.en.content,
+        content: contentDe,
+        content_en: contentEn,
         score: reviewContent.score,
         pros: reviewContent.de.pros,
         pros_en: reviewContent.en.pros,
         cons: reviewContent.de.cons,
         cons_en: reviewContent.en.cons,
         images: imageUrls,
+        youtubeVideos,
         status: options.status,
         amazonAsin: productData.asin || null,
         affiliateLink: productData.affiliateLink || null,
         specs: reviewContent.specs || null,
+        metaDescription: seoMeta?.metaDescription ?? null,
+        metaKeywords: seoMeta?.metaKeywords ?? null,
         createdAt: publicationDate,
       },
     });
@@ -1013,6 +1081,13 @@ export async function processAmazonProduct(
       cons: reviewContent.de.cons,
       category: "product",
     }).catch((e) => console.warn("Comment generation for product review failed:", e));
+
+    generateAndAttachTagsForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      category: "product",
+      score: reviewContent.score,
+      contentExcerpt: reviewContent.de.content?.substring(0, 500),
+    }).catch((e) => console.warn("Tag generation for product review failed:", e));
 
     return { success: true, reviewId: review.id };
   } catch (error: any) {
@@ -1059,22 +1134,37 @@ export async function processSeries(
     const isFutureRelease = releaseDate && releaseDate > now;
     const finalStatus = isFutureRelease ? "draft" : options.status;
 
+    const youtubeVideos = extractYouTubeVideoIdsFromTMDB(seriesData.videos);
+
+    const contentDe = replaceImagePlaceholders(reviewContent.de.content, imageUrls, seriesData.name);
+    const contentEn = replaceImagePlaceholders(reviewContent.en.content, imageUrls, seriesData.name);
+
+    let seoMeta: { metaDescription: string; metaKeywords: string } | null = null;
+    try {
+      seoMeta = await generateSEOMetadata(reviewContent.de.title, contentDe, "series");
+    } catch {
+      // Non-blocking
+    }
+
     const review = await prisma.review.create({
       data: {
         title: reviewContent.de.title,
         title_en: reviewContent.en.title,
         slug,
         category: "series",
-        content: reviewContent.de.content,
-        content_en: reviewContent.en.content,
+        content: contentDe,
+        content_en: contentEn,
         score: reviewContent.score,
         pros: reviewContent.de.pros,
         pros_en: reviewContent.en.pros,
         cons: reviewContent.de.cons,
         cons_en: reviewContent.en.cons,
         images: imageUrls,
+        youtubeVideos,
         status: finalStatus,
         tmdbId: seriesData.id,
+        metaDescription: seoMeta?.metaDescription ?? null,
+        metaKeywords: seoMeta?.metaKeywords ?? null,
         createdAt: seriesData.first_air_date ? new Date(seriesData.first_air_date) : new Date(),
       },
     });
@@ -1086,6 +1176,14 @@ export async function processSeries(
       cons: reviewContent.de.cons,
       category: "series",
     }).catch((e) => console.warn("Comment generation for series review failed:", e));
+
+    generateAndAttachTagsForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      category: "series",
+      score: reviewContent.score,
+      metadata: seriesData.genres ? { genres: seriesData.genres.map((g) => g.name) } : undefined,
+      contentExcerpt: reviewContent.de.content?.substring(0, 500),
+    }).catch((e) => console.warn("Tag generation for series review failed:", e));
 
     return { success: true, reviewId: review.id };
   } catch (error: any) {

@@ -59,6 +59,36 @@ curl -X GET https://your-domain.vercel.app/api/cron/generate-category-reviews \
 
 ---
 
+## Product Reviews Cron (SearXNG)
+
+### Endpoint
+```
+GET /api/cron/generate-product-reviews
+```
+
+### Beschreibung
+Erstellt täglich mindestens 10 Produkt-Reviews. Nutzt **SearXNG** (`.env`: `SEARXNG_URL`) zur Produkt-Suche und ASIN-Erkennung.
+
+### Voraussetzung
+- **SEARXNG_URL** in `.env` setzen (z.B. `https://your-searxng.instance/search`).
+- Cron läuft täglich um 5:00 UTC (`0 5 * * *`).
+
+### Optionale Query-Parameter
+- `minReviews` – Mindestanzahl neuer Reviews pro Lauf (Standard: 10, max. 30).
+
+### Manueller Aufruf
+```bash
+curl -X GET "https://your-domain.vercel.app/api/cron/generate-product-reviews?minReviews=10" \
+  -H "Authorization: Bearer YOUR_CRON_SECRET"
+```
+
+### Response
+- `created` – Anzahl neu erstellter Reviews
+- `reviews` – Array der erstellten Reviews (id, title, slug)
+- `failed`, `skipped`, `errors` – Fehler-/Skip-Info
+
+---
+
 ## Auto-Generate Review Endpoint
 
 ### Endpoint

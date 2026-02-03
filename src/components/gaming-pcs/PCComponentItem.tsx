@@ -86,6 +86,11 @@ export function PCComponentItem({ component, isEn = false }: PCComponentItemProp
                     {component.manufacturer}
                   </span>
                 )}
+                {component.price && component.price > 0 && (
+                  <Badge className="bg-primary/10 text-primary border-primary/20 font-black text-xs">
+                    {component.price}€
+                  </Badge>
+                )}
               </div>
               
               <div className="space-y-1">
@@ -100,8 +105,14 @@ export function PCComponentItem({ component, isEn = false }: PCComponentItemProp
               </div>
             </div>
 
-            <div className="flex flex-col md:items-end justify-center gap-4 shrink-0 md:min-w-[180px]">
-              <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col md:items-end justify-center gap-4 shrink-0 md:min-w-[200px]">
+              {component.price && component.price > 0 && (
+                <div className="text-right">
+                  <div className="text-2xl font-black text-primary">{component.price}€</div>
+                  <div className="text-xs text-muted-foreground">Preis</div>
+                </div>
+              )}
+              <div className="flex flex-wrap gap-2 justify-end">
                 {component.reviewId && (
                   <Button variant="outline" size="sm" asChild className="h-9 gap-2">
                     <Link href={`/reviews/${component.reviewId}`}>

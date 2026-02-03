@@ -8,6 +8,10 @@ import { repairJson, generateHardwareReviewContent } from "@/lib/review-generati
 import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
 import { searchAmazonHardware } from "@/lib/amazon-search";
 import { generateReviewImages } from "@/lib/image-generation";
+import { searchYouTubeVideoIdsTavily } from "@/lib/youtube-extraction";
+import { generateAndAttachTagsForReview } from "@/lib/tag-generation";
+import { replaceImagePlaceholders } from "@/lib/image-placeholder";
+import { generateSEOMetadata } from "@/lib/seo-generation";
 
 interface BulkCreateHardwareOptions {
   hardwareNames: string[]; // List of hardware names to create reviews for
@@ -211,6 +215,24 @@ export async function processHardware(
     const isFutureRelease = releaseDate && releaseDate > now;
     const finalStatus = isFutureRelease ? "draft" : options.status;
 
+    // Fetch YouTube videos (trailers/reviews) via Tavily
+    let youtubeVideos: string[] = [];
+    try {
+      youtubeVideos = await searchYouTubeVideoIdsTavily(hardwareName, manufacturer);
+    } catch (error) {
+      console.warn("Could not fetch YouTube videos for", hardwareName, error);
+    }
+
+    const contentDe = replaceImagePlaceholders(reviewContent.de.content, imageUrls, hardwareName);
+    const contentEn = replaceImagePlaceholders(reviewContent.en.content, imageUrls, hardwareName);
+
+    let seoMeta: { metaDescription: string; metaKeywords: string } | null = null;
+    try {
+      seoMeta = await generateSEOMetadata(reviewContent.de.title, contentDe, "hardware");
+    } catch {
+      // Non-blocking
+    }
+
     // Create review
     const review = await prisma.review.create({
       data: {
@@ -218,15 +240,17 @@ export async function processHardware(
         title_en: reviewContent.en.title,
         slug,
         category: "hardware",
-        content: reviewContent.de.content,
-        content_en: reviewContent.en.content,
+        content: contentDe,
+        content_en: contentEn,
+        metaDescription: seoMeta?.metaDescription ?? null,
+        metaKeywords: seoMeta?.metaKeywords ?? null,
         score: reviewContent.score,
         pros: reviewContent.de.pros,
         pros_en: reviewContent.en.pros,
         cons: reviewContent.de.cons,
         cons_en: reviewContent.en.cons,
         images: imageUrls,
-        youtubeVideos: [],
+        youtubeVideos,
         status: finalStatus,
         hardwareId: hardware.id,
         specs: reviewContent.specs || hardware.specs || null,
@@ -242,6 +266,13 @@ export async function processHardware(
       cons: reviewContent.de.cons,
       category: "hardware",
     }).catch((e) => console.warn("Comment generation for hardware review failed:", e));
+
+    generateAndAttachTagsForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      category: "hardware",
+      score: reviewContent.score,
+      contentExcerpt: reviewContent.de.content?.substring(0, 500),
+    }).catch((e) => console.warn("Tag generation for hardware review failed:", e));
 
     return { success: true, reviewId: review.id };
   } catch (error: any) {

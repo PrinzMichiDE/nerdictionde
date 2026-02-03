@@ -420,3 +420,45 @@ export async function getIGDBPlatforms() {
   return response.data;
 }
 
+/**
+ * Fetches upcoming games from IGDB with release dates in the future
+ * @param daysAhead Number of days ahead to look (default: 365)
+ * @param limit Maximum number of games to return (default: 500)
+ * @param offset Offset for pagination (default: 0)
+ */
+export async function getIGDBUpcomingGames(daysAhead: number = 365, limit: number = 500, offset: number = 0) {
+  const token = await getAccessToken();
+  const now = Math.floor(Date.now() / 1000);
+  const futureDate = Math.floor((Date.now() + daysAhead * 24 * 60 * 60 * 1000) / 1000);
+
+  const query = `fields ${IGDB_GAME_FIELDS}; where first_release_date >= ${now} & first_release_date <= ${futureDate} & cover != null & summary != null; sort first_release_date asc; limit ${limit}; offset ${offset};`;
+
+  try {
+    const response = await axios.post(
+      "https://api.igdb.com/v4/games",
+      query,
+      {
+        headers: {
+          "Client-ID": process.env.IGDB_CLIENT_ID!,
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    const errorMessage = error.response?.data 
+      ? (typeof error.response.data === 'string' 
+          ? error.response.data 
+          : JSON.stringify(error.response.data))
+      : error.message;
+    
+    console.error("IGDB Upcoming Games Query Error:", {
+      query,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      error: errorMessage,
+    });
+    
+    throw new Error(`IGDB API error: ${errorMessage}`);
+  }
+}

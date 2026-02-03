@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Gamepad2, Zap } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 interface FPSSectionProps {
   fpsResults: FPSResult[];
@@ -42,33 +43,35 @@ export function FPSSection({ fpsResults, isEn = false }: FPSSectionProps) {
   };
 
   return (
-    <Card className="border-2">
+    <Card className="border-2 bg-gradient-to-br from-background to-muted/20">
       <CardHeader>
         <div className="flex items-center gap-3">
           <div className="p-2 bg-primary/10 rounded-lg">
             <Gamepad2 className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-black uppercase tracking-tight">
-            {isEn ? "Gaming Performance" : "Gaming Performance"}
-          </CardTitle>
+          <div>
+            <CardTitle className="text-2xl font-black uppercase tracking-tight">
+              {isEn ? "Gaming Performance" : "Gaming Performance"}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              {isEn
+                ? "Estimated FPS in popular games at different resolutions"
+                : "Geschätzte FPS in beliebten Spielen bei verschiedenen Auflösungen"}
+            </p>
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground mt-2">
-          {isEn
-            ? "Estimated FPS in popular games at different resolutions"
-            : "Geschätzte FPS in beliebten Spielen bei verschiedenen Auflösungen"}
-        </p>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
           {Object.entries(fpsByGame).map(([game, results]) => (
-            <div key={game} className="p-4 rounded-xl bg-muted/50 border hover:bg-muted/80 transition-colors">
-              <h3 className="text-lg font-black mb-4 flex items-center gap-2">
+            <div key={game} className="p-5 rounded-xl bg-gradient-to-br from-muted/50 to-muted/30 border-2 hover:border-primary/50 hover:shadow-lg transition-all">
+              <h3 className="text-xl font-black mb-5 flex items-center gap-2">
                 <Zap className="h-5 w-5 text-primary" />
                 {game}
               </h3>
               <div className="grid gap-4 md:grid-cols-3">
                 {results.map((result, idx) => (
-                  <div key={idx} className="space-y-2">
+                  <div key={idx} className="p-4 rounded-lg bg-background/50 border space-y-3 hover:bg-background/80 transition-colors">
                     <div className="flex items-center justify-between">
                       <Badge variant="outline" className="text-xs font-bold">
                         {result.resolution}
@@ -77,26 +80,32 @@ export function FPSSection({ fpsResults, isEn = false }: FPSSectionProps) {
                         {result.settings}
                       </Badge>
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       <div className="flex items-baseline gap-2">
                         <span className={`text-3xl font-black ${getFPSColor(result.fps)}`}>
                           {result.fps}
                         </span>
-                        <span className="text-sm text-muted-foreground">FPS</span>
+                        <span className="text-sm text-muted-foreground font-medium">FPS</span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className={getFPSColor(result.fps)}>
+                        <Badge 
+                          variant="outline" 
+                          className={cn(
+                            "text-xs font-bold",
+                            getFPSColor(result.fps).replace("text-", "border-")
+                          )}
+                        >
                           {getFPSQuality(result.fps)}
-                        </span>
+                        </Badge>
                         {result.source && (
-                          <span className="text-muted-foreground">
+                          <span className="text-muted-foreground text-xs">
                             {result.source}
                           </span>
                         )}
                       </div>
                       <Progress 
                         value={Math.min((result.fps / 144) * 100, 100)} 
-                        className="h-2"
+                        className="h-2.5"
                       />
                     </div>
                   </div>

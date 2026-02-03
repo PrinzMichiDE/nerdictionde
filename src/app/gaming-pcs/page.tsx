@@ -61,27 +61,36 @@ export default async function GamingPCsPage() {
     console.log(`[GamingPCsPage] Found ${desktops.length} desktop builds, ${laptops.length} laptop builds`);
   }
 
+  const totalBuilds = desktops.length + laptops.length;
+  const currentMonth = new Date().toLocaleString("de-DE", { month: "long", year: "numeric" });
+
   return (
-    <div className="container mx-auto px-4 py-12 space-y-16">
+    <div className="container mx-auto px-4 py-8 md:py-12 space-y-16">
       {/* Hero Section */}
-      <div className="max-w-4xl mx-auto text-center space-y-6">
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-none uppercase">
-          Die besten <span className="text-primary">Gaming Setups</span>
-        </h1>
-        <p className="text-xl text-muted-foreground leading-relaxed">
-          Hier findest du immer die aktuellsten und besten Gaming PC & Laptop Zusammenstellungen für jedes Budget. 
-          Unsere Konfigurationen werden regelmäßig aktualisiert, um dir das beste Preis-Leistungs-Verhältnis zu garantieren.
-        </p>
-        <div className="flex flex-wrap justify-center gap-4 pt-4">
-          <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full border border-primary/20 text-sm font-bold text-primary">
+      <div className="max-w-5xl mx-auto text-center space-y-8">
+        <div className="space-y-6">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-none uppercase">
+            Die besten <span className="text-primary">Gaming Setups</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+            Hier findest du immer die aktuellsten und besten Gaming PC & Laptop Zusammenstellungen für jedes Budget. 
+            Unsere Konfigurationen werden regelmäßig aktualisiert, um dir das beste Preis-Leistungs-Verhältnis zu garantieren.
+          </p>
+        </div>
+        
+        <div className="flex flex-wrap justify-center gap-3 pt-4">
+          <div className="flex items-center gap-2 bg-primary/10 px-5 py-2.5 rounded-full border border-primary/20 text-sm font-bold text-primary">
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
             Nerdiction Empfehlungen
           </div>
-          <div className="flex items-center gap-2 bg-muted/50 px-4 py-2 rounded-full border text-sm font-medium">
-            Januar 2026 Update
+          <div className="flex items-center gap-2 bg-muted/50 px-5 py-2.5 rounded-full border text-sm font-medium">
+            {currentMonth} Update
           </div>
-          <div className="bg-muted/50 px-4 py-2 rounded-full border text-sm font-medium">
+          <div className="bg-muted/50 px-5 py-2.5 rounded-full border text-sm font-medium">
             Bestes Preis-Leistungs-Verhältnis
+          </div>
+          <div className="bg-muted/50 px-5 py-2.5 rounded-full border text-sm font-medium">
+            {totalBuilds} Builds verfügbar
           </div>
         </div>
       </div>
@@ -89,24 +98,59 @@ export default async function GamingPCsPage() {
       <GamingPCsTabs desktops={desktops as PCBuild[]} laptops={laptops as PCBuild[]} />
 
       {/* Info Section */}
-      <div className="max-w-3xl mx-auto bg-muted/30 p-8 md:p-12 rounded-3xl border space-y-6">
-        <h2 className="text-2xl font-black uppercase tracking-tight">Worauf wir bei unseren Empfehlungen achten</h2>
+      <div className="max-w-4xl mx-auto bg-gradient-to-br from-muted/30 to-muted/10 p-8 md:p-12 rounded-3xl border-2 space-y-8">
+        <div className="text-center space-y-2">
+          <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">
+            Worauf wir bei unseren <span className="text-primary">Empfehlungen</span> achten
+          </h2>
+          <p className="text-muted-foreground">
+            Unsere Auswahlkriterien für die besten Gaming-PCs und Laptops
+          </p>
+        </div>
         <div className="grid gap-6 sm:grid-cols-2">
-          <div className="space-y-2">
-            <h3 className="font-bold text-primary">Preisleistung</h3>
-            <p className="text-sm text-muted-foreground">Wir wählen Komponenten, die für ihr Geld die maximale Performance liefern.</p>
+          <div className="space-y-3 p-6 rounded-2xl bg-background/50 border hover:bg-background/80 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                <span className="text-primary font-black text-xl">€</span>
+              </div>
+              <h3 className="text-lg font-black text-primary uppercase tracking-tight">Preisleistung</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Wir wählen Komponenten, die für ihr Geld die maximale Performance liefern. Jeder Euro zählt.
+            </p>
           </div>
-          <div className="space-y-2">
-            <h3 className="font-bold text-primary">Aktualität</h3>
-            <p className="text-sm text-muted-foreground">Unsere Listen werden monatlich geprüft und bei Preisänderungen angepasst.</p>
+          <div className="space-y-3 p-6 rounded-2xl bg-background/50 border hover:bg-background/80 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                <span className="text-primary font-black text-xl">🔄</span>
+              </div>
+              <h3 className="text-lg font-black text-primary uppercase tracking-tight">Aktualität</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Unsere Listen werden monatlich geprüft und bei Preisänderungen oder neuen Releases angepasst.
+            </p>
           </div>
-          <div className="space-y-2">
-            <h3 className="font-bold text-primary">Kompatibilität</h3>
-            <p className="text-sm text-muted-foreground">Alle Teile in einem Build passen garantiert zu 100% zusammen.</p>
+          <div className="space-y-3 p-6 rounded-2xl bg-background/50 border hover:bg-background/80 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                <span className="text-primary font-black text-xl">✓</span>
+              </div>
+              <h3 className="text-lg font-black text-primary uppercase tracking-tight">Kompatibilität</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Alle Teile in einem Build passen garantiert zu 100% zusammen. Keine Überraschungen beim Zusammenbau.
+            </p>
           </div>
-          <div className="space-y-2">
-            <h3 className="font-bold text-primary">Aufrüstbarkeit</h3>
-            <p className="text-sm text-muted-foreground">Wir achten darauf, dass du dein System auch in Zukunft einfach erweitern kannst.</p>
+          <div className="space-y-3 p-6 rounded-2xl bg-background/50 border hover:bg-background/80 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                <span className="text-primary font-black text-xl">⬆</span>
+              </div>
+              <h3 className="text-lg font-black text-primary uppercase tracking-tight">Aufrüstbarkeit</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Wir achten darauf, dass du dein System auch in Zukunft einfach erweitern und upgraden kannst.
+            </p>
           </div>
         </div>
       </div>

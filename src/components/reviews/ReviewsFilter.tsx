@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, X, Filter, SortDesc, Calendar, Star } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -42,9 +42,10 @@ export function ReviewsFilter() {
 
   const handleSearch = (value: string) => {
     setQuery(value);
-    // Debounce this in a real app, but for now direct update
     updateURL({ query: value || null });
   };
+
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleCategoryChange = (value: string) => {
     setCategory(value);
@@ -108,7 +109,12 @@ export function ReviewsFilter() {
             type="search"
             placeholder="Nach Titel oder Inhalt suchen..."
             value={query}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              setQuery(v);
+              if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+              searchDebounceRef.current = setTimeout(() => updateURL({ query: v || null }), 300);
+            }}
             className="pl-9 pr-9"
           />
           {query && (

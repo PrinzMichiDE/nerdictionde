@@ -8,48 +8,53 @@ datasource db {
 }
 
 model Review {
-  id            String       @id @default(cuid())
-  title         String
-  title_en      String?
-  slug          String       @unique
-  category      String // "game" | "hardware" | "amazon" | "movie" | "series"
-  content       String // Markdown
-  content_en    String? // Markdown English
-  score         Int // 0-100
-  pros          String[]
-  pros_en       String[]
-  cons          String[]
-  cons_en       String[]
-  images        String[] // Vercel Blob URLs
-  youtubeVideos String[] // YouTube video IDs or URLs (e.g., "dQw4w9WgXcQ" or "https://youtube.com/watch?v=dQw4w9WgXcQ")
-  status        String       @default("draft") // "draft" | "published"
-  igdbId        Int?
-  tmdbId        Int? // TMDB ID for movies and series
-  steamAppId    String?
-  epicId        String? // Epic Games Store ID
-  gogId         String? // GOG.com Store ID
-  amazonAsin    String? // Amazon Product ASIN
-  affiliateLink String? // Amazon Affiliate Link
-  hardwareId    String? // Reference to Hardware model
-  specs         Json? // Hardware requirements or technical specs
-  metadata      Json? // Additional IGDB metadata (developer, publisher, modes, etc.)
-  hardware      Hardware?    @relation(fields: [hardwareId], references: [id], onDelete: SetNull)
-  comments      Comment[]
-  userRatings   UserRating[]
-  tags          ReviewTag[]
-  priceHistory  PriceHistory[]
-  deals         Deal[]
-  priceAlerts   PriceAlert[]
-  episodeReviews EpisodeReview[]
-  gameProgress  GameProgress[]
-  videoChapters VideoChapter[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id              String          @id @default(cuid())
+  title           String
+  title_en        String?
+  slug            String          @unique
+  category        String // "game" | "hardware" | "amazon" | "movie" | "series"
+  content         String // Markdown
+  content_en      String? // Markdown English
+  score           Int // 0-100
+  pros            String[]
+  pros_en         String[]
+  cons            String[]
+  cons_en         String[]
+  images          String[] // Vercel Blob URLs
+  youtubeVideos   String[] // YouTube video IDs or URLs (e.g., "dQw4w9WgXcQ" or "https://youtube.com/watch?v=dQw4w9WgXcQ")
+  status          String          @default("draft") // "draft" | "published"
+  igdbId          Int?
+  tmdbId          Int? // TMDB ID for movies and series
+  steamAppId      String?
+  epicId          String? // Epic Games Store ID
+  gogId           String? // GOG.com Store ID
+  amazonAsin      String? // Amazon Product ASIN
+  affiliateLink   String? // Amazon Affiliate Link
+  hardwareId      String? // Reference to Hardware model
+  specs           Json? // Hardware requirements or technical specs
+  metadata        Json? // Additional IGDB metadata (developer, publisher, modes, etc.)
+  metaDescription String? // SEO meta description (150-160 chars)
+  metaKeywords    String? // SEO meta keywords (comma-separated)
+  releaseDate     DateTime? // Release date for games, movies, series, hardware
+  hardware        Hardware?       @relation(fields: [hardwareId], references: [id], onDelete: SetNull)
+  comments        Comment[]
+  userRatings     UserRating[]
+  tags            ReviewTag[]
+  priceHistory    PriceHistory[]
+  deals           Deal[]
+  priceAlerts     PriceAlert[]
+  episodeReviews  EpisodeReview[]
+  gameProgress    GameProgress[]
+  videoChapters   VideoChapter[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   @@index([slug])
   @@index([category, status])
   @@index([amazonAsin])
   @@index([tmdbId])
+  @@index([releaseDate])
+  @@index([category, releaseDate])
 }
 
 model Comment {
@@ -192,21 +197,25 @@ model BulkJobItem {
 }
 
 model Tag {
-  id    String      @id @default(cuid())
-  name  String      @unique
-  slug  String      @unique
-  reviews ReviewTag[]
-  createdAt DateTime @default(now())
+  id          String      @id @default(cuid())
+  name        String      @unique
+  slug        String      @unique
+  category    String?
+  reviewCount Int?
+  reviews     ReviewTag[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   @@index([name])
 }
 
 model ReviewTag {
-  id       String  @id @default(cuid())
-  reviewId String
-  tagId    String
-  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-  tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  id        String    @id @default(cuid())
+  reviewId  String
+  tagId     String
+  review    Review    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  tag       Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt DateTime? @default(now())
 
   @@unique([reviewId, tagId])
   @@index([reviewId])
@@ -214,36 +223,36 @@ model ReviewTag {
 }
 
 model PriceHistory {
-  id        String   @id @default(cuid())
-  reviewId  String
-  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-  price     Float
-  currency  String   @default("EUR")
-  source    String // "amazon", "mydealz", etc.
-  url       String?
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  reviewId   String
+  review     Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  price      Float
+  currency   String   @default("EUR")
+  source     String
+  url        String?
+  recordedAt DateTime @default(now())
 
-  @@index([reviewId, createdAt])
+  @@index([reviewId, recordedAt])
 }
 
 model Deal {
-  id             String    @id @default(cuid())
-  title          String
-  price          Float
-  originalPrice  Float?
-  discount       Float?
-  currency       String    @default("EUR")
-  url            String
-  imageUrl       String?
-  source         String    @default("mydealz")
-  category       String?
-  reviewId       String?
-  review         Review?   @relation(fields: [reviewId], references: [id], onDelete: SetNull)
-  asin           String?
-  status         String    @default("active") // "active" | "expired" | "invalid"
-  expiresAt      DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  title         String
+  price         Float
+  originalPrice Float?
+  discount      Float?
+  currency      String    @default("EUR")
+  url           String
+  imageUrl      String?
+  source        String    @default("mydealz")
+  category      String?
+  reviewId      String?
+  review        Review?   @relation(fields: [reviewId], references: [id], onDelete: SetNull)
+  asin          String?
+  status        String    @default("active") // "active" | "expired" | "invalid"
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([reviewId])
   @@index([status, createdAt])
@@ -251,14 +260,14 @@ model Deal {
 }
 
 model PriceAlert {
-  id        String   @id @default(cuid())
-  userId    String?
-  reviewId  String
-  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  userId      String?
+  reviewId    String
+  review      Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   targetPrice Float
-  email     String?
-  notified  Boolean  @default(false)
-  createdAt DateTime @default(now())
+  email       String?
+  notified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
 
   @@index([reviewId])
 }
@@ -291,27 +300,1116 @@ model EpisodeReview {
 }
 
 model GameProgress {
-  id             String   @id @default(cuid())
-  reviewId       String
-  review         Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-  playtimeHours  Float?
-  completion     Int?
-  achievements   Int?
-  notes          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  reviewId      String
+  review        Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  playtimeHours Float?
+  completion    Int?
+  achievements  Int?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@index([reviewId])
 }
 
 model VideoChapter {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   reviewId    String
-  review      Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  review      Review  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   videoId     String
   title       String
   timestamp   Int // seconds
   description String?
 
   @@index([reviewId, videoId])
+}
+
+// Twitch Streaming Tools Models
+
+model TwitchUser {
+  id              String    @id @default(cuid())
+  twitchId        String    @unique
+  username        String    @unique
+  displayName     String
+  email           String?
+  profileImageUrl String?
+  accessToken     String
+  refreshToken    String?
+  tokenExpiresAt  DateTime?
+  broadcasterType String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  schedules           StreamSchedule[]
+  chatCommands        ChatCommand[]
+  clips               StreamClip[]
+  emotes              StreamEmote[]
+  alerts              StreamAlert[]
+  donations           StreamDonation[]
+  notes               StreamNote[]
+  overlays            StreamOverlay[]
+  thumbnails          StreamThumbnail[]
+  panels              StreamPanel[]
+  banners             StreamBanner[]
+  gamePerformances    GamePerformance[]
+  gameLibrary         GameLibrary[]
+  scenes              StreamScene[]
+  widgets             StreamWidget[]
+  transitions         StreamTransition[]
+  introOutros         StreamIntroOutro[]
+  checklists          StreamChecklist[]
+  goals               StreamGoal[]
+  streaks             StreamStreak?          @relation("StreamStreakUser")
+  raidsHosts          StreamRaidHost[]
+  polls               StreamPoll[]
+  giveaways           StreamGiveaway[]
+  moderationRules     StreamModerationRule[]
+  musicPlaylists      StreamMusicPlaylist[]
+  locations           StreamLocation[]
+  routes              StreamRoute[]
+  pois                StreamPOI[]
+  weatherData         StreamWeather[]
+  safetyContacts      StreamSafetyContact[]
+  interruptions       StreamInterruption[]
+  mobileSetups        MobileStreamSetup[]
+  speedTests          NetworkSpeedTest[]
+  batteryStatuses     BatteryStatus[]
+  dataUsages          DataUsage[]
+  contentIdeas        IRLContentIdea[]
+  socialPosts         SocialMediaPost[]
+  bioLink             BioLink?               @relation("BioLinkUser")
+  affiliateLinks      AffiliateLink[]
+  sponsorPitches      SponsorPitch[]
+  mediaKit            MediaKit?              @relation("MediaKitUser")
+  revenueEntries      RevenueEntry[]
+  invoices            Invoice[]
+  communityEvents     CommunityEvent[]
+  viewerProfiles      ViewerProfile[]
+  communityChallenges CommunityChallenge[]
+  brandingProfile     BrandingProfile?       @relation("BrandingProfileUser")
+  soundEffects        SoundEffect[]
+  gameVotings         GameVoting[]
+  subathonConfig      SubathonConfig?        @relation("SubathonConfigUser")
+  challengeWheelItems ChallengeWheelItem[]
+  bingoCards          BingoCard[]
+  healthReminders     HealthReminder[]
+  healthLogs          HealthLog[]
+  sleepEntries        SleepEntry[]
+  collabContacts      CollabContact[]
+  collabEvents        CollabEvent[]
+  autoReplyRules      AutoReplyRule[]
+  streamDeckProfiles  StreamDeckProfile[]
+  obsMacros           OBSMacro[]
+  chatSentimentLogs   ChatSentimentLog[]
+  retentionData       ViewerRetentionData[]
+  competitorTracks    CompetitorTrack[]
+  contentCalendar     ContentCalendarEntry[]
+  multiStreamConfig   MultiStreamConfig?     @relation("MultiStreamConfigUser")
+  youtubeVodQueue     YouTubeVODQueue[]
+
+  @@index([twitchId])
+  @@index([username])
+}
+
+model StreamSchedule {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  game        String?
+  startTime   DateTime
+  endTime     DateTime?
+  timezone    String     @default("Europe/Berlin")
+  isRecurring Boolean    @default(false)
+  recurrence  String?
+  tags        String[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model ChatCommand {
+  id         String     @id @default(cuid())
+  userId     String
+  user       TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  command    String
+  response   String
+  cooldown   Int?       @default(0)
+  userLevel  String     @default("everyone")
+  enabled    Boolean    @default(true)
+  usageCount Int        @default(0)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@unique([userId, command])
+  @@index([userId])
+}
+
+model StreamClip {
+  id           String     @id @default(cuid())
+  userId       String
+  user         TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clipId       String
+  title        String
+  game         String?
+  duration     Int
+  viewCount    Int        @default(0)
+  url          String
+  thumbnailUrl String?
+  tags         String[]
+  notes        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([userId, clipId])
+  @@index([userId])
+}
+
+model StreamEmote {
+  id         String     @id @default(cuid())
+  userId     String
+  user       TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  imageUrl   String
+  source     String
+  tier       String?
+  isActive   Boolean    @default(true)
+  usageCount Int        @default(0)
+  createdAt  DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model StreamAlert {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  enabled   Boolean    @default(true)
+  soundUrl  String?
+  imageUrl  String?
+  message   String?
+  duration  Int        @default(5000)
+  volume    Float      @default(0.8)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamDonation {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      Float
+  currency    String     @default("EUR")
+  donorName   String
+  message     String?
+  isAnonymous Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model StreamNote {
+  id         String     @id @default(cuid())
+  userId     String
+  user       TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  content    String
+  category   String?
+  streamDate DateTime?
+  isTemplate Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamOverlay {
+  id         String     @id @default(cuid())
+  userId     String
+  user       TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  config     Json
+  previewUrl String?
+  isActive   Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamThumbnail {
+  id         String     @id @default(cuid())
+  userId     String
+  user       TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  imageUrl   String
+  templateId String?
+  game       String?
+  createdAt  DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model StreamPanel {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  imageUrl  String?
+  linkUrl   String?
+  position  Int
+  isVisible Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamBanner {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  imageUrl  String
+  text      String?
+  isActive  Boolean    @default(false)
+  createdAt DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model GamePerformance {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId      String
+  gameName    String
+  streamDate  DateTime
+  avgViewers  Int
+  peakViewers Int
+  duration    Int
+  createdAt   DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model GameLibrary {
+  id         String     @id @default(cuid())
+  userId     String
+  user       TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId     String
+  gameName   String
+  platform   String?
+  tags       String[]
+  playtime   Int?
+  isFavorite Boolean    @default(false)
+  notes      String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@unique([userId, gameId])
+  @@index([userId])
+}
+
+model StreamScene {
+  id         String     @id @default(cuid())
+  userId     String
+  user       TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  config     Json
+  transition String?
+  hotkey     String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamWidget {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  config    Json
+  htmlCode  String
+  isActive  Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamTransition {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  type      String
+  config    Json
+  duration  Int
+  soundUrl  String?
+  createdAt DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model StreamIntroOutro {
+  id         String     @id @default(cuid())
+  userId     String
+  user       TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       String
+  videoUrl   String
+  duration   Int
+  templateId String?
+  createdAt  DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model StreamChecklist {
+  id         String     @id @default(cuid())
+  userId     String
+  user       TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  items      Json
+  category   String?
+  isTemplate Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamGoal {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  target    Float
+  current   Float      @default(0)
+  deadline  DateTime?
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamStreak {
+  id             String     @id @default(cuid())
+  userId         String     @unique
+  user           TwitchUser @relation("StreamStreakUser", fields: [userId], references: [id], onDelete: Cascade)
+  currentStreak  Int        @default(0)
+  longestStreak  Int        @default(0)
+  lastStreamDate DateTime?
+  streakHistory  Json
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamRaidHost {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String
+  fromChannel String
+  toChannel   String
+  viewerCount Int?
+  timestamp   DateTime
+  createdAt   DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model StreamPoll {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  options   Json
+  duration  Int
+  isActive  Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamGiveaway {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  entries     Json
+  winnerId    String?
+  rules       String?
+  endDate     DateTime
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamModerationRule {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  pattern   String
+  action    String
+  duration  Int?
+  enabled   Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamMusicPlaylist {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  tracks    Json
+  volume    Float      @default(0.8)
+  fadeIn    Int        @default(0)
+  fadeOut   Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+// IRL Streaming Models
+
+model StreamLocation {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  latitude  Float
+  longitude Float
+  address   String?
+  city      String?
+  country   String?
+  timestamp DateTime
+  streamId  String?
+  isPublic  Boolean    @default(false)
+  createdAt DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model StreamRoute {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  waypoints Json
+  distance  Float?
+  duration  Int?
+  isPublic  Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamPOI {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  latitude    Float
+  longitude   Float
+  category    String
+  description String?
+  rating      Float?
+  isFavorite  Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model StreamWeather {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  locationId  String
+  temperature Float
+  condition   String
+  humidity    Float?
+  windSpeed   Float?
+  timestamp   DateTime
+  createdAt   DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model StreamSafetyContact {
+  id           String     @id @default(cuid())
+  userId       String
+  user         TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  phone        String
+  email        String?
+  relationship String
+  isPrimary    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamInterruption {
+  id              String     @id @default(cuid())
+  userId          String
+  user            TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason          String
+  startTime       DateTime
+  endTime         DateTime?
+  estimatedReturn Int?
+  message         String?
+  createdAt       DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model MobileStreamSetup {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceType  String
+  appName     String
+  bitrate     Int
+  resolution  String
+  networkType String
+  config      Json
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model NetworkSpeedTest {
+  id            String     @id @default(cuid())
+  userId        String
+  user          TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  downloadSpeed Float
+  uploadSpeed   Float
+  latency       Int
+  networkType   String
+  location      String?
+  timestamp     DateTime
+  createdAt     DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model BatteryStatus {
+  id                     String     @id @default(cuid())
+  userId                 String
+  user                   TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level                  Int
+  isCharging             Boolean
+  estimatedTimeRemaining Int?
+  timestamp              DateTime
+  createdAt              DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model DataUsage {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Float
+  period    String
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model IRLContentIdea {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  category    String
+  location    String?
+  tags        String[]
+  isFavorite  Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+// Social Media & Marketing Models
+
+model SocialMediaPost {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platform    String
+  content     String
+  mediaUrls   String[]
+  scheduledAt DateTime?
+  publishedAt DateTime?
+  status      String     @default("draft")
+  analytics   Json?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([status, scheduledAt])
+}
+
+model BioLink {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      TwitchUser @relation("BioLinkUser", fields: [userId], references: [id], onDelete: Cascade)
+  slug      String     @unique
+  title     String
+  links     Json
+  theme     Json?
+  clicks    Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model AffiliateLink {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  originalUrl String
+  shortCode   String     @unique
+  clicks      Int        @default(0)
+  revenue     Float?
+  category    String?
+  expiresAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+// Additional Models (simplified - can be expanded later)
+
+model SponsorPitch {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  content     String
+  status      String     @default("draft")
+  sentAt      DateTime?
+  responseAt  DateTime?
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model MediaKit {
+  id         String     @id @default(cuid())
+  userId     String     @unique
+  user       TwitchUser @relation("MediaKitUser", fields: [userId], references: [id], onDelete: Cascade)
+  config     Json
+  publicSlug String     @unique
+  views      Int        @default(0)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model RevenueEntry {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  amount    Float
+  currency  String     @default("EUR")
+  source    String?
+  date      DateTime
+  notes     String?
+  createdAt DateTime   @default(now())
+
+  @@index([userId])
+  @@index([userId, date])
+}
+
+model Invoice {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientName  String
+  clientEmail String?
+  items       Json
+  totalAmount Float
+  currency    String     @default("EUR")
+  status      String     @default("draft")
+  dueDate     DateTime?
+  paidAt      DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model CommunityEvent {
+  id              String     @id @default(cuid())
+  userId          String
+  user            TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  eventType       String
+  startTime       DateTime
+  endTime         DateTime?
+  isRecurring     Boolean    @default(false)
+  maxParticipants Int?
+  rsvpCount       Int        @default(0)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model ViewerProfile {
+  id             String     @id @default(cuid())
+  userId         String
+  user           TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  twitchUsername String
+  role           String     @default("viewer")
+  tags           String[]
+  notes          String?
+  firstSeen      DateTime?
+  subSince       DateTime?
+  interactions   Json?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@unique([userId, twitchUsername])
+  @@index([userId])
+}
+
+model CommunityChallenge {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  goal        Float
+  current     Float      @default(0)
+  reward      String?
+  startDate   DateTime
+  endDate     DateTime
+  status      String     @default("active")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model BrandingProfile {
+  id         String     @id @default(cuid())
+  userId     String     @unique
+  user       TwitchUser @relation("BrandingProfileUser", fields: [userId], references: [id], onDelete: Cascade)
+  colors     Json
+  fonts      Json?
+  logoUrl    String?
+  badges     Json?
+  emoteIdeas Json?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model SoundEffect {
+  id         String     @id @default(cuid())
+  userId     String
+  user       TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  category   String
+  url        String
+  duration   Int?
+  isFavorite Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model GameVoting {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  options   Json
+  isActive  Boolean    @default(true)
+  endsAt    DateTime?
+  winnerId  String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model SubathonConfig {
+  id          String     @id @default(cuid())
+  userId      String     @unique
+  user        TwitchUser @relation("SubathonConfigUser", fields: [userId], references: [id], onDelete: Cascade)
+  isActive    Boolean    @default(false)
+  baseTime    Int
+  timePerSub  Int
+  timePerBit  Float?
+  currentTime Int        @default(0)
+  startedAt   DateTime?
+  milestones  Json?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model ChallengeWheelItem {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  text        String
+  category    String?
+  weight      Int        @default(1)
+  isEnabled   Boolean    @default(true)
+  timesLanded Int        @default(0)
+  createdAt   DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model BingoCard {
+  id         String     @id @default(cuid())
+  userId     String
+  user       TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String
+  items      Json
+  publicSlug String     @unique
+  isActive   Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model HealthReminder {
+  id              String     @id @default(cuid())
+  userId          String
+  user            TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            String
+  intervalMinutes Int
+  isEnabled       Boolean    @default(true)
+  lastTriggered   DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model HealthLog {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  timestamp DateTime   @default(now())
+  notes     String?
+
+  @@index([userId, timestamp])
+}
+
+model SleepEntry {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sleepTime DateTime
+  wakeTime  DateTime?
+  quality   Int?
+  notes     String?
+  createdAt DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model CollabContact {
+  id             String     @id @default(cuid())
+  userId         String
+  user           TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  twitchUsername String
+  displayName    String?
+  email          String?
+  discord        String?
+  notes          String?
+  tags           String[]
+  lastCollab     DateTime?
+  collabCount    Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@unique([userId, twitchUsername])
+  @@index([userId])
+}
+
+model CollabEvent {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  partnerId   String?
+  title       String
+  description String?
+  scheduledAt DateTime
+  status      String     @default("planned")
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model AutoReplyRule {
+  id             String     @id @default(cuid())
+  userId         String
+  user           TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trigger        String
+  response       String
+  isRegex        Boolean    @default(false)
+  cooldown       Int        @default(30)
+  isEnabled      Boolean    @default(true)
+  timesTriggered Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model StreamDeckProfile {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  config    Json
+  isDefault Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model OBSMacro {
+  id        String     @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  actions   Json
+  hotkey    String?
+  isEnabled Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+model ChatSentimentLog {
+  id            String     @id @default(cuid())
+  userId        String
+  user          TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  streamDate    DateTime
+  sentiment     Float
+  positiveWords Int
+  negativeWords Int
+  totalMessages Int
+  topWords      Json?
+  createdAt     DateTime   @default(now())
+
+  @@index([userId, streamDate])
+}
+
+model ViewerRetentionData {
+  id            String     @id @default(cuid())
+  userId        String
+  user          TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  streamDate    DateTime
+  peakViewers   Int
+  avgViewers    Float
+  dropOffPoints Json?
+  avgWatchTime  Float?
+  createdAt     DateTime   @default(now())
+
+  @@index([userId, streamDate])
+}
+
+model CompetitorTrack {
+  id             String     @id @default(cuid())
+  userId         String
+  user           TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  twitchUsername String
+  notes          String?
+  isActive       Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@unique([userId, twitchUsername])
+  @@index([userId])
+}
+
+model ContentCalendarEntry {
+  id          String     @id @default(cuid())
+  userId      String
+  user        TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  category    String?
+  scheduledAt DateTime
+  status      String     @default("planned")
+  linkedTools Json?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([userId, scheduledAt])
+}
+
+model MultiStreamConfig {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      TwitchUser @relation("MultiStreamConfigUser", fields: [userId], references: [id], onDelete: Cascade)
+  platforms Json
+  isActive  Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model YouTubeVODQueue {
+  id           String     @id @default(cuid())
+  userId       String
+  user         TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  twitchVodId  String
+  title        String
+  description  String?
+  tags         String[]
+  playlist     String?
+  status       String     @default("pending")
+  youtubeUrl   String?
+  scheduledFor DateTime?
+  uploadedAt   DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([status])
 }

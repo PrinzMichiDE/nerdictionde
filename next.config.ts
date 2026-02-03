@@ -1,6 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    instrumentationHook: true,
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "static.mydealz.de",
+        pathname: "/**",
+      },
+    ],
+  },
   webpack: (config, { isServer }) => {
     // Handle paapi5-nodejs-sdk which uses AMD modules
     if (!isServer) {

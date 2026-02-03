@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Gamepad2, Mail, FileText, Cpu, ShoppingCart, Handshake, Shield, FileCheck } from "lucide-react";
+import { Gamepad2, Mail, FileText, Cpu, ShoppingCart, Handshake, Shield, FileCheck, BarChart3 } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -7,6 +7,10 @@ export function Footer() {
   const navigationLinks = [
     { href: "/", label: "Startseite", icon: null },
     { href: "/reviews", label: "Alle Reviews", icon: FileText },
+    { href: "/gaming-pcs", label: "Gaming PCs", icon: null },
+    { href: "/pc-builder", label: "PC Builder", icon: null },
+    { href: "/deals", label: "Deals", icon: null },
+    { href: "/analytics", label: "Statistik", icon: BarChart3 },
   ];
 
   const categoryLinks = [

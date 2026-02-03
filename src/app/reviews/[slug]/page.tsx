@@ -42,7 +42,9 @@ export async function generateMetadata({
   if (!review) return {};
 
   const title = isEn && review.title_en ? review.title_en : review.title;
-  const description = (isEn && review.content_en ? review.content_en : review.content).substring(0, 160);
+  const content = isEn && review.content_en ? review.content_en : review.content;
+  const description =
+    review.metaDescription || content.substring(0, 160).replace(/\n/g, " ");
 
   return {
     title: `${title} - Nerdiction`,

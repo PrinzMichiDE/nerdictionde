@@ -13,6 +13,10 @@ import {
   generateContent,
   validateProductInput
 } from "@/lib/review-generation";
+import {
+  extractYouTubeVideoIdsFromIGDB,
+  searchYouTubeVideoIdsTavily,
+} from "@/lib/youtube-extraction";
 
 export async function POST(req: NextRequest) {
   // Require admin authentication
@@ -246,6 +250,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Attach YouTube videos (games: IGDB; hardware/product: Tavily)
+    let youtubeVideos: string[] = [];
+    try {
+      if (category === "game") {
+        youtubeVideos = extractYouTubeVideoIdsFromIGDB(data);
+      } else if (category === "hardware" || category === "product") {
+        youtubeVideos = await searchYouTubeVideoIdsTavily(data.name, data.manufacturer);
+      }
+    } catch {
+      // Non-blocking
+    }
+
     return NextResponse.json({
       title: result.de.title || data.name,
       title_en: result.en.title || data.name,
@@ -263,6 +279,7 @@ export async function POST(req: NextRequest) {
       amazonAsin: (category === "amazon" || category === "product") ? data.asin : null,
       hardwareId: category === "hardware" ? hardwareId : null,
       images: imageUrls,
+      youtubeVideos,
       createdAt: pubDate,
     });
   } catch (error: any) {
