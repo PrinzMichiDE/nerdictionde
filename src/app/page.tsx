@@ -25,16 +25,18 @@ export default async function HomePage() {
     seriesReviews: 0,
   };
 
+  const highlightCategories = ["game", "hardware", "movie", "series"];
+
   try {
-    // Fetch featured review first (highest scored review)
+    // Fetch featured review first (highest scored review), exclude product/amazon
     featuredReview = (await prisma.review.findFirst({
-      where: { status: "published" },
+      where: { status: "published", category: { in: highlightCategories } },
       orderBy: { score: "desc" },
     })) as unknown as Review | null;
 
-    // Fetch latest reviews, excluding featured review
+    // Fetch latest reviews, excluding featured review and product/amazon
     const latestReviewsQuery: any = {
-      where: { status: "published" },
+      where: { status: "published", category: { in: highlightCategories } },
       orderBy: { createdAt: "desc" },
       take: 6,
     };
@@ -55,6 +57,7 @@ export default async function HomePage() {
     const topRatedQuery: any = {
       where: {
         status: "published",
+        category: { in: highlightCategories },
         id: excludedIds.size > 0 ? { notIn: Array.from(excludedIds) } : undefined,
       },
       orderBy: { score: "desc" },

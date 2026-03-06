@@ -8,6 +8,7 @@ import { TMDBMovie, TMDBSeries, getTMDBImageUrl } from "@/lib/tmdb";
 import { searchHardwareProduct, extractProductSpecs, extractTavilyImages } from "@/lib/tavily";
 import { generateReviewImages } from "@/lib/image-generation";
 import { getAmazonProductData, parseAmazonUrl } from "@/lib/amazon";
+import { getIGDBGameById } from "@/lib/igdb";
 import {
   extractYouTubeVideoIdsFromIGDB,
   extractYouTubeVideoIdsFromTMDB,
@@ -687,6 +688,150 @@ export async function processGame(
     return { success: true, reviewId: review.id };
   } catch (error: any) {
     console.error(`Error processing game ${gameData.name}:`, error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Load a draft game review by ID, fetch full IGDB data, generate full content (text, images, SEO, tags, comments)
+ * and update the existing review with status "published".
+ * Used by the publish-release-reviews cron to turn release-calendar drafts into published posts.
+ */
+export async function enrichAndPublishDraftGameReview(
+  reviewId: string
+): Promise<{ success: boolean; reviewId?: string; error?: string }> {
+  try {
+    const review = await prisma.review.findUnique({
+      where: { id: reviewId },
+      select: { id: true, slug: true, igdbId: true, category: true, status: true },
+    });
+
+    if (!review || review.category !== "game") {
+      return { success: false, error: "Review not found or not a game" };
+    }
+    if (review.status !== "draft") {
+      return { success: false, error: "Review is not a draft" };
+    }
+    if (review.igdbId == null) {
+      return { success: false, error: "Review has no igdbId" };
+    }
+
+    const gameData = await getIGDBGameById(review.igdbId);
+    if (!gameData) {
+      return { success: false, error: "IGDB game not found" };
+    }
+
+    const reviewContent = await generateReviewContent(gameData);
+    const slug = review.slug;
+
+    let imageUrls: string[] = [];
+    if (gameData.cover?.url) {
+      try {
+        const coverUrl = gameData.cover.url.startsWith("//") ? "https:" + gameData.cover.url : gameData.cover.url;
+        const highResCoverUrl = coverUrl.replace("t_thumb", "t_720p");
+        const syncedUrl = await uploadImage(highResCoverUrl, `${slug}-cover.jpg`);
+        imageUrls.push(syncedUrl);
+      } catch (error) {
+        console.error(`Error uploading cover for ${gameData.name}:`, error);
+      }
+    }
+    if (gameData.screenshots && gameData.screenshots.length > 0) {
+      const screenshotUrls = gameData.screenshots.slice(0, 5).map((s: any) =>
+        s.url.startsWith("//") ? "https:" + s.url.replace("t_thumb", "t_1080p") : s.url.replace("t_thumb", "t_1080p")
+      );
+      for (let i = 0; i < screenshotUrls.length; i++) {
+        try {
+          const syncedUrl = await uploadImage(screenshotUrls[i], `${slug}-screen-${i + 1}.jpg`);
+          imageUrls.push(syncedUrl);
+        } catch {
+          imageUrls.push(screenshotUrls[i]);
+        }
+      }
+    }
+
+    let storeIds: {
+      steamAppId?: string;
+      epicId?: string;
+      gogId?: string;
+      amazonAsin?: string;
+      stores?: Array<{ category: number; name: string; id: string; url: string }>;
+    } = {};
+    try {
+      const { findStoreIds } = await import("./store-search");
+      storeIds = await findStoreIds(gameData.name, gameData.id);
+    } catch {
+      // Non-blocking
+    }
+
+    const gameMetadata = {
+      developers: gameData.involved_companies?.filter((c: any) => c.developer).map((c: any) => c.company.name) || [],
+      publishers: gameData.involved_companies?.filter((c: any) => c.publisher).map((c: any) => c.company.name) || [],
+      platforms: gameData.platforms?.map((p: any) => p.name) || [],
+      genres: gameData.genres?.map((g: any) => g.name) || [],
+      releaseDate: gameData.first_release_date,
+      igdbScore: gameData.rating,
+      stores: storeIds.stores || [],
+    };
+
+    const releaseDate = gameData.first_release_date ? new Date(gameData.first_release_date * 1000) : null;
+    const youtubeVideos = extractYouTubeVideoIdsFromIGDB(gameData);
+
+    const contentDe = replaceImagePlaceholders(reviewContent.de.content, imageUrls, gameData.name);
+    const contentEn = replaceImagePlaceholders(reviewContent.en.content, imageUrls, gameData.name);
+
+    let seoMeta: { metaDescription: string; metaKeywords: string } | null = null;
+    try {
+      seoMeta = await generateSEOMetadata(reviewContent.de.title, contentDe, "game");
+    } catch {
+      // Non-blocking
+    }
+
+    await prisma.review.update({
+      where: { id: reviewId },
+      data: {
+        title: reviewContent.de.title,
+        title_en: reviewContent.en.title,
+        content: contentDe,
+        content_en: contentEn,
+        score: reviewContent.score,
+        pros: reviewContent.de.pros,
+        pros_en: reviewContent.en.pros,
+        cons: reviewContent.de.cons,
+        cons_en: reviewContent.en.cons,
+        images: imageUrls,
+        youtubeVideos,
+        status: "published",
+        steamAppId: storeIds.steamAppId || null,
+        epicId: storeIds.epicId || null,
+        gogId: storeIds.gogId || null,
+        amazonAsin: storeIds.amazonAsin || null,
+        specs: reviewContent.specs || null,
+        metadata: gameMetadata,
+        metaDescription: seoMeta?.metaDescription ?? null,
+        metaKeywords: seoMeta?.metaKeywords ?? null,
+        releaseDate: releaseDate || null,
+      },
+    });
+
+    generateAndSaveCommentsForReview(reviewId, {
+      reviewTitle: reviewContent.de.title,
+      score: reviewContent.score,
+      pros: reviewContent.de.pros,
+      cons: reviewContent.de.cons,
+      category: "game",
+    }).catch((e) => console.warn("Comment generation for draft publish failed:", e));
+
+    generateAndAttachTagsForReview(reviewId, {
+      reviewTitle: reviewContent.de.title,
+      category: "game",
+      score: reviewContent.score,
+      metadata: gameMetadata as { genres?: string[]; platforms?: string[] },
+      contentExcerpt: reviewContent.de.content?.substring(0, 500),
+    }).catch((e) => console.warn("Tag generation for draft publish failed:", e));
+
+    return { success: true, reviewId };
+  } catch (error: any) {
+    console.error(`Error enriching draft game review ${reviewId}:`, error);
     return { success: false, error: error.message };
   }
 }

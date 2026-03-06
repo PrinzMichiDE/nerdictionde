@@ -65,7 +65,13 @@ export function QuickCreate() {
         content_en: contentEn,
         status: "published",
       });
-      
+
+      try {
+        await axios.post(`/api/reviews/${saveResponse.data.id}/enrich`);
+      } catch (enrichError: unknown) {
+        console.warn("Enrich failed (review saved):", enrichError);
+      }
+
       router.push(`/admin/reviews/${saveResponse.data.id}/edit`);
     } catch (error: any) {
       console.error("Generation failed:", error);
