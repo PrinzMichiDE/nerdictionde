@@ -33,11 +33,14 @@ export function BackToTop() {
       variant="secondary"
       size="icon"
       className={cn(
-        "fixed bottom-6 right-6 z-50 rounded-md shadow-md transition-all duration-300 border border-border",
-        isVisible ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0"
+        "fixed bottom-6 right-6 z-50 size-10 rounded-md shadow-md transition-all duration-300 border border-border",
+        isVisible
+          ? "translate-y-0 opacity-100 pointer-events-auto"
+          : "translate-y-16 opacity-0 pointer-events-none"
       )}
       onClick={scrollToTop}
       aria-label="Nach oben scrollen"
+      tabIndex={isVisible ? 0 : -1}
     >
       <ArrowUp className="size-5" />
     </Button>

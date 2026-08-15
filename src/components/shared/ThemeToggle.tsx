@@ -35,8 +35,8 @@ export function ThemeToggle() {
       <Button
         variant="ghost"
         size="icon"
-        className="size-9"
-        aria-label="Toggle theme"
+        className="size-10"
+        aria-label="Theme wechseln"
         disabled
       >
         <Sun className="size-4" />
@@ -48,14 +48,14 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      className="size-9"
+      className="size-10"
       onClick={toggleTheme}
-      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      aria-label={`Zu ${theme === "dark" ? "hellem" : "dunklem"} Modus wechseln`}
     >
       {theme === "dark" ? (
-        <Sun className="size-4 transition-transform hover:rotate-90" />
+        <Sun className="size-4 motion-safe:transition-transform motion-safe:hover:rotate-90" />
       ) : (
-        <Moon className="size-4 transition-transform hover:-rotate-12" />
+        <Moon className="size-4 motion-safe:transition-transform motion-safe:hover:-rotate-12" />
       )}
     </Button>
   );

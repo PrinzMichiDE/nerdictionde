@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,11 +25,46 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set());
-  const [results, setResults] = useState<Review[]>([]);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  const results = useMemo(() => {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery && selectedFilters.size === 0) {
+      return [];
+    }
+
+    let filtered = reviews;
+
+    // Filter by category
+    if (selectedFilters.size > 0) {
+      filtered = filtered.filter((review) => {
+        // Handle backward compatibility: "product" and "amazon" are treated as equivalent
+        if (selectedFilters.has("amazon")) {
+          return review.category === "amazon" || review.category === "product";
+        }
+        if (selectedFilters.has("product")) {
+          return review.category === "amazon" || review.category === "product";
+        }
+        return selectedFilters.has(review.category);
+      });
+    }
+
+    // Filter by query
+    if (trimmedQuery) {
+      const lowerQuery = trimmedQuery.toLowerCase();
+      filtered = filtered.filter(
+        (review) =>
+          review.title.toLowerCase().includes(lowerQuery) ||
+          review.content?.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    return filtered.slice(0, 8);
+  }, [query, selectedFilters, reviews]);
 
   // Fetch reviews if not provided
   useEffect(() => {
@@ -79,41 +114,6 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
     };
   }, []);
 
-  useEffect(() => {
-    if (!query.trim() && selectedFilters.size === 0) {
-      setResults([]);
-      return;
-    }
-
-    let filtered = reviews;
-
-    // Filter by category
-    if (selectedFilters.size > 0) {
-      filtered = filtered.filter((review) => {
-        // Handle backward compatibility: "product" and "amazon" are treated as equivalent
-        if (selectedFilters.has("amazon")) {
-          return review.category === "amazon" || review.category === "product";
-        }
-        if (selectedFilters.has("product")) {
-          return review.category === "amazon" || review.category === "product";
-        }
-        return selectedFilters.has(review.category);
-      });
-    }
-
-    // Filter by query
-    if (query.trim()) {
-      const lowerQuery = query.toLowerCase();
-      filtered = filtered.filter(
-        (review) =>
-          review.title.toLowerCase().includes(lowerQuery) ||
-          review.content?.toLowerCase().includes(lowerQuery)
-      );
-    }
-
-    setResults(filtered.slice(0, 8));
-  }, [query, selectedFilters, reviews]);
-
   const toggleFilter = (category: string) => {
     const newFilters = new Set(selectedFilters);
     if (newFilters.has(category)) {
@@ -122,35 +122,71 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
       newFilters.add(category);
     }
     setSelectedFilters(newFilters);
+    inputRef.current?.focus();
+  };
+
+  const handleInputKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown" && results.length > 0) {
+      e.preventDefault();
+      setIsOpen(true);
+      setActiveIndex((prev) => (prev + 1) % results.length);
+    } else if (e.key === "ArrowUp" && results.length > 0) {
+      e.preventDefault();
+      setActiveIndex((prev) => (prev <= 0 ? results.length - 1 : prev - 1));
+    } else if (e.key === "Enter") {
+      if (activeIndex >= 0 && results[activeIndex]) {
+        e.preventDefault();
+        handleResultClick(results[activeIndex].slug);
+      }
+    } else if (e.key === "Escape") {
+      setIsOpen(false);
+      setActiveIndex(-1);
+      inputRef.current?.blur();
+    } else {
+      setActiveIndex(-1);
+    }
   };
 
   const handleResultClick = (slug: string) => {
     router.push(`/reviews/${slug}`);
     setIsOpen(false);
     setQuery("");
+    setActiveIndex(-1);
   };
 
   return (
     <div ref={searchRef} className="relative w-full max-w-2xl lg:max-w-3xl">
       {/* Search Input */}
       <div className="relative">
-        <Search className="absolute left-4 md:left-5 lg:left-6 top-1/2 -translate-y-1/2 h-5 w-5 md:h-6 md:w-6 text-muted-foreground" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           ref={inputRef}
           type="text"
+          role="combobox"
+          aria-label="Suche nach Reviews"
+          aria-expanded={isOpen}
+          aria-controls="global-search-results"
+          aria-autocomplete="list"
+          aria-activedescendant={
+            activeIndex >= 0 ? `search-result-${results[activeIndex]?.id}` : undefined
+          }
+          autoComplete="off"
           placeholder="Suche nach Reviews... (⌘K)"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsOpen(true)}
-          className="pl-12 pr-10 h-11 text-base border focus:border-primary rounded-sm"
+          onKeyDown={handleInputKeyDown}
+          className="pl-11 pr-10 h-11 text-base border focus:border-primary rounded-sm"
         />
         {query && (
           <Button
             variant="ghost"
             size="icon"
             className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+            aria-label="Suche löschen"
             onClick={() => {
               setQuery("");
+              setActiveIndex(-1);
               inputRef.current?.focus();
             }}
           >
@@ -162,7 +198,7 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
       {/* Search Results Dropdown */}
       {isOpen && (
         <Card className="absolute top-full mt-2 w-full shadow-lg z-50 max-h-[600px] overflow-hidden">
-          <CardContent className="p-0">
+          <CardContent className="p-0" id="global-search-results">
             {/* Filter Tags */}
             <div className="p-4 border-b border-border">
               <div className="flex items-center gap-2 mb-3">
@@ -180,6 +216,7 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
                     <button
                       key={category}
                       onClick={() => toggleFilter(category)}
+                      aria-pressed={isSelected}
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
                         isSelected
                           ? "bg-primary text-primary-foreground"
@@ -195,10 +232,14 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
             </div>
 
             {/* Results */}
-            <div className="max-h-[400px] overflow-y-auto">
+            <div
+              className="max-h-[400px] overflow-y-auto"
+              role="listbox"
+              aria-label="Suchergebnisse"
+            >
               {results.length > 0 ? (
                 <div className="p-2">
-                  {results.map((review) => {
+                  {results.map((review, index) => {
                     // Map "product" to "amazon" icon for backward compatibility
                     const categoryKey = review.category === "product" ? "amazon" : review.category;
                     const Icon =
@@ -207,8 +248,14 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
                     return (
                       <button
                         key={review.id}
+                        id={`search-result-${review.id}`}
+                        role="option"
+                        aria-selected={activeIndex === index}
                         onClick={() => handleResultClick(review.slug)}
-                        className="w-full p-3 rounded-sm hover:bg-muted transition-colors text-left group"
+                        onMouseEnter={() => setActiveIndex(index)}
+                        className={`w-full p-3 rounded-sm transition-colors text-left group ${
+                          activeIndex === index ? "bg-muted" : "hover:bg-muted"
+                        }`}
                       >
                         <div className="flex items-start gap-3">
                           <div className="p-2 rounded-sm bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">

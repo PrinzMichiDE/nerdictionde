@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown } from "lucide-react";
@@ -28,16 +28,45 @@ export function MobileNav() {
   const [open, setOpen] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const pathname = usePathname();
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        setOpenSubmenu(null);
+        toggleRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   return (
     <div className="md:hidden">
       <Button
+        ref={toggleRef}
         variant="ghost"
         size="icon"
-        className="size-9"
+        className="size-10"
         onClick={() => setOpen(!open)}
-        aria-label="Menü öffnen"
+        aria-label={open ? "Menü schließen" : "Menü öffnen"}
         aria-expanded={open}
+        aria-controls="mobile-navigation"
       >
         {open ? <X className="size-5" /> : <Menu className="size-5" />}
       </Button>
@@ -53,7 +82,8 @@ export function MobileNav() {
             aria-hidden="true"
           />
           <nav
-            className="fixed top-16 left-0 right-0 z-50 border-b border-border bg-background md:hidden max-h-[calc(100vh-4rem)] overflow-y-auto animate-fade-in"
+            id="mobile-navigation"
+            className="fixed top-16 left-0 right-0 z-50 border-b border-border bg-background md:hidden max-h-[calc(100vh-4rem)] overflow-y-auto"
             aria-label="Mobile navigation"
           >
             <div className="container px-4 py-4 space-y-4">

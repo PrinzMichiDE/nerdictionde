@@ -34,9 +34,19 @@ export function Navigation() {
       }
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpenDropdown(null);
+      }
+    };
+
     if (openDropdown) {
       document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+        document.removeEventListener("keydown", handleKeyDown);
+      };
     }
   }, [openDropdown]);
 
@@ -71,6 +81,7 @@ export function Navigation() {
                 )}
                 aria-expanded={isDropdownOpen}
                 aria-haspopup="true"
+                aria-controls="gaming-pcs-submenu"
               >
                 <span>{link.label}</span>
                 <ChevronDown
@@ -88,7 +99,12 @@ export function Navigation() {
                 />
               </button>
               {isDropdownOpen && (
-                <div className="absolute top-full left-0 w-52 bg-popover border border-border rounded-md shadow-lg shadow-border/30 py-1.5 mt-1">
+                <div
+                  id="gaming-pcs-submenu"
+                  role="menu"
+                  aria-label={link.label}
+                  className="absolute top-full left-0 w-52 bg-popover border border-border rounded-md shadow-lg shadow-border/30 py-1.5 mt-1"
+                >
                   {link.submenu?.map((subItem) => {
                     const isSubActive =
                       pathname === subItem.href ||
@@ -97,10 +113,12 @@ export function Navigation() {
                       <Link
                         key={subItem.href}
                         href={subItem.href}
+                        role="menuitem"
                         onClick={() => setOpenDropdown(null)}
                         className={cn(
                           "flex items-center px-4 py-2.5 text-sm font-medium transition-colors",
                           "hover:bg-accent hover:text-accent-foreground",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                           isSubActive
                             ? "bg-accent text-accent-foreground"
                             : "text-foreground"

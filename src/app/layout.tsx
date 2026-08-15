@@ -55,7 +55,16 @@ export default function RootLayout({
           <ReadingProgressBar />
           <SupportTopBanner />
           <Header />
-          <main className="flex-1 container mx-auto py-8 md:py-12 lg:py-16 px-4 md:px-6 lg:px-8 xl:px-12 max-w-7xl">
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus:text-sm focus:font-medium"
+          >
+            Zum Inhalt springen
+          </a>
+          <main
+            id="main-content"
+            className="flex-1 container mx-auto py-8 md:py-12 lg:py-16 px-4 md:px-6 lg:px-8 xl:px-12 max-w-7xl scroll-mt-24"
+          >
             {children}
           </main>
           <Footer />

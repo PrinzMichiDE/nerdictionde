@@ -352,6 +352,7 @@ interface StructuredReviewPromptOptions {
   isRetry: boolean;
   includeSpecs?: boolean;
   referenceRating?: string;
+  scoreBand?: { min: number; max: number; target: number };
 }
 
 /**
@@ -370,6 +371,7 @@ export function buildStructuredReviewPrompt(options: StructuredReviewPromptOptio
     isRetry,
     includeSpecs,
     referenceRating,
+    scoreBand,
   } = options;
 
   const categoryLabel =
@@ -397,6 +399,10 @@ export function buildStructuredReviewPrompt(options: StructuredReviewPromptOptio
     ? `Der Score (0-100) muss logisch aus Pros/Cons und Analyse ableitbar sein und in einem plausiblen Verhältnis zur externen Referenzbewertung stehen (${referenceRating}).`
     : `Der Score (0-100) muss logisch aus Pros/Cons und Analyse ableitbar sein.`;
 
+  const bandGuidance = scoreBand
+    ? ` Die externen Referenzbewertungen liegen im Mittel bei ${scoreBand.target}/100. Vergebe den Score so, dass er im Bereich ${scoreBand.min}–${scoreBand.max} liegt. Eine Abweichung um mehr als ±5 ist nur erlaubt, wenn deine qualitative Analyse dafür triftige Gründe liefert, die du im Fazit nachvollziehbar begründest.`
+    : "";
+
   return `
 Schreibe eine tiefgehende, professionelle und SEO-optimierte ${categoryLabel} für "${itemName}" auf der Website Nerdiction – in DEUTSCH UND ENGLISCH.
 
@@ -412,10 +418,11 @@ ${sectionList}
 
 5. Bilder: Platziere an sinnvollen Stellen im Text die Platzhalter ${placeholders} (einzeln, als eigener Absatz). Verwende höchstens ${imageCount} verschiedene Platzhalter.
 6. Vor- und Nachteile: Gib exakt 5 Pros und 5 Cons pro Sprache an. Sie müssen konkrete Details aus der Review widerspiegeln und dürfen nicht generisch oder austauschbar sein.
-7. Score: ${scoreGuidance} Vergebe nicht automatisch 70-80 – differenziere ehrlich.
+7. Score: ${scoreGuidance}${bandGuidance} Vergebe nicht automatisch 70-80 – differenziere ehrlich.
 8. Tonfall: Begeistert, kompetent und objektiv, wie von einem erfahrenen Redakteur. Erwähne NIEMALS, dass der Text von einer KI, einem Sprachmodell oder automatisch generiert wurde.
 9. DE/EN-Konsistenz: Die englische Version ist eine vollständige, hochwertige Übersetzung der deutschen Version mit identischer Struktur – keine Auslassungen, keine Zusammenfassungen.
-10. Format: Antworte AUSSCHLIESSLICH mit gültigem JSON – kein Markdown-Codeblock, kein Text außerhalb des JSON.
+10. FAKTENTREUE: Stütze dich in Handlungs- und Inhaltsabschnitten AUSSCHLIESSLICH auf die unten bereitgestellten Fakten (Zusammenfassung, Storyline, Steam-Daten, Recherche). Erfinde KEINE konkreten Handlungsdetails, Namen, Charaktere, Features, technischen Werte oder Ereignisse, die nicht belegt sind. Fehlen Details, formuliere bewusst allgemein statt zu spekulieren.
+11. Format: Antworte AUSSCHLIESSLICH mit gültigem JSON – kein Markdown-Codeblock, kein Text außerhalb des JSON.
 
 JSON-Schema:
 {
@@ -437,6 +444,80 @@ JSON-Schema:
 FAKTEN UND KONTEXT (nur als Recherche-Basis verwenden, nicht wörtlich kopieren):
 ${contextLines.join("\n")}
 `.trim();
+}
+
+const GAME_CATEGORY_LABELS: Record<number, string> = {
+  0: "Hauptspiel",
+  1: "DLC / Add-on",
+  2: "Erweiterung",
+  3: "Bundle",
+  4: "Standalone-Erweiterung",
+  5: "Mod",
+  6: "Episode",
+  7: "Sammlung",
+  8: "Mod",
+  9: "Remake",
+  10: "Remaster",
+  11: "Expanded Game",
+  12: "Port",
+  13: "Fork",
+  14: "Pack",
+  15: "Update",
+};
+
+const AGE_RATING_LABELS: Record<number, string> = {
+  1: "PEGI 3",
+  2: "PEGI 7",
+  3: "PEGI 12",
+  4: "PEGI 16",
+  5: "PEGI 18",
+  6: "ESRB eC",
+  7: "ESRB E",
+  8: "ESRB E10+",
+  9: "ESRB T",
+  10: "ESRB M",
+  11: "ESRB AO",
+};
+
+/**
+ * Computes a plausible target score band from external reference ratings
+ * (IGDB community, IGDB critics, Metacritic, Steam %) so the generated score
+ * stays calibrated instead of defaulting to 70-80.
+ */
+export function computeGameScoreBand(
+  values: Array<number | null | undefined>
+): { min: number; max: number; target: number } | null {
+  const valid = values.filter((v): v is number => typeof v === "number" && Number.isFinite(v) && v > 0);
+  if (valid.length === 0) return null;
+  const avg = valid.reduce((a, b) => a + b, 0) / valid.length;
+  const target = Math.round(avg);
+  return {
+    target,
+    min: Math.max(0, target - 8),
+    max: Math.min(100, target + 8),
+  };
+}
+
+function formatTimeToBeat(seconds?: number): string | null {
+  if (!seconds || seconds <= 0) return null;
+  const hours = Math.round(seconds / 3600);
+  if (hours < 1) return `${Math.round(seconds / 60)} Minuten`;
+  return `${hours} Stunden`;
+}
+
+function formatAgeRating(ratings?: Array<{ category?: number; rating?: number }>): string {
+  if (!ratings || ratings.length === 0) return "";
+  const seen = new Set<string>();
+  const labels: string[] = [];
+  for (const r of ratings) {
+    if (typeof r.rating !== "number") continue;
+    const label = AGE_RATING_LABELS[r.rating] || `Altersfreigabe ${r.rating}`;
+    if (!seen.has(label)) {
+      seen.add(label);
+      labels.push(label);
+    }
+  }
+  return labels.join(", ");
 }
 
 // Helper function to generate review content using OpenAI with built-in auto-repair
@@ -467,6 +548,36 @@ export async function generateReviewContent(
   const gameModes = ((gameData.game_modes || []) as Array<{ name: string }>).map((m) => m.name);
   const perspectives = ((gameData.player_perspectives || []) as Array<{ name: string }>).map((p) => p.name);
 
+  const storyline = (gameData.storyline as string | undefined)?.trim();
+  const themes = ((gameData.themes || []) as Array<{ name: string }>).map((t) => t.name);
+  const keywords = ((gameData.keywords || []) as Array<{ name: string }>).map((k) => k.name).slice(0, 12);
+  const similarGames = ((gameData.similar_games || []) as Array<{ name: string }>).map((s) => s.name).slice(0, 6);
+  const franchise = (gameData.franchise as { name?: string } | undefined)?.name;
+  const collections = ((gameData.collections || []) as Array<{ name: string }>).map((c) => c.name);
+  const engines = ((gameData.game_engines || []) as Array<{ name: string }>).map((e) => e.name);
+  const timeToBeat = gameData.time_to_beat as
+    | { hastly?: number; normally?: number; completely?: number }
+    | undefined;
+  const ageRating = formatAgeRating(
+    (gameData.age_ratings || []) as Array<{ category?: number; rating?: number }>
+  );
+  const languages = ((gameData.language_supports || []) as Array<{ language: { name: string } }>)
+    .map((l) => l.language?.name)
+    .filter(Boolean)
+    .slice(0, 12);
+
+  const gameCategory = GAME_CATEGORY_LABELS[(gameData.category as number) ?? -1];
+  const statusLabels: Record<number, string> = {
+    0: "angekündigt",
+    1: "Alpha",
+    2: "Beta",
+    3: "Early Access",
+    4: "erscheint",
+    5: "veröffentlicht",
+    6: "eingestellt",
+  };
+  const gameStatus = statusLabels[(gameData.status as number) ?? -1];
+
   const releaseDate = gameData.first_release_date
     ? new Date(gameData.first_release_date * 1000).toLocaleDateString("de-DE")
     : "N/A";
@@ -493,14 +604,32 @@ export async function generateReviewContent(
     `Spielmodi: ${gameModes.join(", ") || "N/A"}`,
     `Perspektive: ${perspectives.join(", ") || "N/A"}`,
     `Erscheinungsdatum: ${releaseDate}`,
+    gameCategory ? `Spieltyp: ${gameCategory}` : "",
+    gameStatus ? `Status: ${gameStatus}` : "",
+    engines.length ? `Game-Engines: ${engines.join(", ")}` : "",
+    themes.length ? `Themen: ${themes.join(", ")}` : "",
+    keywords.length ? `Schlagwörter: ${keywords.join(", ")}` : "",
+    franchise ? `Franchise: ${franchise}` : "",
+    collections.length ? `Collection: ${collections.join(", ")}` : "",
+    ageRating ? `Altersfreigabe: ${ageRating}` : "",
+    languages.length ? `Unterstützte Sprachen (UI/Untertitel): ${languages.join(", ")}` : "",
+    formatTimeToBeat(timeToBeat?.hastly)
+      ? `Spieldauer (Hauptstory): ${formatTimeToBeat(timeToBeat?.hastly)}`
+      : "",
+    formatTimeToBeat(timeToBeat?.completely)
+      ? `Spieldauer (100%): ${formatTimeToBeat(timeToBeat?.completely)}`
+      : "",
     gameData.rating ? `IGDB-Community-Bewertung: ${Number(gameData.rating).toFixed(1)}/100` : "",
     gameData.aggregated_rating ? `IGDB-Kritiker-Bewertung: ${Number(gameData.aggregated_rating).toFixed(1)}/100` : "",
     steam?.metacriticScore ? `Metacritic: ${steam.metacriticScore}/100` : "",
     steam?.reviewSummary?.percentPositive != null && steam.reviewSummary.total > 0
       ? `Steam-Nutzerbewertung: ${steam.reviewSummary.percentPositive}% positiv (${steam.reviewSummary.description || "aus " + steam.reviewSummary.total + " Rezensionen"})`
       : "",
+    steam?.recommendations ? `Steam-Empfehlungen: ${steam.recommendations}` : "",
     steam?.priceFormatted ? `Aktueller Preis (Steam): ${steam.priceFormatted}` : "",
     `Zusammenfassung: ${gameData.summary || "N/A"}`,
+    storyline ? `Storyline: ${storyline.substring(0, 1200)}` : "",
+    similarGames.length ? `Ähnliche Spiele für den Vergleich: ${similarGames.join(", ")}` : "",
     ...(tavilySearchResults ? buildGameResearchSummary(tavilySearchResults) : []),
   ].filter(Boolean);
 

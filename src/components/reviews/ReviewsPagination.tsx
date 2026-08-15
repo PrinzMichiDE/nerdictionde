@@ -32,7 +32,7 @@ export function ReviewsPagination({ totalPages, currentPage }: PaginationProps) 
       }
     } else {
       let startPage = Math.max(1, currentPage - 2);
-      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
       if (endPage === totalPages) {
         startPage = Math.max(1, endPage - maxVisiblePages + 1);
@@ -61,7 +61,7 @@ export function ReviewsPagination({ totalPages, currentPage }: PaginationProps) 
   return (
     <nav 
       role="navigation" 
-      aria-label="Pagination Navigation" 
+      aria-label="Seitennavigation" 
       className="flex flex-col items-center gap-4 py-8"
     >
       <div className="flex items-center gap-1 sm:gap-2">
@@ -111,6 +111,7 @@ export function ReviewsPagination({ totalPages, currentPage }: PaginationProps) 
                   "size-9 text-sm font-medium",
                   currentPage === page ? "pointer-events-none" : ""
                 )}
+                aria-current={currentPage === page ? "page" : undefined}
                 asChild={currentPage !== page}
               >
                 {currentPage !== page ? (

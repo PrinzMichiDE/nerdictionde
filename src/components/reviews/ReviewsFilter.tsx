@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, X, Filter, SortDesc, Calendar, Star } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { ReviewCategory } from "@/types/review";
-import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 export function ReviewsFilter() {
   const router = useRouter();
@@ -213,43 +212,59 @@ export function ReviewsFilter() {
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Aktive Filter:</span>
           {query && (
-            <Badge variant="secondary" className="gap-1 px-2 py-0.5 text-[10px] h-5">
+            <Badge variant="secondary" className="px-2 py-0.5 text-[10px] h-5">
               Suche: {query}
-              <X className="size-2.5 cursor-pointer" onClick={() => handleSearch("")} />
+              <button
+                type="button"
+                onClick={() => handleSearch("")}
+                aria-label={`Suche "${query}" entfernen`}
+                className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              >
+                <X className="size-2.5" />
+              </button>
             </Badge>
           )}
           {category !== "all" && (
-            <Badge variant="secondary" className="gap-1 px-2 py-0.5 text-[10px] h-5 capitalize">
+            <Badge variant="secondary" className="px-2 py-0.5 text-[10px] h-5 capitalize">
               {category}
-              <X className="size-2.5 cursor-pointer" onClick={() => handleCategoryChange("all")} />
+              <button
+                type="button"
+                onClick={() => handleCategoryChange("all")}
+                aria-label={`Kategorie "${category}" entfernen`}
+                className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              >
+                <X className="size-2.5" />
+              </button>
             </Badge>
           )}
           {dateFilter !== "all" && (
-            <Badge variant="secondary" className="gap-1 px-2 py-0.5 text-[10px] h-5">
+            <Badge variant="secondary" className="px-2 py-0.5 text-[10px] h-5">
               Zeitraum: {dateFilter}
-              <X className="size-2.5 cursor-pointer" onClick={() => handleDateChange("all")} />
+              <button
+                type="button"
+                onClick={() => handleDateChange("all")}
+                aria-label={`Zeitraum "${dateFilter}" entfernen`}
+                className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              >
+                <X className="size-2.5" />
+              </button>
             </Badge>
           )}
           {(minScore || maxScore) && (
-            <Badge variant="secondary" className="gap-1 px-2 py-0.5 text-[10px] h-5">
+            <Badge variant="secondary" className="px-2 py-0.5 text-[10px] h-5">
               Score: {minScore || 0} - {maxScore || 100}
-              <X className="size-2.5 cursor-pointer" onClick={() => { setMinScore(""); setMaxScore(""); updateURL({ minScore: null, maxScore: null }); }} />
+              <button
+                type="button"
+                onClick={() => { setMinScore(""); setMaxScore(""); updateURL({ minScore: null, maxScore: null }); }}
+                aria-label="Score-Filter entfernen"
+                className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              >
+                <X className="size-2.5" />
+              </button>
             </Badge>
           )}
         </div>
       )}
     </div>
-  );
-}
-
-function Badge({ children, variant, className }: any) {
-  return (
-    <span className={cn(
-      "inline-flex items-center rounded-sm border px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-      variant === "secondary" ? "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80" : "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-      className
-    )}>
-      {children}
-    </span>
   );
 }
