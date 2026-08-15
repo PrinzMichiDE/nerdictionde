@@ -111,9 +111,9 @@ export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, epi
       {/* Info-Panel & Tech-Check */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Info-Panel */}
-        <Card className="border-primary/10 bg-muted/20 shadow-sm overflow-hidden">
-          <CardHeader className="bg-primary/5 pb-3">
-            <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center">
+        <Card className="border-border bg-card overflow-hidden">
+          <CardHeader className="border-b border-border pb-3">
+            <CardTitle className="kicker flex items-center">
               <Gamepad2 className="h-4 w-4 mr-2 text-primary" />
               {isEn ? "General Info" : "Info-Panel"}
             </CardTitle>
@@ -152,8 +152,8 @@ export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, epi
 
             {/* Store Links Section */}
             {(amazonLink || sortedStores.length > 0) && (
-              <div className="pt-4 border-t border-primary/10">
-                <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center">
+              <div className="pt-4 border-t border-border">
+                <h4 className="kicker text-muted-foreground mb-3 flex items-center">
                   <ShoppingCart className="h-3 w-3 mr-1.5" />
                   {isEn ? "Available at" : "Erhältlich bei"}
                 </h4>
@@ -164,7 +164,7 @@ export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, epi
                       size="sm"
                       asChild
                       className={cn(
-                        "h-8 gap-1.5 text-xs font-bold uppercase tracking-wider border-none shadow-sm hover:shadow-md transition-all active:scale-95",
+                        "h-8 gap-1.5 text-xs font-semibold uppercase tracking-wider border-none",
                         "bg-[#FF9900] hover:bg-[#E68A00] text-black"
                       )}
                     >
@@ -181,7 +181,7 @@ export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, epi
                       size="sm"
                       asChild
                       variant="outline"
-                      className="h-8 gap-1.5 text-xs font-bold uppercase tracking-wider border-primary/20 hover:bg-primary/5"
+                      className="h-8 gap-1.5 text-xs font-semibold uppercase tracking-wider"
                     >
                       <a href={store.url} target="_blank" rel="nofollow">
                         <ExternalLink className="h-3 w-3" />
@@ -196,9 +196,9 @@ export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, epi
         </Card>
 
         {/* Tech-Check */}
-        <Card className="border-primary/10 bg-muted/20 shadow-sm overflow-hidden">
-          <CardHeader className="bg-primary/5 pb-3">
-            <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center">
+        <Card className="border-border bg-card overflow-hidden">
+          <CardHeader className="border-b border-border pb-3">
+            <CardTitle className="kicker flex items-center">
               <ShieldCheck className="h-4 w-4 mr-2 text-primary" />
               {isEn ? "Technical Specs" : "Tech-Check"}
             </CardTitle>
@@ -227,17 +227,17 @@ export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, epi
       </div>
 
       {/* Rating-Vergleich */}
-      <Card className="border-primary/20 bg-primary/5 shadow-md overflow-hidden">
-        <CardHeader className="bg-primary/10 pb-3">
-          <CardTitle className="text-sm font-bold uppercase tracking-widest text-center">
+      <Card className="border-border bg-card overflow-hidden">
+        <CardHeader className="border-b border-border pb-3">
+          <CardTitle className="kicker text-center">
             {isEn ? "Rating Comparison" : "Rating-Vergleich"}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-8 pb-8">
           <div className="grid grid-cols-3 gap-4 items-center max-w-2xl mx-auto">
             <div className="flex flex-col items-center space-y-3">
-              <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground">Nerdiction</span>
-              <ScoreBadge score={nerdictionScore} className="h-16 w-16 text-2xl shadow-lg border-2 border-background" />
+              <span className="kicker text-muted-foreground">Nerdiction</span>
+              <ScoreBadge score={nerdictionScore} className="h-16 w-16 text-2xl" />
               <span className="text-[10px] font-bold text-primary">{isEn ? "Expert Review" : "Experten-Test"}</span>
             </div>
             

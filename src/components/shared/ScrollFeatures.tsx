@@ -27,7 +27,7 @@ export function ReadingProgressBar() {
   return (
     <div className="fixed top-0 left-0 right-0 h-1 bg-muted z-50">
       <div
-        className="h-full bg-gradient-to-r from-primary via-primary/80 to-primary transition-all duration-150 ease-out"
+        className="h-full bg-primary transition-all duration-150 ease-out"
         style={{ width: `${progress}%` }}
       />
     </div>
@@ -58,10 +58,10 @@ export function ScrollToTop() {
       onClick={scrollToTop}
       size="icon"
       className={cn(
-        "fixed bottom-8 right-8 z-50 rounded-full shadow-lg transition-all duration-300",
+        "fixed bottom-8 right-8 z-50 rounded-md shadow-md transition-all duration-300",
         isVisible
-          ? "opacity-100 translate-y-0 scale-100"
-          : "opacity-0 translate-y-4 scale-95 pointer-events-none"
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-4 pointer-events-none"
       )}
       aria-label="Nach oben scrollen"
     >
@@ -95,7 +95,7 @@ export function StickyNav({ children, offset = 0, className = "" }: StickyNavPro
       className={cn(
         "transition-all duration-300",
         isSticky
-          ? "fixed top-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border shadow-lg"
+          ? "fixed top-0 left-0 right-0 z-40 bg-background border-b border-border shadow-sm"
           : "relative",
         className
       )}

@@ -43,14 +43,14 @@ export function FPSSection({ fpsResults, isEn = false }: FPSSectionProps) {
   };
 
   return (
-    <Card className="border-2 bg-gradient-to-br from-background to-muted/20">
+    <Card className="border border-border rounded-md">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
+          <div className="p-2 bg-primary/5 rounded-md">
             <Gamepad2 className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-black uppercase tracking-tight">
+            <CardTitle className="font-serif text-2xl font-semibold tracking-tight">
               {isEn ? "Gaming Performance" : "Gaming Performance"}
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
@@ -64,16 +64,16 @@ export function FPSSection({ fpsResults, isEn = false }: FPSSectionProps) {
       <CardContent>
         <div className="space-y-6">
           {Object.entries(fpsByGame).map(([game, results]) => (
-            <div key={game} className="p-5 rounded-xl bg-gradient-to-br from-muted/50 to-muted/30 border-2 hover:border-primary/50 hover:shadow-lg transition-all">
-              <h3 className="text-xl font-black mb-5 flex items-center gap-2">
+            <div key={game} className="p-5 rounded-md bg-muted/40 border border-border">
+              <h3 className="font-serif text-xl font-semibold tracking-tight mb-5 flex items-center gap-2">
                 <Zap className="h-5 w-5 text-primary" />
                 {game}
               </h3>
               <div className="grid gap-4 md:grid-cols-3">
                 {results.map((result, idx) => (
-                  <div key={idx} className="p-4 rounded-lg bg-background/50 border space-y-3 hover:bg-background/80 transition-colors">
+                  <div key={idx} className="p-4 rounded-md bg-card border border-border space-y-3">
                     <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="text-xs font-bold">
+                      <Badge variant="outline" className="text-xs font-semibold">
                         {result.resolution}
                       </Badge>
                       <Badge variant="secondary" className="text-xs">
@@ -82,7 +82,7 @@ export function FPSSection({ fpsResults, isEn = false }: FPSSectionProps) {
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-baseline gap-2">
-                        <span className={`text-3xl font-black ${getFPSColor(result.fps)}`}>
+                        <span className={`font-serif text-3xl font-semibold tracking-tight ${getFPSColor(result.fps)}`}>
                           {result.fps}
                         </span>
                         <span className="text-sm text-muted-foreground font-medium">FPS</span>
@@ -91,7 +91,7 @@ export function FPSSection({ fpsResults, isEn = false }: FPSSectionProps) {
                         <Badge 
                           variant="outline" 
                           className={cn(
-                            "text-xs font-bold",
+                            "text-xs font-semibold",
                             getFPSColor(result.fps).replace("text-", "border-")
                           )}
                         >

@@ -47,18 +47,18 @@ function getAffiliateLink(affiliateLink: string | null | undefined, componentNam
 export function PCComponentItem({ component, isEn = false }: PCComponentItemProps) {
   const affiliateLink = getAffiliateLink(component.affiliateLink, component.name);
   return (
-    <Card className="overflow-hidden border-2 hover:border-primary/50 transition-all group">
+    <Card className="overflow-hidden border border-border rounded-md">
       <CardContent className="p-0">
         <div className="flex flex-col md:flex-row min-h-[180px]">
           {/* Component Image - Larger and more prominent */}
-          <div className="w-full md:w-[240px] lg:w-[280px] bg-gradient-to-br from-muted/30 to-muted/10 flex items-center justify-center p-6 border-b md:border-b-0 md:border-r relative overflow-hidden">
+          <div className="w-full md:w-[240px] lg:w-[280px] bg-muted flex items-center justify-center p-6 border-b md:border-b-0 md:border-r relative overflow-hidden">
             {component.image ? (
               <div className="relative w-full h-full min-h-[160px] flex items-center justify-center">
                 <Image
                   src={component.image}
                   alt={component.name}
                   fill
-                  className="object-contain transition-transform duration-300 group-hover:scale-110 p-4"
+                  className="object-contain p-4"
                   sizes="(max-width: 768px) 100vw, 240px"
                   unoptimized
                 />
@@ -71,30 +71,28 @@ export function PCComponentItem({ component, isEn = false }: PCComponentItemProp
                 </span>
               </div>
             )}
-            {/* Subtle gradient overlay on hover */}
-            <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
 
           <div className="flex-grow p-4 md:p-6 flex flex-col md:flex-row justify-between gap-6">
             <div className="space-y-3 flex-grow">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary" className="font-bold text-[10px] uppercase tracking-wider px-2 py-0">
+                <Badge variant="secondary" className="font-semibold text-[10px] uppercase tracking-wider px-2 py-0">
                   {component.type}
                 </Badge>
                 {component.manufacturer && (
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                  <span className="kicker text-muted-foreground">
                     {component.manufacturer}
                   </span>
                 )}
                 {component.price && component.price > 0 && (
-                  <Badge className="bg-primary/10 text-primary border-primary/20 font-black text-xs">
+                  <Badge className="bg-primary text-primary-foreground font-semibold text-xs">
                     {component.price}€
                   </Badge>
                 )}
               </div>
               
               <div className="space-y-1">
-                <h3 className="text-xl font-black leading-none tracking-tight group-hover:text-primary transition-colors">
+                <h3 className="font-serif text-xl font-semibold tracking-tight leading-none group-hover:text-primary transition-colors">
                   {component.name}
                 </h3>
                 {component.description && (
@@ -108,7 +106,7 @@ export function PCComponentItem({ component, isEn = false }: PCComponentItemProp
             <div className="flex flex-col md:items-end justify-center gap-4 shrink-0 md:min-w-[200px]">
               {component.price && component.price > 0 && (
                 <div className="text-right">
-                  <div className="text-2xl font-black text-primary">{component.price}€</div>
+                  <div className="font-serif text-2xl font-semibold tracking-tight text-primary">{component.price}€</div>
                   <div className="text-xs text-muted-foreground">Preis</div>
                 </div>
               )}
@@ -117,7 +115,7 @@ export function PCComponentItem({ component, isEn = false }: PCComponentItemProp
                   <Button variant="outline" size="sm" asChild className="h-9 gap-2">
                     <Link href={`/reviews/${component.reviewId}`}>
                       <Info className="h-4 w-4" />
-                      <span className="text-xs font-bold uppercase tracking-wider">
+                      <span className="text-xs font-semibold uppercase tracking-wider">
                         {isEn ? "Review" : "Test"}
                       </span>
                     </Link>
@@ -127,11 +125,11 @@ export function PCComponentItem({ component, isEn = false }: PCComponentItemProp
                   <Button 
                     size="sm" 
                     asChild 
-                    className="h-9 gap-2 border-none shadow-sm hover:shadow-md transition-all active:scale-95 bg-[#FF9900] hover:bg-[#E68A00] text-black"
+                    className="h-9 gap-2 border-none active:scale-95 bg-[#FF9900] hover:bg-[#E68A00] text-black"
                   >
                     <a href={affiliateLink} target="_blank" rel="nofollow sponsored">
                       <ExternalLink className="h-4 w-4" />
-                      <span className="text-xs font-bold uppercase tracking-wider">
+                      <span className="text-xs font-semibold uppercase tracking-wider">
                         Amazon
                       </span>
                     </a>

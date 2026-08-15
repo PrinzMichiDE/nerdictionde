@@ -81,11 +81,11 @@ export function GamingPCsTabs({ desktops, laptops }: GamingPCsTabsProps) {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
       <div className="flex justify-center">
-        <TabsList className="bg-muted/50 p-1 h-14 rounded-2xl border">
-          <TabsTrigger value="desktop" className="px-8 rounded-xl font-black uppercase tracking-tight text-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+        <TabsList>
+          <TabsTrigger value="desktop">
             Gaming PCs
           </TabsTrigger>
-          <TabsTrigger value="laptop" className="px-8 rounded-xl font-black uppercase tracking-tight text-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <TabsTrigger value="laptop">
             Gaming Laptops
           </TabsTrigger>
         </TabsList>
@@ -94,21 +94,21 @@ export function GamingPCsTabs({ desktops, laptops }: GamingPCsTabsProps) {
       {/* Stats Section */}
       {stats.total > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-muted/30 p-4 rounded-xl border space-y-1">
+          <div className="bg-card p-4 rounded-md border border-border space-y-1">
             <p className="text-xs text-muted-foreground uppercase tracking-tight font-medium">Gesamt</p>
-            <p className="text-2xl font-black">{stats.total}</p>
+            <p className="font-serif text-2xl font-semibold tracking-tight">{stats.total}</p>
           </div>
-          <div className="bg-muted/30 p-4 rounded-xl border space-y-1">
+          <div className="bg-card p-4 rounded-md border border-border space-y-1">
             <p className="text-xs text-muted-foreground uppercase tracking-tight font-medium">Ab</p>
-            <p className="text-2xl font-black">{stats.minPrice}€</p>
+            <p className="font-serif text-2xl font-semibold tracking-tight">{stats.minPrice}€</p>
           </div>
-          <div className="bg-muted/30 p-4 rounded-xl border space-y-1">
+          <div className="bg-card p-4 rounded-md border border-border space-y-1">
             <p className="text-xs text-muted-foreground uppercase tracking-tight font-medium">Bis</p>
-            <p className="text-2xl font-black">{stats.maxPrice}€</p>
+            <p className="font-serif text-2xl font-semibold tracking-tight">{stats.maxPrice}€</p>
           </div>
-          <div className="bg-muted/30 p-4 rounded-xl border space-y-1">
+          <div className="bg-card p-4 rounded-md border border-border space-y-1">
             <p className="text-xs text-muted-foreground uppercase tracking-tight font-medium">Ø Preis</p>
-            <p className="text-2xl font-black">{stats.avgPrice}€</p>
+            <p className="font-serif text-2xl font-semibold tracking-tight">{stats.avgPrice}€</p>
           </div>
         </div>
       )}
@@ -174,10 +174,10 @@ export function GamingPCsTabs({ desktops, laptops }: GamingPCsTabsProps) {
             ))
           ) : (
             <div className="col-span-full py-20 text-center space-y-4">
-              <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+              <div className="w-16 h-16 mx-auto bg-muted rounded-md flex items-center justify-center mb-4">
                 <Filter className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h2 className="text-2xl font-bold">Keine Builds gefunden</h2>
+              <h2 className="font-serif text-2xl font-semibold tracking-tight">Keine Builds gefunden</h2>
               <p className="text-muted-foreground">
                 Versuche einen anderen Preisbereich oder Filter auszuwählen.
               </p>
@@ -203,10 +203,10 @@ export function GamingPCsTabs({ desktops, laptops }: GamingPCsTabsProps) {
             ))
           ) : (
             <div className="col-span-full py-20 text-center space-y-4">
-              <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
+              <div className="w-16 h-16 mx-auto bg-muted rounded-md flex items-center justify-center mb-4">
                 <Filter className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h2 className="text-2xl font-bold">Keine Laptops gefunden</h2>
+              <h2 className="font-serif text-2xl font-semibold tracking-tight">Keine Laptops gefunden</h2>
               <p className="text-muted-foreground">
                 Versuche einen anderen Preisbereich oder Filter auszuwählen.
               </p>

@@ -142,7 +142,7 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsOpen(true)}
-          className="pl-12 md:pl-14 lg:pl-16 pr-12 md:pr-14 lg:pr-16 h-12 md:h-14 lg:h-16 text-base md:text-lg lg:text-xl border-2 focus:border-primary rounded-full"
+          className="pl-12 pr-10 h-11 text-base border focus:border-primary rounded-sm"
         />
         {query && (
           <Button
@@ -161,7 +161,7 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
 
       {/* Search Results Dropdown */}
       {isOpen && (
-        <Card className="absolute top-full mt-2 w-full border-2 shadow-2xl z-50 max-h-[600px] overflow-hidden">
+        <Card className="absolute top-full mt-2 w-full shadow-lg z-50 max-h-[600px] overflow-hidden">
           <CardContent className="p-0">
             {/* Filter Tags */}
             <div className="p-4 border-b border-border">
@@ -180,7 +180,7 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
                     <button
                       key={category}
                       onClick={() => toggleFilter(category)}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
                         isSelected
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -208,10 +208,10 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
                       <button
                         key={review.id}
                         onClick={() => handleResultClick(review.slug)}
-                        className="w-full p-3 rounded-lg hover:bg-muted transition-colors text-left group"
+                        className="w-full p-3 rounded-sm hover:bg-muted transition-colors text-left group"
                       >
                         <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+                          <div className="p-2 rounded-sm bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
                             <Icon className="h-4 w-4" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -263,13 +263,13 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
                 <div className="flex flex-wrap gap-2">
                   <Link
                     href="/reviews"
-                    className="px-3 py-1.5 rounded-lg bg-background border border-border hover:border-primary hover:text-primary text-sm font-medium transition-colors"
+                    className="px-3 py-1.5 rounded-sm bg-background border border-border hover:border-primary hover:text-primary text-sm font-medium transition-colors"
                   >
                     Alle Reviews
                   </Link>
                   <Link
                     href="/reviews?sort=score-desc"
-                    className="px-3 py-1.5 rounded-lg bg-background border border-border hover:border-primary hover:text-primary text-sm font-medium transition-colors"
+                    className="px-3 py-1.5 rounded-sm bg-background border border-border hover:border-primary hover:text-primary text-sm font-medium transition-colors"
                   >
                     Top Reviews
                   </Link>

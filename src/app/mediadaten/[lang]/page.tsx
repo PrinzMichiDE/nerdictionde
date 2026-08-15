@@ -76,22 +76,22 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
               <ArrowLeft className="size-4" />
             </Link>
           </Button>
-          <h1 className="text-4xl font-bold tracking-tight">{t.header.title}</h1>
         </div>
+        <h1 className="font-serif text-4xl md:text-5xl font-semibold tracking-tight">{t.header.title}</h1>
         <p className="text-xl text-muted-foreground max-w-3xl">
           {t.header.subtitle}
         </p>
       </div>
 
       {/* Important Notice */}
-      <Card className="border-2 border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent">
+      <Card>
         <CardContent className="p-6">
           <div className="flex items-start gap-4">
-            <div className="size-10 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0 border border-amber-500/30">
+            <div className="size-10 rounded-md bg-amber-500/20 flex items-center justify-center shrink-0">
               <FileText className="size-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div className="flex-1 space-y-2">
-              <h3 className="text-lg font-bold text-foreground">
+              <h3 className="font-serif text-lg font-semibold text-foreground">
                 {t.notice.title}
               </h3>
               <p className="text-muted-foreground">
@@ -110,7 +110,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
       </Card>
 
       {/* Update Notice */}
-      <Card className="border-2 border-primary/20 bg-muted/30">
+      <Card className="bg-muted/30 border border-border">
         <CardContent className="p-4">
           <div className="flex items-center gap-3 text-sm">
             <RefreshCw className="size-4 text-primary" />
@@ -125,66 +125,66 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
       {/* Key Metrics */}
       <section>
         <div className="mb-6">
-          <h2 className="text-2xl font-bold tracking-tight mb-2">{t.keyMetrics.title}</h2>
+          <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mb-2">{t.keyMetrics.title}</h2>
           <p className="text-muted-foreground">
             {t.keyMetrics.subtitle}
           </p>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.keyMetrics.monthlyVisitors}</CardTitle>
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-md bg-primary/10">
                 <Users className="size-4 text-primary" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <div className="text-3xl font-semibold text-primary">
                 {formatMediaNumber(stats.monthlyVisitors, locale)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">{t.keyMetrics.activeUsers}</p>
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.keyMetrics.pageViews}</CardTitle>
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-md bg-primary/10">
                 <Eye className="size-4 text-primary" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <div className="text-3xl font-semibold text-primary">
                 {formatMediaNumber(stats.monthlyPageViews, locale)}
               </div>
               <p className="text-xs text-muted-foreground mt-1">{t.keyMetrics.perMonth}</p>
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.keyMetrics.sessionDuration}</CardTitle>
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-md bg-primary/10">
                 <TrendingUp className="size-4 text-primary" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <div className="text-3xl font-semibold text-primary">
                 {stats.averageSessionDuration}
               </div>
               <p className="text-xs text-muted-foreground mt-1">{t.keyMetrics.average}</p>
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.keyMetrics.bounceRate}</CardTitle>
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-md bg-primary/10">
                 <BarChart3 className="size-4 text-primary" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <div className="text-3xl font-semibold text-primary">
                 {stats.bounceRate}
               </div>
               <p className="text-xs text-muted-foreground mt-1">{t.keyMetrics.lowBounceRate}</p>
@@ -196,12 +196,12 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
       {/* 12 Month Timeline */}
       <section>
         <div className="mb-6">
-          <h2 className="text-2xl font-bold tracking-tight mb-2">{t.timeline.title}</h2>
+          <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mb-2">{t.timeline.title}</h2>
           <p className="text-muted-foreground">
             {t.timeline.subtitle}
           </p>
         </div>
-        <Card className="border-2">
+        <Card>
           <CardContent className="p-6">
             <div className="space-y-8">
               {/* Visitors Chart */}
@@ -223,7 +223,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                       <div key={index} className="flex-1 flex flex-col items-center justify-end h-full group">
                         <div className="w-full relative" style={{ height: '100%' }}>
                           <div
-                            className="w-full bg-primary rounded-t transition-all hover:bg-primary/80 group-hover:scale-105 cursor-pointer absolute bottom-0 left-0 right-0"
+                            className="w-full bg-primary rounded-t cursor-pointer absolute bottom-0 left-0 right-0"
                             style={{ 
                               height: `${barHeight}%`,
                               minHeight: '6px'
@@ -259,7 +259,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                       <div key={index} className="flex-1 flex flex-col items-center justify-end h-full group">
                         <div className="w-full relative" style={{ height: '100%' }}>
                           <div
-                            className="w-full bg-primary/70 rounded-t transition-all hover:bg-primary/60 group-hover:scale-105 cursor-pointer absolute bottom-0 left-0 right-0"
+                            className="w-full bg-primary/70 rounded-t cursor-pointer absolute bottom-0 left-0 right-0"
                             style={{ 
                               height: `${barHeight}%`,
                               minHeight: '6px'
@@ -295,66 +295,66 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
       {/* Additional Metrics */}
       <section>
         <div className="mb-6">
-          <h2 className="text-2xl font-bold tracking-tight mb-2">{t.detailedMetrics.title}</h2>
+          <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mb-2">{t.detailedMetrics.title}</h2>
           <p className="text-muted-foreground">
             {t.detailedMetrics.subtitle}
           </p>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.detailedMetrics.pagesPerVisit}</CardTitle>
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-md bg-primary/10">
                 <FileText className="size-4 text-primary" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <div className="text-3xl font-semibold text-primary">
                 {stats.averagePagesPerVisit}
               </div>
               <p className="text-xs text-muted-foreground mt-1">{t.detailedMetrics.average}</p>
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.detailedMetrics.newVisitors}</CardTitle>
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-md bg-primary/10">
                 <Users className="size-4 text-primary" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <div className="text-3xl font-semibold text-primary">
                 {stats.newVisitorsPercentage}
               </div>
               <p className="text-xs text-muted-foreground mt-1">{t.detailedMetrics.firstTimeVisitors}</p>
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.detailedMetrics.returningVisitors}</CardTitle>
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-md bg-primary/10">
                 <TrendingUp className="size-4 text-primary" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <div className="text-3xl font-semibold text-primary">
                 {stats.returningVisitorsPercentage}
               </div>
               <p className="text-xs text-muted-foreground mt-1">{t.detailedMetrics.loyalReadership}</p>
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.detailedMetrics.reviewReadTime}</CardTitle>
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-md bg-primary/10">
                 <Clock className="size-4 text-primary" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <div className="text-3xl font-semibold text-primary">
                 {stats.averageReviewReadTime}
               </div>
               <p className="text-xs text-muted-foreground mt-1">{t.detailedMetrics.average}</p>
@@ -366,16 +366,16 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
       {/* Device & Geography */}
       <section>
         <div className="mb-6">
-          <h2 className="text-2xl font-bold tracking-tight mb-2">{t.deviceGeography.title}</h2>
+          <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mb-2">{t.deviceGeography.title}</h2>
           <p className="text-muted-foreground">
             {t.deviceGeography.subtitle}
           </p>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-primary/10">
+                <div className="p-2 rounded-md bg-primary/10">
                   <Smartphone className="size-5 text-primary" />
                 </div>
                 {t.deviceGeography.mobileTraffic}
@@ -383,22 +383,22 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
               <CardDescription>{t.deviceGeography.smartphoneTablet}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-2">
+              <div className="text-3xl font-semibold text-primary mb-2">
                 {stats.mobileTrafficPercentage}
               </div>
-              <div className="h-3 bg-muted rounded-full overflow-hidden mt-3">
+              <div className="h-3 bg-muted rounded-sm overflow-hidden mt-3">
                 <div 
-                  className="h-full bg-primary rounded-full transition-all" 
+                  className="h-full bg-primary rounded-sm" 
                   style={{ width: `${stats.mobileTrafficPercentage}%` }} 
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-primary/10">
+                <div className="p-2 rounded-md bg-primary/10">
                   <Monitor className="size-5 text-primary" />
                 </div>
                 {t.deviceGeography.desktopTraffic}
@@ -406,22 +406,22 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
               <CardDescription>{t.deviceGeography.pcLaptop}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent mb-2">
+              <div className="text-3xl font-semibold text-primary mb-2">
                 {stats.desktopTrafficPercentage}
               </div>
-              <div className="h-3 bg-muted rounded-full overflow-hidden mt-3">
+              <div className="h-3 bg-muted rounded-sm overflow-hidden mt-3">
                 <div 
-                  className="h-full bg-primary rounded-full transition-all" 
+                  className="h-full bg-primary rounded-sm" 
                   style={{ width: `${stats.desktopTrafficPercentage}%` }} 
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-primary/10">
+                <div className="p-2 rounded-md bg-primary/10">
                   <Globe className="size-5 text-primary" />
                 </div>
                 {t.deviceGeography.topCountry}
@@ -429,7 +429,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
               <CardDescription>{t.deviceGeography.mainOriginCountry}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <div className="text-3xl font-semibold text-primary">
                 {stats.topCountry}
               </div>
               <p className="text-xs text-muted-foreground mt-2">
@@ -443,7 +443,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
       {/* Target Audience */}
       <section className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight mb-2">{t.targetAudience.title}</h2>
+          <h2 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight mb-2">{t.targetAudience.title}</h2>
           <p className="text-muted-foreground text-lg">
             {t.targetAudience.subtitle}
           </p>
@@ -461,8 +461,8 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                   <span className="text-sm text-muted-foreground">{t.targetAudience.age} 18-24</span>
                   <span className="font-semibold text-foreground">~35%</span>
                 </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full" style={{ width: "35%" }} />
+                <div className="h-2 bg-muted rounded-sm overflow-hidden">
+                  <div className="h-full bg-primary rounded-sm" style={{ width: "35%" }} />
                 </div>
               </div>
               <div className="space-y-2">
@@ -470,8 +470,8 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                   <span className="text-sm text-muted-foreground">{t.targetAudience.age} 25-34</span>
                   <span className="font-semibold text-foreground">~40%</span>
                 </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full" style={{ width: "40%" }} />
+                <div className="h-2 bg-muted rounded-sm overflow-hidden">
+                  <div className="h-full bg-primary rounded-sm" style={{ width: "40%" }} />
                 </div>
               </div>
               <div className="space-y-2">
@@ -479,8 +479,8 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                   <span className="text-sm text-muted-foreground">{t.targetAudience.age} 35-44</span>
                   <span className="font-semibold text-foreground">~20%</span>
                 </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full" style={{ width: "20%" }} />
+                <div className="h-2 bg-muted rounded-sm overflow-hidden">
+                  <div className="h-full bg-primary rounded-sm" style={{ width: "20%" }} />
                 </div>
               </div>
               <div className="space-y-2">
@@ -488,8 +488,8 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                   <span className="text-sm text-muted-foreground">{t.targetAudience.age} 45+</span>
                   <span className="font-semibold text-foreground">~5%</span>
                 </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full" style={{ width: "5%" }} />
+                <div className="h-2 bg-muted rounded-sm overflow-hidden">
+                  <div className="h-full bg-primary rounded-sm" style={{ width: "5%" }} />
                 </div>
               </div>
               <div className="pt-2 mt-2 border-t text-xs text-muted-foreground">
@@ -528,16 +528,16 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
       {/* Contact */}
       <section className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight mb-2">{t.contact.title}</h2>
+          <h2 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight mb-2">{t.contact.title}</h2>
           <p className="text-muted-foreground text-lg">
             {t.contact.subtitle}
           </p>
         </div>
 
-        <Card className="border-2 hover:border-primary/30 transition-all duration-300">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-md bg-primary/10">
                 <Mail className="size-5 text-primary" />
               </div>
               {t.contact.title}
@@ -549,9 +549,9 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                 <p className="text-sm font-semibold text-foreground mb-1">{t.contact.general}</p>
                 <a 
                   href="mailto:editing@nerdiction.de" 
-                  className="text-primary hover:underline font-medium inline-flex items-center gap-2 group/link"
+                  className="text-primary hover:underline font-medium inline-flex items-center gap-2"
                 >
-                  <Mail className="size-4 group-hover/link:scale-110 transition-transform" />
+                  <Mail className="size-4" />
                   editing@nerdiction.de
                 </a>
               </div>
@@ -559,9 +559,9 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                 <p className="text-sm font-semibold text-foreground mb-1">{t.contact.forGames}</p>
                 <a 
                   href="mailto:reviews.games@nerdiction.de" 
-                  className="text-primary hover:underline font-medium inline-flex items-center gap-2 group/link"
+                  className="text-primary hover:underline font-medium inline-flex items-center gap-2"
                 >
-                  <Mail className="size-4 group-hover/link:scale-110 transition-transform" />
+                  <Mail className="size-4" />
                   reviews.games@nerdiction.de
                 </a>
               </div>
@@ -569,9 +569,9 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                 <p className="text-sm font-semibold text-foreground mb-1">{t.contact.forHardware}</p>
                 <a 
                   href="mailto:reviews.hardware@nerdiction.de" 
-                  className="text-primary hover:underline font-medium inline-flex items-center gap-2 group/link"
+                  className="text-primary hover:underline font-medium inline-flex items-center gap-2"
                 >
-                  <Mail className="size-4 group-hover/link:scale-110 transition-transform" />
+                  <Mail className="size-4" />
                   reviews.hardware@nerdiction.de
                 </a>
               </div>
@@ -579,9 +579,9 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                 <p className="text-sm font-semibold text-foreground mb-1">{t.contact.forMovies}</p>
                 <a 
                   href="mailto:reviews.movies@nerdiction.de" 
-                  className="text-primary hover:underline font-medium inline-flex items-center gap-2 group/link"
+                  className="text-primary hover:underline font-medium inline-flex items-center gap-2"
                 >
-                  <Mail className="size-4 group-hover/link:scale-110 transition-transform" />
+                  <Mail className="size-4" />
                   reviews.movies@nerdiction.de
                 </a>
               </div>

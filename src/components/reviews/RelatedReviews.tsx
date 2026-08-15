@@ -50,12 +50,13 @@ export async function RelatedReviews({
   if (toShow.length === 0) return null;
 
   return (
-    <div className="space-y-8 pt-12 border-t mt-12">
-      <div className="flex flex-col space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">
+    <div className="space-y-8 pt-12 border-t border-border mt-12">
+      <div className="border-b border-border pb-4">
+        <span className="kicker text-primary">Weiterlesen</span>
+        <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mt-1">
           Das könnte dich auch interessieren
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-sm">
           Weitere Reviews aus der Kategorie <span className="capitalize font-semibold text-foreground">{category}</span>.
         </p>
       </div>

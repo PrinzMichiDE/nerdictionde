@@ -19,7 +19,7 @@ export function SupportTopBanner() {
   if (!isVisible) return null;
 
   return (
-    <div className="w-full bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-b border-primary/20 py-3 md:py-4 px-4 md:px-6 lg:px-8">
+    <div className="w-full bg-muted border-b border-border py-3 md:py-4 px-4 md:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 md:gap-6">
         <div className="flex items-center gap-3 md:gap-4 text-sm md:text-base lg:text-lg text-foreground/90">
           <Heart className="h-4 w-4 md:h-5 md:w-5 text-primary fill-current" />
@@ -35,7 +35,7 @@ export function SupportTopBanner() {
             asChild
             size="sm"
             variant="outline"
-            className="border-primary/30 hover:bg-primary/10 text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 h-auto"
+            className="text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 h-auto"
           >
             <Link
               href="https://ko-fi.com/michelfritzsch"

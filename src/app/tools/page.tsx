@@ -161,7 +161,8 @@ export default function ToolsPage() {
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Streaming Tools</h1>
+          <span className="kicker text-primary">Für Streamer & Creators</span>
+          <h1 className="font-serif text-4xl md:text-5xl font-semibold tracking-tight mt-1 mb-2">Streaming Tools</h1>
           <p className="text-muted-foreground">
             Wähle ein Tool aus der Liste aus.
           </p>
@@ -176,14 +177,14 @@ export default function ToolsPage() {
             <div key={category.name}>
               <div className="flex items-center gap-2 mb-4">
                 <Icon className="h-6 w-6 text-primary" />
-                <h2 className="text-2xl font-semibold">{category.name}</h2>
+                <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight">{category.name}</h2>
               </div>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {category.tools.map((tool) => {
                   const ToolIcon = tool.icon;
                   return (
                     <Link key={tool.id} href={`/tools/${tool.id}`}>
-                      <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                      <Card className="h-full">
                         <CardHeader>
                           <div className="flex items-center gap-2">
                             <ToolIcon className="h-5 w-5 text-primary" />

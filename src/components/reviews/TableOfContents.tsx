@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { List } from "lucide-react";
 
 interface Heading {
   level: number;
@@ -78,12 +79,12 @@ export function TableOfContents({ headings, isEn }: TableOfContentsProps) {
   if (!mounted || headings.length === 0) return null;
 
   return (
-    <div className="p-6 rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 backdrop-blur-sm">
-      <h2 className="text-xl font-bold mb-4 text-primary flex items-center gap-2">
-        <span className="text-2xl">📑</span>
+    <div className="p-6 rounded-md border border-border bg-card">
+      <h2 className="font-serif text-xl font-semibold tracking-tight mb-4 flex items-center gap-2">
+        <List className="size-5 text-primary" />
         {isEn ? "Table of Contents" : "Inhaltsverzeichnis"}
       </h2>
-      <nav className="space-y-2">
+      <nav className="space-y-1">
         {headingItems.map((heading) => (
           <a
             key={heading.key}
@@ -92,10 +93,10 @@ export function TableOfContents({ headings, isEn }: TableOfContentsProps) {
               e.preventDefault();
               handleClick(heading.id);
             }}
-            className={`block text-sm transition-colors py-1 rounded-md px-2 -mx-2 break-words overflow-wrap-anywhere ${
+            className={`block text-sm transition-colors py-1.5 rounded-sm px-2 -mx-2 break-words overflow-wrap-anywhere ${
               activeId === heading.id
-                ? "text-primary font-semibold bg-primary/10"
-                : "hover:text-primary hover:bg-primary/5"
+                ? "text-primary font-semibold bg-primary/5"
+                : "hover:text-primary hover:bg-accent"
             } ${
               heading.level === 1
                 ? "font-bold text-foreground"

@@ -1,78 +1,55 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Gamepad2, Cpu, ShoppingCart, Film, Tv } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Suspense } from "react";
 
 const categories = [
-  { name: "Alle", href: "/reviews", icon: null, value: "all" },
-  { name: "Games", href: "/reviews?category=game", icon: Gamepad2, value: "game" },
-  { name: "Filme", href: "/reviews?category=movie", icon: Film, value: "movie" },
-  { name: "Serien", href: "/reviews?category=series", icon: Tv, value: "series" },
-  { name: "Hardware", href: "/reviews?category=hardware", icon: Cpu, value: "hardware" },
-  { name: "Produkte", href: "/reviews?category=product", icon: ShoppingCart, value: "product" },
+  { name: "Alle", href: "/reviews", value: "all" },
+  { name: "Games", href: "/reviews?category=game", value: "game" },
+  { name: "Filme", href: "/reviews?category=movie", value: "movie" },
+  { name: "Serien", href: "/reviews?category=series", value: "series" },
+  { name: "Hardware", href: "/reviews?category=hardware", value: "hardware" },
+  { name: "Produkte", href: "/reviews?category=product", value: "product" },
 ];
 
 function CategoryFilterContent() {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category") || "all";
 
   return (
-    <div className="flex flex-wrap items-center gap-3 md:gap-4 lg:gap-5 mb-12 md:mb-16 lg:mb-20">
-      {categories.map((category) => {
-        const Icon = category.icon;
-        const isActive = currentCategory === category.value;
+    <nav className="border-b border-border mb-10 md:mb-14" aria-label="Kategorie Filter">
+      <div className="flex flex-wrap items-center gap-1 -mb-px">
+        {categories.map((category) => {
+          const isActive = currentCategory === category.value && pathname.startsWith("/reviews");
 
-        return (
-          <Button
-            key={category.value}
-            asChild
-            variant={isActive ? "default" : "outline"}
-            size="lg"
-            className={cn(
-              "rounded-full transition-all duration-300 text-sm md:text-base lg:text-lg px-4 md:px-6 lg:px-8 py-2 md:py-3 lg:py-4 h-auto",
-              isActive
-                ? "shadow-lg scale-105 md:scale-110"
-                : "hover:scale-105 md:hover:scale-110 hover:border-primary/50"
-            )}
-          >
-            <Link href={category.href} className="flex items-center gap-2 md:gap-3">
-              {Icon && <Icon className="h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6" />}
+          return (
+            <Link
+              key={category.value}
+              href={category.href}
+              className={cn(
+                "kicker px-3 md:px-4 py-2.5 md:py-3 -mb-px border-b-2 transition-colors",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-t-sm",
+                isActive
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              )}
+              aria-current={isActive ? "page" : undefined}
+            >
               {category.name}
             </Link>
-          </Button>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
 
 export function CategoryFilter() {
   return (
-    <Suspense fallback={
-      <div className="flex flex-wrap items-center gap-3 md:gap-4 lg:gap-5 mb-12 md:mb-16 lg:mb-20">
-        {categories.map((category) => {
-          const Icon = category.icon;
-          return (
-            <Button
-              key={category.value}
-              asChild
-              variant="outline"
-              size="lg"
-              className="rounded-full text-sm md:text-base lg:text-lg px-4 md:px-6 lg:px-8 py-2 md:py-3 lg:py-4 h-auto"
-            >
-              <Link href={category.href} className="flex items-center gap-2 md:gap-3">
-                {Icon && <Icon className="h-4 w-4 md:h-5 md:w-5 lg:h-6 lg:w-6" />}
-                {category.name}
-              </Link>
-            </Button>
-          );
-        })}
-      </div>
-    }>
+    <Suspense fallback={<div className="border-b border-border mb-10 md:mb-14 h-11" />}>
       <CategoryFilterContent />
     </Suspense>
   );

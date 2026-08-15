@@ -20,7 +20,10 @@ export default function KooperationenPage() {
               <ArrowLeft className="size-4" />
             </Link>
           </Button>
-          <h1 className="text-4xl font-bold tracking-tight">Kooperationen</h1>
+        </div>
+        <div>
+          <span className="kicker text-primary">Für Marken & Hersteller</span>
+          <h1 className="font-serif text-4xl md:text-5xl font-semibold tracking-tight mt-1">Kooperationen</h1>
         </div>
         <p className="text-xl text-muted-foreground max-w-3xl">
           Professionelle Produkttests und Kooperationsmöglichkeiten für Hersteller und Marken
@@ -28,14 +31,14 @@ export default function KooperationenPage() {
       </div>
 
       {/* Game Review CTA Section */}
-      <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-lg">
+      <Card>
         <CardHeader>
           <div className="flex items-start gap-4">
-            <div className="size-14 rounded-xl bg-primary/20 flex items-center justify-center shrink-0 border-2 border-primary/30">
+            <div className="size-14 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
               <Gamepad2 className="size-7 text-primary" />
             </div>
             <div className="flex-1">
-              <CardTitle className="text-2xl md:text-3xl mb-2 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <CardTitle className="font-serif text-2xl md:text-3xl mb-2 text-primary">
                 Wir sollen dein Spiel testen?
               </CardTitle>
               <CardDescription className="text-base text-muted-foreground">
@@ -53,7 +56,7 @@ export default function KooperationenPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="bg-background/50 rounded-lg p-4 border border-primary/10">
+          <div className="bg-muted/30 rounded-md p-4 border border-border">
             <p className="text-sm font-semibold text-foreground mb-2">Was wir benötigen:</p>
             <ul className="space-y-1.5 text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
@@ -74,7 +77,7 @@ export default function KooperationenPage() {
               </li>
             </ul>
           </div>
-          <Button asChild size="lg" className="w-full sm:w-auto rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105">
+          <Button asChild size="lg" className="w-full sm:w-auto rounded-md">
             <a href="mailto:review@nerdiction.de?subject=Spiel-Review-Anfrage">
               <Mail className="size-4 mr-2" />
               Key an review@nerdiction.de senden
@@ -84,10 +87,10 @@ export default function KooperationenPage() {
       </Card>
 
       {/* General Product CTA Section */}
-      <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+      <Card>
         <CardHeader>
           <div className="flex items-start gap-4">
-            <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <div className="size-12 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
               <Mail className="size-6 text-primary" />
             </div>
             <div className="flex-1">
@@ -121,8 +124,9 @@ export default function KooperationenPage() {
       {/* What We Offer */}
       <section className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight mb-2">Was wir bieten</h2>
-          <p className="text-muted-foreground text-lg">
+          <span className="kicker text-primary">Leistungen</span>
+          <h2 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight mt-1">Was wir bieten</h2>
+          <p className="text-muted-foreground text-lg mt-2">
             Professionelle und unabhängige Produkttests für Ihre Hardware und Games
           </p>
         </div>
@@ -130,7 +134,7 @@ export default function KooperationenPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader>
-              <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+              <div className="size-10 rounded-md bg-primary/10 flex items-center justify-center mb-2">
                 <Star className="size-5 text-primary" />
               </div>
               <CardTitle>Unabhängige Reviews</CardTitle>
@@ -146,7 +150,7 @@ export default function KooperationenPage() {
 
           <Card>
             <CardHeader>
-              <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+              <div className="size-10 rounded-md bg-primary/10 flex items-center justify-center mb-2">
                 <FileText className="size-5 text-primary" />
               </div>
               <CardTitle>Detaillierte Analysen</CardTitle>
@@ -162,7 +166,7 @@ export default function KooperationenPage() {
 
           <Card>
             <CardHeader>
-              <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+              <div className="size-10 rounded-md bg-primary/10 flex items-center justify-center mb-2">
                 <Users className="size-5 text-primary" />
               </div>
               <CardTitle>Engagierte Community</CardTitle>
@@ -178,7 +182,7 @@ export default function KooperationenPage() {
 
           <Card>
             <CardHeader>
-              <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+              <div className="size-10 rounded-md bg-primary/10 flex items-center justify-center mb-2">
                 <TrendingUp className="size-5 text-primary" />
               </div>
               <CardTitle>SEO-Optimiert</CardTitle>
@@ -194,7 +198,7 @@ export default function KooperationenPage() {
 
           <Card>
             <CardHeader>
-              <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+              <div className="size-10 rounded-md bg-primary/10 flex items-center justify-center mb-2">
                 <Package className="size-5 text-primary" />
               </div>
               <CardTitle>Multimedia-Content</CardTitle>
@@ -210,7 +214,7 @@ export default function KooperationenPage() {
 
           <Card>
             <CardHeader>
-              <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+              <div className="size-10 rounded-md bg-primary/10 flex items-center justify-center mb-2">
                 <CheckCircle2 className="size-5 text-primary" />
               </div>
               <CardTitle>Transparente Kommunikation</CardTitle>
@@ -229,8 +233,9 @@ export default function KooperationenPage() {
       {/* Test Process */}
       <section className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight mb-2">Unser Testprozess</h2>
-          <p className="text-muted-foreground text-lg">
+          <span className="kicker text-primary">Ablauf</span>
+          <h2 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight mt-1">Unser Testprozess</h2>
+          <p className="text-muted-foreground text-lg mt-2">
             So funktioniert die Zusammenarbeit mit uns
           </p>
         </div>
@@ -239,7 +244,7 @@ export default function KooperationenPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="size-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center font-semibold text-sm">
                   1
                 </span>
                 Kontaktaufnahme
@@ -256,7 +261,7 @@ export default function KooperationenPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="size-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center font-semibold text-sm">
                   2
                 </span>
                 Absprache & Planung
@@ -273,7 +278,7 @@ export default function KooperationenPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="size-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center font-semibold text-sm">
                   3
                 </span>
                 Produkttest
@@ -290,7 +295,7 @@ export default function KooperationenPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="size-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center font-semibold text-sm">
                   4
                 </span>
                 Review-Erstellung
@@ -307,7 +312,7 @@ export default function KooperationenPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="size-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center font-semibold text-sm">
                   5
                 </span>
                 Veröffentlichung
@@ -324,7 +329,7 @@ export default function KooperationenPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <span className="size-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                <span className="size-8 rounded-sm bg-primary text-primary-foreground flex items-center justify-center font-semibold text-sm">
                   6
                 </span>
                 Nachbetreuung
@@ -343,8 +348,9 @@ export default function KooperationenPage() {
       {/* What We Test */}
       <section className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight mb-2">Was wir testen</h2>
-          <p className="text-muted-foreground text-lg">
+          <span className="kicker text-primary">Kategorien</span>
+          <h2 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight mt-1">Was wir testen</h2>
+          <p className="text-muted-foreground text-lg mt-2">
             Unsere Expertise umfasst verschiedene Produktkategorien
           </p>
         </div>
@@ -415,8 +421,9 @@ export default function KooperationenPage() {
       {/* Guidelines */}
       <section className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight mb-2">Unsere Richtlinien</h2>
-          <p className="text-muted-foreground text-lg">
+          <span className="kicker text-primary">Grundsätze</span>
+          <h2 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight mt-1">Unsere Richtlinien</h2>
+          <p className="text-muted-foreground text-lg mt-2">
             Transparenz und Unabhängigkeit sind uns wichtig
           </p>
         </div>
@@ -474,7 +481,7 @@ export default function KooperationenPage() {
 
       {/* Contact CTA */}
       <section className="pt-8 border-t">
-        <Card className="bg-muted/30">
+        <Card className="bg-muted/30 border border-border">
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2">
               <Mail className="size-6 text-primary" />

@@ -55,6 +55,67 @@ export async function searchHardwareProduct(
 }
 
 /**
+ * Search for game review information using Tavily
+ */
+export async function searchGameProduct(
+  gameName: string,
+  platform?: string
+): Promise<TavilySearchResponse> {
+  const query = platform
+    ? `${gameName} game review ${platform} gameplay performance`
+    : `${gameName} game review gameplay performance`;
+
+  try {
+    const response = await getTavilyClient().search(query, {
+      search_depth: "advanced",
+      include_answer: true,
+      include_images: true,
+      include_raw_content: false,
+      max_results: 8,
+      include_domains: [
+        "ign.com",
+        "eurogamer.net",
+        "gamepressure.com",
+        "pcgamer.com",
+        "gamespot.com",
+        "gamerant.com",
+        "gamingbolt.com",
+        "rockpapershotgun.com",
+        "gamepro.de",
+        "gamestar.de",
+        "4players.de",
+      ],
+    });
+
+    return response;
+  } catch (error) {
+    console.error(`Error searching for game ${gameName}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Builds a compact research summary (answer + top results) from a Tavily
+ * response, suitable to be embedded into an LLM prompt as factual context.
+ */
+export function buildGameResearchSummary(
+  searchResults: TavilySearchResponse,
+  maxResults = 5,
+  maxCharsPerResult = 400
+): string[] {
+  const lines: string[] = [];
+  if (searchResults.answer) {
+    lines.push(`Recherche-Zusammenfassung: ${searchResults.answer}`);
+  }
+  const results = (searchResults.results || []).slice(0, maxResults);
+  results.forEach((result, i) => {
+    const content = (result.content || "").replace(/\s+/g, " ").trim();
+    lines.push(`Quelle ${i + 1} (${result.title || "Unbekannt"}): ${content.substring(0, maxCharsPerResult)}`);
+  });
+  return lines;
+}
+
+/**
  * Search for Amazon product information using Tavily
  */
 export async function searchAmazonProduct(

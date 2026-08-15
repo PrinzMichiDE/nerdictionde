@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Public_Sans, Libre_Bodoni } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
@@ -11,14 +11,14 @@ import { SupportTopBanner } from "@/components/shared/SupportTopBanner";
 import { SupportBanner } from "@/components/shared/SupportBanner";
 import { ReadingProgressBar } from "@/components/shared/ScrollFeatures";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const publicSans = Public_Sans({
+  variable: "--font-public-sans",
   subsets: ["latin"],
   display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const libreBodoni = Libre_Bodoni({
+  variable: "--font-libre-bodoni",
   subsets: ["latin"],
   display: "swap",
 });
@@ -48,7 +48,7 @@ export default function RootLayout({
   return (
     <html lang="de" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        className={`${publicSans.variable} ${libreBodoni.variable} antialiased min-h-screen flex flex-col`}
         suppressHydrationWarning
       >
         <ThemeProvider>

@@ -55,7 +55,8 @@ export default async function DealsPage() {
   return (
     <div className="container mx-auto px-4 py-12 space-y-12">
       <div className="max-w-3xl space-y-4">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+        <span className="kicker text-primary">Angebote & Rabatte</span>
+        <h1 className="font-serif text-4xl md:text-5xl font-semibold tracking-tight mt-1">
           Deals & Angebote
         </h1>
         <p className="text-lg text-muted-foreground">

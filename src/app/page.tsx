@@ -135,29 +135,27 @@ export default async function HomePage() {
       <CategoryFilter />
 
       {/* Latest Reviews Grid */}
-      <section className="space-y-8 md:space-y-10 lg:space-y-12">
-        <div className="flex items-center justify-between">
+      <section className="space-y-8 md:space-y-10">
+        <div className="flex items-end justify-between gap-4 border-b border-border pb-4">
           <div>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-2 md:mb-3">
+            <span className="kicker text-primary">Aktuelle Tests</span>
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mt-1">
               Neueste Reviews
             </h2>
-            <p className="text-muted-foreground text-lg md:text-xl lg:text-2xl">
-              Professionelle Tests und Bewertungen
-            </p>
           </div>
-          <Link 
-            href="/reviews" 
-            className="hidden sm:flex items-center gap-2 text-sm md:text-base font-medium text-primary hover:text-primary/80 transition-colors group"
+          <Link
+            href="/reviews"
+            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors group pb-1"
           >
             Alle ansehen
-            <span className="transition-transform group-hover:translate-x-1">→</span>
+            <span className="transition-transform group-hover:translate-x-0.5">→</span>
           </Link>
         </div>
-        
+
         {latestReviews.length > 0 ? (
-          <div className="grid gap-6 md:gap-8 lg:gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+          <div className="grid gap-8 md:gap-10 md:grid-cols-2 lg:grid-cols-3">
             {latestReviews.map((review, index) => (
-              <LargeReviewCard 
+              <LargeReviewCard
                 key={review.id}
                 review={review}
                 priority={index < 3}
@@ -165,9 +163,9 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 md:py-32 border-2 border-dashed rounded-2xl bg-muted/30">
-            <p className="text-muted-foreground text-xl md:text-2xl font-semibold">Noch keine Reviews vorhanden.</p>
-            <p className="text-muted-foreground/70 text-sm md:text-base mt-2">
+          <div className="text-center py-24 border border-dashed rounded-md bg-muted/30">
+            <p className="text-muted-foreground text-xl font-semibold">Noch keine Reviews vorhanden.</p>
+            <p className="text-muted-foreground/70 text-sm mt-2">
               Bald findest du hier die neuesten Reviews und Tests.
             </p>
           </div>
@@ -176,28 +174,26 @@ export default async function HomePage() {
 
       {/* Top Rated Reviews */}
       {topRatedReviews.length > 0 && (
-        <section className="space-y-8 md:space-y-10 lg:space-y-12 pt-8 md:pt-12 lg:pt-16">
-          <div className="flex items-center justify-between">
+        <section className="space-y-8 md:space-y-10">
+          <div className="flex items-end justify-between gap-4 border-b border-border pb-4">
             <div>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-2 md:mb-3">
+              <span className="kicker text-primary">Redaktions-Favoriten</span>
+              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mt-1">
                 Top Bewertungen
               </h2>
-              <p className="text-muted-foreground text-lg md:text-xl lg:text-2xl">
-                Die besten Reviews unserer Redaktion
-              </p>
             </div>
-            <Link 
-              href="/reviews?sort=score-desc" 
-              className="hidden sm:flex items-center gap-2 text-sm md:text-base font-medium text-primary hover:text-primary/80 transition-colors group"
+            <Link
+              href="/reviews?sort=score-desc"
+              className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors group pb-1"
             >
               Alle Top-Reviews
-              <span className="transition-transform group-hover:translate-x-1">→</span>
+              <span className="transition-transform group-hover:translate-x-0.5">→</span>
             </Link>
           </div>
 
-          <div className="grid gap-6 md:gap-8 lg:gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+          <div className="grid gap-8 md:gap-10 md:grid-cols-2 lg:grid-cols-3">
             {topRatedReviews.slice(0, 6).map((review) => (
-              <LargeReviewCard 
+              <LargeReviewCard
                 key={review.id}
                 review={review}
               />
@@ -207,12 +203,8 @@ export default async function HomePage() {
       )}
 
       {/* View All CTA */}
-      <div className="text-center py-12 md:py-16 lg:py-20">
-        <Button
-          asChild
-          size="lg"
-          className="rounded-full text-lg md:text-xl lg:text-2xl px-8 md:px-10 lg:px-12 py-6 md:py-7 lg:py-8 h-auto"
-        >
+      <div className="border-t border-border pt-10 text-center">
+        <Button asChild size="lg" variant="outline">
           <Link href="/reviews">
             Alle Reviews entdecken
           </Link>

@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
 import { ScoreBadge } from "@/components/reviews/ScoreBadge";
 import Image from "next/image";
 import { generateReviewSchema } from "@/lib/seo";
@@ -21,7 +20,7 @@ import { ReviewProgress } from "@/components/reviews/ReviewProgress";
 import { ShareButtons } from "@/components/reviews/ShareButtons";
 import { YouTubeEmbed } from "@/components/reviews/YouTubeEmbed";
 import { HardwareSpecs } from "@/components/reviews/HardwareSpecs";
-import { Clock, ShoppingCart } from "lucide-react";
+import { Clock, ShoppingCart, Check, X } from "lucide-react";
 import { getAmazonProductData } from "@/lib/amazon";
 
 export async function generateMetadata({
@@ -177,15 +176,14 @@ export default async function ReviewDetailPage({
         
         if (imageUrl) {
           return (
-            <div className="my-12 relative aspect-video w-full overflow-hidden rounded-2xl border-2 shadow-xl group">
+            <div className="my-12 relative aspect-video w-full overflow-hidden rounded-md group">
               <Image
                 src={imageUrl}
                 alt={`Screenshot ${index}`}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                className="object-cover"
                 unoptimized
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
             </div>
           );
         }
@@ -196,7 +194,7 @@ export default async function ReviewDetailPage({
   };
 
   return (
-    <article className="max-w-5xl mx-auto space-y-10 pb-12 animate-fade-in">
+    <article className="max-w-5xl mx-auto space-y-10 pb-12">
       <ReviewProgress />
       <script
         type="application/ld+json"
@@ -204,48 +202,50 @@ export default async function ReviewDetailPage({
       />
       
       {/* Header Section */}
-      <header className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <header className="border-b border-border pb-8">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div className="space-y-4 flex-1">
-            <div className="flex flex-wrap items-center gap-3">
-              <Badge variant="outline" className="capitalize text-xs font-semibold border-primary/30 bg-primary/5">
-                {review.category}
-              </Badge>
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground font-medium">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="kicker text-primary">
+                {review.category === "game" ? "Test" : review.category === "hardware" ? "Hardware-Test" : "Kritik"} · {review.category}
+              </span>
+              <span className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
                 <Clock className="size-3.5" />
-                <span>{readingTime} {isEn ? "min read" : "Min. Lesezeit"}</span>
-              </div>
-              <time 
+                {readingTime} {isEn ? "min read" : "Min. Lesezeit"}
+              </span>
+              <time
                 dateTime={review.createdAt.toISOString()}
-                className="text-sm text-muted-foreground font-medium"
+                className="text-sm text-muted-foreground"
               >
                 {isEn ? "Published on" : "Veröffentlicht am"} {formattedDate}
               </time>
             </div>
-            <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl xl:text-6xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
+
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-[1.1] max-w-4xl">
               {title}
             </h1>
-            <div className="pt-2">
+
+            <div className="pt-1">
               <ShareButtons title={title} url={`/reviews/${slug}`} />
             </div>
           </div>
 
-          <div className="flex bg-muted rounded-lg p-1 text-xs font-bold uppercase tracking-widest border">
-            <Link 
-              href={`/reviews/${slug}`} 
-              className={`px-4 py-2 rounded-md transition-all ${
-                !isEn 
-                  ? "bg-background shadow-sm text-primary border border-primary/20" 
+          <div className="flex items-center self-start lg:self-end gap-1 bg-muted rounded-md p-1 text-xs font-semibold uppercase tracking-widest border border-border shrink-0">
+            <Link
+              href={`/reviews/${slug}`}
+              className={`px-4 py-2 rounded-[4px] transition-colors ${
+                !isEn
+                  ? "bg-background text-foreground border border-border shadow-xs"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               DE
             </Link>
-            <Link 
-              href={`/reviews/${slug}?lang=en`} 
-              className={`px-4 py-2 rounded-md transition-all ${
-                isEn 
-                  ? "bg-background shadow-sm text-primary border border-primary/20" 
+            <Link
+              href={`/reviews/${slug}?lang=en`}
+              className={`px-4 py-2 rounded-[4px] transition-colors ${
+                isEn
+                  ? "bg-background text-foreground border border-border shadow-xs"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -256,29 +256,28 @@ export default async function ReviewDetailPage({
       </header>
 
       {/* Hero Image */}
-      <div className="relative aspect-video w-full overflow-hidden rounded-2xl border-2 shadow-2xl group">
+      <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
         {review.images?.[0] ? (
           <Image
             src={review.images[0]}
             alt={title}
             fill
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            className="object-cover"
             priority
             unoptimized
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+          <div className="flex h-full w-full items-center justify-center bg-muted">
             <span className="text-muted-foreground font-medium">Kein Bild vorhanden</span>
           </div>
         )}
-                <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-transparent to-transparent" />
-              </div>
+      </div>
 
       {/* YouTube Videos Section */}
       {review.youtubeVideos && review.youtubeVideos.length > 0 && (
         <div className="space-y-6">
-          <h2 className="text-3xl font-bold">
+          <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight border-b border-border pb-3">
             {isEn ? "Videos & Trailers" : "Videos & Trailer"}
           </h2>
           <div className="grid gap-6 md:grid-cols-2">
@@ -331,7 +330,7 @@ export default async function ReviewDetailPage({
           {/* Table of Contents */}
           {hasTableOfContents && <TableOfContents headings={headings} isEn={isEn} />}
 
-          <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed prose-headings:scroll-mt-24">
+          <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed prose-headings:scroll-mt-24 prose-headings:font-serif prose-headings:tracking-tight prose-headings:font-semibold">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[[rehypeSlugCustomId, { enableCustomId: true }]]}
@@ -369,20 +368,20 @@ export default async function ReviewDetailPage({
 
           {/* Hardware Requirements */}
           {review.category === "game" && specs && (
-            <div className="space-y-6 pt-10 border-t">
-              <h2 className="text-3xl font-bold flex items-center gap-3">
-                <Monitor className="h-8 w-8 text-primary" />
+            <div className="space-y-6 pt-10 border-t border-border">
+              <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight flex items-center gap-3">
+                <Monitor className="h-6 w-6 text-primary" />
                 {isEn ? "System Requirements" : "Systemanforderungen"}
               </h2>
-              
+
               <div className="grid md:grid-cols-2 gap-6">
                 {["minimum", "recommended"].map((type) => (
-                  <div key={type} className="p-6 rounded-2xl bg-muted/30 border-2 border-border/50 space-y-4">
-                    <h3 className="text-xl font-bold capitalize flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${type === "minimum" ? "bg-yellow-500" : "bg-green-500"}`} />
+                  <div key={type} className="p-6 rounded-md bg-muted/40 border border-border space-y-4">
+                    <h3 className="text-lg font-semibold capitalize flex items-center gap-2">
+                      <span className={`h-1.5 w-1.5 rounded-full ${type === "minimum" ? "bg-amber-500" : "bg-green-600"}`} />
                       {isEn ? (type === "minimum" ? "Minimum" : "Recommended") : (type === "minimum" ? "Minimum" : "Empfohlen")}
                     </h3>
-                    
+
                     <div className="space-y-3">
                       {[
                         { icon: Monitor, label: "OS", key: "os" },
@@ -394,7 +393,7 @@ export default async function ReviewDetailPage({
                         <div key={item.key} className="flex items-start gap-3 text-sm">
                           <item.icon className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                           <div className="flex flex-col">
-                            <span className="font-bold text-[10px] uppercase tracking-wider text-muted-foreground/70">{item.label}</span>
+                            <span className="font-semibold text-[10px] uppercase tracking-wider text-muted-foreground">{item.label}</span>
                             <span className="text-foreground/80">{specs[type]?.[item.key] || "N/A"}</span>
                           </div>
                         </div>
@@ -419,59 +418,54 @@ export default async function ReviewDetailPage({
 
         {/* Sidebar */}
         <aside className="space-y-8">
-          <div className="p-8 border-2 border-primary/20 rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 flex flex-col items-center text-center space-y-6 shadow-xl sticky top-24 backdrop-blur-sm">
-            <h3 className="font-bold text-xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <div className="p-6 rounded-md border border-border bg-card flex flex-col items-center text-center space-y-5 sticky top-24">
+            <h3 className="font-serif text-xl font-semibold tracking-tight">
               {isEn ? "Nerdiction Score" : "Nerdiction Wertung"}
             </h3>
-            <ScoreBadge score={review.score} className="h-28 w-28 text-4xl border-4 border-background shadow-2xl" />
-            <p className="text-sm font-semibold uppercase tracking-wider text-primary">
+            <ScoreBadge score={review.score} className="h-20 w-20 text-2xl" />
+            <p className="kicker text-primary">
               {review.score >= 90 ? (isEn ? "Phenomenal" : "Phänomenal") : review.score >= 80 ? (isEn ? "Excellent" : "Hervorragend") : review.score >= 70 ? (isEn ? "Good" : "Gut") : (isEn ? "Satisfactory" : "Befriedigend")}
             </p>
-            
-            <div className="w-full pt-4 space-y-6 border-t border-primary/20">
-                <div className="text-left space-y-3">
-                    <h4 className="font-bold flex items-center text-green-500 dark:text-green-400 uppercase text-xs tracking-widest">
-                        <span className="mr-2 text-lg">+</span> Pro
-                    </h4>
-                    <ul className="space-y-2.5">
-                    {pros.map((pro, i) => (
-                        <li key={i} className="flex items-start text-sm leading-relaxed">
-                        <span className="text-green-500 dark:text-green-400 mr-2.5 font-bold mt-0.5">✓</span> 
-                        <span className="flex-1">{pro}</span>
-                        </li>
-                    ))}
-                    </ul>
-                </div>
 
-                <div className="text-left space-y-3">
-                    <h4 className="font-bold flex items-center text-red-500 dark:text-red-400 uppercase text-xs tracking-widest">
-                        <span className="mr-2 text-lg">-</span> Contra
-                    </h4>
-                    <ul className="space-y-2.5">
-                    {cons.map((con, i) => (
-                        <li key={i} className="flex items-start text-sm leading-relaxed">
-                        <span className="text-red-500 dark:text-red-400 mr-2.5 font-bold mt-0.5">✗</span> 
-                        <span className="flex-1">{con}</span>
-                        </li>
-                    ))}
-                    </ul>
-                </div>
+            <div className="w-full pt-4 space-y-5 border-t border-border">
+              <div className="text-left space-y-2.5">
+                <h4 className="kicker text-green-700 dark:text-green-500">Pro</h4>
+                <ul className="space-y-2.5">
+                  {pros.map((pro, i) => (
+                    <li key={i} className="flex items-start text-sm leading-relaxed">
+                      <Check className="size-4 text-green-600 dark:text-green-500 mr-2 shrink-0 mt-0.5" />
+                      <span className="flex-1">{pro}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="text-left space-y-2.5">
+                <h4 className="kicker text-red-700 dark:text-red-500">Contra</h4>
+                <ul className="space-y-2.5">
+                  {cons.map((con, i) => (
+                    <li key={i} className="flex items-start text-sm leading-relaxed">
+                      <X className="size-4 text-red-600 dark:text-red-500 mr-2 shrink-0 mt-0.5" />
+                      <span className="flex-1">{con}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
             {/* Amazon Affiliate Link in Sidebar - Show for hardware reviews or if no metadata section */}
-            {(review.category === "hardware" || 
-              (review.category !== "product" && review.category !== "amazon")) && 
+            {(review.category === "hardware" ||
+              (review.category !== "product" && review.category !== "amazon")) &&
               review.affiliateLink && (
-              <div className="w-full pt-6 border-t border-primary/20">
-                <a 
-                  href={review.affiliateLink} 
-                  target="_blank" 
+              <div className="w-full pt-5 border-t border-border">
+                <a
+                  href={review.affiliateLink}
+                  target="_blank"
                   rel="nofollow sponsored"
-                  className="flex items-center justify-center w-full bg-[#FF9900] hover:bg-[#E68A00] text-black font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] group"
+                  className="flex items-center justify-center w-full bg-[#FF9900] hover:bg-[#E68A00] text-black font-semibold py-3 rounded-md transition-colors"
                 >
-                  <ShoppingCart className="mr-2 h-5 w-5" />
-                  <span>{isEn ? "View on Amazon" : "Auf Amazon ansehen"}</span>
-                  <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                  <ShoppingCart className="mr-2 h-4 w-4" />
+                  {isEn ? "View on Amazon" : "Auf Amazon ansehen"}
                 </a>
               </div>
             )}

@@ -9,9 +9,7 @@ import { Review } from "@/types/review";
 import { Skeleton } from "@/components/shared/Skeleton";
 import Image from "next/image";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { ScoreBadge } from "./ScoreBadge";
-import { Star } from "lucide-react";
 
 const categoryLabels: Record<string, string> = {
   game: "Games",
@@ -87,12 +85,13 @@ export function ReviewsList() {
   const otherReviews = featuredReview ? reviews.slice(1) : reviews;
 
   return (
-    <div className="space-y-10 pb-12 animate-fade-in">
-      <div className="flex flex-col space-y-3">
-        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+    <div className="space-y-10 pb-12">
+      <div className="border-b border-border pb-6">
+        <span className="kicker text-primary">Das Magazin</span>
+        <h1 className="font-serif text-4xl md:text-5xl font-semibold tracking-tight mt-1">
           Alle Reviews
         </h1>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-muted-foreground mt-3 max-w-2xl">
           Durchsuche unsere neuesten Tests zu Games, Filmen, Serien und Hardware.
         </p>
       </div>
@@ -124,14 +123,30 @@ export function ReviewsList() {
         <>
           {featuredReview && (
             <div className="mb-12">
-              <Link href={`/reviews/${featuredReview.slug}`} className="group block">
-                <div className="relative aspect-[21/9] w-full overflow-hidden rounded-3xl border-2 shadow-2xl transition-all duration-500 group-hover:border-primary/30 group-hover:shadow-primary/10">
+              <Link href={`/reviews/${featuredReview.slug}`} className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
+                <div className="border-b border-border pb-5 mb-5">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
+                    <span className="kicker text-primary">Featured</span>
+                    <span className="text-muted-foreground" aria-hidden="true">·</span>
+                    <span className="kicker text-muted-foreground">
+                      {categoryLabels[featuredReview.category] || featuredReview.category}
+                    </span>
+                  </div>
+                  <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-[1.1] group-hover:text-primary transition-colors line-clamp-2">
+                    {featuredReview.title}
+                  </h2>
+                  <p className="text-muted-foreground text-sm md:text-base mt-3 line-clamp-2 max-w-2xl">
+                    {featuredReview.content.replace(/[#*`]/g, "").substring(0, 200)}...
+                  </p>
+                </div>
+
+                <div className="relative aspect-[21/9] w-full overflow-hidden rounded-md bg-muted">
                   {featuredReview.images?.[0] ? (
                     <Image
                       src={featuredReview.images[0]}
                       alt={featuredReview.title}
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
                       priority
                       unoptimized
                     />
@@ -140,38 +155,17 @@ export function ReviewsList() {
                       <span className="text-muted-foreground">Kein Bild</span>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-                  
-                  <div className="absolute bottom-0 left-0 p-6 md:p-10 space-y-4 w-full max-w-3xl">
-                    <div className="flex items-center gap-3">
-                      <Badge className="bg-primary text-primary-foreground hover:bg-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                        <Star className="size-3 fill-current" />
-                        Featured Review
-                      </Badge>
-                      <Badge variant="outline" className="bg-background/50 backdrop-blur-md text-foreground border-foreground/10 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                        {categoryLabels[featuredReview.category] || featuredReview.category}
-                      </Badge>
-                    </div>
-                    
-                    <h2 className="text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                      {featuredReview.title}
-                    </h2>
-                    
-                    <p className="text-muted-foreground text-sm md:text-base lg:text-lg line-clamp-2 max-w-2xl font-medium">
-                      {featuredReview.content.replace(/[#*`]/g, "").substring(0, 200)}...
-                    </p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
 
-                    <div className="flex items-center gap-6 pt-2">
-                      <div className="flex items-center gap-2">
-                        <ScoreBadge score={featuredReview.score} className="size-12 md:size-14 text-lg md:text-xl border-2 border-background shadow-xl" />
-                        <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-muted-foreground">
-                          Nerdiction Score
-                        </span>
-                      </div>
-                      <span className="text-primary font-bold text-sm md:text-base group-hover:translate-x-2 transition-transform flex items-center gap-2">
-                        Jetzt lesen <span className="text-xl">→</span>
-                      </span>
-                    </div>
+                  <div className="absolute top-3 right-3 md:top-4 md:right-4 flex items-center gap-3">
+                    <ScoreBadge score={featuredReview.score} className="h-12 w-12 md:h-14 md:w-14 text-lg md:text-xl border border-white/20" />
+                  </div>
+
+                  <div className="absolute bottom-3 left-3 md:bottom-4 md:left-4">
+                    <span className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-black/60 px-3 py-1.5 rounded-sm">
+                      Jetzt lesen
+                      <span className="transition-transform group-hover:translate-x-0.5">→</span>
+                    </span>
                   </div>
                 </div>
               </Link>
@@ -184,15 +178,9 @@ export function ReviewsList() {
               {pagination && pagination.totalPages > 1 && ` (Seite ${pagination.page} von ${pagination.totalPages})`}
             </p>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {otherReviews.map((review, index) => (
-              <div
-                key={review.id}
-                className="animate-scale-in"
-                style={{ animationDelay: `${index * 0.05}s`, animationFillMode: "both" }}
-              >
-                <ReviewCard review={review} />
-              </div>
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {otherReviews.map((review) => (
+              <ReviewCard key={review.id} review={review} />
             ))}
           </div>
           

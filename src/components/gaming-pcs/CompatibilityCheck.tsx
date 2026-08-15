@@ -113,11 +113,11 @@ export function CompatibilityCheck({ components, isEn = false }: CompatibilityCh
   if (!actualPSU) {
     // Can't determine PSU wattage, show info message
     return (
-      <Card className="border-2 bg-blue-500/5 border-blue-500/20">
+      <Card className="border border-border rounded-md">
         <CardHeader>
           <div className="flex items-center gap-3">
             <AlertCircle className="h-5 w-5 text-blue-500" />
-            <CardTitle className="text-lg font-black uppercase tracking-tight">
+            <CardTitle className="font-serif text-lg font-semibold tracking-tight">
               {isEn ? "PSU Compatibility" : "Netzteil-Kompatibilität"}
             </CardTitle>
           </div>
@@ -139,13 +139,7 @@ export function CompatibilityCheck({ components, isEn = false }: CompatibilityCh
   const isOptimal = difference >= 100; // 100W+ headroom
   
   return (
-    <Card className={cn(
-      "border-2",
-      isCompatible && isOptimal && "bg-green-500/5 border-green-500/20",
-      isCompatible && !isOptimal && "bg-blue-500/5 border-blue-500/20",
-      !isCompatible && isClose && "bg-yellow-500/5 border-yellow-500/20",
-      !isCompatible && !isClose && "bg-red-500/5 border-red-500/20"
-    )}>
+    <Card className="border border-border rounded-md">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -153,14 +147,14 @@ export function CompatibilityCheck({ components, isEn = false }: CompatibilityCh
             {isCompatible && !isOptimal && <CheckCircle2 className="h-5 w-5 text-blue-500" />}
             {!isCompatible && isClose && <AlertTriangle className="h-5 w-5 text-yellow-500" />}
             {!isCompatible && !isClose && <AlertCircle className="h-5 w-5 text-red-500" />}
-            <CardTitle className="text-lg font-black uppercase tracking-tight">
+            <CardTitle className="font-serif text-lg font-semibold tracking-tight">
               {isEn ? "PSU Compatibility" : "Netzteil-Kompatibilität"}
             </CardTitle>
           </div>
           <Badge 
             variant="outline" 
             className={cn(
-              "font-black",
+              "font-semibold",
               isCompatible && isOptimal && "border-green-500/50 text-green-600",
               isCompatible && !isOptimal && "border-blue-500/50 text-blue-600",
               !isCompatible && isClose && "border-yellow-500/50 text-yellow-600",
@@ -195,13 +189,7 @@ export function CompatibilityCheck({ components, isEn = false }: CompatibilityCh
           </div>
         </div>
         
-        <div className={cn(
-          "p-4 rounded-lg border",
-          isCompatible && isOptimal && "bg-green-500/10 border-green-500/20",
-          isCompatible && !isOptimal && "bg-blue-500/10 border-blue-500/20",
-          !isCompatible && isClose && "bg-yellow-500/10 border-yellow-500/20",
-          !isCompatible && !isClose && "bg-red-500/10 border-red-500/20"
-        )}>
+        <div className="p-4 rounded-md border border-border bg-muted">
           {isCompatible && isOptimal && (
             <div className="space-y-1">
               <div className="flex items-center gap-2 font-bold text-green-600">

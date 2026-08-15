@@ -28,14 +28,14 @@ export function BenchmarksSection({ benchmarks, isEn = false }: BenchmarksSectio
   const maxScore = Math.max(...benchmarks.map(b => b.score), 10000);
 
   return (
-    <Card className="border-2 bg-gradient-to-br from-background to-muted/20">
+    <Card className="border border-border rounded-md">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
+          <div className="p-2 bg-primary/5 rounded-md">
             <BarChart3 className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-black uppercase tracking-tight">
+            <CardTitle className="font-serif text-2xl font-semibold tracking-tight">
               {isEn ? "Benchmarks" : "Benchmarks"}
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
@@ -51,10 +51,10 @@ export function BenchmarksSection({ benchmarks, isEn = false }: BenchmarksSectio
             return (
               <div
                 key={idx}
-                className="p-5 rounded-xl bg-gradient-to-br from-muted/50 to-muted/30 border-2 hover:border-primary/50 hover:shadow-lg transition-all group"
+                className="p-5 rounded-md bg-muted/40 border border-border"
               >
                 <div className="flex items-start justify-between gap-2 mb-3">
-                  <Badge variant="secondary" className="text-xs font-bold uppercase flex items-center gap-1">
+                  <Badge variant="secondary" className="text-xs font-semibold flex items-center gap-1">
                     <Zap className="h-3 w-3" />
                     {benchmark.benchmark}
                   </Badge>
@@ -66,7 +66,7 @@ export function BenchmarksSection({ benchmarks, isEn = false }: BenchmarksSectio
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-baseline gap-2">
-                    <span className={`text-3xl font-black ${getBenchmarkColor(benchmark.score, maxScore)}`}>
+                    <span className={`font-serif text-3xl font-semibold tracking-tight ${getBenchmarkColor(benchmark.score, maxScore)}`}>
                       {benchmark.score.toLocaleString("de-DE")}
                     </span>
                     {benchmark.unit && (

@@ -82,18 +82,19 @@ export default async function ReleasesPage() {
       {/* Header */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-primary/10">
+          <div className="p-3 rounded-md bg-primary/10">
             <Calendar className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+            <span className="kicker text-primary">Release-Kalender</span>
+            <h1 className="font-serif text-4xl md:text-5xl font-semibold tracking-tight mt-1">
               Spiele Release Kalender
             </h1>
-            <p className="text-muted-foreground text-lg md:text-xl mt-2">
-              Alle kommenden Spiele-Releases auf einen Blick
-            </p>
           </div>
         </div>
+        <p className="text-muted-foreground text-lg md:text-xl">
+          Alle kommenden Spiele-Releases auf einen Blick
+        </p>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Gamepad2 className="h-4 w-4" />
           <span>{releases.length} kommende Releases für {now.getFullYear()}</span>
@@ -112,7 +113,7 @@ export default async function ReleasesPage() {
             return (
               <section key={monthKey} className="space-y-6">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-2xl md:text-3xl font-bold">{monthName}</h2>
+                  <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight">{monthName}</h2>
                   <Badge variant="secondary" className="text-sm">
                     {monthReleases.length} {monthReleases.length === 1 ? "Release" : "Releases"}
                   </Badge>
@@ -121,40 +122,39 @@ export default async function ReleasesPage() {
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {monthReleases.map((release) => (
                     <Link key={release.id} href={`/reviews/${release.slug}`}>
-                      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 border-2 hover:border-primary/20 h-full">
+                      <Card className="overflow-hidden border h-full">
                         <div className="relative aspect-video w-full overflow-hidden bg-muted">
                           {release.images?.[0] ? (
                             <Image
                               src={release.images[0]}
                               alt={release.title}
                               fill
-                              className="object-cover transition-transform duration-500 group-hover:scale-110"
+                              className="object-cover"
                               unoptimized
                               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                             />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+                            <div className="flex h-full w-full items-center justify-center bg-muted">
                               <span className="text-muted-foreground text-xs font-medium">Kein Bild</span>
                             </div>
                           )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           <ScoreBadge
                             score={release.score}
-                            className="absolute bottom-3 right-3 scale-90 group-hover:scale-100 transition-transform duration-300 shadow-lg"
+                            className="absolute bottom-3 right-3"
                           />
                         </div>
                         <CardHeader className="p-5">
                           <div className="flex items-center justify-between gap-2 mb-2">
                             <Badge
                               variant="outline"
-                              className="text-xs font-semibold border-primary/30 bg-primary/5"
+                              className="text-xs font-semibold"
                             >
                               {release.releaseDate
                                 ? format(new Date(release.releaseDate), "d. MMMM yyyy", { locale: de })
                                 : "TBA"}
                             </Badge>
                           </div>
-                          <CardTitle className="line-clamp-2 text-lg leading-tight group-hover:text-primary transition-colors">
+                          <CardTitle className="font-serif line-clamp-2 text-lg leading-tight">
                             {release.title}
                           </CardTitle>
                         </CardHeader>
@@ -187,7 +187,7 @@ export default async function ReleasesPage() {
           })}
         </div>
       ) : (
-        <div className="text-center py-24 border-2 border-dashed rounded-xl bg-muted/30">
+        <div className="text-center py-24 border border-dashed rounded-md bg-muted/30">
           <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground text-lg font-medium">
             Noch keine kommenden Releases vorhanden
