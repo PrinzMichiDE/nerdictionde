@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Mail, Heart, FileText, BarChart3, Handshake, FileCheck } from "lucide-react";
+import { BrandMark } from "@/components/shared/BrandMark";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -31,7 +32,8 @@ export function Footer() {
           <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
             {/* Brand */}
             <div className="space-y-4">
-              <Link href="/" className="flex items-baseline gap-2 w-fit" aria-label="Nerdiction Startseite">
+              <Link href="/" className="flex items-center gap-2 w-fit" aria-label="Nerdiction Startseite">
+                <BrandMark className="size-7 shrink-0" />
                 <span className="font-serif text-2xl font-semibold tracking-tight">
                   Nerdiction
                 </span>

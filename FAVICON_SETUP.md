@@ -1,73 +1,47 @@
 # Favicon Setup für Nerdiction
 
-## Aktuelle Konfiguration
+## Design
 
-Das Favicon-System ist bereits konfiguriert in `src/app/layout.tsx` und erwartet folgende Dateien im `/public` Verzeichnis:
+Das Logo ist ein **N-Monogramm** in einem abgerundeten Badge:
 
-- `favicon.ico` - Standard Favicon (16x16, 32x32 Multi-Resolution)
-- `icon-192.png` - 192x192 PNG für Android
-- `icon-512.png` - 512x512 PNG für PWA
-- `apple-icon.png` - 180x180 PNG für iOS
+- **Quelle**: `public/icon.svg` (Badge) und `public/icon-maskable.svg` (Vollfläche für PWA maskable)
+- **Wortlogo**: `public/logo.svg` (Badge + „Nerdiction"-Wordmark)
+- **Farbe**: Blau (#3b82f6) mit Gradient (#60a5fa → #3b82f6 → #1d4ed8)
+- **Stil**: Modern, minimalistisch, gut erkennbar bis 16x16 px
+- Das N besitzt eine diagonale Unterbrechung (Circuit-/Gaming-Element)
 
-## Favicon generieren
+## Dateien generieren
 
-### Option 1: Online-Tool (Empfohlen)
-
-1. Gehe zu [RealFaviconGenerator](https://realfavicongenerator.net/)
-2. Lade die `public/icon.svg` Datei hoch
-3. Konfiguriere die Optionen:
-   - **iOS**: Apple Touch Icon aktivieren
-   - **Android**: Chrome/Android Icons aktivieren
-   - **Favicon für Desktop**: Windows, macOS, etc.
-4. Lade das generierte Paket herunter
-5. Kopiere alle Dateien ins `/public` Verzeichnis
-
-### Option 2: Manuell mit Bildbearbeitung
-
-1. Öffne `public/icon.svg` in einem Bildbearbeitungsprogramm (z.B. GIMP, Photoshop, Figma)
-2. Exportiere als PNG in folgenden Größen:
-   - 512x512 → `icon-512.png`
-   - 192x192 → `icon-192.png`
-   - 180x180 → `apple-icon.png`
-3. Erstelle ein Multi-Resolution ICO:
-   - Verwende ein Tool wie [ICO Convert](https://icoconvert.com/)
-   - Lade `icon-512.png` hoch
-   - Wähle Größen: 16x16, 32x32, 48x48
-   - Speichere als `favicon.ico`
-
-### Option 3: Mit Sharp (Node.js)
-
-Falls du Node.js installiert hast, kannst du ein Script verwenden:
+Alle Favicon-Dateien werden automatisch aus den SVGs erzeugt:
 
 ```bash
-npm install sharp --save-dev
+npm run generate:icons
 ```
 
-Dann ein Script erstellen, das die SVG in alle benötigten Formate konvertiert.
+Das Script (`scripts/generate-favicons.mjs`) erstellt in `/public`:
 
-## Design-Hinweise
+| Datei                   | Format      | Verwendung                 |
+| ----------------------- | ----------- | -------------------------- |
+| `favicon.ico`           | ICO (16/32/48/256) | Standard-Favicon     |
+| `icon-192.png`          | 192x192 PNG | Android / Chrome           |
+| `icon-512.png`          | 512x512 PNG | PWA                        |
+| `icon-512-maskable.png` | 512x512 PNG | PWA maskable (Vollfläche)  |
+| `apple-icon.png`        | 180x180 PNG | iOS Apple Touch Icon       |
 
-Das aktuelle Design basiert auf:
-- **Farbe**: Blau (#3b82f6) - Primary Color der Website
-- **Icon**: Gamepad-Symbol (passend zum Logo)
-- **Stil**: Modern, minimalistisch, gut erkennbar
+## Integration
+
+- `src/app/layout.tsx` referenziert die Icons in den `Metadata`.
+- `public/manifest.json` enthält die PWA-Icons inkl. maskable Variante.
+- Das Logo-Badge wird in Header und Footer angezeigt.
 
 ## Verifizierung
 
-Nach dem Hochladen der Dateien:
-
 1. Starte den Dev-Server: `npm run dev`
-2. Öffne die Website im Browser
-3. Prüfe den Tab: Das Favicon sollte sichtbar sein
-4. Prüfe die Browser-Console auf 404-Fehler für fehlende Icons
-
-## Manifest
-
-Das `manifest.json` ist bereits konfiguriert und wird automatisch verwendet für PWA-Funktionalität.
+2. Öffne die Website im Browser – der Tab zeigt das Favicon.
+3. Prüfe die Browser-Console auf 404-Fehler für fehlende Icons.
 
 ## Troubleshooting
 
-- **Favicon wird nicht angezeigt**: Browser-Cache leeren (Ctrl+Shift+R)
-- **404-Fehler**: Prüfe, ob alle Dateien im `/public` Verzeichnis liegen
-- **Falsche Größe**: Stelle sicher, dass die Dateien die korrekten Dimensionen haben
-
+- **Favicon wird nicht angezeigt**: Browser-Cache leeren (Ctrl+Shift+R).
+- **404-Fehler**: Prüfe, ob alle Dateien im `/public` Verzeichnis liegen.
+- **Neues Design**: `public/icon.svg` anpassen und `npm run generate:icons` ausführen.

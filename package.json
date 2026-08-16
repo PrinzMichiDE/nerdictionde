@@ -14,6 +14,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:apply-tmdb-migration": "tsx scripts/apply-tmdb-migration.ts",
     "type-check": "tsc --noEmit",
+    "generate:icons": "node scripts/generate-favicons.mjs",
     "create-game-reviews": "tsx scripts/create-200-game-reviews.ts",
     "regenerate-movie-series": "tsx scripts/regenerate-movie-series-content.ts"
   },

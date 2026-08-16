@@ -3,6 +3,7 @@ import { Navigation } from "./Navigation";
 import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { GlobalSearch } from "@/components/shared/GlobalSearch";
+import { BrandMark } from "@/components/shared/BrandMark";
 
 export function Header() {
   return (
@@ -14,6 +15,7 @@ export function Header() {
           className="flex items-baseline gap-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
           aria-label="Nerdiction Startseite"
         >
+          <BrandMark className="size-7 md:size-8 self-center shrink-0" />
           <span className="font-serif text-2xl md:text-3xl font-semibold tracking-tight">
             Nerdiction
           </span>

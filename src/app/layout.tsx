@@ -10,6 +10,12 @@ import { BackToTop } from "@/components/shared/BackToTop";
 import { SupportTopBanner } from "@/components/shared/SupportTopBanner";
 import { SupportBanner } from "@/components/shared/SupportBanner";
 import { ReadingProgressBar } from "@/components/shared/ScrollFeatures";
+import {
+  generateOrganizationSchema,
+  generateWebsiteSchema,
+  getSiteUrl,
+  SITE_NAME,
+} from "@/lib/seo";
 
 const publicSans = Public_Sans({
   variable: "--font-public-sans",
@@ -23,9 +29,58 @@ const libreBodoni = Libre_Bodoni({
   display: "swap",
 });
 
+const siteUrl = getSiteUrl();
+
 export const metadata: Metadata = {
-  title: "Nerdiction - Professional Game & Hardware Reviews",
-  description: "Die Plattform für detaillierte Hardware- und Game-Reviews für fundierte Kaufentscheidungen.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: `${SITE_NAME} - Professional Game & Hardware Reviews`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description:
+    "Die Plattform für detaillierte Hardware- und Game-Reviews für fundierte Kaufentscheidungen. Unabhängige Tests zu Games, Filmen und Serien.",
+  applicationName: SITE_NAME,
+  authors: [{ name: SITE_NAME, url: siteUrl }],
+  keywords: [
+    "Game Review",
+    "Hardware Test",
+    "Film Kritik",
+    "Serien Review",
+    "Kaufberatung",
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "de_DE",
+    url: siteUrl,
+    title: `${SITE_NAME} - Professional Game & Hardware Reviews`,
+    description:
+      "Die Plattform für detaillierte Hardware- und Game-Reviews für fundierte Kaufentscheidungen.",
+    images: [
+      {
+        url: `${siteUrl}/icon-512.png`,
+        width: 512,
+        height: 512,
+        alt: `${SITE_NAME} Logo`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    site: "@nerdiction",
+    title: `${SITE_NAME} - Professional Game & Hardware Reviews`,
+    description:
+      "Die Plattform für detaillierte Hardware- und Game-Reviews für fundierte Kaufentscheidungen.",
+    images: [`${siteUrl}/icon-512.png`],
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -51,6 +106,14 @@ export default function RootLayout({
         className={`${publicSans.variable} ${libreBodoni.variable} antialiased min-h-screen flex flex-col`}
         suppressHydrationWarning
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(generateOrganizationSchema()) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(generateWebsiteSchema()) }}
+        />
         <ThemeProvider>
           <ReadingProgressBar />
           <SupportTopBanner />
