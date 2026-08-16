@@ -15,9 +15,6 @@ const categoryLabels: Record<string, string> = {
   game: "Games",
   movie: "Filme",
   series: "Serien",
-  hardware: "Hardware",
-  product: "Produkte",
-  amazon: "Produkte",
 };
 
 export function LargeReviewCard({ review, priority = false }: LargeReviewCardProps) {

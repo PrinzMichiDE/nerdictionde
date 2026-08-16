@@ -6,18 +6,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { 
   Loader2, Play, Pause, CheckCircle2, XCircle, Clock, Database, 
-  TrendingUp, Film, Tv, Cpu, ShoppingCart, RefreshCcw, List, ChevronDown, ChevronUp, ExternalLink, Plus
+  TrendingUp, Film, Tv, RefreshCcw, List, ChevronDown, ChevronUp, ExternalLink, Plus
 } from "lucide-react";
 import axios from "axios";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
-type ReviewCategory = "game" | "movie" | "series" | "hardware" | "product";
+type ReviewCategory = "game" | "movie" | "series";
 
 interface JobItem {
   name: string;
@@ -72,9 +71,6 @@ export function MassReviewCreation() {
   const [platforms, setPlatforms] = useState<Array<{ id: number; name: string }>>([]);
   const [tmdbMovieGenres, setTmdbMovieGenres] = useState<Array<{ id: number; name: string }>>([]);
   const [tmdbSeriesGenres, setTmdbSeriesGenres] = useState<Array<{ id: number; name: string }>>([]);
-  const [hardwareNames, setHardwareNames] = useState<string>("");
-  const [productNames, setProductNames] = useState<string>("");
-  const [keywords, setKeywords] = useState<string>("Gaming Zubehör");
 
   // Auto-poll for all jobs if any are running
   useEffect(() => {
@@ -159,20 +155,6 @@ export function MassReviewCreation() {
           minRating: adjustedRating || 5,
         };
         if (genreId && genreId !== "all") requestBody.queryOptions.genreId = parseInt(genreId);
-      } else if (category === "hardware") {
-        if (!hardwareNames.trim()) {
-          alert("Bitte geben Sie Hardware-Namen ein");
-          setLoading(false);
-          return;
-        }
-        requestBody.hardwareNames = hardwareNames.split("\n").map(n => n.trim()).filter(n => n.length > 0);
-      } else if (category === "product") {
-        if (productNames.trim()) {
-          requestBody.productNames = productNames.split("\n").map(n => n.trim()).filter(n => n.length > 0);
-        } else {
-          // Automatic search via keywords
-          requestBody.keywords = keywords || "Gaming Zubehör";
-        }
       }
 
       const response = await axios.post("/api/reviews/bulk-create-mass", requestBody);
@@ -226,8 +208,6 @@ export function MassReviewCreation() {
       case "game": return <Database className="h-4 w-4" />;
       case "movie": return <Film className="h-4 w-4" />;
       case "series": return <Tv className="h-4 w-4" />;
-      case "hardware": return <Cpu className="h-4 w-4" />;
-      case "product": return <ShoppingCart className="h-4 w-4" />;
       default: return <Database className="h-4 w-4" />;
     }
   };
@@ -263,8 +243,6 @@ export function MassReviewCreation() {
                   <SelectItem value="game">Games</SelectItem>
                   <SelectItem value="movie">Filme</SelectItem>
                   <SelectItem value="series">Serien</SelectItem>
-                  <SelectItem value="hardware">Hardware</SelectItem>
-                  <SelectItem value="product">Produkte</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -324,68 +302,6 @@ export function MassReviewCreation() {
                       step={category === "game" ? "1" : "0.1"}
                     />
                   </div>
-                </div>
-              </div>
-            )}
-
-            {(category === "hardware") && (
-              <div className="space-y-2">
-                <Label>Hardware Namen (einer pro Zeile)</Label>
-                <Textarea 
-                  placeholder="RTX 4090..." 
-                  value={hardwareNames} 
-                  onChange={(e) => setHardwareNames(e.target.value)}
-                  className="min-h-[100px]"
-                />
-              </div>
-            )}
-
-            {(category === "product") && (
-              <div className="space-y-4 border-t pt-4">
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Database className="h-3 w-3" />
-                    Amazon Suchbegriffe (Automatik)
-                  </Label>
-                  <Input 
-                    placeholder="z.B. Gaming Maus, Smart Home..." 
-                    value={keywords} 
-                    onChange={(e) => setKeywords(e.target.value)}
-                  />
-                  <p className="text-[10px] text-muted-foreground italic">
-                    Hinweis: Erfordert aktive Amazon PA API Zugangsdaten. Falls nicht vorhanden, werden Standard-Produkte verwendet.
-                  </p>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {["Gaming Zubehör", "Smart Home", "PC Komponenten", "Streaming Setup"].map(kw => (
-                      <Badge 
-                        key={kw} 
-                        variant="secondary" 
-                        className="text-[9px] cursor-pointer hover:bg-primary/20"
-                        onClick={() => setKeywords(kw)}
-                      >
-                        {kw}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="relative py-2">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-[10px] uppercase font-bold">
-                    <span className="bg-background px-2 text-muted-foreground">ODER</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Spezifische Produktnamen / ASINs</Label>
-                  <Textarea 
-                    placeholder="iPhone 15, B09B8V1LZ3..." 
-                    value={productNames} 
-                    onChange={(e) => setProductNames(e.target.value)}
-                    className="min-h-[80px] text-xs"
-                  />
                 </div>
               </div>
             )}

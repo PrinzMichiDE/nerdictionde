@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getIGDBGamesBulk } from "@/lib/igdb";
 import { getTMDBMoviesBulk, getTMDBSeriesBulk } from "@/lib/tmdb";
-import { processGame, processMovie, processSeries, processAmazonProduct } from "@/lib/review-generation";
-import { processHardware } from "@/app/api/reviews/bulk-create-hardware/route";
+import { processGame, processMovie, processSeries } from "@/lib/review-generation";
 import prisma from "@/lib/prisma";
 
 /**
  * Cron Job: Generates reviews from all categories daily
- * Categories: game, hardware, amazon, movie, series, product
+ * Categories: game, movie, series
  * Schedule: Daily at midnight (0 0 * * *)
  */
 export async function GET(req: NextRequest) {
@@ -23,9 +22,6 @@ export async function GET(req: NextRequest) {
 
     const results = {
       game: { success: false, reviewId: null as string | null, error: null as string | null },
-      hardware: { success: false, reviewId: null as string | null, error: null as string | null },
-      amazon: { success: false, reviewId: null as string | null, error: null as string | null },
-      product: { success: false, reviewId: null as string | null, error: null as string | null },
       movie: { success: false, reviewId: null as string | null, error: null as string | null },
       series: { success: false, reviewId: null as string | null, error: null as string | null },
     };
@@ -73,115 +69,7 @@ export async function GET(req: NextRequest) {
     // Delay between categories to avoid rate limits
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // 3. Generate Hardware Review
-    try {
-      console.log("💻 Generating hardware review...");
-      const popularHardware = [
-        "NVIDIA RTX 4090", "AMD Ryzen 9 7950X", "Intel Core i9-14900K", "Samsung Odyssey G9",
-        "Logitech MX Master 3S", "PlayStation 5 Pro", "Xbox Series X", "AMD Ryzen 7 7800X3D",
-        "NVIDIA RTX 4070 Ti Super", "Apple MacBook Pro M3 Max", "Steam Deck OLED", "Asus ROG Ally X"
-      ];
-
-      const existingHardwareReviews = await prisma.review.findMany({
-        where: { category: "hardware" },
-        include: { hardware: true },
-      });
-
-      const existingHardwareNames = new Set(
-        existingHardwareReviews.map((r: any) => r.hardware?.name).filter(Boolean)
-      );
-
-      const hardwareToReview = popularHardware
-        .filter((name) => !existingHardwareNames.has(name))
-        .slice(0, 1); // Just 1 for daily cron to keep it stable
-
-      if (hardwareToReview.length > 0) {
-        const hardwareName = hardwareToReview[0];
-        const result = await processHardware(hardwareName, {
-          status: "published",
-          skipExisting: true,
-          generateImages: true,
-        });
-
-        if (result.success && result.reviewId) {
-          results.hardware.success = true;
-          results.hardware.reviewId = result.reviewId;
-          console.log(`✅ Hardware review created: ${hardwareName}`);
-        } else {
-          results.hardware.error = result.error || "Unknown error";
-        }
-      } else {
-        results.hardware.error = "No new hardware available";
-      }
-    } catch (error: any) {
-      results.hardware.error = error.message;
-      console.error("Error generating hardware review:", error);
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // 4. Generate Product & Amazon Reviews
-    const categories: ("amazon" | "product")[] = ["amazon", "product"];
-    for (const cat of categories) {
-      try {
-        console.log(`🛒 Generating ${cat} review...`);
-        
-        const popularProducts = [
-          // Smart Home
-          { name: "Echo Dot (5. Generation)", asin: "B09B8V1LZ3" },
-          { name: "Ring Video Doorbell", asin: "B08N5NQ869" },
-          { name: "Echo Show 8", asin: "B09B8V1LZ4" },
-          { name: "Philips Hue Bridge", asin: "B016151IPI" },
-          // Tech Accessories
-          { name: "Anker USB-C Ladekabel", asin: "B08C1W5N87" },
-          { name: "SanDisk Extreme Portable SSD 1TB", asin: "B08GTYFC37" },
-          // Electronics
-          { name: "Sony WH-1000XM5", asin: "B09XS7JWHH" },
-          { name: "Kindle Paperwhite", asin: "B08KTZ8249" },
-          { name: "Fire TV Stick 4K", asin: "B08C1W5N87" },
-          { name: "Logitech C920 HD Pro Webcam", asin: "B006JH8T3S" },
-          // Gaming
-          { name: "DualSense Wireless-Controller", asin: "B08H99BPJN" },
-          { name: "SteelSeries Arctis Nova 7", asin: "B09ZWCYQSX" }
-        ];
-
-        const existingReviews = await prisma.review.findMany({
-          where: { category: cat },
-          select: { amazonAsin: true, title: true },
-        });
-
-        const existingAsins = new Set(existingReviews.map((r: any) => r.amazonAsin).filter(Boolean));
-        const existingTitles = new Set(existingReviews.map((r: any) => r.title.toLowerCase()));
-
-        const productsToReview = popularProducts
-          .filter((p) => !existingAsins.has(p.asin) && !existingTitles.has(p.name.toLowerCase()))
-          .slice(0, 1);
-
-        if (productsToReview.length > 0) {
-          const product = productsToReview[0];
-          const result = await processAmazonProduct(
-            { name: product.name, asin: product.asin },
-            { status: "published", skipExisting: true, generateImages: true }
-          );
-
-          if (result.success && result.reviewId) {
-            results[cat].success = true;
-            results[cat].reviewId = result.reviewId;
-            console.log(`✅ ${cat} review created: ${product.name}`);
-          } else {
-            results[cat].error = result.error || "Unknown error";
-          }
-        } else {
-          results[cat].error = `No new ${cat} products available`;
-        }
-      } catch (error: any) {
-        results[cat].error = error.message;
-        console.error(`Error generating ${cat} review:`, error);
-      }
-      await new Promise(resolve => setTimeout(resolve, 3000));
-    }
-
-    // 5. Generate Movie Review
+    // 3. Generate Movie Review
     try {
       console.log("🎬 Generating movie review...");
       const movies = await getTMDBMoviesBulk({ sortBy: "release_date", order: "desc", limit: 50 });
@@ -219,7 +107,7 @@ export async function GET(req: NextRequest) {
 
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // 6. Generate Series Review
+    // 4. Generate Series Review
     try {
       console.log("📺 Generating series review...");
       const series = await getTMDBSeriesBulk({ sortBy: "release_date", order: "desc", limit: 50 });
@@ -261,7 +149,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       status: 200,
-      message: `Cron completed. ${totalSuccessful}/6 categories successful.`,
+      message: `Cron completed. ${totalSuccessful}/3 categories successful.`,
       duration: `${duration}s`,
       results,
       timestamp: new Date().toISOString(),

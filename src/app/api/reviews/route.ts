@@ -62,14 +62,9 @@ export async function GET(req: NextRequest) {
       };
     }
 
-    // Add category filter (support both "product" and "amazon" for backward compatibility)
+    // Add category filter
     if (category) {
-      if (category === "product") {
-        // Include both "product" and "amazon" categories for backward compatibility
-        where.category = { in: ["product", "amazon"] };
-      } else {
-        where.category = category;
-      }
+      where.category = category;
     }
 
     // Add search query filter
@@ -192,9 +187,8 @@ export async function POST(req: NextRequest) {
         status: body.status || "draft",
         igdbId: body.igdbId || null,
         steamAppId: body.steamAppId || null,
-        amazonAsin: body.amazonAsin || null,
-        affiliateLink: body.affiliateLink || null,
-        hardwareId: body.hardwareId || null,
+        epicId: body.epicId || null,
+        gogId: body.gogId || null,
         specs: body.specs || null,
         metadata: body.metadata || null,
         createdAt: body.createdAt ? new Date(body.createdAt) : undefined,

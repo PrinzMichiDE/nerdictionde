@@ -1,16 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { TriangleAlert } from "lucide-react";
 
 interface SpoilerWarningProps {
   className?: string;
-  /** Optional short message */
   message?: string;
 }
 
-/**
- * Banner shown above content that may contain spoilers (e.g. movie/series reviews).
- */
 export function SpoilerWarning({
   className,
   message = "Dieser Abschnitt kann Spoiler enthalten.",
@@ -19,13 +16,11 @@ export function SpoilerWarning({
     <div
       role="alert"
       className={cn(
-        "flex items-center gap-3 rounded-lg border-2 border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200",
+        "flex items-start gap-3 rounded-md border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200",
         className
       )}
     >
-      <span className="text-lg" aria-hidden>
-        ⚠️
-      </span>
+      <TriangleAlert className="size-4 mt-0.5 shrink-0" aria-hidden="true" />
       <span>{message}</span>
     </div>
   );

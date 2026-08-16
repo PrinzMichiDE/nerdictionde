@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Cpu, ShoppingCart, Film, Tv, ArrowRight } from "lucide-react";
+import { Gamepad2, Film, Tv, ArrowRight } from "lucide-react";
 
 interface CategoryLink {
   name: string;
@@ -41,24 +41,6 @@ const categories: CategoryLink[] = [
     color: "from-green-500/10 to-green-600/5",
     hoverColor: "hover:from-green-500/20 hover:to-green-600/10",
   },
-  {
-    name: "Hardware",
-    nameEn: "Hardware",
-    href: "/reviews?category=hardware",
-    icon: <Cpu className="h-8 w-8" />,
-    description: "Detaillierte Tests von Gaming-Hardware",
-    color: "from-purple-500/10 to-purple-600/5",
-    hoverColor: "hover:from-purple-500/20 hover:to-purple-600/10",
-  },
-  {
-    name: "Produkte",
-    nameEn: "Products",
-    href: "/reviews?category=product",
-    icon: <ShoppingCart className="h-8 w-8" />,
-    description: "Umfassende Produktreviews und Tests",
-    color: "from-orange-500/10 to-orange-600/5",
-    hoverColor: "hover:from-orange-500/20 hover:to-orange-600/10",
-  },
 ];
 
 export function CategoryQuickLinks() {
@@ -71,7 +53,7 @@ export function CategoryQuickLinks() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {categories.map((category, index) => (
           <Card
             key={category.href}

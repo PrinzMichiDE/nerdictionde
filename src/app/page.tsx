@@ -5,7 +5,6 @@ import { LargeReviewCard } from "@/components/home/LargeReviewCard";
 import { CategoryFilter } from "@/components/home/CategoryFilter";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Suspense } from "react";
 
 export const dynamic = 'force-dynamic';
 
@@ -14,18 +13,8 @@ export default async function HomePage() {
   let latestReviews: Review[] = [];
   let topRatedReviews: Review[] = [];
   let featuredReview: Review | null = null;
-  let allReviews: Array<{ score: number; category: string; createdAt: Date }> = [];
-  let statistics = {
-    totalReviews: 0,
-    averageScore: 0,
-    gameReviews: 0,
-    hardwareReviews: 0,
-    productReviews: 0,
-    movieReviews: 0,
-    seriesReviews: 0,
-  };
 
-  const highlightCategories = ["game", "hardware", "movie", "series"];
+  const highlightCategories = ["game", "movie", "series"];
 
   try {
     // Fetch featured review first (highest scored review), exclude product/amazon
@@ -70,57 +59,6 @@ export default async function HomePage() {
     }
 
     topRatedReviews = (await prisma.review.findMany(topRatedQuery)) as unknown as Review[];
-
-    // Calculate statistics
-    const totalReviews = await prisma.review.count({
-      where: { status: "published" },
-    });
-
-    const gameReviews = await prisma.review.count({
-      where: { status: "published", category: "game" },
-    });
-
-    const hardwareReviews = await prisma.review.count({
-      where: { status: "published", category: "hardware" },
-    });
-
-    const productReviews = await prisma.review.count({
-      where: { status: "published", category: { in: ["product", "amazon"] } },
-    });
-
-    const movieReviews = await prisma.review.count({
-      where: { status: "published", category: "movie" },
-    });
-
-    const seriesReviews = await prisma.review.count({
-      where: { status: "published", category: "series" },
-    });
-
-    const allScores = await prisma.review.findMany({
-      where: { status: "published" },
-      select: { score: true },
-    });
-
-    const averageScore =
-      allScores.length > 0
-        ? allScores.reduce((sum, review) => sum + review.score, 0) / allScores.length
-        : 0;
-
-    // Get all reviews for charts
-    allReviews = (await prisma.review.findMany({
-      where: { status: "published" },
-      select: { score: true, category: true, createdAt: true },
-    })) as unknown as Array<{ score: number; category: string; createdAt: Date }>;
-
-    statistics = {
-      totalReviews,
-      averageScore,
-      gameReviews,
-      hardwareReviews,
-      productReviews,
-      movieReviews: movieReviews || 0,
-      seriesReviews: seriesReviews || 0,
-    };
   } catch (error) {
     // Silently fail during build if database is not available
     console.error("Error fetching data:", error);

@@ -1,10 +1,7 @@
 import { getRunningJobs, getJob, updateJob, updateQueueItem } from "@/lib/job-status";
-import { processGame, processMovie, processSeries, processAmazonProduct, generateSlug } from "@/lib/review-generation";
-import { processHardware } from "@/app/api/reviews/bulk-create-hardware/route";
-import { getIGDBGamesBulkLarge, BulkQueryOptions } from "@/lib/igdb";
-import { getTMDBMoviesBulkLarge, getTMDBSeriesBulkLarge, BulkQueryOptions as TMDBBulkQueryOptions } from "@/lib/tmdb-large";
+import { processGame, processMovie, processSeries, generateSlug } from "@/lib/review-generation";
 
-type ReviewCategory = "game" | "movie" | "series" | "hardware" | "product";
+type ReviewCategory = "game" | "movie" | "series";
 
 // Singleton flag to ensure resume only runs once per server instance
 let resumeInitialized = false;
@@ -83,7 +80,6 @@ async function processItemsAsync(
     delayBetweenBatches,
     delayBetweenItems,
     status,
-    skipExisting,
     maxRetries,
   } = options;
 
@@ -104,8 +100,7 @@ async function processItemsAsync(
 
   // Retry wrapper with exponential backoff
   const retryWithBackoff = async (
-    fn: () => Promise<{ success: boolean; reviewId?: string; error?: string }>,
-    itemName: string
+    fn: () => Promise<{ success: boolean; reviewId?: string; error?: string }>
   ): Promise<{ success: boolean; reviewId?: string; error?: string }> => {
     let lastError: Error | null = null;
     const baseDelay = 2000;
@@ -185,36 +180,19 @@ async function processItemsAsync(
         switch (category) {
           case "game":
             result = await retryWithBackoff(
-              () => processGame(item, { status, skipExisting: true }),
-              itemName
+              () => processGame(item, { status, skipExisting: true })
             );
             break;
           
           case "movie":
             result = await retryWithBackoff(
-              () => processMovie(item, { status, skipExisting: true }),
-              itemName
+              () => processMovie(item, { status, skipExisting: true })
             );
             break;
           
           case "series":
             result = await retryWithBackoff(
-              () => processSeries(item, { status, skipExisting: true }),
-              itemName
-            );
-            break;
-          
-          case "hardware":
-            result = await retryWithBackoff(
-              () => processHardware(item.name, { status, skipExisting: true }),
-              itemName
-            );
-            break;
-          
-          case "product":
-            result = await retryWithBackoff(
-              () => processAmazonProduct(item, { status, skipExisting: true }),
-              itemName
+              () => processSeries(item, { status, skipExisting: true })
             );
             break;
           

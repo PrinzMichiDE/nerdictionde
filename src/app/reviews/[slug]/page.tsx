@@ -12,16 +12,16 @@ import rehypeSlugCustomId from "rehype-slug-custom-id";
 import { Monitor, Cpu, HardDrive, CpuIcon } from "lucide-react";
 import { GameMetadata } from "@/components/reviews/GameMetadata";
 import { MovieSeriesMetadata } from "@/components/reviews/MovieSeriesMetadata";
-import { HardwareMetadata } from "@/components/reviews/HardwareMetadata";
-import { AmazonMetadata } from "@/components/reviews/AmazonMetadata";
 import { TableOfContents } from "@/components/reviews/TableOfContents";
 import { RelatedReviews } from "@/components/reviews/RelatedReviews";
 import { ReviewProgress } from "@/components/reviews/ReviewProgress";
 import { ShareButtons } from "@/components/reviews/ShareButtons";
 import { YouTubeEmbed } from "@/components/reviews/YouTubeEmbed";
-import { HardwareSpecs } from "@/components/reviews/HardwareSpecs";
-import { Clock, ShoppingCart, Check, X } from "lucide-react";
-import { getAmazonProductData } from "@/lib/amazon";
+import { EpisodeList } from "@/components/reviews/EpisodeList";
+import { GameProgressTracker } from "@/components/reviews/GameProgressTracker";
+import { SpoilerWarning } from "@/components/reviews/SpoilerWarning";
+import { SpoilerSection } from "@/components/reviews/SpoilerSection";
+import { Clock, Check, X } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -71,7 +71,6 @@ export default async function ReviewDetailPage({
     where: { slug },
     include: { 
       comments: true,
-      hardware: true // Include hardware relation for hardware reviews
     }
   });
 
@@ -95,18 +94,6 @@ export default async function ReviewDetailPage({
   });
 
   const specs = review.specs as any;
-
-  // Load Amazon product data if ASIN is available
-  let amazonProductData: any = null;
-  if ((review.category === "product" || review.category === "amazon") && review.amazonAsin) {
-    try {
-      const result = await getAmazonProductData(review.title, review.amazonAsin);
-      amazonProductData = result.data;
-    } catch (error) {
-      console.warn(`Failed to load Amazon data for ASIN ${review.amazonAsin}:`, error);
-      // Continue without Amazon data - will use specs as fallback
-    }
-  }
 
   // Extract headings from markdown content to generate table of contents
   function extractHeadings(markdown: string): Array<{ level: number; text: string; id: string }> {
@@ -163,8 +150,36 @@ export default async function ReviewDetailPage({
   const headings = extractHeadings(content || "");
   const hasTableOfContents = headings.length > 0;
 
+  // remark plugin: converts "> SPOILER: …" blockquotes into custom "spoiler" nodes
+  interface MdastNode {
+    type: string;
+    value?: string;
+    children?: MdastNode[];
+    data?: { hName?: string };
+  }
+  function spoilerPlugin() {
+    const walk = (node: MdastNode) => {
+      if (node.children) {
+        for (const child of node.children) walk(child);
+      }
+      if (node.type === "blockquote") {
+        const first = node.children?.find((c) => c.type === "paragraph");
+        const text = first?.children?.find((c) => c.type === "text");
+        if (text && /^spoiler/i.test(String(text.value).trim())) {
+          text.value = String(text.value).replace(/^SPOILER(?:\s*[:：])?\s*/i, "");
+          node.type = "spoiler";
+          node.data = { hName: "spoiler" };
+        }
+      }
+    };
+    return () => (tree: MdastNode) => walk(tree);
+  }
+
   // Custom component for Markdown images to handle placeholders
   const MarkdownComponents = {
+    spoiler: ({ children }: { children?: React.ReactNode }) => (
+      <SpoilerSection isEn={isEn}>{children}</SpoilerSection>
+    ),
     p: ({ children, ...props }: any) => {
       // Check if children is a placeholder like ![[IMAGE_1]]
       const content = children?.toString() || "";
@@ -207,7 +222,7 @@ export default async function ReviewDetailPage({
           <div className="space-y-4 flex-1">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="kicker text-primary">
-                {review.category === "game" ? "Test" : review.category === "hardware" ? "Hardware-Test" : "Kritik"} · {review.category}
+                {review.category === "game" ? "Test" : "Kritik"} · {review.category}
               </span>
               <span className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
                 <Clock className="size-3.5" />
@@ -286,6 +301,8 @@ export default async function ReviewDetailPage({
                 key={index}
                 videoId={videoId}
                 title={`${title} - ${isEn ? "Video" : "Video"} ${index + 1}`}
+                reviewId={review.id}
+                isEn={isEn}
               />
             ))}
           </div>
@@ -297,11 +314,9 @@ export default async function ReviewDetailPage({
                 <GameMetadata 
                   metadata={review.metadata as any} 
                   nerdictionScore={review.score}
-                  title={title}
                   steamAppId={review.steamAppId}
                   epicId={review.epicId}
                   gogId={review.gogId}
-                  amazonAsin={review.amazonAsin}
                   isEn={isEn}
                 />
               )}
@@ -330,41 +345,26 @@ export default async function ReviewDetailPage({
           {/* Table of Contents */}
           {hasTableOfContents && <TableOfContents headings={headings} isEn={isEn} />}
 
+          {/* Spoiler warning for movie/series reviews */}
+          {(review.category === "movie" || review.category === "series") && (
+            <SpoilerWarning
+              message={
+                isEn
+                  ? "This section may contain spoilers. Read at your own discretion."
+                  : "Dieser Abschnitt kann Spoiler enthalten. Auf eigene Gefahr weiterlesen."
+              }
+            />
+          )}
+
           <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed prose-headings:scroll-mt-24 prose-headings:font-serif prose-headings:tracking-tight prose-headings:font-semibold">
             <ReactMarkdown 
-              remarkPlugins={[remarkGfm]}
+              remarkPlugins={[remarkGfm, spoilerPlugin]}
               rehypePlugins={[[rehypeSlugCustomId, { enableCustomId: true }]]}
               components={MarkdownComponents as any}
             >
               {content || ""}
             </ReactMarkdown>
           </div>
-
-          {/* Hardware Metadata */}
-          {review.category === "hardware" && (
-            <HardwareMetadata 
-              hardware={review.hardware}
-              specs={review.specs || specs}
-              affiliateLink={review.affiliateLink}
-              isEn={isEn}
-            />
-          )}
-
-          {/* Hardware Specifications */}
-          {review.category === "hardware" && (review.specs || specs) && (
-            <HardwareSpecs specs={review.specs || specs} isEn={isEn} />
-          )}
-
-          {/* Product/Amazon Metadata */}
-          {(review.category === "product" || review.category === "amazon") && (
-            <AmazonMetadata 
-              asin={review.amazonAsin}
-              specs={review.specs || specs}
-              affiliateLink={review.affiliateLink}
-              amazonData={amazonProductData}
-              isEn={isEn}
-            />
-          )}
 
           {/* Hardware Requirements */}
           {review.category === "game" && specs && (
@@ -403,6 +403,16 @@ export default async function ReviewDetailPage({
                 ))}
               </div>
             </div>
+          )}
+
+          {/* Episode ratings for series reviews */}
+          {review.category === "series" && (
+            <EpisodeList reviewId={review.id} isEn={isEn} />
+          )}
+
+          {/* Tested playthrough for game reviews */}
+          {review.category === "game" && (
+            <GameProgressTracker reviewId={review.id} isEn={isEn} />
           )}
 
           {/* Related Reviews */}
@@ -453,22 +463,6 @@ export default async function ReviewDetailPage({
               </div>
             </div>
 
-            {/* Amazon Affiliate Link in Sidebar - Show for hardware reviews or if no metadata section */}
-            {(review.category === "hardware" ||
-              (review.category !== "product" && review.category !== "amazon")) &&
-              review.affiliateLink && (
-              <div className="w-full pt-5 border-t border-border">
-                <a
-                  href={review.affiliateLink}
-                  target="_blank"
-                  rel="nofollow sponsored"
-                  className="flex items-center justify-center w-full bg-[#FF9900] hover:bg-[#E68A00] text-black font-semibold py-3 rounded-md transition-colors"
-                >
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  {isEn ? "View on Amazon" : "Auf Amazon ansehen"}
-                </a>
-              </div>
-            )}
           </div>
         </aside>
       </div>

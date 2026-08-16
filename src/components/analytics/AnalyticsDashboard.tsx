@@ -30,9 +30,6 @@ interface AnalyticsData {
 
 const CATEGORY_COLORS: Record<string, string> = {
   game: "hsl(var(--chart-1))",
-  hardware: "hsl(var(--chart-2))",
-  product: "hsl(var(--chart-3))",
-  amazon: "hsl(var(--chart-4))",
   movie: "hsl(var(--chart-5))",
   series: "hsl(var(--chart-1))",
 };
@@ -76,9 +73,6 @@ export function AnalyticsDashboard() {
     game: "Games",
     movie: "Filme",
     series: "Serien",
-    hardware: "Hardware",
-    product: "Produkte",
-    amazon: "Amazon",
   };
 
   return (

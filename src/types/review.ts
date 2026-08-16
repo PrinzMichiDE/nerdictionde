@@ -1,4 +1,4 @@
-export type ReviewCategory = "game" | "hardware" | "amazon" | "product" | "movie" | "series";
+export type ReviewCategory = "game" | "movie" | "series";
 export type ReviewStatus = "draft" | "published";
 
 export interface Review {
@@ -20,9 +20,6 @@ export interface Review {
   igdbId?: number | null;
   tmdbId?: number | null;
   steamAppId?: string | null;
-  amazonAsin?: string | null;
-  affiliateLink?: string | null;
-  hardwareId?: string | null;
   specs?: any | null;
   metadata?: any | null; // Added metadata field
   createdAt: Date;

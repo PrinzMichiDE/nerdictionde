@@ -21,24 +21,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/gaming-pcs`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/pc-builder`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/deals`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.8,
-    },
-    {
       url: `${baseUrl}/analytics`,
       lastModified: new Date(),
       changeFrequency: "weekly",
@@ -91,29 +73,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  // Dynamische Seiten: Gaming PC Builds
-  const pcBuilds = await prisma.pCBuild.findMany({
-    where: {
-      status: "published",
-    },
-    select: {
-      slug: true,
-      pricePoint: true,
-      updatedAt: true,
-    },
-    orderBy: {
-      updatedAt: "desc",
-    },
-  });
-
-  const pcBuildPages: MetadataRoute.Sitemap = pcBuilds.map((build) => ({
-    url: `${baseUrl}/gaming-pcs/${build.slug || build.pricePoint}`,
-    lastModified: build.updatedAt,
-    changeFrequency: "weekly" as const,
-    priority: 0.7,
-  }));
-
   // Kombiniere alle Seiten
-  return [...staticPages, ...reviewPages, ...pcBuildPages];
+  return [...staticPages, ...reviewPages];
 }
 

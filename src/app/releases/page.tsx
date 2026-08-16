@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   description: "Alle kommenden Spiele-Releases auf einen Blick. Verpasse keine Neuerscheinung!",
 };
 
+export const dynamic = "force-dynamic";
+
 interface Release {
   id: string;
   title: string;

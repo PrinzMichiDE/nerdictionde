@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Rocket, Search, Gamepad2, Cpu, ShoppingCart, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, Rocket, Search, Gamepad2, ChevronDown, ChevronUp } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-type ReviewCategory = "game" | "hardware" | "product";
+type ReviewCategory = "game";
 
 export function QuickCreate() {
   const [input, setInput] = useState("");
@@ -88,18 +88,6 @@ export function QuickCreate() {
       icon: <Gamepad2 className="h-4 w-4" />,
       placeholder: "z.B. Elden Ring, Steam Link..."
     },
-    {
-      value: "hardware",
-      label: "Hardware",
-      icon: <Cpu className="h-4 w-4" />,
-      placeholder: "z.B. RTX 4090, Ryzen 9 7950X..."
-    },
-    {
-      value: "product",
-      label: "Produkt",
-      icon: <ShoppingCart className="h-4 w-4" />,
-      placeholder: "natural elements Omega 3 – 365 Kapseln – 2000mg Fischöl pro Tagesdosis – mit EPA und DHA in Triglycerid-Form – Laborgeprüft, aufwendig aufgereinigt und aus nachhaltigem Fischfang"
-    },
   ];
 
   return (
@@ -137,27 +125,17 @@ export function QuickCreate() {
 
         {/* Input and Generate Button */}
         <div className="space-y-2">
-          {category === "product" ? (
-            <Textarea
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
               placeholder={categoryOptions.find(opt => opt.value === category)?.placeholder || "Eingabe..."}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="min-h-[100px] resize-none"
+              className="pl-9 rounded-full h-11"
+              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleGenerate()}
               disabled={loading}
             />
-          ) : (
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={categoryOptions.find(opt => opt.value === category)?.placeholder || "Eingabe..."}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="pl-9 rounded-full h-11"
-                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleGenerate()}
-                disabled={loading}
-              />
-            </div>
-          )}
+          </div>
           <Button 
             onClick={handleGenerate} 
             disabled={loading || !input}
@@ -263,8 +241,6 @@ export function QuickCreate() {
         <div className="text-xs text-center text-muted-foreground space-y-1 pt-2">
           <p>
             {category === "game" && "Unterstützt IGDB Datenbank-Suche, Steam Store Links und IGDB IDs."}
-            {category === "hardware" && "Unterstützt Hardware-Produkte wie GPUs, CPUs, Peripheriegeräte und mehr."}
-            {category === "product" && "Geben Sie den vollständigen Produktnamen ein. Die Review wird automatisch generiert."}
           </p>
         </div>
       </CardContent>

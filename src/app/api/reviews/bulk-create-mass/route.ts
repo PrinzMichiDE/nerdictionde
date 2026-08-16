@@ -4,20 +4,16 @@ import {
   processGame, 
   processMovie, 
   processSeries, 
-  processAmazonProduct, 
-  generateSlug,
-  generateProductListWithAI 
+  generateSlug 
 } from "@/lib/review-generation";
-import { processHardware } from "@/app/api/reviews/bulk-create-hardware/route";
 import { requireAdminAuth } from "@/lib/auth";
-import { createJob, updateJob, addToQueue, updateQueueItem, getJob, getAllJobs } from "@/lib/job-status";
+import { createJob, updateJob, addToQueue, updateQueueItem, getJob } from "@/lib/job-status";
 import { resumeRunningJobs } from "@/lib/job-resume";
 import { randomUUID } from "crypto";
 import { BulkQueryOptions as TMDBBulkQueryOptions } from "@/lib/tmdb";
 import { getTMDBMoviesBulkLarge, getTMDBSeriesBulkLarge } from "@/lib/tmdb-large";
-import { searchAmazonProducts, hasPAAPICredentials } from "@/lib/amazon-paapi";
 
-type ReviewCategory = "game" | "movie" | "series" | "hardware" | "product";
+type ReviewCategory = "game" | "movie" | "series";
 
 interface BulkCreateMassOptions {
   category: ReviewCategory;
@@ -29,10 +25,6 @@ interface BulkCreateMassOptions {
   delayBetweenBatches?: number;
   delayBetweenItems?: number;
   maxRetries?: number;
-  // Category-specific options
-  hardwareNames?: string[]; // For hardware category
-  productNames?: string[]; // For product category
-  keywords?: string; // For automatic product search
 }
 
 /**
@@ -60,8 +52,6 @@ export async function POST(req: NextRequest) {
       status = "published",
       skipExisting = true,
       maxRetries = 3,
-      hardwareNames = [],
-      productNames = [],
     } = body;
 
     if (!category || !count || count <= 0) {
@@ -105,60 +95,6 @@ export async function POST(req: NextRequest) {
           };
           items = await getTMDBSeriesBulkLarge(count, seriesQueryOptions);
           console.log(`✅ Fetched ${items.length} series from TMDB (requested: ${count})`);
-          break;
-        
-        case "hardware":
-          if (hardwareNames.length === 0) {
-            return NextResponse.json(
-              { error: "hardwareNames array is required for hardware category" },
-              { status: 400 }
-            );
-          }
-          // For hardware, we use the provided names
-          items = hardwareNames.slice(0, count).map((name) => ({ name }));
-          break;
-        
-        case "product":
-          if (productNames.length === 0) {
-            // Try automatic search if no names provided
-            const searchKeywords = body.keywords || "Gaming Zubehör";
-            console.log(`🔍 No product names provided, searching for "${searchKeywords}" via PA API...`);
-            
-            try {
-              if (hasPAAPICredentials()) {
-                const searchResults = await searchAmazonProducts(searchKeywords, count);
-                items = searchResults.map(p => ({
-                  name: p.title,
-                  asin: p.asin,
-                  description: p.description
-                }));
-                console.log(`✅ Found ${items.length} products via PA API search`);
-              } else {
-                console.warn("⚠️ No Amazon PA API credentials found, falling back to OpenAI generation.");
-                items = await generateProductListWithAI(searchKeywords, count);
-                console.log(`✅ Generated ${items.length} products via OpenAI`);
-              }
-            } catch (searchError: any) {
-              console.error(`❌ PA API Search failed: ${searchError.message}. Falling back to OpenAI generation.`);
-              items = await generateProductListWithAI(searchKeywords, count);
-              console.log(`✅ Generated ${items.length} products via OpenAI after search error`);
-            }
-            
-            // Final fallback if OpenAI also fails
-            if (items.length === 0) {
-              console.warn("⚠️ OpenAI generation also failed, using hardcoded fallback list.");
-              items = [
-                { name: "Echo Dot (5. Generation)", asin: "B09B8V1LZ3" },
-                { name: "Sony WH-1000XM5", asin: "B09XS7JWHH" },
-                { name: "Logitech G502 LIGHTSPEED", asin: "B07QKC4WWD" },
-                { name: "Kindle Paperwhite", asin: "B08KTZ8249" },
-                { name: "Elgato Stream Deck MK.2", asin: "B09738CV2G" }
-              ].slice(0, count);
-            }
-          } else {
-            // Convert product names to product objects
-            items = productNames.slice(0, count).map((name) => ({ name }));
-          }
           break;
         
         default:
@@ -258,7 +194,6 @@ async function processItemsAsync(
     delayBetweenBatches,
     delayBetweenItems,
     status,
-    skipExisting,
     maxRetries,
   } = options;
 
@@ -272,8 +207,7 @@ async function processItemsAsync(
 
   // Retry wrapper with exponential backoff
   const retryWithBackoff = async (
-    fn: () => Promise<{ success: boolean; reviewId?: string; error?: string }>,
-    itemName: string
+    fn: () => Promise<{ success: boolean; reviewId?: string; error?: string }>
   ): Promise<{ success: boolean; reviewId?: string; error?: string }> => {
     let lastError: Error | null = null;
     const baseDelay = 2000;
@@ -354,40 +288,21 @@ async function processItemsAsync(
           case "game":
             // Always skip existing for games to prevent duplicates
             result = await retryWithBackoff(
-              () => processGame(item, { status, skipExisting: true }),
-              itemName
+              () => processGame(item, { status, skipExisting: true })
             );
             break;
           
           case "movie":
             // Always skip existing for movies to prevent duplicates
             result = await retryWithBackoff(
-              () => processMovie(item, { status, skipExisting: true }),
-              itemName
+              () => processMovie(item, { status, skipExisting: true })
             );
             break;
           
           case "series":
             // Always skip existing for series to prevent duplicates
             result = await retryWithBackoff(
-              () => processSeries(item, { status, skipExisting: true }),
-              itemName
-            );
-            break;
-          
-          case "hardware":
-            // Always skip existing for hardware to prevent duplicates
-            result = await retryWithBackoff(
-              () => processHardware(item.name, { status, skipExisting: true }),
-              itemName
-            );
-            break;
-          
-          case "product":
-            // Always skip existing for products to prevent duplicates
-            result = await retryWithBackoff(
-              () => processAmazonProduct(item, { status, skipExisting: true }),
-              itemName
+              () => processSeries(item, { status, skipExisting: true })
             );
             break;
           

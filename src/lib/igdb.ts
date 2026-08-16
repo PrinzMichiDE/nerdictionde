@@ -26,6 +26,14 @@ async function getAccessToken() {
 
 const IGDB_GAME_FIELDS = "name, id, cover.url, screenshots.url, genres.name, first_release_date, summary, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, platforms.name, game_modes.name, player_perspectives.name, aggregated_rating, rating, total_rating_count, videos.video_id, videos.name";
 
+/**
+ * Rich field set for single-game lookups (draft generation, review enrichment).
+ * Adds storyline and further metadata used to ground AI reviews in real facts.
+ */
+const IGDB_GAME_DETAIL_FIELDS =
+  IGDB_GAME_FIELDS +
+  ", storyline, keywords.name, themes.name, similar_games.name, franchise.name, collections.name, game_engines.name, time_to_beat.hastly, time_to_beat.normally, time_to_beat.completely, age_ratings.category, age_ratings.rating, language_supports.language.name, status, category";
+
 export async function searchIGDB(query: string) {
   const token = await getAccessToken();
   const response = await axios.post(
@@ -58,7 +66,7 @@ export async function getIGDBGameBySteamId(steamId: string) {
     const gameId = response.data[0].game;
     const gameResponse = await axios.post(
       "https://api.igdb.com/v4/games",
-      `fields ${IGDB_GAME_FIELDS}; where id = ${gameId};`,
+      `fields ${IGDB_GAME_DETAIL_FIELDS}; where id = ${gameId};`,
       {
         headers: {
           "Client-ID": process.env.IGDB_CLIENT_ID,
@@ -293,7 +301,7 @@ export async function getIGDBGameById(id: number) {
   const token = await getAccessToken();
   const response = await axios.post(
     "https://api.igdb.com/v4/games",
-    `fields ${IGDB_GAME_FIELDS}; where id = ${id};`,
+    `fields ${IGDB_GAME_DETAIL_FIELDS}; where id = ${id};`,
     {
       headers: {
         "Client-ID": process.env.IGDB_CLIENT_ID,

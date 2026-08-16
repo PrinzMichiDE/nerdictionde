@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Film, Users, Globe, Star, TrendingUp, Building2 } from "lucide-react";
+import { Calendar, Clock, Film, Users, Globe, Star, TrendingUp, Building2, UserRound } from "lucide-react";
 
 interface MovieSeriesMetadataProps {
   metadata: {
@@ -11,12 +11,17 @@ interface MovieSeriesMetadataProps {
     spoken_languages?: string[];
     release_date?: string;
     first_air_date?: string;
+    last_air_date?: string;
     runtime?: number;
     number_of_seasons?: number;
     number_of_episodes?: number;
     tmdb_score?: number;
     vote_count?: number;
     popularity?: number;
+    director?: string[];
+    created_by?: string[];
+    cast?: string[];
+    status?: string;
   };
   category: "movie" | "series";
   isEn?: boolean;
@@ -105,6 +110,65 @@ export function MovieSeriesMetadata({ metadata, category, isEn = false }: MovieS
                   {isEn ? "Episodes" : "Episoden"}
                 </div>
                 <p className="text-lg font-semibold text-foreground">{metadata.number_of_episodes}</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Director / Creator */}
+        {isMovie ? (
+          metadata.director && metadata.director.length > 0 && (
+            <div className="p-6 rounded-2xl bg-muted/30 border-2 border-border/50 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground/70">
+                <UserRound className="h-4 w-4" />
+                {isEn ? "Director" : "Regie"}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {metadata.director.slice(0, 5).map((name, index) => (
+                  <Badge key={index} variant="outline" className="text-sm px-3 py-1">
+                    {name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )
+        ) : (
+          metadata.created_by && metadata.created_by.length > 0 && (
+            <div className="p-6 rounded-2xl bg-muted/30 border-2 border-border/50 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground/70">
+                <UserRound className="h-4 w-4" />
+                {isEn ? "Created By" : "Ersteller"}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {metadata.created_by.slice(0, 5).map((name, index) => (
+                  <Badge key={index} variant="outline" className="text-sm px-3 py-1">
+                    {name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )
+        )}
+
+        {/* Series Status / Last Air Date */}
+        {!isMovie && (
+          <>
+            {metadata.status && (
+              <div className="p-6 rounded-2xl bg-muted/30 border-2 border-border/50 space-y-3">
+                <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground/70">
+                  <TrendingUp className="h-4 w-4" />
+                  {isEn ? "Status" : "Status"}
+                </div>
+                <p className="text-lg font-semibold text-foreground">{metadata.status}</p>
+              </div>
+            )}
+            {metadata.last_air_date && (
+              <div className="p-6 rounded-2xl bg-muted/30 border-2 border-border/50 space-y-3">
+                <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground/70">
+                  <Calendar className="h-4 w-4" />
+                  {isEn ? "Last Air Date" : "Letzte Ausstrahlung"}
+                </div>
+                <p className="text-lg font-semibold text-foreground">{formatDate(metadata.last_air_date)}</p>
               </div>
             )}
           </>
@@ -211,6 +275,23 @@ export function MovieSeriesMetadata({ metadata, category, isEn = false }: MovieS
             {metadata.spoken_languages.map((language, index) => (
               <Badge key={index} variant="outline" className="text-sm px-3 py-1">
                 {language}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Cast */}
+      {metadata.cast && metadata.cast.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-lg font-bold flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            {isEn ? "Cast" : "Besetzung"}
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {metadata.cast.slice(0, 10).map((name, index) => (
+              <Badge key={index} variant="secondary" className="text-sm px-3 py-1">
+                {name}
               </Badge>
             ))}
           </div>

@@ -70,8 +70,6 @@ interface StatsDashboardProps {
     totalReviews: number;
     averageScore: number;
     gameReviews: number;
-    hardwareReviews: number;
-    productReviews: number;
     movieReviews: number;
     seriesReviews: number;
   };
@@ -87,18 +85,6 @@ export function StatsDashboard({ statistics }: StatsDashboardProps) {
       value: statistics.gameReviews,
       max: statistics.totalReviews,
       color: "bg-blue-500",
-    },
-    {
-      label: "Hardware",
-      value: statistics.hardwareReviews,
-      max: statistics.totalReviews,
-      color: "bg-purple-500",
-    },
-    {
-      label: "Produkte",
-      value: statistics.productReviews,
-      max: statistics.totalReviews,
-      color: "bg-orange-500",
     },
     {
       label: "Filme",

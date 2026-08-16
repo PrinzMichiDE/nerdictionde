@@ -4,9 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QuickCreate } from "./components/QuickCreate";
 import { BulkCreate } from "./components/BulkCreate";
 import { ReviewList } from "./components/ReviewList";
-import { HardwareRSSFetcher } from "./components/HardwareRSSFetcher";
 import { MassReviewCreation } from "./components/MassReviewCreation";
-import { GamingPCManager } from "./components/GamingPCManager";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 
@@ -35,7 +33,7 @@ function AdminTabs() {
 
   return (
     <Tabs value={tab} onValueChange={handleTabChange} className="space-y-4 md:space-y-6">
-      <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 max-w-5xl">
+      <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-w-4xl">
         <TabsTrigger 
           value="quick" 
           className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
@@ -58,20 +56,6 @@ function AdminTabs() {
           <span className="lg:hidden">Mass</span>
         </TabsTrigger>
         <TabsTrigger 
-          value="hardware-rss" 
-          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
-        >
-          <span className="hidden md:inline">Hardware RSS</span>
-          <span className="md:hidden">RSS</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="gaming-pcs" 
-          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
-        >
-          <span className="hidden md:inline">Gaming PCs</span>
-          <span className="md:hidden">PCs</span>
-        </TabsTrigger>
-        <TabsTrigger 
           value="list" 
           className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
         >
@@ -87,12 +71,6 @@ function AdminTabs() {
       </TabsContent>
       <TabsContent value="mass-200" className="space-y-4 mt-6">
         <MassReviewCreation />
-      </TabsContent>
-      <TabsContent value="hardware-rss" className="space-y-4 mt-6">
-        <HardwareRSSFetcher />
-      </TabsContent>
-      <TabsContent value="gaming-pcs" className="space-y-4 mt-6">
-        <GamingPCManager />
       </TabsContent>
       <TabsContent value="list" className="space-y-4 mt-6">
         <ReviewList />

@@ -10,8 +10,6 @@ const categories = [
   { name: "Games", href: "/reviews?category=game", value: "game" },
   { name: "Filme", href: "/reviews?category=movie", value: "movie" },
   { name: "Serien", href: "/reviews?category=series", value: "series" },
-  { name: "Hardware", href: "/reviews?category=hardware", value: "hardware" },
-  { name: "Produkte", href: "/reviews?category=product", value: "product" },
 ];
 
 function CategoryFilterContent() {

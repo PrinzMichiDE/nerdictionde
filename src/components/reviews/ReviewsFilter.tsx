@@ -137,9 +137,6 @@ export function ReviewsFilter() {
               <SelectItem value="game">Games</SelectItem>
               <SelectItem value="movie">Filme</SelectItem>
               <SelectItem value="series">Serien</SelectItem>
-              <SelectItem value="hardware">Hardware</SelectItem>
-              <SelectItem value="product">Produkte</SelectItem>
-              <SelectItem value="amazon">Amazon (Legacy)</SelectItem>
             </SelectContent>
           </Select>
 

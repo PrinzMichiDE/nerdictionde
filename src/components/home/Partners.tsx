@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Building2, Sparkles } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 
 interface Partner {

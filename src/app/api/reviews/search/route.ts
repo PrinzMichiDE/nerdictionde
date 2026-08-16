@@ -19,11 +19,7 @@ export async function GET(req: NextRequest) {
     const where: Record<string, unknown> = { status: "published" };
 
     if (category) {
-      if (category === "product") {
-        (where as { category: { in: string[] } }).category = { in: ["product", "amazon"] };
-      } else {
-        (where as { category: string }).category = category;
-      }
+      (where as { category: string }).category = category;
     }
 
     if (minScore || maxScore) {

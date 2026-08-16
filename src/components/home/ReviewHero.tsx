@@ -36,7 +36,7 @@ export function ReviewHero({ review }: ReviewHeroProps) {
       {/* Editorial header */}
       <div className="border-b border-border pb-6 md:pb-8 mb-6 md:mb-8">
         <div className="kicker text-primary mb-3 md:mb-4">
-          {review.category === "game" ? "Test" : review.category === "hardware" ? "Hardware-Test" : "Kritik"} ·{" "}
+          {review.category === "game" ? "Test" : "Kritik"} ·{" "}
           {review.category}
         </div>
 

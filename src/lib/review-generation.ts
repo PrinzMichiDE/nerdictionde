@@ -3,18 +3,14 @@ import openai, { OPENAI_MODEL } from "@/lib/openai";
 import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
 import { uploadImage } from "@/lib/blob";
 import { calculatePublicationDate } from "@/lib/date-utils";
-import { HardwareType } from "@/lib/hardware";
 import { TMDBMovie, TMDBSeries, getTMDBImageUrl } from "@/lib/tmdb";
-import { searchHardwareProduct, extractProductSpecs, extractTavilyImages, searchGameProduct, buildGameResearchSummary } from "@/lib/tavily";
+import { searchGameProduct, buildGameResearchSummary, buildResearchSummary, searchMovieProduct, searchSeriesProduct } from "@/lib/tavily";
 import type { TavilySearchResponse } from "@/lib/tavily";
 import type { SteamGameInfo } from "@/lib/steam";
-import { generateReviewImages } from "@/lib/image-generation";
-import { getAmazonProductData, parseAmazonUrl } from "@/lib/amazon";
 import { getIGDBGameById } from "@/lib/igdb";
 import {
   extractYouTubeVideoIdsFromIGDB,
   extractYouTubeVideoIdsFromTMDB,
-  searchYouTubeVideoIdsTavily,
 } from "@/lib/youtube-extraction";
 import { generateAndAttachTagsForReview } from "@/lib/tag-generation";
 import { replaceImagePlaceholders } from "@/lib/image-placeholder";
@@ -26,28 +22,6 @@ export function generateSlug(title: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-}
-
-/**
- * Validates product input data
- */
-export function validateProductInput(data: { name: string; asin?: string }): {
-  valid: boolean;
-  errors: string[];
-} {
-  const errors: string[] = [];
-  
-  if (!data.name || data.name.trim().length < 3) {
-    errors.push("Produktname muss mindestens 3 Zeichen lang sein.");
-  }
-  if (data.name && data.name.length > 200) {
-    errors.push("Produktname darf maximal 200 Zeichen lang sein.");
-  }
-  if (data.asin && !/^[A-Z0-9]{10}$/i.test(data.asin)) {
-    errors.push("ASIN muss aus 10 alphanumerischen Zeichen bestehen.");
-  }
-  
-  return { valid: errors.length === 0, errors };
 }
 
 // Helper function to repair common JSON issues from AI responses
@@ -90,7 +64,7 @@ export function repairJson(contentRaw: string, parseError: any, itemName: string
     }
 
     // 2. Close brackets and braces in correct order
-    let stack: string[] = [];
+    const stack: string[] = [];
     inString = false;
     escaped = false;
     
@@ -191,7 +165,7 @@ export function repairJson(contentRaw: string, parseError: any, itemName: string
     const errorPos = errorPosMatch ? parseInt(errorPosMatch[1]) : repaired.length;
     
     let lastGoodPos = 0;
-    let stack: string[] = [];
+    const stack: string[] = [];
     let inString = false;
     let escaped = false;
     
@@ -226,7 +200,7 @@ export function repairJson(contentRaw: string, parseError: any, itemName: string
           console.log(`Successfully repaired JSON for ${itemName} using aggressive repair`);
           return parsed;
         }
-      } catch (e) {}
+      } catch {}
     }
 
     // Final fallback: just close everything from where it broke
@@ -301,45 +275,25 @@ export async function generateContent(
   }
 }
 
-// Helper function to generate a list of products using OpenAI based on keywords
-export async function generateProductListWithAI(
-  keywords: string,
-  count: number = 10
-): Promise<Array<{ name: string; asin?: string; description?: string }>> {
-  const prompt = `
-    Erstelle eine Liste von ${count} populären und aktuell relevanten Amazon-Produkten für den Suchbegriff "${keywords}".
-    
-    Antworte EXKLUSIV im JSON-Format:
-    {
-      "products": [
-        { "name": "Produktname", "asin": "10-stellige ASIN falls bekannt (optional)", "description": "Kurze Beschreibung des Produkts" },
-        ...
-      ]
-    }
-    
-    WICHTIG: Erfinde KEINE ASINs, wenn du sie nicht sicher kennst. Gib nur echte, existierende Produkte zurück.
-  `;
-
-  try {
-    const aiResponse = await openai.chat.completions.create({
-      model: OPENAI_MODEL,
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
-    });
-
-    const contentRaw = aiResponse.choices[0].message.content || "{}";
-    const parsed = JSON.parse(contentRaw);
-    return (parsed.products || []).slice(0, count);
-  } catch (error) {
-    console.error("Error generating product list with AI:", error);
-    return [];
-  }
-}
-
 export interface ReviewSection {
   de: string;
   en: string;
   description: string;
+}
+
+/**
+ * Maps a reference rating on a 0-10 scale to a 0-100 score band.
+ * The band is centered on the reference and clamped to [0, 100].
+ */
+export function computeScoreBand(
+  reference10: number
+): { min: number; max: number; target: number } {
+  const target = Math.round(reference10 * 10);
+  return {
+    min: Math.max(0, target - 8),
+    max: Math.min(100, target + 8),
+    target,
+  };
 }
 
 interface StructuredReviewPromptOptions {
@@ -706,6 +660,13 @@ export async function generateReviewContent(
   if (steam?.metacriticScore) referenceRatings.push(`Metacritic ${steam.metacriticScore}/100`);
   if (steam?.reviewSummary?.percentPositive != null) referenceRatings.push(`Steam ${steam.reviewSummary.percentPositive}% positiv`);
 
+  const scoreBand = computeGameScoreBand([
+    gameData.rating,
+    gameData.aggregated_rating,
+    steam?.metacriticScore,
+    steam?.reviewSummary?.percentPositive,
+  ]);
+
   const prompt = buildStructuredReviewPrompt({
     category: "game",
     itemName: gameData.name,
@@ -716,6 +677,7 @@ export async function generateReviewContent(
     isRetry,
     includeSpecs: true,
     referenceRating: referenceRatings.join("; "),
+    scoreBand: scoreBand ?? undefined,
   });
 
   try {
@@ -756,144 +718,6 @@ export async function generateReviewContent(
   }
 }
 
-// Helper function to generate hardware review content using OpenAI with built-in auto-repair
-export async function generateHardwareReviewContent(
-  hardwareData: { name: string; type: HardwareType; manufacturer?: string; model?: string; description?: string; specs?: any },
-  retryCount = 0
-): Promise<{
-  de: { title: string; content: string; pros: string[]; cons: string[] };
-  en: { title: string; content: string; pros: string[]; cons: string[] };
-  score: number;
-  specs?: any;
-  tavilySearchResults?: any; // Include Tavily search results for image extraction
-}> {
-  const isRetry = retryCount > 0;
-  
-  // Use Tavily Search to gather product information
-  let tavilyData: {
-    specs: Record<string, any>;
-    description: string;
-    pros: string[];
-    cons: string[];
-    price?: string;
-    rating?: number;
-  } | null = null;
-  
-  let tavilySearchResults: any = null;
-  
-  try {
-    console.log(`🔍 Searching Tavily for ${hardwareData.name}...`);
-    const searchResults = await searchHardwareProduct(
-      hardwareData.name,
-      hardwareData.manufacturer
-    );
-    tavilySearchResults = searchResults;
-    tavilyData = extractProductSpecs(searchResults);
-    console.log(`✅ Found Tavily data: ${JSON.stringify(tavilyData.specs)}`);
-  } catch (error) {
-    console.warn(`⚠️  Tavily search failed for ${hardwareData.name}:`, error);
-  }
-  
-  // Merge Tavily specs with existing specs
-  const mergedSpecs = {
-    ...(hardwareData.specs || {}),
-    ...(tavilyData?.specs || {}),
-  };
-  
-  // Merge descriptions
-  const mergedDescription = tavilyData?.description || hardwareData.description || "Keine Beschreibung verfügbar";
-  
-  // Merge pros/cons
-  const mergedPros = [
-    ...(tavilyData?.pros || []),
-    ...(hardwareData.specs?.pros || []),
-  ].slice(0, 5);
-  
-  const mergedCons = [
-    ...(tavilyData?.cons || []),
-    ...(hardwareData.specs?.cons || []),
-  ].slice(0, 5);
-  
-  const prompt = `
-    Schreibe eine EXTREM AUSFÜHRLICHE und ULTRA-DETAILLIERTE professionelle Hardware-Review für "${hardwareData.name}" in Deutsch UND Englisch.
-    
-    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer (ca. 3000-4000 Wörter pro Sprache), damit das JSON vollständig ist." : "KRITISCHE ANFORDERUNGEN:\n1. Der Text muss MASSIV AUSFÜHRLICH sein (MINDESTENS 5000-10000 Wörter pro Sprache - NICHT weniger!).\n2. Nutze eine tiefgehende journalistische Struktur mit vielen aussagekräftigen H2- und H3-Überschriften.\n3. Nutze die recherchierten Informationen aus den Tavily-Suchergebnissen für authentische Details.\n4. WICHTIG: Schreibe KEINE kurzen Reviews! Jeder Abschnitt muss SEHR ausführlich sein mit vielen Details.\n5. Erwähne NIEMALS, dass dieser Text von einer KI generiert wurde. Der Text muss so klingen, als wäre er von einem passionierten Hardware-Experten geschrieben worden.\n6. Gehe in JEDEM Abschnitt sehr tief ins Detail - beschreibe nicht nur oberflächlich, sondern analysiere gründlich."}
-    
-    Antworte EXKLUSIV im JSON-Format mit folgendem Schema:
-    {
-      "de": {
-        "title": "...",
-        "content": "Markdown mit:\n- Inhaltsverzeichnis\n- SEHR AUSFÜHRLICHER Einleitung (mindestens 8-10 Absätze über das Produkt, seine Bedeutung, Marktposition, historischer Kontext, Hersteller)\n- VIELE tiefgehenden Analyse-Abschnitten mit Überschriften wie:\n  * Design & Verarbeitung (SEHR ausführlich - mindestens 5-6 Absätze)\n  * Technische Spezifikationen im Detail (jede wichtige Spec SEHR detailliert erklären - mindestens 10-15 Absätze)\n  * Performance & Benchmarks (SEHR detaillierte Leistungsanalyse mit vielen Beispielen - mindestens 8-10 Absätze)\n  * Features & Innovationen (alle wichtigen Features SEHR ausführlich beschreiben - mindestens 6-8 Absätze)\n  * Vergleich mit Konkurrenzprodukten (detaillierter Vergleich - mindestens 5-6 Absätze)\n  * Preis-Leistungs-Verhältnis (ausführliche Analyse - mindestens 4-5 Absätze)\n  * Einsatzgebiete & Zielgruppe (detaillierte Beschreibung - mindestens 4-5 Absätze)\n  * Installation & Setup (falls relevant - mindestens 3-4 Absätze)\n  * Software & Treiber (falls relevant - mindestens 3-4 Absätze)\n  * Vor- und Nachteile im Detail (jeder Punkt ausführlich erklärt - mindestens 6-8 Absätze)\n- BILD-PLATZHALTERN (![[IMAGE_X]]) an passenden Stellen\n- SEHR AUSFÜHRLICHEM Fazit (mindestens 5-6 Absätze mit Zusammenfassung, Empfehlung, Zielgruppe, Ausblick)\n\nKRITISCH WICHTIG: Diese Review muss MINDESTENS 5000-10000 Wörter lang sein! Jeder Abschnitt muss SEHR ausführlich sein mit vielen Details, Beispielen und Erklärungen! Keine kurzen Sätze oder oberflächliche Beschreibungen!",
-        "pros": ["...", "...", "...", "...", "..."],
-        "cons": ["...", "...", "...", "...", "..."]
-      },
-      "en": {
-        "title": "...",
-        "content": "Markdown with:\n- Table of Contents\n- VERY DETAILED Introduction (at least 8-10 paragraphs about the product, its significance, market position, historical context, manufacturer)\n- MANY deep-dive analysis sections with headings like:\n  * Design & Build Quality (VERY detailed - at least 5-6 paragraphs)\n  * Technical Specifications in Detail (explain every important spec VERY thoroughly - at least 10-15 paragraphs)\n  * Performance & Benchmarks (VERY detailed performance analysis with many examples - at least 8-10 paragraphs)\n  * Features & Innovations (describe all important features VERY thoroughly - at least 6-8 paragraphs)\n  * Comparison with Competitors (detailed comparison - at least 5-6 paragraphs)\n  * Value for Money (thorough analysis - at least 4-5 paragraphs)\n  * Use Cases & Target Audience (detailed description - at least 4-5 paragraphs)\n  * Installation & Setup (if relevant - at least 3-4 paragraphs)\n  * Software & Drivers (if relevant - at least 3-4 paragraphs)\n  * Detailed Pros and Cons (each point thoroughly explained - at least 6-8 paragraphs)\n- IMAGE PLACEHOLDERS (![[IMAGE_X]]) at appropriate places\n- VERY DETAILED Conclusion (at least 5-6 paragraphs with summary, recommendation, target audience, outlook)\n\nCRITICALLY IMPORTANT: This review must be AT LEAST 5000-10000 words long! Each section must be VERY detailed with many details, examples, and explanations! No short sentences or superficial descriptions!",
-        "pros": ["...", "...", "...", "...", "..."],
-        "cons": ["...", "...", "...", "...", "..."]
-      },
-      "score": 0-100,
-      "specs": {
-        // Hardware-spezifische Spezifikationen - WICHTIG: Sammle ALLE verfügbaren technischen Details!
-      }
-    }
-    
-    Hardware-Typ: ${hardwareData.type}
-    Hersteller: ${hardwareData.manufacturer || "Unbekannt"}
-    Modell: ${hardwareData.model || hardwareData.name}
-    Beschreibung: ${mergedDescription}
-    ${Object.keys(mergedSpecs).length > 0 ? `Bekannte Specs: ${JSON.stringify(mergedSpecs)}` : ""}
-    ${tavilyData?.price ? `Preis: ${tavilyData.price}` : ""}
-    ${tavilyData?.rating ? `Bewertung: ${tavilyData.rating}/10` : ""}
-    
-    KRITISCH WICHTIGER HINWEIS: Diese Review muss MINDESTENS 5000-10000 Wörter pro Sprache lang sein! Schreibe KEINE kurzen Absätze! Jeder Abschnitt sollte viele Absätze enthalten (mindestens 4-6 Absätze pro Hauptabschnitt) und SEHR tiefgehende Informationen bieten. Gehe in jedes Detail, erkläre Hintergründe, gebe Beispiele, vergleiche mit Alternativen. Die Review muss so ausführlich sein wie eine professionelle Hardware-Testseite!
-  `;
-
-  try {
-    const result = await generateContent(prompt, hardwareData.name, retryCount);
-    
-    // Merge Tavily pros/cons if available
-    if (mergedPros.length > 0 && result.de.pros.length < 3) {
-      result.de.pros = [...result.de.pros, ...mergedPros].slice(0, 5);
-    }
-    if (mergedCons.length > 0 && result.de.cons.length < 3) {
-      result.de.cons = [...result.de.cons, ...mergedCons].slice(0, 5);
-    }
-    
-    // Merge specs
-    result.specs = {
-      ...mergedSpecs,
-      ...(result.specs || {}),
-    };
-    
-    // Include Tavily search results for image extraction
-    return {
-      ...result,
-      tavilySearchResults: tavilySearchResults || undefined,
-    };
-  } catch (error) {
-    console.error(`Final error generating hardware content for ${hardwareData.name}:`, error);
-    return {
-      de: {
-        title: hardwareData.name,
-        content: `## Einleitung\n\n${mergedDescription}\n\n## Design & Verarbeitung\n\nDas ${hardwareData.name} präsentiert sich mit einem durchdachten Design und solider Verarbeitungsqualität. Die Materialauswahl und Konstruktion zeigen die Sorgfalt, die in die Entwicklung investiert wurde.\n\n## Technische Spezifikationen\n\nDie technischen Spezifikationen des ${hardwareData.name} bieten eine solide Grundlage für verschiedene Anwendungsbereiche.\n\n## Performance\n\nIn praktischen Tests zeigt das ${hardwareData.name} eine solide Leistung.\n\n## Fazit\n\nDas ${hardwareData.name} ist ein interessantes Hardware-Produkt, das eine gute Balance zwischen verschiedenen Faktoren bietet.`,
-        pros: mergedPros.length > 0 ? mergedPros : ["Gute Leistung", "Solide Verarbeitung"],
-        cons: mergedCons.length > 0 ? mergedCons : ["Könnte mehr Features haben", "Preis könnte günstiger sein"],
-      },
-      en: {
-        title: hardwareData.name,
-        content: `## Introduction\n\n${mergedDescription}\n\n## Design & Build Quality\n\nThe ${hardwareData.name} presents itself with a thoughtful design and solid build quality.\n\n## Technical Specifications\n\nThe technical specifications of the ${hardwareData.name} provide a solid foundation for various application areas.\n\n## Performance\n\nIn practical tests, the ${hardwareData.name} shows solid performance.\n\n## Conclusion\n\nThe ${hardwareData.name} is an interesting hardware product that offers a good balance between various factors.`,
-        pros: mergedPros.length > 0 ? mergedPros : ["Good performance", "Solid build quality"],
-        cons: mergedCons.length > 0 ? mergedCons : ["Could have more features", "Price could be lower"],
-      },
-      score: tavilyData?.rating ? Math.round(tavilyData.rating * 10) : 70,
-      specs: mergedSpecs,
-      tavilySearchResults: tavilySearchResults || undefined,
-    };
-  }
-}
-
 // Helper function to process a single game
 export async function processGame(
   gameData: any,
@@ -913,7 +737,6 @@ export async function processGame(
       steamAppId?: string;
       epicId?: string;
       gogId?: string;
-      amazonAsin?: string;
       stores?: Array<{ category: number; name: string; id: string; url: string }>;
     } = {};
 
@@ -966,7 +789,7 @@ export async function processGame(
     }
 
     // Upload cover image if available
-    let imageUrls: string[] = [];
+    const imageUrls: string[] = [];
     if (gameData.cover?.url) {
       try {
         const coverUrl = gameData.cover.url.startsWith("//") ? "https:" + gameData.cover.url : gameData.cover.url;
@@ -989,7 +812,7 @@ export async function processGame(
         try {
           const syncedUrl = await uploadImage(screenshotUrls[i], `${slug}-screen-${i+1}.jpg`);
           imageUrls.push(syncedUrl);
-        } catch (err) {
+        } catch {
           imageUrls.push(screenshotUrls[i]);
         }
       }
@@ -1001,8 +824,24 @@ export async function processGame(
         publishers: gameData.involved_companies?.filter((c: any) => c.publisher).map((c: any) => c.company.name) || [],
         platforms: gameData.platforms?.map((p: any) => p.name) || [],
         genres: gameData.genres?.map((g: any) => g.name) || [],
+        gameModes: ((gameData.game_modes || []) as Array<{ name: string }>).map((m) => m.name) || [],
+        perspectives: ((gameData.player_perspectives || []) as Array<{ name: string }>).map((p) => p.name) || [],
+        engines: ((gameData.game_engines || []) as Array<{ name: string }>).map((e) => e.name) || [],
         releaseDate: gameData.first_release_date,
         igdbScore: gameData.rating,
+        criticScore: gameData.aggregated_rating ?? steamData?.metacriticScore ?? undefined,
+        ageRating: formatAgeRating((gameData.age_ratings || []) as Array<{ category?: number; rating?: number }>),
+        timeToBeat: {
+          hastly: gameData.time_to_beat?.hastly ?? undefined,
+          normally: gameData.time_to_beat?.normally ?? undefined,
+          completely: gameData.time_to_beat?.completely ?? undefined,
+        },
+        similarGames: ((gameData.similar_games || []) as Array<{ name: string }>).map((s) => s.name) || [],
+        franchise: (gameData.franchise as { name?: string } | undefined)?.name,
+        steamMetacritic: steamData?.metacriticScore ?? undefined,
+        steamRatingPercent: steamData?.reviewSummary?.percentPositive ?? undefined,
+        steamTotalReviews: steamData?.reviewSummary?.total ?? undefined,
+        steamPrice: steamData?.priceFormatted ?? undefined,
         stores: storeIds.stores || [], // Store all store links in metadata
     };
 
@@ -1044,7 +883,6 @@ export async function processGame(
         steamAppId: storeIds.steamAppId || null,
         epicId: storeIds.epicId || null,
         gogId: storeIds.gogId || null,
-        amazonAsin: storeIds.amazonAsin || null,
         specs: reviewContent.specs || null,
         metadata: gameMetadata,
         metaDescription: seoMeta?.metaDescription ?? null,
@@ -1110,7 +948,6 @@ export async function enrichAndPublishDraftGameReview(
       steamAppId?: string;
       epicId?: string;
       gogId?: string;
-      amazonAsin?: string;
       stores?: Array<{ category: number; name: string; id: string; url: string }>;
     } = {};
     try {
@@ -1143,7 +980,7 @@ export async function enrichAndPublishDraftGameReview(
     const reviewContent = await generateReviewContent(gameData, 0, { steamData });
     const slug = review.slug;
 
-    let imageUrls: string[] = [];
+    const imageUrls: string[] = [];
     if (gameData.cover?.url) {
       try {
         const coverUrl = gameData.cover.url.startsWith("//") ? "https:" + gameData.cover.url : gameData.cover.url;
@@ -1173,8 +1010,24 @@ export async function enrichAndPublishDraftGameReview(
       publishers: gameData.involved_companies?.filter((c: any) => c.publisher).map((c: any) => c.company.name) || [],
       platforms: gameData.platforms?.map((p: any) => p.name) || [],
       genres: gameData.genres?.map((g: any) => g.name) || [],
+      gameModes: ((gameData.game_modes || []) as Array<{ name: string }>).map((m) => m.name) || [],
+      perspectives: ((gameData.player_perspectives || []) as Array<{ name: string }>).map((p) => p.name) || [],
+      engines: ((gameData.game_engines || []) as Array<{ name: string }>).map((e) => e.name) || [],
       releaseDate: gameData.first_release_date,
       igdbScore: gameData.rating,
+      criticScore: gameData.aggregated_rating ?? steamData?.metacriticScore ?? undefined,
+      ageRating: formatAgeRating((gameData.age_ratings || []) as Array<{ category?: number; rating?: number }>),
+      timeToBeat: {
+        hastly: gameData.time_to_beat?.hastly ?? undefined,
+        normally: gameData.time_to_beat?.normally ?? undefined,
+        completely: gameData.time_to_beat?.completely ?? undefined,
+      },
+      similarGames: ((gameData.similar_games || []) as Array<{ name: string }>).map((s) => s.name) || [],
+      franchise: (gameData.franchise as { name?: string } | undefined)?.name,
+      steamMetacritic: steamData?.metacriticScore ?? undefined,
+      steamRatingPercent: steamData?.reviewSummary?.percentPositive ?? undefined,
+      steamTotalReviews: steamData?.reviewSummary?.total ?? undefined,
+      steamPrice: steamData?.priceFormatted ?? undefined,
       stores: storeIds.stores || [],
     };
     const releaseDate = gameData.first_release_date ? new Date(gameData.first_release_date * 1000) : null;
@@ -1208,7 +1061,6 @@ export async function enrichAndPublishDraftGameReview(
         steamAppId: storeIds.steamAppId || null,
         epicId: storeIds.epicId || null,
         gogId: storeIds.gogId || null,
-        amazonAsin: storeIds.amazonAsin || null,
         specs: reviewContent.specs || null,
         metadata: gameMetadata,
         metaDescription: seoMeta?.metaDescription ?? null,
@@ -1243,7 +1095,8 @@ export async function enrichAndPublishDraftGameReview(
 // Helper function to generate movie review content using OpenAI
 export async function generateMovieReviewContent(
   movieData: TMDBMovie,
-  retryCount = 0
+  retryCount = 0,
+  options?: { tavilySearchResults?: TavilySearchResponse }
 ): Promise<{
   de: { title: string; content: string; pros: string[]; cons: string[] };
   en: { title: string; content: string; pros: string[]; cons: string[] };
@@ -1251,15 +1104,43 @@ export async function generateMovieReviewContent(
 }> {
   const isRetry = retryCount > 0;
 
+  // Use Tavily to gather factual review context (best-effort, non-blocking)
+  let tavilySearchResults = options?.tavilySearchResults;
+  if (!tavilySearchResults) {
+    try {
+      console.log(`🔍 Searching Tavily for movie ${movieData.title}...`);
+      tavilySearchResults = await searchMovieProduct(
+        movieData.title,
+        movieData.release_date ? new Date(movieData.release_date).getFullYear() : undefined
+      );
+    } catch (error) {
+      console.warn(`⚠️  Tavily search failed for ${movieData.title}:`, error);
+    }
+  }
+
+  const cast = (movieData.credits?.cast || [])
+    .slice(0, 8)
+    .map((c) => (c.character ? `${c.name} als ${c.character}` : c.name));
+  const directors = (movieData.credits?.crew || [])
+    .filter((c) => c.job === "Director")
+    .map((c) => c.name);
+  const writers = (movieData.credits?.crew || [])
+    .filter((c) => ["Writer", "Screenplay", "Story", "Screenstory", "Novel"].includes(c.job))
+    .map((c) => c.name);
+
   const contextLines = [
     `Titel: ${movieData.title}`,
     `Originaltitel: ${movieData.original_title || "N/A"}`,
     `Genres: ${movieData.genres?.map((g) => g.name).join(", ") || "N/A"}`,
     `Erscheinungsdatum: ${movieData.release_date || "N/A"}`,
     movieData.runtime ? `Laufzeit: ${movieData.runtime} Minuten` : "",
+    `Regie: ${directors.slice(0, 5).join(", ") || "N/A"}`,
+    `Drehbuch: ${[...new Set(writers)].slice(0, 5).join(", ") || "N/A"}`,
+    cast.length > 0 ? `Besetzung: ${[...new Set(cast)].join(", ")}` : "",
     movieData.vote_average
       ? `TMDB-Bewertung: ${Number(movieData.vote_average).toFixed(1)}/10 (${movieData.vote_count || 0} Stimmen)`
       : "",
+    movieData.external_ids?.imdb_id ? `IMDb-ID: ${movieData.external_ids.imdb_id}` : "",
     movieData.production_companies?.length
       ? `Produktionsfirmen: ${movieData.production_companies.map((c) => c.name).join(", ")}`
       : "",
@@ -1270,6 +1151,7 @@ export async function generateMovieReviewContent(
       ? `Sprachen: ${movieData.spoken_languages.map((l) => l.name).join(", ")}`
       : "",
     `Handlung: ${movieData.overview || "N/A"}`,
+    ...(tavilySearchResults ? buildResearchSummary(tavilySearchResults) : []),
   ].filter(Boolean);
 
   const sections: ReviewSection[] = [
@@ -1330,28 +1212,52 @@ export async function generateMovieReviewContent(
     itemName: movieData.title,
     contextLines,
     sections,
-    wordTarget: 1600,
-    imageCount: 3,
+    wordTarget: 1800,
+    imageCount: 4,
     isRetry,
     referenceRating: movieData.vote_average ? `${Number(movieData.vote_average).toFixed(1)}/10` : undefined,
+    scoreBand: movieData.vote_average ? computeScoreBand(Number(movieData.vote_average)) : undefined,
   });
 
   try {
     return await generateContent(prompt, movieData.title, retryCount);
   } catch (error) {
     console.error(`Final error generating movie content for ${movieData.title}:`, error);
+    const castNames = (movieData.credits?.cast || []).slice(0, 5).map((c) => c.name);
+    const directorNames = (movieData.credits?.crew || [])
+      .filter((c) => c.job === "Director")
+      .map((c) => c.name);
+    const fallbackRuntime = movieData.runtime ? `${movieData.runtime} Minuten` : "annähernd zwei Stunden";
+    const fallbackPlotDe = movieData.overview
+      ? `Die Handlung entfaltet sich vor dem Hintergrund des oben beschriebenen Ausgangspunkts und hält den Spannungsbogen über die Laufzeit von ${fallbackRuntime}.\n\n`
+      : "";
+    const fallbackPlotEn = movieData.overview
+      ? `The plot unfolds against the backdrop described above and maintains its dramatic arc across the runtime of approximately ${fallbackRuntime}.\n\n`
+      : "";
+    const castLineDe = castNames.length > 0
+      ? `Die Darsteller ${castNames.join(", ")} tragen die Geschichte mit überzeugenden Leistungen.`
+      : "Die Darsteller überzeugen mit ihrem Ensemble.";
+    const castLineEn = castNames.length > 0
+      ? `The cast, led by ${castNames.join(", ")}, carries the story with compelling performances.`
+      : "The cast delivers compelling ensemble performances.";
+    const directorLineDe = directorNames.length > 0
+      ? `Unter der Regie von ${directorNames.join(", ")} entsteht eine stimmige Inszenierung.\n\n`
+      : "";
+    const directorLineEn = directorNames.length > 0
+      ? `Under the direction of ${directorNames.join(", ")}, the film feels cohesive and well-crafted.\n\n`
+      : "";
     return {
       de: {
         title: movieData.title,
-        content: `## Einleitung\n\n${movieData.overview || "Keine Beschreibung verfügbar."}\n\n## Fazit\n\nEin sehenswerter Film, der es wert ist, genauer betrachtet zu werden.`,
-        pros: ["Spannende Handlung", "Gute schauspielerische Leistung"],
-        cons: ["Einige Längen im Mittelteil"],
+        content: `## Einleitung\n\n${movieData.overview || "Keine Beschreibung verfügbar."}\n\n## Handlung & Erzählung\n\n${fallbackPlotDe}## Schauspiel & Charaktere\n\n${castLineDe}\n\n${directorLineDe}## Fazit\n\nEin sehenswerter Film, der es wert ist, genauer betrachtet zu werden.`,
+        pros: ["Spannende Handlung", "Gute schauspielerische Leistung", "Stimmige Inszenierung", "Atmosphärische Musik", "Überzeugender Cast"],
+        cons: ["Einige Längen im Mittelteil", "Vorhersehbares Ende", "Manche Nebenfiguren bleiben blass", "Erzähltempo schwankt", "Nicht ohne Genreklischees"],
       },
       en: {
         title: movieData.title,
-        content: `## Introduction\n\n${movieData.overview || "No description available."}\n\n## Conclusion\n\nA worthwhile film that deserves a closer look.`,
-        pros: ["Engaging plot", "Strong performances"],
-        cons: ["Some pacing issues"],
+        content: `## Introduction\n\n${movieData.overview || "No description available."}\n\n## Plot & Narrative\n\n${fallbackPlotEn}## Acting & Characters\n\n${castLineEn}\n\n${directorLineEn}## Conclusion\n\nA worthwhile film that deserves a closer look.`,
+        pros: ["Engaging plot", "Strong performances", "Cohesive direction", "Atmospheric score", "Compelling cast"],
+        cons: ["Some pacing issues in the middle", "Predictable ending", "Some side characters feel thin", "Uneven pacing", "Falls back on genre cliches"],
       },
       score: 70,
     };
@@ -1383,7 +1289,7 @@ export async function processMovie(
       slug = `${generateSlug(reviewContent.de.title || movieData.title)}-${Math.random().toString(36).substring(2, 7)}`;
     }
     
-    let imageUrls: string[] = [];
+    const imageUrls: string[] = [];
     if (movieData.poster_path) {
       try {
         const posterUrl = getTMDBImageUrl(movieData.poster_path, "w1280");
@@ -1391,14 +1297,14 @@ export async function processMovie(
           const syncedUrl = await uploadImage(posterUrl, `${slug}-poster.jpg`);
           imageUrls.push(syncedUrl);
         }
-      } catch (err) {
+      } catch {
         const posterUrl = getTMDBImageUrl(movieData.poster_path, "w1280");
         if (posterUrl) imageUrls.push(posterUrl);
       }
     }
 
     // Add backdrops as in-content images (used by ![[IMAGE_X]] placeholders)
-    const movieBackdrops = (movieData.images?.backdrops || []).slice(0, 2);
+    const movieBackdrops = (movieData.images?.backdrops || []).slice(0, 3);
     for (let i = 0; i < movieBackdrops.length; i++) {
       const backdropUrl = getTMDBImageUrl(movieBackdrops[i].file_path, "w1280");
       if (!backdropUrl) continue;
@@ -1428,6 +1334,21 @@ export async function processMovie(
       // Non-blocking
     }
 
+    const movieMetadata = {
+      genres: movieData.genres?.map((g) => g.name) || [],
+      production_companies: movieData.production_companies?.map((c) => c.name) || [],
+      production_countries: movieData.production_countries?.map((c) => c.name) || [],
+      spoken_languages: movieData.spoken_languages?.map((l) => l.name) || [],
+      release_date: movieData.release_date || undefined,
+      runtime: movieData.runtime || undefined,
+      tmdb_score: movieData.vote_average,
+      vote_count: movieData.vote_count,
+      popularity: movieData.popularity,
+      director: (movieData.credits?.crew || []).filter((c) => c.job === "Director").map((c) => c.name) || [],
+      cast: (movieData.credits?.cast || []).slice(0, 8).map((c) => c.name) || [],
+      original_title: movieData.original_title || undefined,
+    };
+
     const review = await prisma.review.create({
       data: {
         title: reviewContent.de.title,
@@ -1445,6 +1366,7 @@ export async function processMovie(
         youtubeVideos,
         status: finalStatus,
         tmdbId: movieData.id,
+        metadata: movieMetadata,
         metaDescription: seoMeta?.metaDescription ?? null,
         metaKeywords: seoMeta?.metaKeywords ?? null,
         createdAt: movieData.release_date ? new Date(movieData.release_date) : new Date(),
@@ -1459,6 +1381,14 @@ export async function processMovie(
       category: "movie",
     }).catch((e) => console.warn("Comment generation for movie review failed:", e));
 
+    generateAndAttachTagsForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      category: "movie",
+      score: reviewContent.score,
+      metadata: { genres: movieMetadata.genres },
+      contentExcerpt: reviewContent.de.content?.substring(0, 500),
+    }).catch((e) => console.warn("Tag generation for movie review failed:", e));
+
     return { success: true, reviewId: review.id };
   } catch (error: any) {
     console.error(`Error processing movie ${movieData.title}:`, error);
@@ -1466,277 +1396,6 @@ export async function processMovie(
   }
 }
 
-// Helper function to generate Amazon review content using OpenAI with Multi-Source Data
-export async function generateAmazonReviewContent(
-  productData: { name: string; asin?: string; description?: string; affiliateLink?: string },
-  retryCount = 0
-): Promise<{
-  de: { title: string; content: string; pros: string[]; cons: string[] };
-  en: { title: string; content: string; pros: string[]; cons: string[] };
-  score: number;
-  specs?: any;
-  images?: string[];
-  tavilySearchResults?: any;
-}> {
-  const isRetry = retryCount > 0;
-  
-  // 1. Get product data from multiple sources
-  let enrichedData: any = null;
-  let dataSource: string = "unknown";
-  
-  try {
-    const result = await getAmazonProductData(productData.name, productData.asin);
-    enrichedData = result.data;
-    dataSource = result.source;
-    console.log(`✅ Enriched product data for "${productData.name}" via ${dataSource}`);
-  } catch (error) {
-    console.warn(`⚠️ Multi-source data fetch failed for ${productData.name}, using basic data:`, (error as Error).message);
-    enrichedData = {
-      name: productData.name,
-      description: productData.description || "Keine Beschreibung verfügbar.",
-      specs: {},
-      pros: [],
-      cons: [],
-    };
-  }
-  
-  const mergedSpecs = { ...(enrichedData.specs || {}) };
-  const mergedDescription = enrichedData.description || enrichedData.summary || productData.description || "Keine Beschreibung verfügbar";
-  const mergedPros = [...(enrichedData.pros || [])].slice(0, 5);
-  const mergedCons = [...(enrichedData.cons || [])].slice(0, 5);
-  
-  const prompt = `
-    Schreibe eine EXTREM AUSFÜHRLICHE professionelle Amazon-Produkt-Review für "${enrichedData.title || productData.name}" in Deutsch UND Englisch.
-    
-    ${isRetry ? "HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Bitte fass dich etwas kürzer." : "WICHTIG: Erwähne NIEMALS eine KI. Der Text muss klingen wie von einem passionierten Produkttester."}
-    
-    Antworte EXKLUSIV im JSON-Format:
-    {
-      "de": { "title": "...", "content": "...", "pros": [...], "cons": [...] },
-      "en": { "title": "...", "content": "...", "pros": [...], "cons": [...] },
-      "score": 0-100,
-      "specs": {}
-    }
-    
-    Kontext: ${mergedDescription}
-    Features: ${enrichedData.features?.join(", ") || "N/A"}
-    Specs: ${JSON.stringify(mergedSpecs)}
-    ${enrichedData.price ? `Preis: ${enrichedData.price}` : ""}
-    ${enrichedData.rating ? `Bewertung: ${enrichedData.rating}/5` : ""}
-    
-    WICHTIG: Wenn kein Preis angegeben ist, erfinde KEINEN Preis. Lass Preisangaben im Text einfach weg.
-  `;
-
-  try {
-    const result = await generateContent(prompt, enrichedData.title || productData.name, retryCount);
-    
-    // Merge data
-    if (mergedPros.length > 0 && result.de.pros.length < 3) {
-      result.de.pros = [...new Set([...result.de.pros, ...mergedPros])].slice(0, 5);
-    }
-    if (mergedCons.length > 0 && result.de.cons.length < 3) {
-      result.de.cons = [...new Set([...result.de.cons, ...mergedCons])].slice(0, 5);
-    }
-    
-    result.specs = { ...mergedSpecs, ...(result.specs || {}) };
-    
-    return {
-      ...result,
-      images: enrichedData.images || [],
-      tavilySearchResults: enrichedData.tavilySearchResults,
-    };
-  } catch (error) {
-    console.error(`Final error generating Amazon content for ${productData.name}:`, error);
-    return {
-      de: { title: productData.name, content: mergedDescription, pros: mergedPros, cons: mergedCons },
-      en: { title: productData.name, content: mergedDescription, pros: mergedPros, cons: mergedCons },
-      score: enrichedData.rating ? Math.round(enrichedData.rating * 20) : 70,
-      specs: mergedSpecs,
-      images: enrichedData.images || [],
-    };
-  }
-}
-
-// Helper function to process an Amazon product review
-export async function processAmazonProduct(
-  productData: { name: string; asin?: string; description?: string; affiliateLink?: string },
-  options: { status: "draft" | "published"; skipExisting: boolean; generateImages?: boolean }
-): Promise<{ success: boolean; reviewId?: string; error?: string }> {
-  try {
-    // 1. Validation
-    const validation = validateProductInput(productData);
-    if (!validation.valid) {
-      return { success: false, error: `Validierungsfehler: ${validation.errors.join(", ")}` };
-    }
-
-    // 2. Duplicate check - improved to catch duplicates even with different titles
-    // Normalize product name for comparison (remove special chars, lowercase)
-    const normalizedProductName = productData.name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-    
-    // Extract key words from product name (first 2-3 words usually identify the product)
-    const nameWords = normalizedProductName.split(" ").filter(w => w.length > 2);
-    const keyWords = nameWords.slice(0, Math.min(3, nameWords.length)).join(" ");
-    
-    if (productData.asin) {
-      const existingByAsin = await prisma.review.findFirst({
-        where: { amazonAsin: productData.asin, category: { in: ["amazon", "product"] } },
-      });
-      if (existingByAsin) {
-        if (options.skipExisting) return { success: false, error: "Already exists (ASIN)" };
-        // Even if not skipping, warn about duplicate ASIN
-        console.warn(`⚠️ Duplicate ASIN detected: ${productData.asin} (existing review: ${existingByAsin.title})`);
-      }
-    }
-    
-    // Check by exact name match
-    const existingByName = await prisma.review.findFirst({
-      where: { title: { equals: productData.name, mode: "insensitive" }, category: { in: ["amazon", "product"] } },
-    });
-    if (existingByName) {
-      if (options.skipExisting) return { success: false, error: "Already exists (Exact Name)" };
-      console.warn(`⚠️ Duplicate exact name detected: ${productData.name}`);
-    }
-    
-    // Check by product name contained in title (catches variations like "Sony WH-1000XM5: Review..." vs "Sony WH-1000XM5: Test...")
-    if (keyWords.length > 5) {
-      const existingByTitleContains = await prisma.review.findFirst({
-        where: {
-          AND: [
-            { title: { contains: keyWords, mode: "insensitive" as const } },
-            { category: { in: ["amazon", "product"] } },
-          ],
-        },
-      });
-      if (existingByTitleContains) {
-        if (options.skipExisting) return { success: false, error: `Already exists (Similar title: "${existingByTitleContains.title}")` };
-        console.warn(`⚠️ Similar product review found: "${existingByTitleContains.title}" (searching for: ${keyWords})`);
-      }
-    }
-
-    // 3. Generate review content
-    const reviewContent = await generateAmazonReviewContent(productData);
-
-    // 4. Slug and uniqueness
-    let slug = generateSlug(reviewContent.de.title || productData.name);
-    let slugAttempts = 0;
-    while (await prisma.review.findUnique({ where: { slug } })) {
-      slugAttempts++;
-      if (slugAttempts > 10) {
-        slug = `${generateSlug(reviewContent.de.title || productData.name)}-${Date.now().toString(36)}`;
-        break;
-      }
-      slug = `${generateSlug(reviewContent.de.title || productData.name)}-${Math.random().toString(36).substring(2, 7)}`;
-    }
-
-    // 5. Images (Enriched from PA API or Scraping, fallback to Generation)
-    let imageUrls: string[] = [];
-    
-    // Try to sync images from data source first
-    if (reviewContent.images && reviewContent.images.length > 0) {
-      for (let i = 0; i < Math.min(reviewContent.images.length, 5); i++) {
-        try {
-          const syncedUrl = await uploadImage(reviewContent.images[i], `${slug}-source-${i+1}.jpg`);
-          imageUrls.push(syncedUrl);
-        } catch (err) {
-          imageUrls.push(reviewContent.images[i]);
-        }
-      }
-    }
-
-    // If still no images or explicitly requested, generate some
-    if (imageUrls.length === 0 && options.generateImages !== false) {
-      try {
-        console.log(`🎨 Generating review images for ${productData.name}...`);
-        const generatedImages = await generateReviewImages({
-          productName: productData.name,
-          productType: "product",
-          style: "professional",
-          count: 3,
-          tavilySearchResults: reviewContent.tavilySearchResults,
-        });
-        imageUrls = [...imageUrls, ...generatedImages].slice(0, 5);
-      } catch (error) {
-        console.error(`Error generating images for ${productData.name}:`, error);
-      }
-    }
-
-    // 6. Optional: fetch YouTube videos for product (trailers/reviews via Tavily)
-    let youtubeVideos: string[] = [];
-    try {
-      youtubeVideos = await searchYouTubeVideoIdsTavily(productData.name);
-    } catch {
-      // Non-blocking; continue without YouTube videos
-    }
-
-    // 7. Create review
-    // Generate a realistic publication date (random date within last 2 years)
-    const now = new Date();
-    const twoYearsAgo = new Date(now.getTime() - 2 * 365 * 24 * 60 * 60 * 1000);
-    const randomTime = twoYearsAgo.getTime() + Math.random() * (now.getTime() - twoYearsAgo.getTime());
-    const publicationDate = new Date(randomTime);
-
-    const contentDe = replaceImagePlaceholders(reviewContent.de.content, imageUrls, productData.name);
-    const contentEn = replaceImagePlaceholders(reviewContent.en.content, imageUrls, productData.name);
-
-    let seoMeta: { metaDescription: string; metaKeywords: string } | null = null;
-    try {
-      seoMeta = await generateSEOMetadata(reviewContent.de.title, contentDe, "product");
-    } catch {
-      // Non-blocking
-    }
-
-    const review = await prisma.review.create({
-      data: {
-        title: reviewContent.de.title,
-        title_en: reviewContent.en.title,
-        slug,
-        category: "product",
-        content: contentDe,
-        content_en: contentEn,
-        score: reviewContent.score,
-        pros: reviewContent.de.pros,
-        pros_en: reviewContent.en.pros,
-        cons: reviewContent.de.cons,
-        cons_en: reviewContent.en.cons,
-        images: imageUrls,
-        youtubeVideos,
-        status: options.status,
-        amazonAsin: productData.asin || null,
-        affiliateLink: productData.affiliateLink || null,
-        specs: reviewContent.specs || null,
-        metaDescription: seoMeta?.metaDescription ?? null,
-        metaKeywords: seoMeta?.metaKeywords ?? null,
-        createdAt: publicationDate,
-      },
-    });
-
-    generateAndSaveCommentsForReview(review.id, {
-      reviewTitle: reviewContent.de.title,
-      score: reviewContent.score,
-      pros: reviewContent.de.pros,
-      cons: reviewContent.de.cons,
-      category: "product",
-    }).catch((e) => console.warn("Comment generation for product review failed:", e));
-
-    generateAndAttachTagsForReview(review.id, {
-      reviewTitle: reviewContent.de.title,
-      category: "product",
-      score: reviewContent.score,
-      contentExcerpt: reviewContent.de.content?.substring(0, 500),
-    }).catch((e) => console.warn("Tag generation for product review failed:", e));
-
-    return { success: true, reviewId: review.id };
-  } catch (error: any) {
-    console.error(`Error processing Amazon product ${productData.name}:`, error);
-    return { success: false, error: error.message };
-  }
-}
-
-// Add other missing process functions if needed...
 export async function processSeries(
   seriesData: TMDBSeries,
   options: { status: "draft" | "published"; skipExisting: boolean }
@@ -1762,14 +1421,14 @@ export async function processSeries(
       slug = `${generateSlug(reviewContent.de.title || seriesData.name)}-${Math.random().toString(36).substring(2, 7)}`;
     }
     
-    let imageUrls: string[] = [];
+    const imageUrls: string[] = [];
     if (seriesData.poster_path) {
       const posterUrl = getTMDBImageUrl(seriesData.poster_path, "w1280");
       if (posterUrl) imageUrls.push(posterUrl);
     }
 
     // Add backdrops as in-content images (used by ![[IMAGE_X]] placeholders)
-    const seriesBackdrops = (seriesData.images?.backdrops || []).slice(0, 2);
+    const seriesBackdrops = (seriesData.images?.backdrops || []).slice(0, 3);
     for (let i = 0; i < seriesBackdrops.length; i++) {
       const backdropUrl = getTMDBImageUrl(seriesBackdrops[i].file_path, "w1280");
       if (!backdropUrl) continue;
@@ -1799,6 +1458,24 @@ export async function processSeries(
       // Non-blocking
     }
 
+    const seriesMetadata = {
+      genres: seriesData.genres?.map((g) => g.name) || [],
+      production_companies: seriesData.production_companies?.map((c) => c.name) || [],
+      production_countries: seriesData.production_countries?.map((c) => c.name) || [],
+      spoken_languages: seriesData.spoken_languages?.map((l) => l.name) || [],
+      first_air_date: seriesData.first_air_date || undefined,
+      last_air_date: seriesData.last_air_date || undefined,
+      status: seriesData.status || undefined,
+      number_of_seasons: seriesData.number_of_seasons || undefined,
+      number_of_episodes: seriesData.number_of_episodes || undefined,
+      tmdb_score: seriesData.vote_average,
+      vote_count: seriesData.vote_count,
+      popularity: seriesData.popularity,
+      created_by: (seriesData.created_by || []).map((c) => c.name) || [],
+      cast: (seriesData.credits?.cast || []).slice(0, 8).map((c) => c.name) || [],
+      original_name: seriesData.original_name || undefined,
+    };
+
     const review = await prisma.review.create({
       data: {
         title: reviewContent.de.title,
@@ -1816,6 +1493,7 @@ export async function processSeries(
         youtubeVideos,
         status: finalStatus,
         tmdbId: seriesData.id,
+        metadata: seriesMetadata,
         metaDescription: seoMeta?.metaDescription ?? null,
         metaKeywords: seoMeta?.metaKeywords ?? null,
         createdAt: seriesData.first_air_date ? new Date(seriesData.first_air_date) : new Date(),
@@ -1846,7 +1524,8 @@ export async function processSeries(
 
 export async function generateSeriesReviewContent(
   seriesData: TMDBSeries,
-  retryCount = 0
+  retryCount = 0,
+  options?: { tavilySearchResults?: TavilySearchResponse }
 ): Promise<{
   de: { title: string; content: string; pros: string[]; cons: string[] };
   en: { title: string; content: string; pros: string[]; cons: string[] };
@@ -1854,16 +1533,48 @@ export async function generateSeriesReviewContent(
 }> {
   const isRetry = retryCount > 0;
 
+  // Use Tavily to gather factual review context (best-effort, non-blocking)
+  let tavilySearchResults = options?.tavilySearchResults;
+  if (!tavilySearchResults) {
+    try {
+      console.log(`🔍 Searching Tavily for series ${seriesData.name}...`);
+      tavilySearchResults = await searchSeriesProduct(
+        seriesData.name,
+        seriesData.first_air_date ? new Date(seriesData.first_air_date).getFullYear() : undefined
+      );
+    } catch (error) {
+      console.warn(`⚠️  Tavily search failed for ${seriesData.name}:`, error);
+    }
+  }
+
+  const cast = (seriesData.credits?.cast || [])
+    .slice(0, 8)
+    .map((c) => (c.character ? `${c.name} als ${c.character}` : c.name));
+  const creators = (seriesData.created_by || []).map((c) => c.name);
+  const directors = (seriesData.credits?.crew || [])
+    .filter((c) => c.job === "Director")
+    .map((c) => c.name);
+  const writers = (seriesData.credits?.crew || [])
+    .filter((c) => ["Writer", "Screenplay", "Story", "Creator"].includes(c.job))
+    .map((c) => c.name);
+
   const contextLines = [
     `Titel: ${seriesData.name}`,
     `Originaltitel: ${seriesData.original_name || "N/A"}`,
     `Genres: ${seriesData.genres?.map((g) => g.name).join(", ") || "N/A"}`,
     `Erstausstrahlung: ${seriesData.first_air_date || "N/A"}`,
+    seriesData.status ? `Status: ${seriesData.status}` : "",
+    seriesData.last_air_date ? `Letzte Ausstrahlung: ${seriesData.last_air_date}` : "",
+    creators.length > 0 ? `Erdacht von / Creator: ${creators.slice(0, 5).join(", ")}` : "",
+    `Regie: ${directors.slice(0, 5).join(", ") || "N/A"}`,
+    `Autoren: ${[...new Set(writers)].slice(0, 5).join(", ") || "N/A"}`,
+    cast.length > 0 ? `Besetzung: ${[...new Set(cast)].join(", ")}` : "",
     seriesData.number_of_seasons ? `Staffeln: ${seriesData.number_of_seasons}` : "",
     seriesData.number_of_episodes ? `Folgen: ${seriesData.number_of_episodes}` : "",
     seriesData.vote_average
       ? `TMDB-Bewertung: ${Number(seriesData.vote_average).toFixed(1)}/10 (${seriesData.vote_count || 0} Stimmen)`
       : "",
+    seriesData.external_ids?.imdb_id ? `IMDb-ID: ${seriesData.external_ids.imdb_id}` : "",
     seriesData.production_companies?.length
       ? `Produktionsfirmen: ${seriesData.production_companies.map((c) => c.name).join(", ")}`
       : "",
@@ -1874,6 +1585,7 @@ export async function generateSeriesReviewContent(
       ? `Sprachen: ${seriesData.spoken_languages.map((l) => l.name).join(", ")}`
       : "",
     `Handlung: ${seriesData.overview || "N/A"}`,
+    ...(tavilySearchResults ? buildResearchSummary(tavilySearchResults) : []),
   ].filter(Boolean);
 
   const sections: ReviewSection[] = [
@@ -1934,28 +1646,49 @@ export async function generateSeriesReviewContent(
     itemName: seriesData.name,
     contextLines,
     sections,
-    wordTarget: 1600,
-    imageCount: 3,
+    wordTarget: 1800,
+    imageCount: 4,
     isRetry,
     referenceRating: seriesData.vote_average ? `${Number(seriesData.vote_average).toFixed(1)}/10` : undefined,
+    scoreBand: seriesData.vote_average ? computeScoreBand(Number(seriesData.vote_average)) : undefined,
   });
 
   try {
     return await generateContent(prompt, seriesData.name, retryCount);
   } catch (error) {
     console.error(`Final error generating series content for ${seriesData.name}:`, error);
+    const castNames = (seriesData.credits?.cast || []).slice(0, 5).map((c) => c.name);
+    const creatorNames = (seriesData.created_by || []).map((c) => c.name);
+    const fallbackPlotDe = seriesData.overview
+      ? "Die Serie entwickelt ihre Prämisse über mehrere Staffeln und erzählt ihre Geschichte mit einem klaren Spannungsbogen.\n\n"
+      : "";
+    const fallbackPlotEn = seriesData.overview
+      ? "The series develops its premise across multiple seasons and tells its story with a clear dramatic arc.\n\n"
+      : "";
+    const castLineDe = castNames.length > 0
+      ? `Das Ensemble um ${castNames.join(", ")} trägt die Serie mit überzeugenden Leistungen.`
+      : "Das Ensemble trägt die Serie mit überzeugenden Leistungen.";
+    const castLineEn = castNames.length > 0
+      ? `The ensemble, led by ${castNames.join(", ")}, carries the series with compelling performances.`
+      : "The ensemble carries the series with compelling performances.";
+    const creatorLineDe = creatorNames.length > 0
+      ? `Als Creator sind ${creatorNames.join(", ")} für die kreative Ausrichtung verantwortlich.\n\n`
+      : "";
+    const creatorLineEn = creatorNames.length > 0
+      ? `Created by ${creatorNames.join(", ")}, the series benefits from a clear creative vision.\n\n`
+      : "";
     return {
       de: {
         title: seriesData.name,
-        content: `## Einleitung\n\n${seriesData.overview || "Keine Beschreibung verfügbar."}\n\n## Fazit\n\nEine sehenswerte Serie, die es wert ist, genauer betrachtet zu werden.`,
-        pros: ["Spannende Handlung", "Gutes Ensemble"],
-        cons: ["Einige Längen"],
+        content: `## Einleitung\n\n${seriesData.overview || "Keine Beschreibung verfügbar."}\n\n## Handlung & Setting\n\n${fallbackPlotDe}## Charaktere & Schauspiel\n\n${castLineDe}\n\n${creatorLineDe}## Fazit\n\nEine sehenswerte Serie, die es wert ist, genauer betrachtet zu werden.`,
+        pros: ["Spannende Handlung", "Gutes Ensemble", "Starke Inszenierung", "Atmosphärischer Score", "Interessante Themen"],
+        cons: ["Einige Längen", "Manche Nebenhandlungen wirken aufgesetzt", "Vorhersehbare Twists", "Pacing schwankt zwischen Staffeln", "Endet etwas abrupt"],
       },
       en: {
         title: seriesData.name,
-        content: `## Introduction\n\n${seriesData.overview || "No description available."}\n\n## Conclusion\n\nA worthwhile series that deserves a closer look.`,
-        pros: ["Engaging plot", "Strong ensemble cast"],
-        cons: ["Some pacing issues"],
+        content: `## Introduction\n\n${seriesData.overview || "No description available."}\n\n## Plot & Setting\n\n${fallbackPlotEn}## Characters & Acting\n\n${castLineEn}\n\n${creatorLineEn}## Conclusion\n\nA worthwhile series that deserves a closer look.`,
+        pros: ["Engaging plot", "Strong ensemble cast", "Solid direction", "Atmospheric score", "Interesting themes"],
+        cons: ["Some pacing issues", "Some subplots feel tacked on", "Predictable twists", "Pacing varies between seasons", "Ends somewhat abruptly"],
       },
       score: 70,
     };

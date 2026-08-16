@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef, type KeyboardEvent as ReactKeyboa
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, X, Filter, Gamepad2, Cpu, ShoppingCart, Film, Tv } from "lucide-react";
+import { Search, X, Filter, Gamepad2, Film, Tv } from "lucide-react";
 import Link from "next/link";
 import { Review } from "@/types/review";
 import { useRouter } from "next/navigation";
@@ -15,8 +15,6 @@ interface GlobalSearchProps {
 
 const categoryIcons = {
   game: Gamepad2,
-  hardware: Cpu,
-  amazon: ShoppingCart,
   movie: Film,
   series: Tv,
 };
@@ -41,16 +39,7 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
 
     // Filter by category
     if (selectedFilters.size > 0) {
-      filtered = filtered.filter((review) => {
-        // Handle backward compatibility: "product" and "amazon" are treated as equivalent
-        if (selectedFilters.has("amazon")) {
-          return review.category === "amazon" || review.category === "product";
-        }
-        if (selectedFilters.has("product")) {
-          return review.category === "amazon" || review.category === "product";
-        }
-        return selectedFilters.has(review.category);
-      });
+      filtered = filtered.filter((review) => selectedFilters.has(review.category));
     }
 
     // Filter by query
@@ -85,7 +74,7 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
     }
   }, [reviews.length]);
 
-  const categories = ["game", "hardware", "amazon", "movie", "series"];
+  const categories = ["game", "movie", "series"];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -240,10 +229,8 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
               {results.length > 0 ? (
                 <div className="p-2">
                   {results.map((review, index) => {
-                    // Map "product" to "amazon" icon for backward compatibility
-                    const categoryKey = review.category === "product" ? "amazon" : review.category;
                     const Icon =
-                      categoryIcons[categoryKey as keyof typeof categoryIcons] || ShoppingCart;
+                      categoryIcons[review.category as keyof typeof categoryIcons] || Film;
 
                     return (
                       <button

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, Heart, FileText, Cpu, ShoppingCart, BarChart3, Handshake, FileCheck } from "lucide-react";
+import { Mail, Heart, FileText, BarChart3, Handshake, FileCheck } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -8,9 +8,6 @@ export function Footer() {
     { href: "/", label: "Startseite", icon: null },
     { href: "/reviews", label: "Alle Reviews", icon: FileText },
     { href: "/releases", label: "Release Kalender", icon: null },
-    { href: "/gaming-pcs", label: "Gaming PCs", icon: null },
-    { href: "/pc-builder", label: "PC Builder", icon: null },
-    { href: "/deals", label: "Deals", icon: null },
     { href: "/analytics", label: "Statistik", icon: BarChart3 },
   ];
 
@@ -18,8 +15,6 @@ export function Footer() {
     { href: "/reviews?category=game", label: "Games", icon: null },
     { href: "/reviews?category=movie", label: "Filme", icon: null },
     { href: "/reviews?category=series", label: "Serien", icon: null },
-    { href: "/reviews?category=hardware", label: "Hardware", icon: Cpu },
-    { href: "/reviews?category=product", label: "Produkte", icon: ShoppingCart },
   ];
 
   const businessLinks = [
@@ -43,8 +38,8 @@ export function Footer() {
                 <span className="kicker text-primary">Magazin</span>
               </Link>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-                Professionelle Game- und Hardware-Reviews für fundierte Kaufentscheidungen.
-                Unabhängig, ehrlich und mit System.
+                Professionelle Game-, Film- und Serien-Reviews für fundierte
+                Unterhaltungsentscheidungen. Unabhängig, ehrlich und mit System.
               </p>
               <a
                 href="mailto:kontakt@nerdiction.de"

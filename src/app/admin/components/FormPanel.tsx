@@ -188,8 +188,8 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="game">Game</SelectItem>
-                    <SelectItem value="hardware">Hardware</SelectItem>
-                    <SelectItem value="amazon">Amazon Product</SelectItem>
+                    <SelectItem value="movie">Film</SelectItem>
+                    <SelectItem value="series">Serie</SelectItem>
                 </SelectContent>
             </Select>
         </div>
@@ -298,19 +298,6 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
         )}
       </div>
       
-      {(review.category === "product" || review.category === "amazon" || review.category === "hardware") && (
-        <div className="space-y-2 border-t pt-4">
-            <Label htmlFor="affiliateLink">Amazon Affiliate Link</Label>
-            <Input
-              id="affiliateLink"
-              placeholder="https://amazon.de/..."
-              value={review.affiliateLink || ""}
-              onChange={(e) => handleChange("affiliateLink", e.target.value)}
-              className="rounded-lg"
-            />
-        </div>
-      )}
-
       {review.category === "game" && (
         <div className="space-y-2 border-t pt-4">
             <Label htmlFor="specs">Systemanforderungen (JSON)</Label>

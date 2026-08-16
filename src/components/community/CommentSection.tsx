@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export interface Comment {
@@ -75,25 +74,32 @@ export function CommentSection({ reviewId, initialComments }: CommentSectionProp
   };
 
   return (
-    <div className="space-y-8 pt-12 border-t">
-      <div className="flex items-center justify-between">
-        <h3 className="text-2xl font-bold tracking-tight">Community Feedback</h3>
-        <span className="text-sm text-muted-foreground">{comments.length} Kommentare</span>
+    <div className="space-y-8 pt-12 border-t border-border mt-12">
+      <div className="border-b border-border pb-4 flex items-center justify-between">
+        <div>
+          <span className="kicker text-primary">Community</span>
+          <h3 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mt-1">
+            Diskussion
+          </h3>
+        </div>
+        <span className="text-sm text-muted-foreground">
+          {comments.length} {comments.length === 1 ? "Kommentar" : "Kommentare"}
+        </span>
       </div>
 
-      <div className="space-y-4 bg-muted/20 p-6 rounded-2xl border">
+      <div className="space-y-4 bg-card border border-border p-6 rounded-md">
         <Textarea
           placeholder="Teile deine Meinung zu diesem Test..."
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          className="rounded-xl bg-background border-none focus-visible:ring-1 focus-visible:ring-primary h-24"
+          className="rounded-sm h-24"
           disabled={isSubmitting}
         />
         <Input
           placeholder="Name (optional)"
           value={authorName}
           onChange={(e) => setAuthorName(e.target.value)}
-          className="rounded-xl bg-background border-none focus-visible:ring-1 focus-visible:ring-primary"
+          className="rounded-sm"
           disabled={isSubmitting}
           maxLength={100}
         />
@@ -106,7 +112,7 @@ export function CommentSection({ reviewId, initialComments }: CommentSectionProp
           <Button
             onClick={handleSubmit}
             disabled={!newComment.trim() || isSubmitting}
-            className="rounded-full px-8 font-bold"
+            className="rounded-sm"
           >
             {isSubmitting ? "Wird gesendet…" : "Kommentieren"}
           </Button>
@@ -117,23 +123,26 @@ export function CommentSection({ reviewId, initialComments }: CommentSectionProp
         {comments.length > 0 ? (
           comments.map((comment) => (
             <div key={comment.id} className="flex space-x-4">
-              <Avatar className="h-10 w-10 border">
-                <AvatarFallback className="bg-primary/10 text-primary font-bold">
+              <Avatar className="h-10 w-10 border shrink-0">
+                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                   {(comment.author || "?")[0]}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center space-x-2">
-                  <span className="font-bold text-sm">{comment.author}</span>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">
-                    {new Date(comment.createdAt).toLocaleDateString()}
-                  </span>
+              <div className="flex-1 space-y-2 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-sm">{comment.author}</span>
+                  <span aria-hidden="true" className="text-muted-foreground">·</span>
+                  <time dateTime={new Date(comment.createdAt).toISOString()} className="text-xs text-muted-foreground uppercase tracking-wider">
+                    {new Date(comment.createdAt).toLocaleDateString("de-DE", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </time>
                 </div>
-                <Card className="rounded-2xl rounded-tl-none bg-muted/30 border-none shadow-none">
-                  <CardContent className="p-4 py-3">
-                    <p className="text-sm text-foreground/80 leading-relaxed">{comment.text}</p>
-                  </CardContent>
-                </Card>
+                <div className="border border-border bg-card rounded-md px-4 py-3">
+                  <p className="text-sm text-foreground/80 leading-relaxed">{comment.text}</p>
+                </div>
               </div>
             </div>
           ))

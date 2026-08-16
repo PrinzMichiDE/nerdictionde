@@ -7,7 +7,8 @@ import prisma from "@/lib/prisma";
  */
 export async function GET(req: NextRequest) {
   try {
-    const publishedWhere = { status: "published" as const };
+    const focusCategories = ["game", "movie", "series"];
+    const publishedWhere = { status: "published" as const, category: { in: focusCategories } };
 
     const [
       totalReviews,
@@ -39,10 +40,12 @@ export async function GET(req: NextRequest) {
       }),
     ]);
 
-    const categoryDistribution = byCategory.map((c) => ({
-      name: c.category,
-      value: c._count.id,
-    }));
+    const categoryDistribution = byCategory
+      .filter((c) => focusCategories.includes(c.category))
+      .map((c) => ({
+        name: c.category,
+        value: c._count.id,
+      }));
 
     const scoreBuckets: Record<string, number> = {
       "0-19": 0,

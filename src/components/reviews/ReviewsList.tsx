@@ -15,8 +15,6 @@ const categoryLabels: Record<string, string> = {
   game: "Games",
   movie: "Filme",
   series: "Serien",
-  hardware: "Hardware",
-  amazon: "Amazon",
 };
 
 interface PaginationData {
@@ -92,7 +90,7 @@ export function ReviewsList() {
           Alle Reviews
         </h1>
         <p className="text-muted-foreground mt-3 max-w-2xl">
-          Durchsuche unsere neuesten Tests zu Games, Filmen, Serien und Hardware.
+          Durchsuche unsere neuesten Reviews zu Games, Filmen und Serien.
         </p>
       </div>
 

@@ -100,21 +100,6 @@ export async function searchGOGStore(gameName: string): Promise<string | null> {
 }
 
 /**
- * Searches for a game/product on Amazon and returns the ASIN
- */
-export async function searchAmazonStore(gameName: string): Promise<string | null> {
-  try {
-    // Amazon Product Advertising API 5.0 search
-    // Note: This requires AWS credentials and PA API access
-    // For now, we'll return null and let the existing Amazon search handle it
-    return null;
-  } catch (error) {
-    console.error(`Error searching Amazon for ${gameName}:`, error);
-    return null;
-  }
-}
-
-/**
  * Finds all available store IDs for a game
  * Tries IGDB first, then falls back to direct store searches
  */
@@ -125,14 +110,12 @@ export async function findStoreIds(
   steamAppId?: string;
   epicId?: string;
   gogId?: string;
-  amazonAsin?: string;
   stores?: Array<{ category: number; name: string; id: string; url: string }>;
 }> {
   const result: {
     steamAppId?: string;
     epicId?: string;
     gogId?: string;
-    amazonAsin?: string;
     stores?: Array<{ category: number; name: string; id: string; url: string }>;
   } = {};
 
@@ -193,8 +176,7 @@ export async function findStoreIds(
     }
   }
 
-  // Amazon search is handled separately via existing Amazon search functions
-  // So we don't search here to avoid duplication
+  // Amazon search is no longer needed - the site focuses on game, movie and series reviews
 
   return result;
 }

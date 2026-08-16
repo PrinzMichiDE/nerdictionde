@@ -101,7 +101,7 @@ export async function getTMDBMoviesBulkLarge(
               params: {
                 api_key: apiKey,
                 language: "de-DE",
-                append_to_response: "videos,images",
+                append_to_response: "videos,images,credits,external_ids",
               },
             });
             return detailResponse.data;
@@ -230,7 +230,7 @@ export async function getTMDBSeriesBulkLarge(
               params: {
                 api_key: apiKey,
                 language: "de-DE",
-                append_to_response: "videos,images",
+                append_to_response: "videos,images,credits,external_ids",
               },
             });
             return detailResponse.data;

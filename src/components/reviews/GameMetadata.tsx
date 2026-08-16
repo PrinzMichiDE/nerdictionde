@@ -10,14 +10,10 @@ import {
   Users, 
   Eye, 
   Zap, 
-  Star,
   ShieldCheck,
-  ShoppingCart,
   ExternalLink
 } from "lucide-react";
 import { ScoreBadge } from "./ScoreBadge";
-import { generateAmazonAffiliateLink } from "@/lib/amazon-search";
-import { cn } from "@/lib/utils";
 
 interface GameMetadataProps {
   metadata: {
@@ -34,15 +30,13 @@ interface GameMetadataProps {
     stores?: Array<{ category: number; name: string; id: string; url: string }>;
   };
   nerdictionScore: number;
-  title?: string;
   steamAppId?: string | null;
   epicId?: string | null;
   gogId?: string | null;
-  amazonAsin?: string | null;
   isEn?: boolean;
 }
 
-export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, epicId, gogId, amazonAsin, isEn }: GameMetadataProps) {
+export function GameMetadata({ metadata, nerdictionScore, steamAppId, epicId, gogId, isEn }: GameMetadataProps) {
   if (!metadata) return null;
 
   const formattedDate = metadata.releaseDate 
@@ -53,14 +47,6 @@ export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, epi
       })
     : "N/A";
 
-  // Generate store links - Amazon first, then all IGDB stores
-  const gameTitle = title || "";
-  
-  // Amazon link (always first)
-  const amazonLink = amazonAsin 
-    ? `https://www.amazon.de/dp/${amazonAsin}?tag=michelfritzschde-21`
-    : (gameTitle ? generateAmazonAffiliateLink(gameTitle) : null);
-  
   // Get all stores from metadata (from IGDB)
   const stores = metadata.stores || [];
   
@@ -151,30 +137,14 @@ export function GameMetadata({ metadata, nerdictionScore, title, steamAppId, epi
             </div>
 
             {/* Store Links Section */}
-            {(amazonLink || sortedStores.length > 0) && (
+            {sortedStores.length > 0 && (
               <div className="pt-4 border-t border-border">
                 <h4 className="kicker text-muted-foreground mb-3 flex items-center">
-                  <ShoppingCart className="h-3 w-3 mr-1.5" />
+                  <ExternalLink className="h-3 w-3 mr-1.5" />
                   {isEn ? "Available at" : "Erhältlich bei"}
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {/* Amazon always first */}
-                  {amazonLink && (
-                    <Button
-                      size="sm"
-                      asChild
-                      className={cn(
-                        "h-8 gap-1.5 text-xs font-semibold uppercase tracking-wider border-none",
-                        "bg-[#FF9900] hover:bg-[#E68A00] text-black"
-                      )}
-                    >
-                      <a href={amazonLink} target="_blank" rel="nofollow sponsored">
-                        <ExternalLink className="h-3 w-3" />
-                        Amazon
-                      </a>
-                    </Button>
-                  )}
-                  {/* All other stores from IGDB */}
+                  {/* All stores from IGDB */}
                   {sortedStores.map((store) => (
                     <Button
                       key={`${store.category}-${store.id}`}

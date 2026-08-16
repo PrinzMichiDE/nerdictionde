@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Gamepad2 } from "lucide-react";
 
 interface GameProgressData {
   id: string;
@@ -15,29 +15,32 @@ interface GameProgressData {
 
 interface GameProgressTrackerProps {
   reviewId: string;
+  isEn?: boolean;
 }
 
-/**
- * Displays game progress data if available (from API in future).
- * For now shows a placeholder; can be extended with GET /api/reviews/[id]/game-progress.
- */
-export function GameProgressTracker({ reviewId }: GameProgressTrackerProps) {
+export function GameProgressTracker({ reviewId, isEn = false }: GameProgressTrackerProps) {
   const [progress, setProgress] = useState<GameProgressData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     fetch(`/api/reviews/${reviewId}/game-progress`)
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => (Array.isArray(data) ? data[0] : data))
-      .then(setProgress)
-      .catch(() => setProgress(null))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        if (!cancelled) setProgress(Array.isArray(data) ? data[0] : data);
+      })
+      .catch(() => {
+        if (!cancelled) setProgress(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [reviewId]);
 
-  if (loading || !progress) {
-    return null;
-  }
+  if (loading || !progress) return null;
 
   const hasData =
     progress.playtimeHours != null ||
@@ -47,37 +50,60 @@ export function GameProgressTracker({ reviewId }: GameProgressTrackerProps) {
 
   if (!hasData) return null;
 
+  const statItems = [
+    {
+      label: isEn ? "Playtime" : "Spielzeit",
+      value:
+        progress.playtimeHours != null
+          ? `${progress.playtimeHours.toFixed(1)} h`
+          : null,
+    },
+    {
+      label: isEn ? "Progress" : "Fortschritt",
+      value: progress.completion != null ? `${progress.completion} %` : null,
+    },
+    {
+      label: isEn ? "Achievements" : "Erfolge",
+      value: progress.achievements != null ? String(progress.achievements) : null,
+    },
+  ].filter((item) => item.value != null);
+
   return (
-    <Card className="border-2">
-      <CardContent className="p-6">
-        <h3 className="font-semibold mb-4">Spielstand</h3>
-        <div className="grid gap-4 sm:grid-cols-3 text-sm">
-          {progress.playtimeHours != null && (
-            <div>
-              <p className="text-muted-foreground">Spielzeit</p>
-              <p className="font-medium">{progress.playtimeHours.toFixed(1)} h</p>
+    <section
+      className="space-y-6 pt-10 border-t border-border"
+      aria-label={isEn ? "Tested playthrough" : "Test-Durchlauf"}
+    >
+      <div className="border-b border-border pb-4">
+        <span className="kicker text-primary inline-flex items-center gap-1.5">
+          <Gamepad2 className="h-3.5 w-3.5" />
+          {isEn ? "Test Notes" : "Test-Durchlauf"}
+        </span>
+        <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mt-1">
+          {isEn ? "Our Playthrough" : "Unser Durchlauf"}
+        </h2>
+      </div>
+
+      {statItems.length > 0 && (
+        <dl className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-border rounded-md overflow-hidden">
+          {statItems.map((item) => (
+            <div key={item.label} className="bg-card px-5 py-4">
+              <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {item.label}
+              </dt>
+              <dd className="mt-1 font-serif text-2xl font-semibold tabular-nums">
+                {item.value}
+              </dd>
             </div>
-          )}
-          {progress.completion != null && (
-            <div>
-              <p className="text-muted-foreground">Fortschritt</p>
-              <p className="font-medium">{progress.completion} %</p>
-            </div>
-          )}
-          {progress.achievements != null && (
-            <div>
-              <p className="text-muted-foreground">Achievements</p>
-              <p className="font-medium">{progress.achievements}</p>
-            </div>
-          )}
-        </div>
-        {progress.notes && progress.notes.trim().length > 0 && (
-          <p className="mt-4 text-sm text-muted-foreground border-t pt-4">
-            {progress.notes.replace(/[#*`]/g, "").slice(0, 200)}
-            {progress.notes.length > 200 ? "…" : ""}
-          </p>
-        )}
-      </CardContent>
-    </Card>
+          ))}
+        </dl>
+      )}
+
+      {progress.notes && progress.notes.trim().length > 0 && (
+        <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">
+          {progress.notes.replace(/[#*`]/g, "").slice(0, 400)}
+          {progress.notes.replace(/[#*`]/g, "").length > 400 ? "…" : ""}
+        </p>
+      )}
+    </section>
   );
 }

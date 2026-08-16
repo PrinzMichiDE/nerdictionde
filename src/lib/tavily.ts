@@ -98,7 +98,7 @@ export async function searchGameProduct(
  * Builds a compact research summary (answer + top results) from a Tavily
  * response, suitable to be embedded into an LLM prompt as factual context.
  */
-export function buildGameResearchSummary(
+export function buildResearchSummary(
   searchResults: TavilySearchResponse,
   maxResults = 5,
   maxCharsPerResult = 400
@@ -113,6 +113,101 @@ export function buildGameResearchSummary(
     lines.push(`Quelle ${i + 1} (${result.title || "Unbekannt"}): ${content.substring(0, maxCharsPerResult)}`);
   });
   return lines;
+}
+
+/**
+ * Backwards-compatible alias for game reviews.
+ */
+export function buildGameResearchSummary(
+  searchResults: TavilySearchResponse,
+  maxResults = 5,
+  maxCharsPerResult = 400
+): string[] {
+  return buildResearchSummary(searchResults, maxResults, maxCharsPerResult);
+}
+
+/**
+ * Search for movie review information using Tavily.
+ */
+export async function searchMovieProduct(
+  movieTitle: string,
+  year?: number
+): Promise<TavilySearchResponse> {
+  const query = year
+    ? `${movieTitle} (${year}) movie review critics plot performance`
+    : `${movieTitle} movie review critics plot performance`;
+
+  try {
+    const response = await getTavilyClient().search(query, {
+      search_depth: "advanced",
+      include_answer: true,
+      include_raw_content: false,
+      max_results: 8,
+      include_domains: [
+        "rottentomatoes.com",
+        "metacritic.com",
+        "ign.com",
+        "variety.com",
+        "hollywoodreporter.com",
+        "deadline.com",
+        "screenrant.com",
+        "indiewire.com",
+        "collider.com",
+        "theguardian.com",
+        "filmstarts.de",
+        "moviepilot.de",
+        "kino.de",
+        "cineasts.de",
+      ],
+    });
+
+    return response;
+  } catch (error) {
+    console.error(`Error searching for movie ${movieTitle}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Search for series review information using Tavily.
+ */
+export async function searchSeriesProduct(
+  seriesTitle: string,
+  year?: number
+): Promise<TavilySearchResponse> {
+  const query = year
+    ? `${seriesTitle} (${year}) TV series review season critics`
+    : `${seriesTitle} TV series review season critics`;
+
+  try {
+    const response = await getTavilyClient().search(query, {
+      search_depth: "advanced",
+      include_answer: true,
+      include_raw_content: false,
+      max_results: 8,
+      include_domains: [
+        "rottentomatoes.com",
+        "metacritic.com",
+        "ign.com",
+        "variety.com",
+        "hollywoodreporter.com",
+        "deadline.com",
+        "screenrant.com",
+        "indiewire.com",
+        "collider.com",
+        "theguardian.com",
+        "filmstarts.de",
+        "moviepilot.de",
+        "kino.de",
+        "cineasts.de",
+      ],
+    });
+
+    return response;
+  } catch (error) {
+    console.error(`Error searching for series ${seriesTitle}:`, error);
+    throw error;
+  }
 }
 
 /**

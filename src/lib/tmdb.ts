@@ -15,6 +15,15 @@ function getApiKey() {
   return tmdbApiKey;
 }
 
+export interface TMDBPerson {
+  id: number;
+  name: string;
+  known_for_department?: string;
+  character?: string;
+  job?: string;
+  order?: number;
+}
+
 export interface TMDBMovie {
   id: number;
   title: string;
@@ -45,6 +54,15 @@ export interface TMDBMovie {
     backdrops: Array<{ file_path: string }>;
     posters: Array<{ file_path: string }>;
   };
+  credits?: {
+    cast: Array<TMDBPerson & { character: string; order: number }>;
+    crew: Array<TMDBPerson & { job: string; department: string }>;
+  };
+  external_ids?: {
+    imdb_id?: string | null;
+    wikidata_id?: string | null;
+    facebook_id?: string | null;
+  };
 }
 
 export interface TMDBSeries {
@@ -65,6 +83,9 @@ export interface TMDBSeries {
   production_companies?: Array<{ id: number; name: string }>;
   production_countries?: Array<{ iso_3166_1: string; name: string }>;
   spoken_languages?: Array<{ iso_639_1: string; name: string }>;
+  created_by?: Array<{ id: number; name: string; credit_id: string }>;
+  last_air_date?: string;
+  status?: string;
   videos?: {
     results: Array<{
       id: string;
@@ -77,6 +98,15 @@ export interface TMDBSeries {
   images?: {
     backdrops: Array<{ file_path: string }>;
     posters: Array<{ file_path: string }>;
+  };
+  credits?: {
+    cast: Array<TMDBPerson & { character: string; order: number }>;
+    crew: Array<TMDBPerson & { job: string; department: string }>;
+  };
+  external_ids?: {
+    imdb_id?: string | null;
+    wikidata_id?: string | null;
+    tvdb_id?: string | null;
   };
 }
 
@@ -163,7 +193,7 @@ export async function getTMDBMoviesBulk(options: BulkQueryOptions = {}): Promise
             params: {
               api_key: apiKey,
               language: "de-DE",
-              append_to_response: "videos,images",
+              append_to_response: "videos,images,credits,external_ids",
             },
           });
           return detailResponse.data;
@@ -259,7 +289,7 @@ export async function getTMDBSeriesBulk(options: BulkQueryOptions = {}): Promise
             params: {
               api_key: apiKey,
               language: "de-DE",
-              append_to_response: "videos,images",
+              append_to_response: "videos,images,credits,external_ids",
             },
           });
           return detailResponse.data;
@@ -292,7 +322,7 @@ export async function getTMDBMovieById(id: number): Promise<TMDBMovie | null> {
       params: {
         api_key: apiKey,
         language: "de-DE",
-        append_to_response: "videos,images",
+        append_to_response: "videos,images,credits,external_ids",
       },
     });
     return response.data;
@@ -314,7 +344,7 @@ export async function getTMDBSeriesById(id: number): Promise<TMDBSeries | null> 
       params: {
         api_key: apiKey,
         language: "de-DE",
-        append_to_response: "videos,images",
+        append_to_response: "videos,images,credits,external_ids",
       },
     });
     return response.data;

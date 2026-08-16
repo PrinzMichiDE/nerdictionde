@@ -1,19 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getIGDBUpcomingGames } from "@/lib/igdb";
-import { processGame } from "@/lib/review-generation";
+import { generateSlug } from "@/lib/review-generation";
 
 /**
- * Cron Job: Fetches upcoming game releases from IGDB and creates draft reviews
+ * Cron Job: Fetches upcoming game releases from IGDB and creates lightweight draft reviews
  * Schedule: Daily at 4 AM UTC (0 4 * * *)
- * 
+ *
  * This job:
  * - Runs daily but only processes data once per week (on Mondays)
  * - Automatically runs on first start if no upcoming releases exist
  * - Fetches games with release dates in the next 365 days (entire year)
- * - Creates draft reviews for games that don't exist yet
+ * - Creates lightweight draft reviews (no AI generation) for games that don't exist yet
  * - Updates release dates for existing games
- * 
+ *
+ * The full review content (AI-generated text, images, SEO, tags, comments) is generated
+ * later by the /api/cron/publish-release-reviews job once a game actually releases.
+ * This keeps the calendar reliable and fast enough to run within the function limit.
+ *
  * Query Parameters:
  * - force=true: Force execution even if it's not Monday
  */
@@ -31,11 +35,11 @@ export async function GET(req: NextRequest) {
     // 2. Check if we should run this week (only on Mondays, unless forced or first run)
     const searchParams = req.nextUrl.searchParams;
     const force = searchParams.get("force") === "true";
-    
+
     const today = new Date();
     const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
     const futureDate = new Date(today.getTime() + 365 * 24 * 60 * 60 * 1000);
-    
+
     // Check if we have any upcoming releases (first run detection)
     const existingReleasesCount = await prisma.review.count({
       where: {
@@ -46,9 +50,9 @@ export async function GET(req: NextRequest) {
         },
       },
     });
-    
+
     const isFirstRun = existingReleasesCount === 0;
-    
+
     // Only process on Mondays (dayOfWeek === 1), unless forced or first run
     if (dayOfWeek !== 1 && !force && !isFirstRun) {
       console.log(`⏭️ Skipping: Today is ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayOfWeek]}. Only runs on Mondays. Use ?force=true to override.`);
@@ -63,7 +67,7 @@ export async function GET(req: NextRequest) {
     if (force) {
       console.log("🔧 Force mode enabled - running despite day of week");
     }
-    
+
     if (isFirstRun) {
       console.log("🚀 First run detected - no upcoming releases found. Running initial fetch...");
     }
@@ -81,7 +85,7 @@ export async function GET(req: NextRequest) {
 
     while (futureGames.length < maxGames) {
       const batch = await getIGDBUpcomingGames(365, batchSize, offset);
-      
+
       if (batch.length === 0) {
         break; // No more games
       }
@@ -100,7 +104,7 @@ export async function GET(req: NextRequest) {
 
     console.log(`✅ Found ${futureGames.length} upcoming games`);
 
-    // 4. Process each game
+    // 4. Process each game - lightweight draft creation (no AI calls)
     let created = 0;
     let updated = 0;
     let skipped = 0;
@@ -113,7 +117,7 @@ export async function GET(req: NextRequest) {
           where: {
             OR: [
               { igdbId: game.id },
-              { slug: game.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") },
+              { slug: generateSlug(game.name) },
             ],
             category: "game",
           },
@@ -135,29 +139,56 @@ export async function GET(req: NextRequest) {
           } else {
             skipped++;
           }
-        } else {
-          // Create new draft review
-          const result = await processGame(game, {
-            status: "draft", // Always draft for future releases
-            skipExisting: true,
-          });
-
-          if (result.success && result.reviewId) {
-            // Update release date
-            await prisma.review.update({
-              where: { id: result.reviewId },
-              data: { releaseDate },
-            });
-            created++;
-            console.log(`  ✓ Created draft review for: ${game.name} (Release: ${releaseDate?.toLocaleDateString()})`);
-          } else {
-            errors++;
-            console.warn(`  ✗ Failed to create review for: ${game.name} - ${result.error}`);
-          }
+          continue;
         }
 
-        // Small delay to avoid rate limiting
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        // Create a new lightweight draft review from IGDB data
+        const slug = await createUniqueSlug(generateSlug(game.name));
+        const images = game.cover?.url
+          ? [game.cover.url.replace("t_thumb", "t_720p")]
+          : [];
+
+        const metadata = {
+          developers: game.involved_companies?.filter((c: any) => c.developer).map((c: any) => c.company.name) || [],
+          publishers: game.involved_companies?.filter((c: any) => c.publisher).map((c: any) => c.company.name) || [],
+          platforms: game.platforms?.map((p: any) => p.name) || [],
+          genres: game.genres?.map((g: any) => g.name) || [],
+          gameModes: ((game.game_modes || []) as Array<{ name: string }>).map((m) => m.name) || [],
+          perspectives: ((game.player_perspectives || []) as Array<{ name: string }>).map((p) => p.name) || [],
+          engines: ((game.game_engines || []) as Array<{ name: string }>).map((e) => e.name) || [],
+          releaseDate: game.first_release_date,
+          igdbScore: game.rating,
+          criticScore: game.aggregated_rating ?? null,
+          stores: [],
+        };
+
+        const contentDe = buildPlaceholderContent(game.name, releaseDate, metadata.platforms, metadata.genres, "de");
+        const contentEn = buildPlaceholderContent(game.name, releaseDate, metadata.platforms, metadata.genres, "en");
+
+        await prisma.review.create({
+          data: {
+            title: game.name,
+            title_en: game.name,
+            slug,
+            category: "game",
+            content: contentDe,
+            content_en: contentEn,
+            score: Math.round(game.rating || 0),
+            pros: [],
+            pros_en: [],
+            cons: [],
+            cons_en: [],
+            images,
+            status: "draft",
+            igdbId: game.id,
+            releaseDate,
+            metadata,
+            createdAt: new Date(),
+          },
+        });
+
+        created++;
+        console.log(`  ✓ Created draft review for: ${game.name} (Release: ${releaseDate?.toLocaleDateString()})`);
       } catch (error: any) {
         errors++;
         console.error(`  ✗ Error processing ${game.name}:`, error.message);
@@ -196,4 +227,66 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Generates a unique slug, appending a suffix on collisions.
+ */
+async function createUniqueSlug(baseSlug: string): Promise<string> {
+  let slug = baseSlug;
+  let attempts = 0;
+  while (await prisma.review.findUnique({ where: { slug } })) {
+    attempts++;
+    if (attempts > 10) {
+      slug = `${baseSlug}-${Date.now().toString(36)}`;
+      break;
+    }
+    slug = `${baseSlug}-${Math.random().toString(36).substring(2, 7)}`;
+  }
+  return slug;
+}
+
+/**
+ * Builds a short factual placeholder text for calendar drafts (no AI required).
+ */
+function buildPlaceholderContent(
+  title: string,
+  releaseDate: Date | null,
+  platforms: string[],
+  genres: string[],
+  lang: "de" | "en"
+): string {
+  const date = releaseDate
+    ? releaseDate.toLocaleDateString(lang === "de" ? "de-DE" : "en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : lang === "de"
+      ? "noch nicht angekündigt"
+      : "TBA";
+
+  if (lang === "de") {
+    return [
+      `**${title}** erscheint am ${date}.`,
+      "",
+      "Dies ist ein automatisch erstellter Kalendereintrag aus der IGDB-Datenbank.",
+      "",
+      `- **Plattformen:** ${platforms.join(", ") || "N/A"}`,
+      `- **Genres:** ${genres.join(", ") || "N/A"}`,
+      "",
+      "Unser ausführliches Review erscheint nach dem Release. Dieser Eintrag wird laufend aktualisiert.",
+    ].join("\n");
+  }
+
+  return [
+    `**${title}** is scheduled to release on ${date}.`,
+    "",
+    "This is an automatically generated calendar entry based on IGDB data.",
+    "",
+    `- **Platforms:** ${platforms.join(", ") || "N/A"}`,
+    `- **Genres:** ${genres.join(", ") || "N/A"}`,
+    "",
+    "Our in-depth review will be published after the release. This entry is updated continuously.",
+  ].join("\n");
 }
