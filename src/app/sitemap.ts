@@ -21,10 +21,52 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: `${baseUrl}/releases`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/tools`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/tools/title-generator`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/tools/schedule-planner`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
       url: `${baseUrl}/analytics`,
       lastModified: new Date(),
       changeFrequency: "weekly",
-      priority: 0.6,
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/mediadaten/de`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/mediadaten/en`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/kooperationen`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
     },
     {
       url: `${baseUrl}/impressum`,
@@ -38,21 +80,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.3,
     },
-    {
-      url: `${baseUrl}/kooperationen`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/mediadaten`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
   ];
 
-  // Dynamische Seiten: Reviews
+  // Dynamische Seiten: Reviews (inkl. EN-Variante über hreflang)
   const reviews = await prisma.review.findMany({
     where: {
       status: "published",
@@ -66,14 +96,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   });
 
-  const reviewPages: MetadataRoute.Sitemap = reviews.map((review) => ({
-    url: `${baseUrl}/reviews/${review.slug}`,
-    lastModified: review.updatedAt,
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-  }));
+  const reviewPages: MetadataRoute.Sitemap = reviews.map((review) => {
+    const url = `${baseUrl}/reviews/${review.slug}`;
+    return {
+      url,
+      lastModified: review.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+      alternates: {
+        languages: {
+          de: url,
+          en: `${url}?lang=en`,
+          "x-default": url,
+        },
+      },
+    };
+  });
 
   // Kombiniere alle Seiten
   return [...staticPages, ...reviewPages];
 }
-

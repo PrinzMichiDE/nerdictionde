@@ -1,152 +1,190 @@
 import prisma from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { Review } from "@/types/review";
-import { ReviewHero } from "@/components/home/ReviewHero";
-import { LargeReviewCard } from "@/components/home/LargeReviewCard";
-import { CategoryFilter } from "@/components/home/CategoryFilter";
+import { Hero } from "@/components/home/Hero";
+import { Marquee } from "@/components/home/Marquee";
+import { StatsBar } from "@/components/home/StatsBar";
+import { FeaturedSpotlight } from "@/components/home/FeaturedSpotlight";
+import { LatestReviews } from "@/components/home/LatestReviews";
+import { CategoriesShowcase } from "@/components/home/CategoriesShowcase";
+import { FeatureGrid } from "@/components/home/FeatureGrid";
+import { Leaderboard } from "@/components/home/Leaderboard";
+import { TestimonialsGrid } from "@/components/home/TestimonialsGrid";
+import { FAQAccordion } from "@/components/home/FAQAccordion";
+import { CTASection } from "@/components/home/CTASection";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { ArrowRight, Sparkles } from "lucide-react";
+import type { Metadata } from "next";
+import { generateItemListSchema, getSiteUrl } from "@/lib/seo";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: { absolute: "Nerdiction - Professional Game & Hardware Reviews" },
+  description:
+    "Die Plattform für detaillierte Hardware- und Game-Reviews für fundierte Kaufentscheidungen. Unabhängige Tests zu Games, Filmen und Serien.",
+  alternates: {
+    canonical: "/",
+  },
+};
 
 export default async function HomePage() {
-  // Fetch latest reviews
+  const highlightCategories = ["game", "movie", "series"];
+
   let latestReviews: Review[] = [];
   let topRatedReviews: Review[] = [];
   let featuredReview: Review | null = null;
-
-  const highlightCategories = ["game", "movie", "series"];
+  let stats = {
+    totalReviews: 0,
+    averageScore: 0,
+    gameReviews: 0,
+    movieReviews: 0,
+    seriesReviews: 0,
+  };
 
   try {
-    // Fetch featured review first (highest scored review), exclude product/amazon
     featuredReview = (await prisma.review.findFirst({
       where: { status: "published", category: { in: highlightCategories } },
       orderBy: { score: "desc" },
     })) as unknown as Review | null;
 
-    // Fetch latest reviews, excluding featured review and product/amazon
-    const latestReviewsQuery: any = {
-      where: { status: "published", category: { in: highlightCategories } },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-    };
-    
-    if (featuredReview) {
-      latestReviewsQuery.where.id = { not: featuredReview.id };
-    }
-    
-    latestReviews = (await prisma.review.findMany(latestReviewsQuery)) as unknown as Review[];
-
-    // Fetch top-rated reviews, excluding featured review and latest reviews
     const excludedIds = new Set<string>();
-    if (featuredReview) {
-      excludedIds.add(featuredReview.id);
-    }
-    latestReviews.forEach((r) => excludedIds.add(r.id));
+    if (featuredReview) excludedIds.add(featuredReview.id);
 
-    const topRatedQuery: any = {
+    const latestReviewsQuery: Prisma.ReviewFindManyArgs = {
       where: {
         status: "published",
         category: { in: highlightCategories },
-        id: excludedIds.size > 0 ? { notIn: Array.from(excludedIds) } : undefined,
+        ...(featuredReview ? { id: { not: featuredReview.id } } : {}),
+      },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+    };
+
+    const topRatedQuery: Prisma.ReviewFindManyArgs = {
+      where: {
+        status: "published",
+        category: { in: highlightCategories },
+        ...(excludedIds.size > 0 ? { id: { notIn: Array.from(excludedIds) } } : {}),
       },
       orderBy: { score: "desc" },
       take: 6,
     };
 
-    // Remove undefined fields
-    if (!topRatedQuery.where.id) {
-      delete topRatedQuery.where.id;
-    }
+    const [latestResult, topRatedResult, countResult] = await Promise.all([
+      prisma.review.findMany(latestReviewsQuery),
+      prisma.review.findMany(topRatedQuery),
+      Promise.all([
+        prisma.review.count({ where: { status: "published", category: { in: highlightCategories } } }),
+        prisma.review.aggregate({
+          where: { status: "published", category: { in: highlightCategories } },
+          _avg: { score: true },
+        }),
+        prisma.review.count({ where: { status: "published", category: "game" } }),
+        prisma.review.count({ where: { status: "published", category: "movie" } }),
+        prisma.review.count({ where: { status: "published", category: "series" } }),
+      ]),
+    ]);
 
-    topRatedReviews = (await prisma.review.findMany(topRatedQuery)) as unknown as Review[];
+    latestReviews = latestResult as unknown as Review[];
+    topRatedReviews = topRatedResult as unknown as Review[];
+    const [total, avg, games, movies, series] = countResult;
+    stats = {
+      totalReviews: total,
+      averageScore: Math.round((avg._avg.score ?? 0) * 10) / 10,
+      gameReviews: games,
+      movieReviews: movies,
+      seriesReviews: series,
+    };
+
+    latestReviews.forEach((r) => excludedIds.add(r.id));
+    topRatedReviews = topRatedReviews.filter((r) => !excludedIds.has(r.id));
   } catch (error) {
-    // Silently fail during build if database is not available
     console.error("Error fetching data:", error);
   }
 
+  const allFeatured = [featuredReview, ...latestReviews, ...topRatedReviews].filter(
+    Boolean
+  ) as Review[];
+  const itemListSchema = generateItemListSchema(
+    allFeatured.slice(0, 12).map((r) => ({
+      name: r.title,
+      url: `${getSiteUrl()}/reviews/${r.slug}`,
+      image: r.images?.[0],
+    }))
+  );
+
   return (
-    <div className="space-y-16 md:space-y-20 lg:space-y-24 pb-16 md:pb-24 lg:pb-32 max-w-7xl mx-auto">
-      {/* Hero Review - Featured */}
-      {featuredReview && <ReviewHero review={featuredReview} />}
+    <div className="relative">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
 
-      {/* Category Filter */}
-      <CategoryFilter />
+      {/* Hero */}
+      <Hero />
 
-      {/* Latest Reviews Grid */}
-      <section className="space-y-8 md:space-y-10">
-        <div className="flex items-end justify-between gap-4 border-b border-border pb-4">
-          <div>
-            <span className="kicker text-primary">Aktuelle Tests</span>
-            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mt-1">
-              Neueste Reviews
-            </h2>
-          </div>
-          <Link
-            href="/reviews"
-            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors group pb-1"
-          >
-            Alle ansehen
-            <span className="transition-transform group-hover:translate-x-0.5">→</span>
-          </Link>
-        </div>
+      {/* Marquee */}
+      <Marquee />
 
-        {latestReviews.length > 0 ? (
-          <div className="grid gap-8 md:gap-10 md:grid-cols-2 lg:grid-cols-3">
-            {latestReviews.map((review, index) => (
-              <LargeReviewCard
-                key={review.id}
-                review={review}
-                priority={index < 3}
-              />
-            ))}
-          </div>
+      {/* Content-Sektionen */}
+      <div className="mx-auto max-w-7xl space-y-24 px-4 pt-16 pb-16 md:space-y-32 md:px-6 md:pt-24 md:pb-24 lg:space-y-40 lg:px-8 lg:pt-32 xl:px-12">
+        {/* Statistiken */}
+        <StatsBar stats={stats} />
+
+        {/* Review der Woche */}
+        {featuredReview ? (
+          <FeaturedSpotlight review={featuredReview} />
         ) : (
-          <div className="text-center py-24 border border-dashed rounded-md bg-muted/30">
-            <p className="text-muted-foreground text-xl font-semibold">Noch keine Reviews vorhanden.</p>
-            <p className="text-muted-foreground/70 text-sm mt-2">
-              Bald findest du hier die neuesten Reviews und Tests.
-            </p>
-          </div>
-        )}
-      </section>
-
-      {/* Top Rated Reviews */}
-      {topRatedReviews.length > 0 && (
-        <section className="space-y-8 md:space-y-10">
-          <div className="flex items-end justify-between gap-4 border-b border-border pb-4">
-            <div>
-              <span className="kicker text-primary">Redaktions-Favoriten</span>
-              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mt-1">
-                Top Bewertungen
+          <section className="relative overflow-hidden rounded-[2rem] border border-border bg-card px-6 py-16 md:px-12 md:py-20">
+            <div className="absolute inset-0 bg-mesh opacity-60" aria-hidden="true" />
+            <div className="relative z-10 flex flex-col items-center gap-6 text-center">
+              <span className="inline-flex size-14 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10">
+                <Sparkles className="size-7 text-primary" />
+              </span>
+              <h2 className="max-w-xl font-serif text-3xl md:text-4xl font-semibold tracking-tight">
+                Bald erscheinen hier die ersten Reviews
               </h2>
+              <p className="max-w-lg text-muted-foreground">
+                Unsere Redaktion arbeitet mit Hochdruck an den ersten ausführlichen Tests.
+              </p>
+              <Button asChild size="lg" className="shine group relative rounded-full px-8">
+                <Link href="/reviews" className="relative z-[2] inline-flex items-center gap-2">
+                  Alle Reviews entdecken
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </Button>
             </div>
-            <Link
-              href="/reviews?sort=score-desc"
-              className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors group pb-1"
-            >
-              Alle Top-Reviews
-              <span className="transition-transform group-hover:translate-x-0.5">→</span>
-            </Link>
-          </div>
+          </section>
+        )}
 
-          <div className="grid gap-8 md:gap-10 md:grid-cols-2 lg:grid-cols-3">
-            {topRatedReviews.slice(0, 6).map((review) => (
-              <LargeReviewCard
-                key={review.id}
-                review={review}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+        {/* Neueste Reviews */}
+        <LatestReviews reviews={latestReviews} />
 
-      {/* View All CTA */}
-      <div className="border-t border-border pt-10 text-center">
-        <Button asChild size="lg" variant="outline">
-          <Link href="/reviews">
-            Alle Reviews entdecken
-          </Link>
-        </Button>
+        {/* Kategorien */}
+        <CategoriesShowcase
+          counts={{
+            game: stats.gameReviews,
+            movie: stats.movieReviews,
+            series: stats.seriesReviews,
+          }}
+        />
+
+        {/* Warum Nerdiction */}
+        <FeatureGrid />
+
+        {/* Top-Rated Leaderboard */}
+        <Leaderboard reviews={topRatedReviews} />
+
+        {/* Testimonials */}
+        <TestimonialsGrid />
+
+        {/* FAQ */}
+        <FAQAccordion />
+
+        {/* Newsletter / CTA */}
+        <CTASection />
       </div>
     </div>
   );

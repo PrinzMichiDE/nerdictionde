@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+
 export const SITE_NAME = "Nerdiction";
 
 export function getSiteUrl(): string {
@@ -14,6 +16,18 @@ const reviewTypeMap: Record<string, string> = {
   hardware: "Product",
 };
 
+interface ReviewSchemaInput {
+  slug?: string;
+  title?: string;
+  category?: string;
+  score?: number;
+  content?: string;
+  images?: string[];
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  metadata?: Prisma.JsonValue | null;
+}
+
 function plainText(md: string, maxLen = 400): string {
   const plain = md
     .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
@@ -24,9 +38,10 @@ function plainText(md: string, maxLen = 400): string {
   return plain.length <= maxLen ? plain : plain.substring(0, maxLen - 3) + "...";
 }
 
-export function generateReviewSchema(review: any) {
+export function generateReviewSchema(review: ReviewSchemaInput) {
   const url = `${getSiteUrl()}/reviews/${review.slug}`;
-  const type = reviewTypeMap[review.category] || "Product";
+  const type = reviewTypeMap[review.category || ""] || "Product";
+  const genres = (review.metadata as { genres?: string[] } | null)?.genres;
 
   return {
     "@context": "https://schema.org",
@@ -44,8 +59,8 @@ export function generateReviewSchema(review: any) {
       "name": review.title,
       "image": review.images?.[0],
       "url": url,
-      ...(review.category === "game" && review.metadata?.genres?.length
-        ? { genre: review.metadata.genres.map((g: string) => g) }
+      ...(review.category === "game" && genres?.length
+        ? { genre: genres.map((g: string) => g) }
         : {}),
     },
     "author": {
@@ -69,7 +84,7 @@ export function generateReviewSchema(review: any) {
       "worstRating": 0,
       "alternateName": `${review.score} von 100`,
     },
-    "reviewBody": plainText(review.content),
+    "reviewBody": plainText(review.content || ""),
   };
 }
 

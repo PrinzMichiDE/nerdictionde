@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getMediaStats, formatMediaNumber, getMonthlyTimeline } from "@/lib/mediadaten";
 import { getTranslations, getLanguageFromRequest, formatDate, getLocale, supportedLanguages, type SupportedLanguage } from "@/lib/i18n";
 import { redirect } from "next/navigation";
+import { getSiteUrl } from "@/lib/seo";
 
 interface MediadatenPageProps {
   params: Promise<{ lang: string }>;
@@ -22,6 +23,13 @@ export async function generateMetadata({ params }: MediadatenPageProps): Promise
   return {
     title: t.meta.title,
     description: t.meta.description,
+    alternates: {
+      canonical: `${getSiteUrl()}/mediadaten/${lang}`,
+      languages: {
+        de: `${getSiteUrl()}/mediadaten/de`,
+        en: `${getSiteUrl()}/mediadaten/en`,
+      },
+    },
   };
 }
 

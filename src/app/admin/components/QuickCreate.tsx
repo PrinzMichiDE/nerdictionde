@@ -132,7 +132,26 @@ export function QuickCreate() {
       }
     }
 
+    // Flush any trailing bytes left in the decoder buffer
+    buffer += decoder.decode();
+
+    // Fallback: if no SSE "data:" events arrived, the endpoint may still be
+    // serving a plain JSON response (e.g. legacy deployment). Try to parse it.
+    if (!reviewData && buffer.trim()) {
+      try {
+        const parsed = JSON.parse(buffer.trim()) as GeneratedReviewData;
+        if (parsed && typeof parsed === "object" && "content" in parsed) {
+          reviewData = parsed;
+        }
+      } catch {
+        // Not valid JSON – treat as no data
+      }
+    }
+
     if (!reviewData) throw new Error("Keine Review-Daten empfangen");
+    if (!reviewData.title || !reviewData.content) {
+      throw new Error("Generierte Review-Daten sind unvollständig (Titel/Inhalt fehlen)");
+    }
     return reviewData;
   };
 

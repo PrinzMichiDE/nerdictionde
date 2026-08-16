@@ -8,10 +8,30 @@ import { ScoreBadge } from "@/components/reviews/ScoreBadge";
 import prisma from "@/lib/prisma";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { generateItemListSchema, getSiteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Spiele Release Kalender | Nerdiction",
-  description: "Alle kommenden Spiele-Releases auf einen Blick. Verpasse keine Neuerscheinung!",
+  title: "Spiele Release Kalender",
+  description:
+    "Alle kommenden Spiele-Releases auf einen Blick. Verpasse keine Neuerscheinung - mit Release-Datum und Plattform.",
+  alternates: {
+    canonical: "/releases",
+  },
+  openGraph: {
+    type: "website",
+    title: "Spiele Release Kalender | Nerdiction",
+    description:
+      "Alle kommenden Spiele-Releases auf einen Blick. Verpasse keine Neuerscheinung!",
+    url: `${getSiteUrl()}/releases`,
+    siteName: "Nerdiction",
+    locale: "de_DE",
+  },
+  twitter: {
+    card: "summary",
+    title: "Spiele Release Kalender | Nerdiction",
+    description:
+      "Alle kommenden Spiele-Releases auf einen Blick. Verpasse keine Neuerscheinung!",
+  },
 };
 
 export const dynamic = "force-dynamic";
@@ -79,8 +99,20 @@ export default async function ReleasesPage() {
 
   const monthKeys = Object.keys(releasesByMonth).sort();
 
+  const itemListSchema = generateItemListSchema(
+    releases.map((release) => ({
+      name: release.title,
+      url: `${getSiteUrl()}/reviews/${release.slug}`,
+      image: release.images?.[0],
+    }))
+  );
+
   return (
     <div className="max-w-7xl mx-auto space-y-12 py-8 px-4">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
       {/* Header */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">

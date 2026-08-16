@@ -5,6 +5,7 @@ import { QuickCreate } from "./components/QuickCreate";
 import { BulkCreate } from "./components/BulkCreate";
 import { ReviewList } from "./components/ReviewList";
 import { MassReviewCreation } from "./components/MassReviewCreation";
+import { ReleaseSyncButton } from "./components/ReleaseSyncButton";
 import { Toaster } from "@/components/ui/toaster";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useState, useEffect } from "react";
@@ -142,6 +143,7 @@ export default function AdminPage() {
 
       <Suspense fallback={<div className="flex items-center justify-center py-16">Laden...</div>}>
         <StatsBar />
+        <ReleaseSyncButton />
         <AdminTabs />
       </Suspense>
 

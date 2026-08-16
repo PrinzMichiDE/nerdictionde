@@ -92,7 +92,17 @@ export async function generateMetadata({
   };
 }
 
-function buildFaqs(review: any, isEn: boolean) {
+interface FaqReviewShape {
+  title: string;
+  title_en?: string | null;
+  score: number;
+  pros: string[];
+  pros_en?: string[];
+  cons: string[];
+  cons_en?: string[];
+}
+
+function buildFaqs(review: FaqReviewShape, isEn: boolean) {
   const title = isEn && review.title_en ? review.title_en : review.title;
   const pros = (isEn && review.pros_en?.length ? review.pros_en : review.pros) || [];
   const cons = (isEn && review.cons_en?.length ? review.cons_en : review.cons) || [];

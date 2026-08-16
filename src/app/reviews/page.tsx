@@ -1,6 +1,16 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { ReviewsList } from "@/components/reviews/ReviewsList";
 import { Skeleton } from "@/components/shared/Skeleton";
+
+export const metadata: Metadata = {
+  title: "Alle Reviews",
+  description:
+    "Durchsuche unsere neuesten Reviews zu Games, Filmen und Serien. Unabhängige Tests, Wertungen und Kaufberatung auf Nerdiction.",
+  alternates: {
+    canonical: "/reviews",
+  },
+};
 
 function ReviewsListSkeleton() {
   return (

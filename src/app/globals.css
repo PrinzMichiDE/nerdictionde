@@ -347,3 +347,557 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
+
+/* ==========================================================================
+   Nerdiction Landing Design System — Maximales CSS
+   ========================================================================== */
+
+/* --- Animierter Conic-Gradient-Border (via @property) --- */
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --mx {
+  syntax: "<percentage>";
+  initial-value: 50%;
+  inherits: true;
+}
+
+@property --my {
+  syntax: "<percentage>";
+  initial-value: 50%;
+  inherits: true;
+}
+
+@keyframes border-rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    transparent 0%,
+    color-mix(in oklab, var(--primary) 65%, transparent) 12%,
+    transparent 30%,
+    transparent 70%,
+    color-mix(in oklab, var(--primary) 65%, transparent) 88%,
+    transparent 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: border-rotate 7s linear infinite;
+}
+
+/* --- Full-bleed Sektionen (über den Container hinaus) --- */
+.full-bleed {
+  position: relative;
+  left: 50%;
+  right: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+/* --- Scroll-Reveal --- */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform, filter;
+}
+
+.reveal-left {
+  transform: translateX(-36px);
+}
+
+.reveal-right {
+  transform: translateX(36px);
+}
+
+.reveal-zoom {
+  transform: scale(0.9);
+}
+
+.reveal-blur {
+  filter: blur(14px);
+}
+
+.reveal-fade {
+  transform: translateY(0);
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0) translateX(0) scale(1);
+  filter: blur(0);
+}
+
+/* --- Text-Effekte --- */
+.text-gradient {
+  background-image: linear-gradient(
+    100deg,
+    var(--foreground) 0%,
+    color-mix(in oklab, var(--primary) 85%, var(--foreground)) 45%,
+    var(--primary) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-animate {
+  background-image: linear-gradient(
+    100deg,
+    var(--primary) 0%,
+    color-mix(in oklab, var(--primary) 45%, var(--foreground)) 25%,
+    var(--primary) 50%,
+    color-mix(in oklab, var(--primary) 45%, var(--foreground)) 75%,
+    var(--primary) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-pan 5s linear infinite;
+}
+
+.text-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--foreground) 25%,
+    var(--primary) 50%,
+    var(--foreground) 75%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 5s linear infinite;
+}
+
+/* --- Glassmorphism --- */
+.glass {
+  background: oklch(1 0 0 / 0.62);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid oklch(0.45 0 0 / 0.12);
+}
+
+.dark .glass {
+  background: oklch(0.18 0.005 90 / 0.55);
+  border-color: oklch(1 0 0 / 0.1);
+}
+
+/* --- Hintergründe: Grid, Dots, Noise, Mesh --- */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, oklch(0.55 0 0 / 0.09) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.55 0 0 / 0.09) 1px, transparent 1px);
+  background-size: 46px 46px;
+}
+
+.dark .bg-grid {
+  background-image:
+    linear-gradient(to right, oklch(1 0 0 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.05) 1px, transparent 1px);
+}
+
+.bg-dots {
+  background-image: radial-gradient(oklch(0.55 0 0 / 0.16) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.dark .bg-dots {
+  background-image: radial-gradient(oklch(1 0 0 / 0.09) 1px, transparent 1px);
+}
+
+.noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.bg-mesh {
+  background-image:
+    radial-gradient(at 18% 18%, color-mix(in oklab, var(--primary) 20%, transparent), transparent 52%),
+    radial-gradient(at 82% 6%, oklch(0.55 0.16 200 / 0.14), transparent 50%),
+    radial-gradient(at 65% 88%, oklch(0.55 0.16 300 / 0.12), transparent 55%);
+}
+
+/* --- Shine / Sheen Sweep --- */
+.shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    oklch(1 0 0 / 0.35) 50%,
+    transparent 70%
+  );
+  transform: translateX(-130%) skewX(-12deg);
+  transition: transform 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.shine:hover::after {
+  transform: translateX(130%) skewX(-12deg);
+}
+
+/* --- Marquee --- */
+.marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  animation: marquee var(--marquee-speed, 32s) linear infinite;
+}
+
+.marquee-reverse {
+  animation-direction: reverse;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* --- Spotlight Card (Maus-Highlight + 3D Tilt) --- */
+.spotlight-card {
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.spotlight-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    620px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in oklab, var(--primary) 22%, transparent),
+    transparent 42%
+  );
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+.card-glow {
+  transition:
+    box-shadow 0.45s ease,
+    border-color 0.45s ease,
+    transform 0.45s ease;
+}
+
+.card-glow:hover {
+  box-shadow:
+    0 24px 70px -20px color-mix(in oklab, var(--primary) 45%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--primary) 25%, transparent);
+}
+
+/* --- Keyframes (Landing) --- */
+@keyframes aurora {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.75;
+  }
+  25% {
+    transform: translate(9%, -7%) scale(1.12);
+    opacity: 0.95;
+  }
+  50% {
+    transform: translate(-6%, 10%) scale(0.94);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translate(6%, 5%) scale(1.08);
+    opacity: 0.85;
+  }
+}
+
+.animate-aurora {
+  animation: aurora 18s ease-in-out infinite;
+}
+
+@keyframes gradient-pan {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-18px);
+  }
+}
+
+.animate-float-y {
+  animation: float-y 6s ease-in-out infinite;
+}
+
+.animate-float-y-slow {
+  animation: float-y 9s ease-in-out infinite;
+}
+
+@keyframes blob {
+  0%,
+  100% {
+    border-radius: 42% 58% 63% 37% / 45% 45% 55% 55%;
+  }
+  25% {
+    border-radius: 58% 42% 33% 67% / 63% 35% 65% 37%;
+  }
+  50% {
+    border-radius: 36% 64% 55% 45% / 38% 62% 38% 62%;
+  }
+  75% {
+    border-radius: 63% 37% 42% 58% / 55% 45% 55% 45%;
+  }
+}
+
+.animate-blob {
+  animation: blob 16s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 18s linear infinite;
+}
+
+.animate-spin-reverse {
+  animation: spin-slow 26s linear infinite reverse;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 45%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 34px 6px color-mix(in oklab, var(--primary) 22%, transparent);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3.6s ease-in-out infinite;
+}
+
+@keyframes word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.55em) rotateX(75deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+  }
+}
+
+.animate-word {
+  animation: word-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: 50% 0%;
+  display: inline-block;
+}
+
+@keyframes scroll-dot {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+}
+
+.animate-scroll-dot {
+  animation: scroll-dot 1.8s ease-in-out infinite;
+}
+
+@keyframes ring-spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes ring-spin-reverse {
+  0% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+}
+
+.animate-ring-spin {
+  animation: ring-spin 24s linear infinite;
+}
+
+.animate-ring-spin-reverse {
+  animation: ring-spin-reverse 32s linear infinite;
+}
+
+@keyframes bounce-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-bounce-soft {
+  animation: bounce-soft 2.4s ease-in-out infinite;
+}
+
+/* --- Hero Vignette --- */
+.hero-vignette {
+  background:
+    radial-gradient(ellipse at 50% -20%, color-mix(in oklab, var(--primary) 26%, transparent), transparent 55%),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--background) 82%, transparent),
+      var(--background) 96%
+    );
+}
+
+/* --- Rank/Medal Farben --- */
+.rank-gold {
+  background: linear-gradient(135deg, #f6d365, #fda085);
+  color: #4a2400;
+}
+
+.rank-silver {
+  background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+  color: #1e293b;
+}
+
+.rank-bronze {
+  background: linear-gradient(135deg, #f5b182, #c9733d);
+  color: #3c1d05;
+}
+
+/* --- Skillbar / Progressleiste --- */
+.bar-stripes {
+  background-image: linear-gradient(
+    45deg,
+    oklch(1 0 0 / 0.16) 25%,
+    transparent 25%,
+    transparent 50%,
+    oklch(1 0 0 / 0.16) 50%,
+    oklch(1 0 0 / 0.16) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 22px 22px;
+}
+
+/* --- Animierte Leaderboard-Bar (wächst beim Reveal) --- */
+.bar-grow {
+  width: 0%;
+  transition: width 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-visible .bar-grow {
+  width: var(--bar-w, 0%);
+}
+
+/* --- FAQ Grid-Trick für sanftes Aufklappen --- */
+.accordion-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-panel[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+
+.accordion-panel > div {
+  overflow: hidden;
+}
+
+/* --- Tilt-Karte auf Touch-Geräten deaktivieren --- */
+@media (hover: none) {
+  .spotlight-card {
+    transform: none !important;
+  }
+}

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { UserProfile } from "@/components/tools/UserProfile";
 import {
   Calendar,
@@ -83,6 +84,15 @@ import {
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Streaming Tools",
+  description:
+    "Kostenlose Streaming-Tools für Twitch & Co: Stream Title Generator, Schedule Planner, Overlays, Alerts und mehr - für Streamer & Creators.",
+  alternates: {
+    canonical: "/tools",
+  },
+};
 
 const toolCategories = [
   {
