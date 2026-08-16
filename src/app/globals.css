@@ -708,6 +708,40 @@
   animation: float-y 9s ease-in-out infinite;
 }
 
+/* --- Aurora Drift (Hero) --- */
+@keyframes aurora {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(40px, -28px) scale(1.15);
+  }
+  66% {
+    transform: translate(-30px, 24px) scale(0.95);
+  }
+}
+
+.animate-aurora {
+  animation: aurora 12s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* --- Pulsierender Glow (Featured Ring) --- */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.9 0.05 20 / 0.28);
+  }
+  50% {
+    box-shadow: 0 0 34px 4px oklch(0.9 0.05 20 / 0.18);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3.2s ease-in-out infinite;
+}
+
 @keyframes blob {
   0%,
   100% {
@@ -1018,6 +1052,32 @@
   transform: scale(1.07);
 }
 
+.review-card:hover .shine::after {
+  transform: translateX(130%) skewX(-12deg);
+}
+
+/* --- Titel-Unterstreichung (kategoriegefärbt) --- */
+.review-title-underline {
+  position: relative;
+}
+
+.review-title-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 2px;
+  width: 100%;
+  background: color-mix(in oklab, var(--cat, var(--primary)) 60%, transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.review-card:hover .review-title-underline::after {
+  transform: scaleX(1);
+}
+
 .review-card-arrow {
   transition:
     transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
@@ -1086,6 +1146,7 @@
 
 .filter-tab[data-active="true"]::after {
   transform: scaleX(1);
+  background: var(--tab-color, var(--primary));
 }
 
 .filter-tab-count {
@@ -1108,7 +1169,7 @@
 }
 
 .filter-tab[data-active="true"] .filter-tab-count {
-  background: var(--primary);
+  background: var(--tab-color, var(--primary));
   color: var(--primary-foreground);
 }
 
@@ -1383,6 +1444,12 @@
   color: var(--foreground);
 }
 
+@media (max-width: 640px) {
+  .dist-col:nth-child(even) .dist-label {
+    display: none;
+  }
+}
+
 /* --- Redaktions-Tipps (Top Picks) --- */
 .pick-row {
   position: relative;
@@ -1548,4 +1615,89 @@
 
 .animate-ring-glow {
   animation: ring-glow 3.4s ease-in-out infinite;
+}
+
+/* --- Hero Scroll-Exit (Scroll-Driven Animation, Progressive Enhancement) --- */
+@supports (animation-timeline: scroll()) {
+  .hero-exit {
+    animation: hero-exit linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 55vh;
+  }
+}
+
+@keyframes hero-exit {
+  to {
+    opacity: 0.12;
+    transform: translateY(-64px) scale(0.985);
+    filter: blur(3px);
+  }
+}
+
+/* --- Vertikale Fade-Maske für Ticker am Seitenende --- */
+.fade-mask-x {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* --- Ken-Burns (langsamer Cinematic-Zoom) --- */
+@keyframes ken-burns {
+  0% {
+    transform: scale(1.02) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.1) translate(-1.5%, -1%);
+  }
+  100% {
+    transform: scale(1.02) translate(0, 0);
+  }
+}
+
+.ken-burns {
+  animation: ken-burns 26s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* --- Kicker-Linie mit Shimmer --- */
+.kicker-line {
+  height: 1px;
+  width: 1.5rem;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    currentColor 50%,
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: gradient-pan 3.4s linear infinite;
+}
+
+/* --- Cursor Aura (Page-Level Radial-Glow) --- */
+.cursor-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    720px circle at var(--gx, 50%) var(--gy, 50%),
+    color-mix(in oklab, var(--primary) 10%, transparent),
+    transparent 45%
+  );
+}
+
+.dark .cursor-glow {
+  background: radial-gradient(
+    720px circle at var(--gx, 50%) var(--gy, 50%),
+    color-mix(in oklab, var(--primary) 13%, transparent),
+    transparent 45%
+  );
+}
+
+/* --- Page Noise (feine Film-Korn-Textur) --- */
+.page-noise {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.025;
 }

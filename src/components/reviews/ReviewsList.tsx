@@ -206,6 +206,15 @@ export function ReviewsList() {
           className="bg-mesh absolute inset-0 opacity-70"
           aria-hidden="true"
         />
+        <div
+          className="pointer-events-none absolute -top-20 left-[15%] h-64 w-64 rounded-full bg-primary/20 blur-3xl animate-aurora"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute -bottom-24 right-[10%] h-80 w-80 rounded-full bg-chart-2/15 blur-3xl animate-aurora [animation-delay:6s]"
+          aria-hidden="true"
+        />
+        <div className="noise pointer-events-none absolute inset-0 opacity-[0.045]" aria-hidden="true" />
         <div className="relative py-10 md:py-14 lg:py-16">
           <div className="flex items-start justify-between gap-8">
             <div className="max-w-3xl">
@@ -319,7 +328,7 @@ export function ReviewsList() {
                 <SpotlightCard
                   tilt={true}
                   intensity={3}
-                  className="group mb-12 overflow-hidden rounded-sm border border-border bg-card"
+                  className="gradient-border group mb-12 overflow-hidden rounded-sm border border-border bg-card"
                 >
                   <div className="grid lg:grid-cols-12">
                     <div className="relative flex flex-col justify-between gap-6 border-b border-border p-6 md:p-8 lg:col-span-5 lg:border-b-0 lg:border-r">
@@ -408,7 +417,7 @@ export function ReviewsList() {
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
-                        <div className="absolute right-4 top-4">
+                        <div className="animate-pulse-glow absolute right-4 top-4 rounded-full">
                           <ScoreRing
                             score={featuredReview.score}
                             size={76}
@@ -434,23 +443,38 @@ export function ReviewsList() {
               </ScrollReveal>
             )}
 
-            {/* Result Bar */}
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
-              <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">{pagination?.total}</span>{" "}
-                {pagination?.total === 1 ? "Review gefunden" : "Reviews gefunden"}
-                {pagination && pagination.totalPages > 1 && (
-                  <span className="text-muted-foreground/70">
-                    {" "}
-                    · Seite {pagination.page} von {pagination.totalPages}
+            {/* Score Distribution */}
+            {scoreDistribution && pagination && pagination.total > 0 && (
+              <ScrollReveal variant="up" className="mb-10">
+                <ScoreDistribution
+                  data={scoreDistribution}
+                  total={pagination.total}
+                />
+              </ScrollReveal>
+            )}
+
+            {/* Editorial Section Header */}
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-2 border-b-2 border-foreground pb-3">
+              <div>
+                <span className="kicker text-primary">03 · {hasActiveFilters() ? "Suche" : "Der Index"}</span>
+                <h2 className="mt-1 font-serif text-2xl md:text-3xl font-semibold tracking-tight">
+                  {hasActiveFilters() ? "Suchergebnisse" : "Alle Reviews"}
+                </h2>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pb-1">
+                <span className="kicker text-muted-foreground" style={{ fontSize: "0.625rem" }}>
+                  {pagination?.total} {pagination?.total === 1 ? "Review" : "Reviews"}
+                  {pagination && pagination.totalPages > 1 && (
+                    <> · Seite {pagination.page}/{pagination.totalPages}</>
+                  )}
+                </span>
+                {activeFilterCount > 0 && (
+                  <span className="kicker text-primary" style={{ fontSize: "0.625rem" }}>
+                    {activeFilterCount}{" "}
+                    {activeFilterCount === 1 ? "Filter aktiv" : "Filter aktiv"}
                   </span>
                 )}
-              </p>
-              {activeFilterCount > 0 && (
-                <span className="kicker text-primary" style={{ fontSize: "0.625rem" }}>
-                  {activeFilterCount} {activeFilterCount === 1 ? "Filter aktiv" : "Filter aktiv"}
-                </span>
-              )}
+              </div>
             </div>
 
             {/* Grid */}
@@ -462,7 +486,7 @@ export function ReviewsList() {
                   delay={Math.min(index * 70, 420)}
                   className="h-full"
                 >
-                  <ReviewCard review={review} />
+                  <ReviewCard review={review} index={index} />
                 </ScrollReveal>
               ))}
             </div>
@@ -473,13 +497,26 @@ export function ReviewsList() {
                 currentPage={pagination.page}
               />
             )}
+
+            {/* Editor's Picks */}
+            {!hasActiveFilters() && topPicks.length > 0 && (
+              <ScrollReveal variant="up" className="pt-4">
+                <TopPicks picks={topPicks} />
+              </ScrollReveal>
+            )}
           </>
         ) : (
           /* Empty State */
           <div className="py-24">
             <div className="mx-auto max-w-md rounded-sm border border-dashed border-border bg-muted/30 p-10 text-center">
-              <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-full border border-border text-muted-foreground">
-                <SearchX className="size-6" />
+              <div className="relative mx-auto mb-5 flex size-16 items-center justify-center">
+                <div
+                  className="animate-spin-slow absolute inset-0 rounded-full border border-dashed border-muted-foreground/40"
+                  aria-hidden="true"
+                />
+                <div className="flex size-12 items-center justify-center rounded-full border border-border bg-card text-muted-foreground">
+                  <SearchX className="size-5" />
+                </div>
               </div>
               <h2 className="font-serif text-2xl font-semibold">
                 {hasActiveFilters() ? "Keine Treffer" : "Noch keine Reviews"}

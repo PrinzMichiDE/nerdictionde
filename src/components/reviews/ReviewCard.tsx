@@ -29,7 +29,7 @@ export function ReviewCard({ review, index }: ReviewCardProps) {
       className="group block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
     >
       <article className="review-card flex h-full flex-col overflow-hidden rounded-sm border border-border bg-card">
-        <div className="review-card-image relative aspect-[16/9] w-full bg-muted">
+        <div className="review-card-image shine relative aspect-[16/9] w-full bg-muted">
           <span
             className="cat-bar"
             style={{ "--cat": style.color } as CSSProperties}
@@ -98,7 +98,10 @@ export function ReviewCard({ review, index }: ReviewCardProps) {
             </span>
           </div>
 
-          <h3 className="font-serif text-xl font-semibold leading-snug line-clamp-2 transition-colors group-hover:text-primary">
+          <h3
+            className="review-title-underline font-serif text-xl font-semibold leading-snug line-clamp-2 transition-colors group-hover:text-primary"
+            style={{ "--cat": style.color } as CSSProperties}
+          >
             {review.title}
           </h3>
 

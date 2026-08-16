@@ -118,6 +118,8 @@ export default function RootLayout({
           <ReadingProgressBar />
           <SupportTopBanner />
           <Header />
+          <CursorGlow />
+          <div className="page-noise noise" aria-hidden="true" />
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus:text-sm focus:font-medium"

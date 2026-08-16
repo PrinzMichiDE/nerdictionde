@@ -143,7 +143,7 @@ export function Hero() {
       </span>
 
       {/* ===== Content ===== */}
-      <div className="relative z-10 mx-auto max-w-7xl px-4 md:px-6 lg:px-8 xl:px-12 pt-16 md:pt-24 lg:pt-32">
+      <div className="hero-exit relative z-10 mx-auto max-w-7xl px-4 md:px-6 lg:px-8 xl:px-12 pt-16 md:pt-24 lg:pt-32">
         <div className="flex flex-col items-center text-center">
           {/* Badge */}
           <div
@@ -155,7 +155,7 @@ export function Hero() {
             }}
           >
             <Sparkles className="size-4 animate-pulse" />
-            Unabhängiges Nerd-Magazin
+            <span className="text-glow">Unabhängiges Nerd-Magazin</span>
             <span className="relative flex size-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 bg-current" />
               <span className="relative inline-flex size-2 rounded-full bg-current" />

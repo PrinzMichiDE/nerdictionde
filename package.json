@@ -16,7 +16,8 @@
     "type-check": "tsc --noEmit",
     "generate:icons": "node scripts/generate-favicons.mjs",
     "create-game-reviews": "tsx scripts/create-200-game-reviews.ts",
-    "regenerate-movie-series": "tsx scripts/regenerate-movie-series-content.ts"
+    "regenerate-movie-series": "tsx scripts/regenerate-movie-series-content.ts",
+    "regenerate-review-content": "tsx scripts/regenerate-review-content.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

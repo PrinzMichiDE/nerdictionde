@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, type CSSProperties } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search,
@@ -38,11 +38,13 @@ interface ReviewsFilterProps {
 }
 
 const categoryTabs = [
-  { value: "all", label: "Alle", icon: LayoutGrid },
-  { value: "game", label: "Games", icon: Gamepad2 },
-  { value: "movie", label: "Filme", icon: Film },
-  { value: "series", label: "Serien", icon: Tv },
+  { value: "all", label: "Alle", icon: LayoutGrid, color: "var(--primary)" },
+  { value: "game", label: "Games", icon: Gamepad2, color: "var(--chart-3)" },
+  { value: "movie", label: "Filme", icon: Film, color: "var(--chart-2)" },
+  { value: "series", label: "Serien", icon: Tv, color: "var(--chart-5)" },
 ] as const;
+
+const scoreKeyShortcut = "/";
 
 export function ReviewsFilter({ categoryCounts }: ReviewsFilterProps) {
   const router = useRouter();
@@ -72,6 +74,24 @@ export function ReviewsFilter({ categoryCounts }: ReviewsFilterProps) {
   };
 
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isTyping =
+        !!target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable);
+      if (e.key === scoreKeyShortcut && !isTyping && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   const handleCategoryChange = (value: string) => {
     setCategory(value);
@@ -135,6 +155,7 @@ export function ReviewsFilter({ categoryCounts }: ReviewsFilterProps) {
                   data-active={active}
                   onClick={() => handleCategoryChange(tab.value)}
                   className={cn("filter-tab inline-flex items-center whitespace-nowrap")}
+                  style={{ "--tab-color": tab.color } as CSSProperties}
                 >
                   <Icon className="size-3.5 mr-1.5" />
                   {tab.label}
@@ -149,6 +170,7 @@ export function ReviewsFilter({ categoryCounts }: ReviewsFilterProps) {
           <div className="relative lg:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
             <Input
+              ref={searchInputRef}
               type="search"
               placeholder="Titel oder Inhalt durchsuchen…"
               value={query}
@@ -160,7 +182,7 @@ export function ReviewsFilter({ categoryCounts }: ReviewsFilterProps) {
               }}
               className="h-9 pl-9 pr-9 rounded-sm"
             />
-            {query && (
+            {query ? (
               <button
                 onClick={() => {
                   setQuery("");
@@ -171,6 +193,10 @@ export function ReviewsFilter({ categoryCounts }: ReviewsFilterProps) {
               >
                 <X className="size-4" />
               </button>
+            ) : (
+              <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 items-center rounded-sm border border-border bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground sm:inline-flex">
+                /
+              </kbd>
             )}
           </div>
         </div>

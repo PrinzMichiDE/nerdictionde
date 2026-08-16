@@ -62,7 +62,7 @@ export function FeaturedSpotlight({ review }: FeaturedSpotlightProps) {
               priority
               unoptimized
               sizes="(max-width: 1024px) 100vw, 60vw"
-              className="object-cover transition-transform duration-[1200ms] ease-out hover:scale-105"
+              className="ken-burns object-cover"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-muted/50">

@@ -14,9 +14,9 @@ const testimonials: Testimonial[] = [
   {
     quote:
       "Die Reviews auf Nerdiction haben mir bei meiner letzten Hardware-Entscheidung enorm geholfen. Endlich mal ehrliche und detaillierte Tests.",
-    name: "Max Mustermann",
+    name: "Jonas Berger",
     role: "Gaming-Enthusiast",
-    initials: "MM",
+    initials: "JB",
     tint: "oklch(0.62 0.15 160)",
   },
   {

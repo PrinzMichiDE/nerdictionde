@@ -15,6 +15,7 @@ import { FeatureGrid } from "@/components/home/FeatureGrid";
 import { ComparisonTable } from "@/components/home/ComparisonTable";
 import { Leaderboard } from "@/components/home/Leaderboard";
 import { TestimonialsGrid } from "@/components/home/TestimonialsGrid";
+import { VerdictTicker } from "@/components/home/VerdictTicker";
 import { FAQAccordion } from "@/components/home/FAQAccordion";
 import { CTASection } from "@/components/home/CTASection";
 import { Button } from "@/components/ui/button";
@@ -206,6 +207,9 @@ export default async function HomePage() {
 
         {/* FAQ */}
         <FAQAccordion />
+
+        {/* Verdict-Ticker */}
+        <VerdictTicker reviews={videoReviews} />
 
         {/* Newsletter / CTA */}
         <CTASection />

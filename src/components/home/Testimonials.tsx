@@ -14,7 +14,7 @@ interface Testimonial {
 
 const testimonials: Testimonial[] = [
   {
-    name: "Max Mustermann",
+    name: "Jonas Berger",
     role: "Gaming-Enthusiast",
     content: "Die Reviews auf Nerdiction haben mir bei meiner letzten Hardware-Entscheidung enorm geholfen. Endlich mal ehrliche und detaillierte Tests!",
     rating: 5,

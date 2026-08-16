@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Gamepad2, Film, Tv, ArrowUpRight } from "lucide-react";
 import { SectionHeading } from "./SectionHeading";
 import { ScrollReveal } from "./ScrollReveal";
+import { SpotlightCard } from "./SpotlightCard";
 
 interface CategoryCounts {
   game: number;
@@ -55,10 +56,11 @@ export function CategoriesShowcase({ counts }: CategoriesShowcaseProps) {
           const count = counts[cat.key];
           return (
             <ScrollReveal key={cat.key} variant="up" delay={i * 130} className="h-full">
-              <Link
-                href={cat.href}
-                className="group shine relative flex h-full flex-col justify-between gap-10 overflow-hidden rounded-3xl border border-border bg-card p-8 transition-all duration-500 hover:-translate-y-2 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10"
-              >
+              <SpotlightCard tilt={false} className="h-full rounded-3xl">
+                <Link
+                  href={cat.href}
+                  className="group shine relative flex h-full flex-col justify-between gap-10 overflow-hidden rounded-3xl border border-border bg-card p-8 transition-all duration-500 hover:-translate-y-2 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10"
+                >
                 {/* Glow */}
                 <div
                   className="absolute -top-16 -right-16 size-44 rounded-full blur-3xl opacity-0 transition-opacity duration-700 group-hover:opacity-40"
@@ -101,7 +103,8 @@ export function CategoriesShowcase({ counts }: CategoriesShowcaseProps) {
                     <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
                   </span>
                 </div>
-              </Link>
+                </Link>
+              </SpotlightCard>
             </ScrollReveal>
           );
         })}

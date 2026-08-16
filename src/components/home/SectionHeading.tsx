@@ -29,10 +29,10 @@ export function SectionHeading({
     >
       {kicker && (
         <span className="kicker inline-flex items-center gap-2 text-primary">
-          <span className="h-px w-6 bg-current opacity-60" aria-hidden="true" />
+          <span className="kicker-line opacity-60" aria-hidden="true" />
           {kicker}
           {align === "center" && (
-            <span className="h-px w-6 bg-current opacity-60" aria-hidden="true" />
+            <span className="kicker-line opacity-60 [animation-direction:reverse]" aria-hidden="true" />
           )}
         </span>
       )}
