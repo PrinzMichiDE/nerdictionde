@@ -20,8 +20,13 @@ export interface Review {
   igdbId?: number | null;
   tmdbId?: number | null;
   steamAppId?: string | null;
+  epicId?: string | null;
+  gogId?: string | null;
   specs?: any | null;
   metadata?: any | null; // Added metadata field
+  metaDescription?: string | null;
+  metaKeywords?: string | null;
+  releaseDate?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }

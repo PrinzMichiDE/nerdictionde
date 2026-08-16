@@ -222,6 +222,9 @@ export function repairJson(contentRaw: string, parseError: any, itemName: string
   }
 }
 
+const RETRY_HINT =
+  '\n\nHINWEIS: Dein letzter Versuch war leer, abgeschnitten oder ungültig. Antworte AUSSCHLIESSLICH mit einem einzigen vollständigen JSON-Objekt mit allen Feldern des Schemas (de, en, score). Schreibe kürzer (ca. 900-1100 Wörter pro Sprache), damit die Antwort vollständig bleibt. Kein leerer "{}", kein Markdown.';
+
 // Helper function to generate any content using OpenAI with built-in auto-repair
 export async function generateContent(
   prompt: string, 
@@ -257,11 +260,21 @@ export async function generateContent(
       }
       return parsed;
     } catch (parseError: any) {
+      // The model occasionally answers with a trivial empty object (e.g. "{}"),
+      // so there is nothing to repair. Skip straight to a retry with a hint.
+      const isTrivial =
+        /^\s*(?:null|true|false|\[\]|\{\}|0|-?\d+(?:\.\d+)?)\s*$/.test(contentRaw) ||
+        contentRaw.trim().length < 10;
+
+      if (isTrivial) {
+        throw new Error(`Empty or trivial AI response for ${itemName}`);
+      }
+
       const repaired = repairJson(contentRaw, parseError, itemName);
       
       if ((!repaired.en || !repaired.en.content) && retryCount < 1) {
         console.log(`Repaired JSON for ${itemName} is still missing content. Retrying...`);
-        return generateContent(prompt + "\n\nHINWEIS: Dein letzter Versuch wurde abgeschnitten. Bitte fass dich etwas kürzer, damit das JSON vollständig ist.", itemName, retryCount + 1);
+        return generateContent(prompt + RETRY_HINT, itemName, retryCount + 1);
       }
       
       return repaired;
@@ -269,7 +282,7 @@ export async function generateContent(
   } catch (error) {
     if (retryCount < 1) {
       console.error(`Error in generation for ${itemName}, retrying...`, error);
-      return generateContent(prompt, itemName, retryCount + 1);
+      return generateContent(prompt + (retryCount === 0 ? RETRY_HINT : ""), itemName, retryCount + 1);
     }
     throw error;
   }

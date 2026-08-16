@@ -55,6 +55,9 @@ RUN apk update && apk upgrade && \
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+# Suppress the known DEP0169 `url.parse()` deprecation warning emitted by
+# dependencies (axios -> follow-redirects). It is non-actionable in our code.
+ENV NODE_OPTIONS=--disable-warning=DEP0169
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \
