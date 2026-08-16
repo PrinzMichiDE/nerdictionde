@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
  * 
  * Query parameters:
  * - limit: Number of releases to return (default: 1000)
- * - days: Number of days ahead to look (default: 365)
+ * - days: Number of days ahead to look (default: 730)
  * - month: Filter by specific month (YYYY-MM format)
  * - year: Filter by specific year
  */
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
     const limit = parseInt(searchParams.get("limit") || "1000", 10);
-    const days = parseInt(searchParams.get("days") || "365", 10);
+    const days = parseInt(searchParams.get("days") || "730", 10);
     const month = searchParams.get("month"); // YYYY-MM format
     const year = searchParams.get("year");
 

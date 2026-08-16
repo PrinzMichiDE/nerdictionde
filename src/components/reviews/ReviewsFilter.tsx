@@ -2,17 +2,52 @@
 
 import { useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search, X, Filter, SortDesc, Calendar, Star } from "lucide-react";
+import {
+  Search,
+  X,
+  SortDesc,
+  Calendar,
+  Star,
+  LayoutGrid,
+  Gamepad2,
+  Film,
+  Tv,
+  RotateCcw,
+  SlidersHorizontal,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
-export function ReviewsFilter() {
+export interface CategoryCounts {
+  all: number;
+  game: number;
+  movie: number;
+  series: number;
+}
+
+interface ReviewsFilterProps {
+  categoryCounts?: CategoryCounts | null;
+}
+
+const categoryTabs = [
+  { value: "all", label: "Alle", icon: LayoutGrid },
+  { value: "game", label: "Games", icon: Gamepad2 },
+  { value: "movie", label: "Filme", icon: Film },
+  { value: "series", label: "Serien", icon: Tv },
+] as const;
+
+export function ReviewsFilter({ categoryCounts }: ReviewsFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
-  // States for all filters
+
   const [query, setQuery] = useState(searchParams.get("query") || "");
   const [category, setCategory] = useState<string>(searchParams.get("category") || "all");
   const [sort, setSort] = useState<string>(searchParams.get("sort") || "date-desc");
@@ -20,11 +55,8 @@ export function ReviewsFilter() {
   const [minScore, setMinScore] = useState(searchParams.get("minScore") || "");
   const [maxScore, setMaxScore] = useState(searchParams.get("maxScore") || "");
 
-  // Update URL whenever a filter changes
   const updateURL = (newParams: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
-    
-    // Reset to page 1 when filters change
     params.set("page", "1");
 
     Object.entries(newParams).forEach(([key, value]) => {
@@ -37,11 +69,6 @@ export function ReviewsFilter() {
 
     const queryString = params.toString();
     router.push(queryString ? `/reviews?${queryString}` : "/reviews", { scroll: false });
-  };
-
-  const handleSearch = (value: string) => {
-    setQuery(value);
-    updateURL({ query: value || null });
   };
 
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -61,11 +88,10 @@ export function ReviewsFilter() {
     updateURL({ dateFilter: value });
   };
 
-  const handleScoreChange = (type: 'min' | 'max', value: string) => {
-    if (type === 'min') setMinScore(value);
+  const handleScoreChange = (type: "min" | "max", value: string) => {
+    if (type === "min") setMinScore(value);
     else setMaxScore(value);
-    
-    updateURL({ [type === 'min' ? 'minScore' : 'maxScore']: value || null });
+    updateURL({ [type === "min" ? "minScore" : "maxScore"]: value || null });
   };
 
   const clearFilters = () => {
@@ -78,74 +104,91 @@ export function ReviewsFilter() {
     router.push("/reviews", { scroll: false });
   };
 
-  const hasActiveFilters = query || category !== "all" || sort !== "date-desc" || dateFilter !== "all" || minScore || maxScore;
+  const hasActiveFilters =
+    query ||
+    category !== "all" ||
+    sort !== "date-desc" ||
+    dateFilter !== "all" ||
+    minScore ||
+    maxScore;
 
   return (
-    <div className="space-y-6 pb-6 border-b">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <Filter className="size-4" />
-          <span>Filter & Suche</span>
-        </div>
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearFilters}
-            className="h-8 text-xs text-muted-foreground hover:text-foreground"
+    <div className="filter-bar sticky top-16 z-30 -mx-4 px-4 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8 xl:-mx-12 xl:px-12">
+      <div className="py-4 space-y-4">
+        {/* Row 1 — Kategorie-Tabs + Suche */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div
+            role="tablist"
+            aria-label="Kategorie filtern"
+            className="flex items-center gap-1 overflow-x-auto pb-1 lg:pb-0"
           >
-            <X className="size-3 mr-1" />
-            Filter zurücksetzen
-          </Button>
-        )}
-      </div>
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {/* Search */}
-        <div className="relative col-span-full lg:col-span-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-          <Input
-            type="search"
-            placeholder="Nach Titel oder Inhalt suchen..."
-            value={query}
-            onChange={(e) => {
-              const v = e.target.value;
-              setQuery(v);
-              if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-              searchDebounceRef.current = setTimeout(() => updateURL({ query: v || null }), 300);
-            }}
-            className="pl-9 pr-9"
-          />
-          {query && (
-            <button
-              onClick={() => handleSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-            >
-              <X className="size-4" />
-            </button>
-          )}
+            {categoryTabs.map((tab) => {
+              const Icon = tab.icon;
+              const active = category === tab.value;
+              const count = categoryCounts ? categoryCounts[tab.value] : null;
+              return (
+                <button
+                  key={tab.value}
+                  role="tab"
+                  type="button"
+                  aria-selected={active}
+                  data-active={active}
+                  onClick={() => handleCategoryChange(tab.value)}
+                  className={cn("filter-tab inline-flex items-center whitespace-nowrap")}
+                >
+                  <Icon className="size-3.5 mr-1.5" />
+                  {tab.label}
+                  {count !== null && count !== undefined && (
+                    <span className="filter-tab-count">{count}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="relative lg:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+            <Input
+              type="search"
+              placeholder="Titel oder Inhalt durchsuchen…"
+              value={query}
+              onChange={(e) => {
+                const v = e.target.value;
+                setQuery(v);
+                if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+                searchDebounceRef.current = setTimeout(() => updateURL({ query: v || null }), 300);
+              }}
+              className="h-9 pl-9 pr-9 rounded-sm"
+            />
+            {query && (
+              <button
+                onClick={() => {
+                  setQuery("");
+                  updateURL({ query: null });
+                }}
+                aria-label="Suche leeren"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+              >
+                <X className="size-4" />
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Category & Sort */}
-        <div className="flex gap-2">
-          <Select value={category} onValueChange={handleCategoryChange}>
-            <SelectTrigger className="flex-1" aria-label="Kategorie">
-              <SelectValue placeholder="Kategorie" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alle Kategorien</SelectItem>
-              <SelectItem value="game">Games</SelectItem>
-              <SelectItem value="movie">Filme</SelectItem>
-              <SelectItem value="series">Serien</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Row 2 — Sortierung / Zeitraum / Score */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground mr-1">
+            <SlidersHorizontal className="size-3.5" />
+            Sortieren
+          </span>
 
           <Select value={sort} onValueChange={handleSortChange}>
-            <SelectTrigger className="flex-1" aria-label="Sortierung">
-              <div className="flex items-center gap-2">
-                <SortDesc className="size-4 text-muted-foreground" />
-                <SelectValue placeholder="Sortieren nach" />
-              </div>
+            <SelectTrigger
+              className="h-8 w-auto gap-2 rounded-sm text-xs px-3"
+              aria-label="Sortierung"
+            >
+              <SortDesc className="size-3.5 text-muted-foreground" />
+              <SelectValue placeholder="Neueste zuerst" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="date-desc">Neueste zuerst</SelectItem>
@@ -156,16 +199,14 @@ export function ReviewsFilter() {
               <SelectItem value="title-desc">Titel Z-A</SelectItem>
             </SelectContent>
           </Select>
-        </div>
 
-        {/* Date & Score */}
-        <div className="flex gap-2">
           <Select value={dateFilter} onValueChange={handleDateChange}>
-            <SelectTrigger className="flex-1" aria-label="Zeitraum">
-              <div className="flex items-center gap-2">
-                <Calendar className="size-4 text-muted-foreground" />
-                <SelectValue placeholder="Zeitraum" />
-              </div>
+            <SelectTrigger
+              className="h-8 w-auto gap-2 rounded-sm text-xs px-3"
+              aria-label="Zeitraum"
+            >
+              <Calendar className="size-3.5 text-muted-foreground" />
+              <SelectValue placeholder="Zeitraum" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Gesamter Zeitraum</SelectItem>
@@ -176,92 +217,44 @@ export function ReviewsFilter() {
             </SelectContent>
           </Select>
 
-          <div className="flex items-center gap-1 flex-1">
-            <div className="relative flex-1">
-              <Star className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-muted-foreground pointer-events-none" />
-              <Input
-                type="number"
-                placeholder="Min"
-                min="0"
-                max="100"
-                value={minScore}
-                onChange={(e) => handleScoreChange('min', e.target.value)}
-                className="h-9 pl-7 text-xs"
-              />
-            </div>
-            <span className="text-muted-foreground">-</span>
-            <div className="relative flex-1">
-              <Input
-                type="number"
-                placeholder="Max"
-                min="0"
-                max="100"
-                value={maxScore}
-                onChange={(e) => handleScoreChange('max', e.target.value)}
-                className="h-9 text-xs"
-              />
-            </div>
+          <div className="flex items-center gap-1 rounded-sm border border-border bg-card h-8 px-2">
+            <Star className="size-3 text-muted-foreground" />
+            <input
+              type="number"
+              placeholder="Min"
+              min="0"
+              max="100"
+              value={minScore}
+              onChange={(e) => handleScoreChange("min", e.target.value)}
+              className="h-7 w-11 bg-transparent text-xs focus:outline-none tabular-nums"
+              aria-label="Minimaler Score"
+            />
+            <span className="text-muted-foreground text-xs">–</span>
+            <input
+              type="number"
+              placeholder="Max"
+              min="0"
+              max="100"
+              value={maxScore}
+              onChange={(e) => handleScoreChange("max", e.target.value)}
+              className="h-7 w-11 bg-transparent text-xs focus:outline-none tabular-nums"
+              aria-label="Maximaler Score"
+            />
           </div>
+
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="h-8 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw className="size-3 mr-1" />
+              Zurücksetzen
+            </Button>
+          )}
         </div>
       </div>
-
-      {hasActiveFilters && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Aktive Filter:</span>
-          {query && (
-            <Badge variant="secondary" className="px-2 py-0.5 text-[10px] h-5">
-              Suche: {query}
-              <button
-                type="button"
-                onClick={() => handleSearch("")}
-                aria-label={`Suche "${query}" entfernen`}
-                className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-              >
-                <X className="size-2.5" />
-              </button>
-            </Badge>
-          )}
-          {category !== "all" && (
-            <Badge variant="secondary" className="px-2 py-0.5 text-[10px] h-5 capitalize">
-              {category}
-              <button
-                type="button"
-                onClick={() => handleCategoryChange("all")}
-                aria-label={`Kategorie "${category}" entfernen`}
-                className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-              >
-                <X className="size-2.5" />
-              </button>
-            </Badge>
-          )}
-          {dateFilter !== "all" && (
-            <Badge variant="secondary" className="px-2 py-0.5 text-[10px] h-5">
-              Zeitraum: {dateFilter}
-              <button
-                type="button"
-                onClick={() => handleDateChange("all")}
-                aria-label={`Zeitraum "${dateFilter}" entfernen`}
-                className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-              >
-                <X className="size-2.5" />
-              </button>
-            </Badge>
-          )}
-          {(minScore || maxScore) && (
-            <Badge variant="secondary" className="px-2 py-0.5 text-[10px] h-5">
-              Score: {minScore || 0} - {maxScore || 100}
-              <button
-                type="button"
-                onClick={() => { setMinScore(""); setMaxScore(""); updateURL({ minScore: null, maxScore: null }); }}
-                aria-label="Score-Filter entfernen"
-                className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-              >
-                <X className="size-2.5" />
-              </button>
-            </Badge>
-          )}
-        </div>
-      )}
     </div>
   );
 }

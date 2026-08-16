@@ -9,6 +9,7 @@ import prisma from "@/lib/prisma";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { generateItemListSchema, getSiteUrl } from "@/lib/seo";
+import { ReleaseCalendarAutoSync } from "./components/ReleaseCalendarAutoSync";
 
 export const metadata: Metadata = {
   title: "Spiele Release Kalender",
@@ -52,8 +53,8 @@ interface Release {
 
 export default async function ReleasesPage() {
   const now = new Date();
-  // Show releases for the entire year (365 days)
-  const futureDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+  // Show releases for the next 24 months
+  const futureDate = new Date(now.getTime() + 730 * 24 * 60 * 60 * 1000);
   // Also include end of current year
   const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
   const maxDate = futureDate > endOfYear ? futureDate : endOfYear;
@@ -131,8 +132,9 @@ export default async function ReleasesPage() {
         </p>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Gamepad2 className="h-4 w-4" />
-          <span>{releases.length} kommende Releases für {now.getFullYear()}</span>
+          <span>{releases.length} kommende Releases in den nächsten 24 Monaten</span>
         </div>
+        <ReleaseCalendarAutoSync />
       </div>
 
       {/* Releases by Month */}
@@ -227,7 +229,7 @@ export default async function ReleasesPage() {
             Noch keine kommenden Releases vorhanden
           </p>
           <p className="text-muted-foreground/70 text-sm mt-2">
-            Der Release-Kalender wird wöchentlich aktualisiert (jeden Montag).
+            Der Release-Kalender wird täglich automatisch aktualisiert.
           </p>
         </div>
       )}

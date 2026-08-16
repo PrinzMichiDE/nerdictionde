@@ -17,29 +17,67 @@ export interface UpcomingReleasesResult {
   error?: string;
 }
 
+export const CALENDAR_SYNC_INTERVAL_MS = 14 * 24 * 60 * 60 * 1000;
+
+let syncInProgress = false;
+
+export function isCalendarSyncRunning(): boolean {
+  return syncInProgress;
+}
+
+export async function getLastCalendarSync(): Promise<Date | null> {
+  const last = await prisma.review.findFirst({
+    where: {
+      category: "game",
+      status: "draft",
+      igdbId: { not: null },
+    },
+    orderBy: { updatedAt: "desc" },
+    select: { updatedAt: true },
+  });
+  return last?.updatedAt ?? null;
+}
+
+export async function isCalendarSyncDue(): Promise<boolean> {
+  const last = await getLastCalendarSync();
+  if (!last) return true;
+  return Date.now() - last.getTime() > CALENDAR_SYNC_INTERVAL_MS;
+}
+
 /**
- * Fetches upcoming game releases from IGDB (next 365 days) and keeps the
+ * Fetches upcoming game releases from IGDB (next 24 months) and keeps the
  * release calendar in sync by creating lightweight draft reviews (no AI calls).
  *
  * The full review content (AI-generated text, images, SEO, tags, comments) is
  * generated later by /api/cron/publish-release-reviews once a game releases.
  */
 export async function syncUpcomingReleases(): Promise<UpcomingReleasesResult> {
+  if (syncInProgress) {
+    return {
+      success: true,
+      message: "Upcoming releases sync already in progress.",
+      stats: { totalFound: 0, created: 0, updated: 0, skipped: 0, errors: 0 },
+      duration: "0s",
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  syncInProgress = true;
   const startTime = Date.now();
 
   try {
     console.log("🎮 Starting upcoming releases sync...");
 
-    // 1. Fetch upcoming games from IGDB (next 365 days - entire year)
-    console.log("📅 Fetching upcoming games with release dates in the next 365 days...");
+    // 1. Fetch upcoming games from IGDB (next 24 months)
+    console.log("📅 Fetching upcoming games with release dates in the next 24 months...");
 
     const futureGames: any[] = [];
     let offset = 0;
     const batchSize = 500;
-    const maxGames = 2000;
+    const maxGames = 3000;
 
     while (futureGames.length < maxGames) {
-      const batch = await getIGDBUpcomingGames(365, batchSize, offset);
+      const batch = await getIGDBUpcomingGames(730, batchSize, offset);
 
       if (batch.length === 0) {
         break;
@@ -175,6 +213,15 @@ export async function syncUpcomingReleases(): Promise<UpcomingReleasesResult> {
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
+    await prisma.review.updateMany({
+      where: {
+        category: "game",
+        status: "draft",
+        igdbId: { not: null },
+      },
+      data: { updatedAt: new Date() },
+    });
+
     return {
       success: true,
       message: `Upcoming releases sync completed. Created: ${created}, Updated: ${updated}, Skipped: ${skipped}, Errors: ${errors}`,
@@ -200,6 +247,8 @@ export async function syncUpcomingReleases(): Promise<UpcomingReleasesResult> {
       duration: `${duration}s`,
       timestamp: new Date().toISOString(),
     };
+  } finally {
+    syncInProgress = false;
   }
 }
 

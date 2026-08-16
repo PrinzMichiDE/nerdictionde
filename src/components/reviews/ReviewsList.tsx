@@ -1,21 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type CSSProperties } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import { ReviewCard } from "./ReviewCard";
-import { ReviewsFilter } from "./ReviewsFilter";
+import { ReviewsFilter, type CategoryCounts } from "./ReviewsFilter";
 import { ReviewsPagination } from "./ReviewsPagination";
+import { ScrollReveal } from "@/components/home/ScrollReveal";
+import { SpotlightCard } from "@/components/home/SpotlightCard";
+import { CircularBadge } from "./CircularBadge";
+import { ScoreRing } from "./ScoreRing";
+import { StatCounter } from "./StatCounter";
 import { Review } from "@/types/review";
 import { Skeleton } from "@/components/shared/Skeleton";
-import Image from "next/image";
-import Link from "next/link";
-import { ScoreBadge } from "./ScoreBadge";
+import { ArrowRight, SearchX, AlertTriangle, RefreshCw, Clock3 } from "lucide-react";
+import { getCategoryStyle, getVerdict, stripMarkdown } from "@/lib/review-category";
 
-const categoryLabels: Record<string, string> = {
-  game: "Games",
-  movie: "Filme",
-  series: "Serien",
-};
+const verdictTickerItems = [
+  "Phänomenal",
+  "Hervorragend",
+  "Gut",
+  "Solide",
+  "Mittelmaß",
+  "Enttäuschend",
+  "Unabhängig",
+  "Redaktionstest",
+  "Kaufberatung",
+  "Fundiert",
+];
 
 interface PaginationData {
   page: number;
@@ -29,16 +42,24 @@ interface PaginationData {
 interface ApiResponse {
   reviews: Review[];
   pagination: PaginationData;
+  categoryCounts?: CategoryCounts;
+}
+
+const headline = "Reviews";
+
+function readingTime(content: string): number {
+  return Math.max(1, Math.ceil((content || "").split(/\s+/).length / 200));
 }
 
 export function ReviewsList() {
   const searchParams = useSearchParams();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [pagination, setPagination] = useState<PaginationData | null>(null);
+  const [categoryCounts, setCategoryCounts] = useState<CategoryCounts | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  // All filter parameters from URL
   const query = searchParams.get("query") || "";
   const category = searchParams.get("category") || "";
   const sort = searchParams.get("sort") || "date-desc";
@@ -55,7 +76,7 @@ export function ReviewsList() {
       try {
         const params = new URLSearchParams(searchParams.toString());
         const response = await fetch(`/api/reviews?${params.toString()}`);
-        
+
         if (!response.ok) {
           throw new Error("Fehler beim Laden der Reviews");
         }
@@ -63,6 +84,7 @@ export function ReviewsList() {
         const data: ApiResponse = await response.json();
         setReviews(data.reviews);
         setPagination(data.pagination);
+        setCategoryCounts(data.categoryCounts ?? null);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten");
         setReviews([]);
@@ -73,134 +95,394 @@ export function ReviewsList() {
     }
 
     fetchReviews();
-  }, [searchParams]);
+  }, [searchParams, reloadKey]);
 
   function hasActiveFilters() {
-    return query || sort !== "date-desc" || dateFilter !== "all" || minScore || maxScore;
+    return (
+      query ||
+      category !== "all" ||
+      sort !== "date-desc" ||
+      dateFilter !== "all" ||
+      minScore ||
+      maxScore
+    );
   }
+
+  const activeFilterCount =
+    (query ? 1 : 0) +
+    (category !== "all" ? 1 : 0) +
+    (sort !== "date-desc" ? 1 : 0) +
+    (dateFilter !== "all" ? 1 : 0) +
+    (minScore || maxScore ? 1 : 0);
 
   const featuredReview = !hasActiveFilters() && page === "1" && reviews.length > 0 ? reviews[0] : null;
   const otherReviews = featuredReview ? reviews.slice(1) : reviews;
 
-  return (
-    <div className="space-y-10 pb-12">
-      <div className="border-b border-border pb-6">
-        <span className="kicker text-primary">Das Magazin</span>
-        <h1 className="font-serif text-4xl md:text-5xl font-semibold tracking-tight mt-1">
-          Alle Reviews
-        </h1>
-        <p className="text-muted-foreground mt-3 max-w-2xl">
-          Durchsuche unsere neuesten Reviews zu Games, Filmen und Serien.
-        </p>
-      </div>
+  const avgScore =
+    reviews.length > 0
+      ? Math.round((reviews.reduce((acc, r) => acc + (r.score || 0), 0) / reviews.length) * 10) / 10
+      : 0;
+  const bestScore = reviews.length > 0 ? Math.max(...reviews.map((r) => r.score || 0)) : 0;
 
-      <ReviewsFilter />
+  const renderStats = () => (
+    <div className="flex flex-wrap gap-3 pt-2">
+      {[
+        {
+          label: "Reviews",
+          value: pagination ? (
+            <StatCounter value={pagination.total} />
+          ) : (
+            <Skeleton className="h-8 w-16" />
+          ),
+        },
+        {
+          label: "Ø Wertung",
+          value: reviews.length > 0 ? <StatCounter value={avgScore} decimals={1} /> : <span>–</span>,
+        },
+        {
+          label: "Beste Wertung",
+          value: reviews.length > 0 ? <StatCounter value={bestScore} /> : <span>–</span>,
+        },
+      ].map((stat) => (
+        <div
+          key={stat.label}
+          className="stat-chip inline-flex items-baseline gap-2.5 rounded-sm border border-border bg-card/70 px-4 py-2.5"
+        >
+          <span className="font-serif text-2xl md:text-3xl font-semibold tabular-nums">
+            {stat.value}
+          </span>
+          <span className="kicker text-muted-foreground" style={{ fontSize: "0.625rem" }}>
+            {stat.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
 
-      {isLoading ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="space-y-4">
-              <Skeleton className="aspect-video w-full rounded-lg" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-1/4" />
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-2/3" />
-              </div>
+  const renderTicker = () => (
+    <div className="full-bleed overflow-hidden border-y border-border bg-muted/40 py-3">
+      <div className="marquee" style={{ "--marquee-speed": "46s" } as CSSProperties}>
+        <div className="marquee-track">
+          {[0, 1].map((row) => (
+            <div key={row} className="flex items-center">
+              {verdictTickerItems.map((label, i) => (
+                <span
+                  key={`${row}-${label}-${i}`}
+                  className="inline-flex items-center gap-3 px-5 font-serif text-sm md:text-base font-medium italic text-muted-foreground whitespace-nowrap"
+                >
+                  {label}
+                  <span className="text-primary not-italic" aria-hidden="true">
+                    ✦
+                  </span>
+                </span>
+              ))}
             </div>
           ))}
         </div>
-      ) : error ? (
-        <div className="text-center py-24 border-2 border-destructive/20 rounded-xl bg-destructive/5">
-          <p className="text-destructive text-lg font-medium">{error}</p>
-          <p className="text-muted-foreground text-sm mt-2">
-            Bitte versuche es später erneut.
-          </p>
-        </div>
-      ) : reviews.length > 0 ? (
-        <>
-          {featuredReview && (
-            <div className="mb-12">
-              <Link href={`/reviews/${featuredReview.slug}`} className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">
-                <div className="border-b border-border pb-5 mb-5">
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
-                    <span className="kicker text-primary">Featured</span>
-                    <span className="text-muted-foreground" aria-hidden="true">·</span>
-                    <span className="kicker text-muted-foreground">
-                      {categoryLabels[featuredReview.category] || featuredReview.category}
-                    </span>
-                  </div>
-                  <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-[1.1] group-hover:text-primary transition-colors line-clamp-2">
-                    {featuredReview.title}
-                  </h2>
-                  <p className="text-muted-foreground text-sm md:text-base mt-3 line-clamp-2 max-w-2xl">
-                    {featuredReview.content.replace(/[#*`]/g, "").substring(0, 200)}...
-                  </p>
-                </div>
+      </div>
+    </div>
+  );
 
-                <div className="relative aspect-[21/9] w-full overflow-hidden rounded-md bg-muted">
-                  {featuredReview.images?.[0] ? (
-                    <Image
-                      src={featuredReview.images[0]}
-                      alt={featuredReview.title}
-                      fill
-                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
-                      priority
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-muted">
-                      <span className="text-muted-foreground">Kein Bild</span>
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+  return (
+    <div className="pb-16">
+      {/* ======================= HERO ======================= */}
+      <header className="relative overflow-hidden border-b border-border">
+        <div
+          className="bg-grid absolute inset-0 opacity-60 [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_75%)]"
+          aria-hidden="true"
+        />
+        <div
+          className="bg-mesh absolute inset-0 opacity-70"
+          aria-hidden="true"
+        />
+        <div className="relative py-10 md:py-14 lg:py-16">
+          <div className="flex items-start justify-between gap-8">
+            <div className="max-w-3xl">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span className="kicker text-primary">Das Magazin</span>
+                <span className="text-muted-foreground" aria-hidden="true">·</span>
+                <span className="kicker text-muted-foreground">Unabhängige Tests & Kritiken</span>
+              </div>
 
-                  <div className="absolute top-3 right-3 md:top-4 md:right-4 flex items-center gap-3">
-                    <ScoreBadge score={featuredReview.score} className="h-12 w-12 md:h-14 md:w-14 text-lg md:text-xl border border-white/20" />
-                  </div>
+              <h1 className="mt-4 font-serif text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.05]">
+                {headline.split("").map((ch, i) => (
+                  <span
+                    key={i}
+                    className="hero-char"
+                    style={{ animationDelay: `${120 + i * 45}ms` }}
+                  >
+                    {ch}
+                  </span>
+                ))}
+                <span className="ml-4 align-top inline-flex items-center rounded-sm border border-primary/40 px-2.5 py-1 font-sans text-[0.625rem] md:text-xs font-bold uppercase tracking-[0.22em] text-primary">
+                  Index
+                </span>
+              </h1>
 
-                  <div className="absolute bottom-3 left-3 md:bottom-4 md:left-4">
-                    <span className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-black/60 px-3 py-1.5 rounded-sm">
-                      Jetzt lesen
-                      <span className="transition-transform group-hover:translate-x-0.5">→</span>
-                    </span>
-                  </div>
-                </div>
-              </Link>
+              <p className="mt-5 max-w-2xl text-base md:text-lg text-muted-foreground leading-relaxed text-balance">
+                Games, Filme und Serien – geprüft, bewertet und auf den Punkt gebracht.
+                Der Nerdiction-Index bündelt jede Wertung auf einen Blick.
+              </p>
+
+              {renderStats()}
             </div>
-          )}
 
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              {pagination?.total} {pagination?.total === 1 ? "Review gefunden" : "Reviews gefunden"}
-              {pagination && pagination.totalPages > 1 && ` (Seite ${pagination.page} von ${pagination.totalPages})`}
-            </p>
-          </div>
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {otherReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} />
-            ))}
-          </div>
-          
-          {pagination && (
-            <ReviewsPagination 
-              totalPages={pagination.totalPages} 
-              currentPage={pagination.page} 
+            <CircularBadge
+              text="Nerdiction ✦ Reviews Index ✦ Nerdiction ✦ Reviews Index ✦"
+              core="N"
+              className="hidden lg:inline-flex mt-6 shrink-0"
             />
-          )}
-        </>
-      ) : (
-        <div className="text-center py-24 border-2 border-dashed rounded-xl bg-muted/30">
-          <p className="text-muted-foreground text-lg font-medium">
-            {hasActiveFilters() ? "Keine Reviews gefunden." : "Keine Reviews vorhanden."}
-          </p>
-          <p className="text-muted-foreground/70 text-sm mt-2">
-            {hasActiveFilters()
-              ? "Versuche andere Suchbegriffe oder Filter."
-              : "Erstelle deinen ersten Review im Admin-Bereich."}
-          </p>
+          </div>
+
+          <div className="mt-10 flex items-center gap-4">
+            <span className="hero-rule" aria-hidden="true" />
+            <span className="kicker text-muted-foreground whitespace-nowrap" style={{ fontSize: "0.625rem" }}>
+              Ausgabe {new Date().getFullYear()}
+            </span>
+            <span className="hero-rule" aria-hidden="true" />
+          </div>
         </div>
-      )}
+      </header>
+
+      {renderTicker()}
+
+      {/* ======================= FILTER ======================= */}
+      <ReviewsFilter categoryCounts={categoryCounts} />
+
+      {/* ======================= CONTENT ======================= */}
+      <div className="pt-10">
+        {isLoading ? (
+          <div className="space-y-12">
+            <div className="grid gap-6 lg:grid-cols-12">
+              <div className="lg:col-span-5 space-y-4">
+                <Skeleton className="skeleton-shimmer h-5 w-32 rounded-sm" />
+                <Skeleton className="skeleton-shimmer h-10 w-full rounded-sm" />
+                <Skeleton className="skeleton-shimmer h-4 w-3/4 rounded-sm" />
+                <Skeleton className="skeleton-shimmer h-4 w-2/3 rounded-sm" />
+              </div>
+              <div className="lg:col-span-7">
+                <Skeleton className="skeleton-shimmer aspect-[16/10] w-full rounded-sm" />
+              </div>
+            </div>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="space-y-3">
+                  <Skeleton className="skeleton-shimmer aspect-[16/9] w-full rounded-sm" />
+                  <Skeleton className="skeleton-shimmer h-4 w-1/3 rounded-sm" />
+                  <Skeleton className="skeleton-shimmer h-6 w-3/4 rounded-sm" />
+                  <Skeleton className="skeleton-shimmer h-4 w-full rounded-sm" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : error ? (
+          <div className="py-24">
+            <div className="mx-auto max-w-md rounded-sm border border-destructive/25 bg-destructive/5 p-10 text-center">
+              <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-full border border-destructive/30 text-destructive">
+                <AlertTriangle className="size-6" />
+              </div>
+              <h2 className="font-serif text-2xl font-semibold">Ups, da lief etwas schief</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{error}</p>
+              <button
+                onClick={() => setReloadKey((k) => k + 1)}
+                className="mt-6 inline-flex items-center gap-2 rounded-sm bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <RefreshCw className="size-4" />
+                Erneut versuchen
+              </button>
+            </div>
+          </div>
+        ) : reviews.length > 0 ? (
+          <>
+            {/* Featured Spotlight */}
+            {featuredReview && (
+              <ScrollReveal variant="up">
+                <SpotlightCard
+                  tilt={true}
+                  intensity={3}
+                  className="group mb-12 overflow-hidden rounded-sm border border-border bg-card"
+                >
+                  <div className="grid lg:grid-cols-12">
+                    <div className="relative flex flex-col justify-between gap-6 border-b border-border p-6 md:p-8 lg:col-span-5 lg:border-b-0 lg:border-r">
+                      <span
+                        className="ghost-num absolute -top-2 right-4 text-[7rem] md:text-[9rem]"
+                        aria-hidden="true"
+                      >
+                        01
+                      </span>
+
+                      <div className="relative">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="kicker text-primary">Featured</span>
+                          <span className="text-muted-foreground" aria-hidden="true">·</span>
+                          <span
+                            className="kicker"
+                            style={{
+                              color: getCategoryStyle(featuredReview.category).color,
+                            }}
+                          >
+                            {getCategoryStyle(featuredReview.category).label}
+                          </span>
+                        </div>
+
+                        <h2 className="mt-3 font-serif text-3xl md:text-4xl font-semibold tracking-tight leading-[1.1] line-clamp-2 group-hover:text-primary transition-colors">
+                          {featuredReview.title}
+                        </h2>
+
+                        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                          <time
+                            dateTime={
+                              featuredReview.createdAt instanceof Date
+                                ? featuredReview.createdAt.toISOString()
+                                : featuredReview.createdAt
+                            }
+                          >
+                            {new Date(featuredReview.createdAt).toLocaleDateString("de-DE", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </time>
+                          <span aria-hidden="true">·</span>
+                          <span className="inline-flex items-center gap-1">
+                            <Clock3 className="size-3.5" />
+                            {readingTime(featuredReview.content)} Min. Lesezeit
+                          </span>
+                          <span aria-hidden="true">·</span>
+                          <span className="font-semibold text-foreground">
+                            {getVerdict(featuredReview.score)}
+                          </span>
+                        </div>
+
+                        <p className="mt-4 text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-3">
+                          {stripMarkdown(featuredReview.content || "").substring(0, 260)}…
+                        </p>
+                      </div>
+
+                      <Link
+                        href={`/reviews/${featuredReview.slug}`}
+                        className="group/cta relative inline-flex w-fit items-center gap-2 rounded-sm bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        Review lesen
+                        <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-1" />
+                      </Link>
+                    </div>
+
+                    <div className="relative lg:col-span-7">
+                      <div className="spotlight relative h-full min-h-[280px] lg:min-h-full overflow-hidden bg-muted">
+                        {featuredReview.images?.[0] ? (
+                          <Image
+                            src={featuredReview.images[0]}
+                            alt={featuredReview.title}
+                            fill
+                            priority
+                            unoptimized
+                            sizes="(max-width: 1024px) 100vw, 58vw"
+                            className="spotlight-img object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-muted">
+                            <span className="text-muted-foreground text-sm font-medium">
+                              Kein Bild
+                            </span>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+                        <div className="absolute right-4 top-4">
+                          <ScoreRing
+                            score={featuredReview.score}
+                            size={76}
+                            ringWidth={5}
+                            hole="oklch(0.16 0.004 90 / 0.85)"
+                            showVerdict
+                          />
+                        </div>
+
+                        <span className="spotlight-corner spotlight-corner-tl" aria-hidden="true" />
+                        <span className="spotlight-corner spotlight-corner-br" aria-hidden="true" />
+
+                        <div className="absolute bottom-4 left-4">
+                          <span className="kicker inline-flex items-center gap-2 rounded-sm bg-black/60 px-2.5 py-1.5 text-[0.625rem] font-semibold text-white backdrop-blur-sm">
+                            Nerdiction-Empfehlung
+                            <span className="text-primary" aria-hidden="true">✦</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </SpotlightCard>
+              </ScrollReveal>
+            )}
+
+            {/* Result Bar */}
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">{pagination?.total}</span>{" "}
+                {pagination?.total === 1 ? "Review gefunden" : "Reviews gefunden"}
+                {pagination && pagination.totalPages > 1 && (
+                  <span className="text-muted-foreground/70">
+                    {" "}
+                    · Seite {pagination.page} von {pagination.totalPages}
+                  </span>
+                )}
+              </p>
+              {activeFilterCount > 0 && (
+                <span className="kicker text-primary" style={{ fontSize: "0.625rem" }}>
+                  {activeFilterCount} {activeFilterCount === 1 ? "Filter aktiv" : "Filter aktiv"}
+                </span>
+              )}
+            </div>
+
+            {/* Grid */}
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {otherReviews.map((review, index) => (
+                <ScrollReveal
+                  key={review.id}
+                  variant="up"
+                  delay={Math.min(index * 70, 420)}
+                  className="h-full"
+                >
+                  <ReviewCard review={review} />
+                </ScrollReveal>
+              ))}
+            </div>
+
+            {pagination && (
+              <ReviewsPagination
+                totalPages={pagination.totalPages}
+                currentPage={pagination.page}
+              />
+            )}
+          </>
+        ) : (
+          /* Empty State */
+          <div className="py-24">
+            <div className="mx-auto max-w-md rounded-sm border border-dashed border-border bg-muted/30 p-10 text-center">
+              <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-full border border-border text-muted-foreground">
+                <SearchX className="size-6" />
+              </div>
+              <h2 className="font-serif text-2xl font-semibold">
+                {hasActiveFilters() ? "Keine Treffer" : "Noch keine Reviews"}
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {hasActiveFilters()
+                  ? "Versuche andere Suchbegriffe oder lockere die Filter."
+                  : "Schau bald wieder vorbei – die Redaktion arbeitet daran."}
+              </p>
+              {hasActiveFilters() && (
+                <Link
+                  href="/reviews"
+                  className="mt-6 inline-flex items-center gap-2 rounded-sm bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Alle Filter zurücksetzen
+                  <ArrowRight className="size-4" />
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -4,10 +4,15 @@ import { Review } from "@/types/review";
 import { Hero } from "@/components/home/Hero";
 import { Marquee } from "@/components/home/Marquee";
 import { StatsBar } from "@/components/home/StatsBar";
+import { TrustBadges } from "@/components/home/TrustBadges";
 import { FeaturedSpotlight } from "@/components/home/FeaturedSpotlight";
 import { LatestReviews } from "@/components/home/LatestReviews";
+import { VideoGallery } from "@/components/home/VideoGallery";
 import { CategoriesShowcase } from "@/components/home/CategoriesShowcase";
+import { DataSources } from "@/components/home/DataSources";
+import { ProcessSteps } from "@/components/home/ProcessSteps";
 import { FeatureGrid } from "@/components/home/FeatureGrid";
+import { ComparisonTable } from "@/components/home/ComparisonTable";
 import { Leaderboard } from "@/components/home/Leaderboard";
 import { TestimonialsGrid } from "@/components/home/TestimonialsGrid";
 import { FAQAccordion } from "@/components/home/FAQAccordion";
@@ -115,6 +120,10 @@ export default async function HomePage() {
     }))
   );
 
+  const videoReviews = Array.from(
+    new Map([...latestReviews, ...topRatedReviews].map((r) => [r.id, r])).values()
+  );
+
   return (
     <div className="relative">
       <script
@@ -132,6 +141,9 @@ export default async function HomePage() {
       <div className="mx-auto max-w-7xl space-y-24 px-4 pt-16 pb-16 md:space-y-32 md:px-6 md:pt-24 md:pb-24 lg:space-y-40 lg:px-8 lg:pt-32 xl:px-12">
         {/* Statistiken */}
         <StatsBar stats={stats} />
+
+        {/* Vertrauens-Ribbon */}
+        <TrustBadges />
 
         {/* Review der Woche */}
         {featuredReview ? (
@@ -162,6 +174,9 @@ export default async function HomePage() {
         {/* Neueste Reviews */}
         <LatestReviews reviews={latestReviews} />
 
+        {/* Video-Reviews */}
+        <VideoGallery reviews={videoReviews} />
+
         {/* Kategorien */}
         <CategoriesShowcase
           counts={{
@@ -171,11 +186,20 @@ export default async function HomePage() {
           }}
         />
 
+        {/* Datenquellen */}
+        <DataSources />
+
+        {/* Testmethode */}
+        <ProcessSteps />
+
         {/* Warum Nerdiction */}
         <FeatureGrid />
 
         {/* Top-Rated Leaderboard */}
         <Leaderboard reviews={topRatedReviews} />
+
+        {/* Vergleich */}
+        <ComparisonTable />
 
         {/* Testimonials */}
         <TestimonialsGrid />

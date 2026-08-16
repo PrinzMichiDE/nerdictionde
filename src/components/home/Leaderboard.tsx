@@ -76,7 +76,7 @@ export function Leaderboard({ reviews }: LeaderboardProps) {
                 <div className="hidden md:flex flex-1 items-center gap-3">
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                     <div
-                      className="bar-grow h-full rounded-full bg-gradient-to-r from-primary/80 via-primary to-primary bar-stripes"
+                      className="bar-grow h-full rounded-full bg-primary bar-stripes"
                       style={{ "--bar-w": `${review.score}%` } as CSSProperties}
                     />
                   </div>

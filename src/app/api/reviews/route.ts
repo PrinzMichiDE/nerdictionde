@@ -114,6 +114,26 @@ export async function GET(req: NextRequest) {
     const total = await prisma.review.count({ where });
     const totalPages = shouldPaginate ? Math.ceil(total / limit) : 1;
 
+    // Category counts for the filter tabs (ignore the category filter itself,
+    // but respect search/date/score so the numbers reflect the active result set)
+    let categoryCounts: Record<string, number> | undefined;
+    if (shouldPaginate) {
+      const countWhere = { ...where };
+      delete countWhere.category;
+      const [countGroups, countAll] = await Promise.all([
+        prisma.review.groupBy({
+          by: ["category"],
+          where: countWhere,
+          _count: { _all: true },
+        }),
+        prisma.review.count({ where: countWhere }),
+      ]);
+      categoryCounts = { all: countAll, game: 0, movie: 0, series: 0 };
+      for (const group of countGroups) {
+        categoryCounts[group.category as string] = group._count._all;
+      }
+    }
+
     const reviews = await prisma.review.findMany({
       where,
       orderBy,
@@ -138,6 +158,7 @@ export async function GET(req: NextRequest) {
         hasNext: page < totalPages,
         hasPrev: page > 1,
       },
+      ...(categoryCounts ? { categoryCounts } : {}),
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

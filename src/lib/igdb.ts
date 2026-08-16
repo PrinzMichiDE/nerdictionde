@@ -430,11 +430,11 @@ export async function getIGDBPlatforms() {
 
 /**
  * Fetches upcoming games from IGDB with release dates in the future
- * @param daysAhead Number of days ahead to look (default: 365)
+ * @param daysAhead Number of days ahead to look (default: 730)
  * @param limit Maximum number of games to return (default: 500)
  * @param offset Offset for pagination (default: 0)
  */
-export async function getIGDBUpcomingGames(daysAhead: number = 365, limit: number = 500, offset: number = 0) {
+export async function getIGDBUpcomingGames(daysAhead: number = 730, limit: number = 500, offset: number = 0) {
   const token = await getAccessToken();
   const now = Math.floor(Date.now() / 1000);
   const futureDate = Math.floor((Date.now() + daysAhead * 24 * 60 * 60 * 1000) / 1000);

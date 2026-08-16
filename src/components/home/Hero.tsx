@@ -52,7 +52,7 @@ export function Hero() {
   });
 
   return (
-    <section className="hero-vignette relative overflow-hidden -mt-8 md:-mt-12 lg:-mt-16 pb-20 md:pb-28 lg:pb-36">
+    <section className="full-bleed hero-vignette relative overflow-hidden -mt-8 md:-mt-12 lg:-mt-16 pb-20 md:pb-28 lg:pb-36">
       {/* ===== Hintergrund-Schichten ===== */}
       <div className="absolute inset-0 bg-mesh" aria-hidden="true" />
       <div

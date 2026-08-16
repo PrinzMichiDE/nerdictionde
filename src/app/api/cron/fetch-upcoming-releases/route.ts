@@ -8,7 +8,7 @@ export const maxDuration = 300;
  * Schedule: Daily at 4 AM UTC (0 4 * * *)
  *
  * This job:
- * - Fetches games with release dates in the next 365 days from IGDB
+ * - Fetches games with release dates in the next 24 months from IGDB
  * - Creates lightweight draft reviews for games that don't exist yet
  * - Updates release dates for existing games
  *

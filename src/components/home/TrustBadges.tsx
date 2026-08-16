@@ -1,82 +1,58 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Shield, Award, Users, TrendingUp, CheckCircle2, Zap } from "lucide-react";
+import { ShieldCheck, Users, Timer, BadgeCheck, type LucideIcon } from "lucide-react";
+import { ScrollReveal } from "./ScrollReveal";
 
-interface TrustBadge {
-  icon: React.ReactNode;
+interface TrustItem {
+  icon: LucideIcon;
   title: string;
   description: string;
 }
 
-const badges: TrustBadge[] = [
+const items: TrustItem[] = [
   {
-    icon: <Shield className="h-6 w-6" />,
-    title: "100% Unabhängig",
-    description: "Keine bezahlten Reviews",
+    icon: ShieldCheck,
+    title: "Keine bezahlten Reviews",
+    description: "Unabhängig & objektiv getestet",
   },
   {
-    icon: <Award className="h-6 w-6" />,
-    title: "Professionell",
-    description: "Von Experten getestet",
+    icon: BadgeCheck,
+    title: "Transparente Scores",
+    description: "Nachvollziehbares 100-Punkte-System",
   },
   {
-    icon: <Users className="h-6 w-6" />,
-    title: "Community-Driven",
-    description: "Basierend auf eurem Feedback",
+    icon: Users,
+    title: "Community-getrieben",
+    description: "Dein Feedback fließt in jeden Test",
   },
   {
-    icon: <TrendingUp className="h-6 w-6" />,
-    title: "Aktuell",
-    description: "Immer auf dem neuesten Stand",
-  },
-  {
-    icon: <CheckCircle2 className="h-6 w-6" />,
-    title: "Verifiziert",
-    description: "Alle Tests dokumentiert",
-  },
-  {
-    icon: <Zap className="h-6 w-6" />,
-    title: "Schnell",
-    description: "Reviews kurz nach Release",
+    icon: Timer,
+    title: "Schnell beim Release",
+    description: "Reviews kurz nach dem Launch",
   },
 ];
 
 export function TrustBadges() {
   return (
-    <section className="space-y-8 py-16">
-      <div className="text-center space-y-2">
-        <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-          Warum uns vertrauen?
-        </h2>
-        <p className="text-muted-foreground text-lg">
-          Unsere Werte und Prinzipien
-        </p>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {badges.map((badge, index) => (
-          <Card
-            key={index}
-            className="group relative overflow-hidden border-2 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/30 text-center"
+    <div className="full-bleed border-y border-border bg-card/60">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 sm:grid-cols-2 md:gap-4 lg:grid-cols-4 lg:px-8 xl:px-12">
+        {items.map(({ icon: Icon, title, description }, i) => (
+          <ScrollReveal
+            key={title}
+            variant="up"
+            delay={i * 100}
+            className={i > 0 && i % 2 === 1 ? "sm:border-l sm:border-border sm:pl-6 lg:border-l-0 lg:pl-0" : ""}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <CardContent className="p-6 relative z-10 space-y-3">
-              <div className="flex justify-center">
-                <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
-                  {badge.icon}
-                </div>
+            <div className="flex items-center gap-4 lg:justify-center lg:text-center lg:flex-col lg:gap-3">
+              <span className="relative inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                <Icon className="size-5" />
+              </span>
+              <div className="space-y-0.5">
+                <h3 className="text-sm font-bold tracking-tight">{title}</h3>
+                <p className="text-xs text-muted-foreground">{description}</p>
               </div>
-              <div className="space-y-1">
-                <h3 className="font-bold text-sm group-hover:text-primary transition-colors">
-                  {badge.title}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {badge.description}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </ScrollReveal>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

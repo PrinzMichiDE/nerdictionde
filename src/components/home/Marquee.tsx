@@ -14,12 +14,12 @@ const items = [
   { icon: Zap, label: "Schnell getestet" },
 ];
 
-function MarqueeRow() {
+function MarqueeRow({ row }: { row: number }) {
   return (
     <>
       {items.map(({ icon: Icon, label }, i) => (
         <span
-          key={`${label}-${i}`}
+          key={`${row}-${label}-${i}`}
           className="inline-flex items-center gap-3 px-6 font-serif text-lg md:text-xl font-medium text-muted-foreground whitespace-nowrap transition-colors hover:text-foreground"
         >
           <Icon className="size-4 text-primary" />
@@ -38,8 +38,8 @@ export function Marquee() {
     <div className="full-bleed border-y border-border bg-background/80 py-5 backdrop-blur-sm">
       <div className="marquee" style={{ "--marquee-speed": "38s" } as CSSProperties}>
         <div className="marquee-track">
-          <MarqueeRow />
-          <MarqueeRow />
+          <MarqueeRow row={0} />
+          <MarqueeRow row={1} />
         </div>
       </div>
     </div>

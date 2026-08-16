@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { ScoreBadge } from "@/components/reviews/ScoreBadge";
+import { ScoreRing } from "@/components/reviews/ScoreRing";
 import Image from "next/image";
 import {
   generateBreadcrumbSchema,
@@ -14,7 +14,7 @@ import { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlugCustomId from "rehype-slug-custom-id";
-import { Monitor, Cpu, HardDrive, CpuIcon } from "lucide-react";
+import { Monitor, Cpu, HardDrive, CpuIcon, ArrowLeft, Clock, Check, X } from "lucide-react";
 import { GameMetadata } from "@/components/reviews/GameMetadata";
 import { MovieSeriesMetadata } from "@/components/reviews/MovieSeriesMetadata";
 import { TableOfContents } from "@/components/reviews/TableOfContents";
@@ -26,7 +26,8 @@ import { EpisodeList } from "@/components/reviews/EpisodeList";
 import { GameProgressTracker } from "@/components/reviews/GameProgressTracker";
 import { SpoilerWarning } from "@/components/reviews/SpoilerWarning";
 import { SpoilerSection } from "@/components/reviews/SpoilerSection";
-import { Clock, Check, X } from "lucide-react";
+import { getCategoryStyle } from "@/lib/review-category";
+import type { CSSProperties } from "react";
 
 export async function generateMetadata({
   params,
@@ -376,13 +377,32 @@ export default async function ReviewDetailPage({
         </ol>
       </nav>
 
+      <Link
+        href="/reviews"
+        className="group -mt-1 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+      >
+        <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+        {isEn ? "Back to all reviews" : "Zurück zu allen Reviews"}
+      </Link>
+
       {/* Header Section */}
       <header className="border-b border-border pb-8">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div className="space-y-4 flex-1">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span className="kicker text-primary">
-                {review.category === "game" ? "Test" : "Kritik"} · {review.category}
+              <span
+                className="inline-flex items-center gap-2"
+                style={{ color: getCategoryStyle(review.category).color }}
+              >
+                <span
+                  className="size-1.5 rounded-full"
+                  style={{ backgroundColor: getCategoryStyle(review.category).color }}
+                  aria-hidden="true"
+                />
+                <span className="kicker">
+                  {review.category === "game" ? "Test" : "Kritik"} ·{" "}
+                  {getCategoryStyle(review.category).label}
+                </span>
               </span>
               <span className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
                 <Clock className="size-3.5" />
@@ -447,6 +467,38 @@ export default async function ReviewDetailPage({
             <span className="text-muted-foreground font-medium">Kein Bild vorhanden</span>
           </div>
         )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+
+        <span className="spotlight-corner spotlight-corner-tl" aria-hidden="true" />
+        <span className="spotlight-corner spotlight-corner-br" aria-hidden="true" />
+
+        <div className="absolute right-4 top-4 md:right-6 md:top-6 flex flex-col items-center gap-1.5 rounded-sm bg-black/55 px-3.5 py-3 backdrop-blur-sm">
+          <ScoreRing
+            score={review.score}
+            size={76}
+            ringWidth={5}
+            hole="oklch(0.16 0.004 90 / 0.9)"
+          />
+          <span
+            className="kicker text-white/85 whitespace-nowrap"
+            style={{ fontSize: "0.5625rem" }}
+          >
+            {review.score >= 90
+              ? isEn ? "Phenomenal" : "Phänomenal"
+              : review.score >= 80
+                ? isEn ? "Excellent" : "Hervorragend"
+                : review.score >= 70
+                  ? isEn ? "Good" : "Gut"
+                  : isEn ? "Satisfactory" : "Befriedigend"}
+          </span>
+        </div>
+
+        <div className="absolute bottom-4 left-4 md:bottom-5 md:left-5">
+          <span className="kicker inline-flex items-center gap-2 rounded-sm bg-black/60 px-2.5 py-1.5 text-[0.625rem] font-semibold text-white backdrop-blur-sm">
+            {isEn ? "Nerdiction Review" : "Nerdiction-Test"}
+            <span className="text-primary" aria-hidden="true">✦</span>
+          </span>
+        </div>
       </div>
 
       {/* At a Glance / Auf einen Blick - for SEO & AEO */}
@@ -455,8 +507,8 @@ export default async function ReviewDetailPage({
         className="p-6 md:p-8 rounded-md border border-border bg-card"
       >
         <div className="flex flex-col md:flex-row gap-6 md:items-start">
-          <div className="flex items-center gap-4 md:flex-col md:items-center md:shrink-0">
-            <ScoreBadge score={review.score} className="h-16 w-16 md:h-20 md:w-20 text-2xl" />
+          <div className="flex items-center gap-4 md:flex-col md:items-center md:shrink-0 md:border-r md:border-border md:pr-8">
+            <ScoreRing score={review.score} size={104} ringWidth={6} />
             <span className="kicker text-primary">
               {review.score >= 90 ? (isEn ? "Phenomenal" : "Phänomenal") : review.score >= 80 ? (isEn ? "Excellent" : "Hervorragend") : review.score >= 70 ? (isEn ? "Good" : "Gut") : (isEn ? "Satisfactory" : "Befriedigend")}
             </span>

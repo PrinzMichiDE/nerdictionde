@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface PaginationProps {
@@ -23,7 +22,7 @@ export function ReviewsPagination({ totalPages, currentPage }: PaginationProps) 
   };
 
   const getPageNumbers = () => {
-    const pages = [];
+    const pages: (number | string)[] = [];
     const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
@@ -57,118 +56,88 @@ export function ReviewsPagination({ totalPages, currentPage }: PaginationProps) 
   };
 
   const pages = getPageNumbers();
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  const arrowClass = cn(
+    "inline-flex h-10 w-10 items-center justify-center rounded-sm border border-border text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground disabled:pointer-events-none disabled:opacity-35"
+  );
 
   return (
-    <nav 
-      role="navigation" 
-      aria-label="Seitennavigation" 
-      className="flex flex-col items-center gap-4 py-8"
+    <nav
+      role="navigation"
+      aria-label="Seitennavigation"
+      className="mt-4 flex flex-col items-center gap-5 border-t border-border pt-8"
     >
-      <div className="flex items-center gap-1 sm:gap-2">
-        {/* First Page */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="size-9 hidden sm:flex"
-          disabled={currentPage <= 1}
-          asChild={currentPage > 1}
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <Link
+          href={createPageURL(1)}
+          aria-label="Erste Seite"
+          className={cn(arrowClass, "hidden sm:inline-flex", currentPage <= 1 && "pointer-events-none opacity-35")}
+          tabIndex={currentPage <= 1 ? -1 : undefined}
+          aria-disabled={currentPage <= 1}
         >
-          {currentPage > 1 ? (
-            <Link href={createPageURL(1)} aria-label="Erste Seite">
-              <ChevronsLeft className="size-4" />
-            </Link>
-          ) : (
-            <ChevronsLeft className="size-4" />
-          )}
-        </Button>
+          <ChevronsLeft className="size-4" />
+        </Link>
 
-        {/* Previous Page */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="size-9"
-          disabled={currentPage <= 1}
-          asChild={currentPage > 1}
+        <Link
+          href={createPageURL(currentPage - 1)}
+          aria-label="Vorherige Seite"
+          className={cn(arrowClass, currentPage <= 1 && "pointer-events-none opacity-35")}
+          tabIndex={currentPage <= 1 ? -1 : undefined}
+          aria-disabled={currentPage <= 1}
         >
-          {currentPage > 1 ? (
-            <Link href={createPageURL(currentPage - 1)} aria-label="Vorherige Seite">
-              <ChevronLeft className="size-4" />
-            </Link>
-          ) : (
-            <ChevronLeft className="size-4" />
-          )}
-        </Button>
+          <ChevronLeft className="size-4" />
+        </Link>
 
-        {/* Page Numbers */}
-        <div className="flex items-center gap-1 sm:gap-2 mx-2">
-          {pages.map((page, index) => (
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          {pages.map((page, index) =>
             typeof page === "number" ? (
-              <Button
+              <Link
                 key={index}
-                variant={currentPage === page ? "default" : "outline"}
-                size="icon"
-                className={cn(
-                  "size-9 text-sm font-medium",
-                  currentPage === page ? "pointer-events-none" : ""
-                )}
+                href={createPageURL(page)}
+                aria-label={`Seite ${page}`}
                 aria-current={currentPage === page ? "page" : undefined}
-                asChild={currentPage !== page}
-              >
-                {currentPage !== page ? (
-                  <Link href={createPageURL(page)} aria-label={`Seite ${page}`}>
-                    {page}
-                  </Link>
-                ) : (
-                  <span>{page}</span>
+                data-active={currentPage === page}
+                className={cn(
+                  "page-btn",
+                  currentPage === page && "pointer-events-none"
                 )}
-              </Button>
+              >
+                {page}
+              </Link>
             ) : (
-              <span key={index} className="w-9 text-center text-muted-foreground">
+              <span key={index} className="w-6 text-center text-muted-foreground">
                 {page}
               </span>
             )
-          ))}
+          )}
         </div>
 
-        {/* Next Page */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="size-9"
-          disabled={currentPage >= totalPages}
-          asChild={currentPage < totalPages}
+        <Link
+          href={createPageURL(currentPage + 1)}
+          aria-label="Nächste Seite"
+          className={cn(arrowClass, currentPage >= totalPages && "pointer-events-none opacity-35")}
+          tabIndex={currentPage >= totalPages ? -1 : undefined}
+          aria-disabled={currentPage >= totalPages}
         >
-          {currentPage < totalPages ? (
-            <Link href={createPageURL(currentPage + 1)} aria-label="Nächste Seite">
-              <ChevronRight className="size-4" />
-            </Link>
-          ) : (
-            <ChevronRight className="size-4" />
-          )}
-        </Button>
+          <ChevronRight className="size-4" />
+        </Link>
 
-        {/* Last Page */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="size-9 hidden sm:flex"
-          disabled={currentPage >= totalPages}
-          asChild={currentPage < totalPages}
+        <Link
+          href={createPageURL(totalPages)}
+          aria-label="Letzte Seite"
+          className={cn(arrowClass, "hidden sm:inline-flex", currentPage >= totalPages && "pointer-events-none opacity-35")}
+          tabIndex={currentPage >= totalPages ? -1 : undefined}
+          aria-disabled={currentPage >= totalPages}
         >
-          {currentPage < totalPages ? (
-            <Link href={createPageURL(totalPages)} aria-label="Letzte Seite">
-              <ChevronsRight className="size-4" />
-            </Link>
-          ) : (
-            <ChevronsRight className="size-4" />
-          )}
-        </Button>
+          <ChevronsRight className="size-4" />
+        </Link>
       </div>
 
-      <p className="text-xs text-muted-foreground font-medium">
-        Seite {currentPage} von {totalPages}
+      <p className="kicker text-muted-foreground" style={{ fontSize: "0.625rem" }}>
+        Seite <span className="text-foreground">{pad(currentPage)}</span> von{" "}
+        <span className="text-foreground">{pad(totalPages)}</span>
       </p>
     </nav>
   );
 }
-
