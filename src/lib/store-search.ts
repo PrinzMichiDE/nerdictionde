@@ -70,10 +70,10 @@ export async function searchEpicStore(gameName: string): Promise<string | null> 
     }
 
     return null;
-  } catch (error: any) {
+  } catch (error) {
     // Best-effort fallback: Epic IDs normally come from IGDB. Epic's anti-bot
     // protection frequently rejects datacenter requests with 403/404, so keep this quiet.
-    const status = error?.response?.status;
+    const status = (error as { response?: { status?: number } })?.response?.status;
     console.warn(
       `Epic Store search skipped for ${gameName} (${status || "network error"}), relying on IGDB external IDs`
     );

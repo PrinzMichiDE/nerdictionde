@@ -2,7 +2,12 @@ import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { ScoreBadge } from "@/components/reviews/ScoreBadge";
 import Image from "next/image";
-import { generateReviewSchema } from "@/lib/seo";
+import {
+  generateBreadcrumbSchema,
+  generateFAQSchema,
+  generateReviewSchema,
+  getSiteUrl,
+} from "@/lib/seo";
 import { CommentSection } from "@/components/community/CommentSection";
 import Link from "next/link";
 import { Metadata } from "next";
@@ -45,15 +50,106 @@ export async function generateMetadata({
   const description =
     review.metaDescription || content.substring(0, 160).replace(/\n/g, " ");
 
+  const url = `${getSiteUrl()}/reviews/${slug}`;
+
+  const image = review.images?.[0];
+
   return {
-    title: `${title} - Nerdiction`,
+    title,
     description,
+    alternates: {
+      canonical: url,
+      languages: {
+        "de-DE": url,
+        en: `${url}?lang=en`,
+        "x-default": url,
+      },
+    },
+    keywords: review.metaKeywords
+      ? review.metaKeywords.split(",").map((k) => k.trim()).filter(Boolean)
+      : [title, review.category, "Review", "Test", "Kritik"],
     openGraph: {
-      title,
+      type: "article",
+      title: `${title} Test & Review`,
       description,
-      images: review.images?.[0] ? [review.images[0]] : [],
+      url,
+      siteName: "Nerdiction",
+      locale: "de_DE",
+      images: image ? [{ url: image, alt: title }] : [],
+      publishedTime: review.createdAt instanceof Date ? review.createdAt.toISOString() : undefined,
+      modifiedTime: review.updatedAt instanceof Date ? review.updatedAt.toISOString() : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} Test & Review`,
+      description,
+      images: image ? [image] : [],
+    },
+    robots: {
+      index: true,
+      follow: true,
     },
   };
+}
+
+function buildFaqs(review: any, isEn: boolean) {
+  const title = isEn && review.title_en ? review.title_en : review.title;
+  const pros = (isEn && review.pros_en?.length ? review.pros_en : review.pros) || [];
+  const cons = (isEn && review.cons_en?.length ? review.cons_en : review.cons) || [];
+  const score = review.score;
+
+  const verdict =
+    score >= 90
+      ? isEn
+        ? "outstanding"
+        : "phänomenal"
+      : score >= 80
+        ? isEn
+          ? "excellent"
+          : "hervorragend"
+        : score >= 70
+          ? isEn
+            ? "good"
+            : "gut"
+          : isEn
+            ? "satisfactory"
+            : "befriedigend";
+
+  const worthIt = score >= 70;
+
+  const faqs = [
+    {
+      question: isEn ? `How good is ${title}?` : `Wie gut ist ${title}?`,
+      answer: `${title} wurde von Nerdiction mit ${score} von 100 Punkten bewertet und ist damit ${verdict}.`,
+    },
+  ];
+
+  if (pros.length > 0) {
+    faqs.push({
+      question: isEn ? `What are the pros of ${title}?` : `Was sind die Vorteile von ${title}?`,
+      answer: `${isEn ? "The advantages of" : "Die Vorteile von"} ${title}: ${pros.join(", ")}.`,
+    });
+  }
+
+  if (cons.length > 0) {
+    faqs.push({
+      question: isEn ? `What are the cons of ${title}?` : `Was sind die Nachteile von ${title}?`,
+      answer: `${isEn ? "The disadvantages of" : "Die Nachteile von"} ${title}: ${cons.join(", ")}.`,
+    });
+  }
+
+  faqs.push({
+    question: isEn ? `Is ${title} worth it?` : `Lohnt sich ${title}?`,
+    answer: worthIt
+      ? isEn
+        ? `Yes. ${title} received a score of ${score}/100 points and is ${verdict}.`
+        : `Ja. ${title} erhält ${score} von 100 Punkten und ist ${verdict}.`
+      : isEn
+        ? `Only conditionally. ${title} received a score of ${score}/100 points.`
+        : `Nur bedingt. ${title} erhält ${score} von 100 Punkten.`,
+  });
+
+  return faqs;
 }
 
 export default async function ReviewDetailPage({
@@ -81,11 +177,38 @@ export default async function ReviewDetailPage({
   const pros = isEn && review.pros_en.length > 0 ? review.pros_en : review.pros;
   const cons = isEn && review.cons_en.length > 0 ? review.cons_en : review.cons;
 
+  const verdictPhrase =
+    review.score >= 90
+      ? isEn
+        ? "outstanding"
+        : "phänomenal"
+      : review.score >= 80
+        ? isEn
+          ? "excellent"
+          : "hervorragend"
+        : review.score >= 70
+          ? isEn
+            ? "good"
+            : "gut"
+          : isEn
+            ? "satisfactory"
+            : "befriedigend";
+
   // Calculate reading time
   const wordCount = (content || "").split(/\s+/).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
   const jsonLd = generateReviewSchema({ ...review, title, content });
+
+  const siteUrl = getSiteUrl();
+  const canonicalUrl = `${siteUrl}/reviews/${slug}`;
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: isEn ? "Home" : "Startseite", url: siteUrl },
+    { name: "Reviews", url: `${siteUrl}/reviews` },
+    { name: title, url: canonicalUrl },
+  ]);
+  const faqs = buildFaqs(review, isEn);
+  const faqSchema = generateFAQSchema(faqs);
 
   const formattedDate = review.createdAt.toLocaleDateString(isEn ? "en-US" : "de-DE", {
     year: "numeric",
@@ -215,7 +338,34 @@ export default async function ReviewDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+
+      {/* Breadcrumb */}
+      <nav aria-label={isEn ? "Breadcrumb" : "Brotkrumen-Navigation"} className="-mb-2">
+        <ol className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+          <li>
+            <Link href="/" className="hover:text-primary transition-colors">
+              {isEn ? "Home" : "Startseite"}
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li>
+            <Link href="/reviews" className="hover:text-primary transition-colors">
+              Reviews
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li className="text-foreground/80 line-clamp-1">{title}</li>
+        </ol>
+      </nav>
+
       {/* Header Section */}
       <header className="border-b border-border pb-8">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
@@ -288,6 +438,62 @@ export default async function ReviewDetailPage({
           </div>
         )}
       </div>
+
+      {/* At a Glance / Auf einen Blick - for SEO & AEO */}
+      <section
+        aria-label={isEn ? "At a glance" : "Auf einen Blick"}
+        className="p-6 md:p-8 rounded-md border border-border bg-card"
+      >
+        <div className="flex flex-col md:flex-row gap-6 md:items-start">
+          <div className="flex items-center gap-4 md:flex-col md:items-center md:shrink-0">
+            <ScoreBadge score={review.score} className="h-16 w-16 md:h-20 md:w-20 text-2xl" />
+            <span className="kicker text-primary">
+              {review.score >= 90 ? (isEn ? "Phenomenal" : "Phänomenal") : review.score >= 80 ? (isEn ? "Excellent" : "Hervorragend") : review.score >= 70 ? (isEn ? "Good" : "Gut") : (isEn ? "Satisfactory" : "Befriedigend")}
+            </span>
+          </div>
+          <div className="flex-1 space-y-4">
+            <div>
+              <span className="kicker text-primary">{isEn ? "At a Glance" : "Auf einen Blick"}</span>
+              <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mt-1">
+                {isEn ? "The Verdict" : "Das Urteil"}
+              </h2>
+            </div>
+            <p className="text-foreground/90 leading-relaxed">
+              {isEn
+                ? `The Nerdiction verdict: ${title} is ${verdictPhrase} and receives ${review.score} out of 100 points.`
+                : `Das Nerdiction-Urteil: ${title} ist ${verdictPhrase} und erhält ${review.score} von 100 Punkten.`}
+            </p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {pros.length > 0 && (
+                <div>
+                  <h3 className="kicker text-green-700 dark:text-green-500 mb-2">Pro</h3>
+                  <ul className="space-y-1.5">
+                    {pros.slice(0, 3).map((pro, i) => (
+                      <li key={i} className="flex items-start text-sm text-foreground/80">
+                        <Check className="size-4 text-green-600 dark:text-green-500 mr-2 shrink-0 mt-0.5" />
+                        <span>{pro}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {cons.length > 0 && (
+                <div>
+                  <h3 className="kicker text-red-700 dark:text-red-500 mb-2">Contra</h3>
+                  <ul className="space-y-1.5">
+                    {cons.slice(0, 3).map((con, i) => (
+                      <li key={i} className="flex items-start text-sm text-foreground/80">
+                        <X className="size-4 text-red-600 dark:text-red-500 mr-2 shrink-0 mt-0.5" />
+                        <span>{con}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* YouTube Videos Section */}
       {review.youtubeVideos && review.youtubeVideos.length > 0 && (
@@ -421,6 +627,25 @@ export default async function ReviewDetailPage({
             category={review.category} 
             score={review.score} 
           />
+
+          {/* FAQ Section - matches FAQPage schema for AEO */}
+          {faqs.length > 0 && (
+            <section aria-label={isEn ? "Frequently Asked Questions" : "Häufige Fragen"} className="space-y-6 pt-10 border-t border-border">
+              <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight">
+                {isEn ? "Frequently Asked Questions" : "Häufige Fragen"}
+              </h2>
+              <div className="space-y-5">
+                {faqs.map((faq, index) => (
+                  <div key={index}>
+                    <h3 className="font-serif text-lg font-semibold tracking-tight mb-1.5">
+                      {faq.question}
+                    </h3>
+                    <p className="text-foreground/80 leading-relaxed">{faq.answer}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Comment Section */}
           <CommentSection reviewId={review.id} initialComments={review.comments} />
