@@ -105,7 +105,7 @@ export function CTASection() {
                 <CheckCircle2 className="size-3.5 text-primary" />
                 Jederzeit abmeldbar
               </span>
-              <Link href="/datenschutz" className="underline-offset-2 hover:text-foreground hover:underline">
+              <Link href="/datenschutz" className="link-underline text-foreground/80">
                 Datenschutz
               </Link>
             </div>

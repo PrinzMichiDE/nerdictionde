@@ -27,7 +27,6 @@ import { GameProgressTracker } from "@/components/reviews/GameProgressTracker";
 import { SpoilerWarning } from "@/components/reviews/SpoilerWarning";
 import { SpoilerSection } from "@/components/reviews/SpoilerSection";
 import { getCategoryStyle } from "@/lib/review-category";
-import type { CSSProperties } from "react";
 
 export async function generateMetadata({
   params,
@@ -306,7 +305,9 @@ export default async function ReviewDetailPage({
         }
       }
     };
-    return () => (tree: MdastNode) => walk(tree);
+    return (tree: MdastNode) => {
+      walk(tree);
+    };
   }
 
   // Custom component for Markdown images to handle placeholders
@@ -719,7 +720,7 @@ export default async function ReviewDetailPage({
             <h3 className="font-serif text-xl font-semibold tracking-tight">
               {isEn ? "Nerdiction Score" : "Nerdiction Wertung"}
             </h3>
-            <ScoreBadge score={review.score} className="h-20 w-20 text-2xl" />
+            <ScoreRing score={review.score} size={88} ringWidth={6} />
             <p className="kicker text-primary">
               {review.score >= 90 ? (isEn ? "Phenomenal" : "Phänomenal") : review.score >= 80 ? (isEn ? "Excellent" : "Hervorragend") : review.score >= 70 ? (isEn ? "Good" : "Gut") : (isEn ? "Satisfactory" : "Befriedigend")}
             </p>

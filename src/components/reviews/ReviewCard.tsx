@@ -8,9 +8,11 @@ import type { CSSProperties } from "react";
 
 interface ReviewCardProps {
   review: Review;
+  /** Laufende Nummer für den Editorial-Index (0-basiert) */
+  index?: number;
 }
 
-export function ReviewCard({ review }: ReviewCardProps) {
+export function ReviewCard({ review, index }: ReviewCardProps) {
   const formattedDate = new Date(review.createdAt).toLocaleDateString("de-DE", {
     year: "numeric",
     month: "long",
@@ -33,6 +35,11 @@ export function ReviewCard({ review }: ReviewCardProps) {
             style={{ "--cat": style.color } as CSSProperties}
             aria-hidden="true"
           />
+          {typeof index === "number" && (
+            <span className="card-index" aria-hidden="true">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+          )}
           {review.images?.[0] ? (
             <Image
               src={review.images[0]}

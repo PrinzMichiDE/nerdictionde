@@ -134,6 +134,14 @@ export function Hero() {
         </div>
       </div>
 
+      {/* Ghost-Wort im Hintergrund */}
+      <span
+        aria-hidden="true"
+        className="ghost-word hidden md:block text-[16vw] text-stroke opacity-[0.35]"
+      >
+        Nerdiction
+      </span>
+
       {/* ===== Content ===== */}
       <div className="relative z-10 mx-auto max-w-7xl px-4 md:px-6 lg:px-8 xl:px-12 pt-16 md:pt-24 lg:pt-32">
         <div className="flex flex-col items-center text-center">
@@ -155,9 +163,23 @@ export function Hero() {
           </div>
 
           {/* Headline */}
-          <h1 className="mt-8 font-serif text-5xl sm:text-6xl md:text-7xl xl:text-8xl font-semibold tracking-tight leading-[1.04] text-balance animate-slide-up [animation-delay:0.15s] [animation-fill-mode:both]">
-            Ehrliche Reviews
-            <span className="block mt-2">
+          <h1 className="mt-8 font-serif text-5xl sm:text-6xl md:text-7xl xl:text-8xl font-semibold tracking-tight leading-[1.04] text-balance">
+            <span className="block">
+              {"Ehrliche Reviews".split("").map((ch, i) =>
+                ch === " " ? (
+                  <span key={i}>{"\u00A0"}</span>
+                ) : (
+                  <span
+                    key={i}
+                    className="hero-char"
+                    style={{ animationDelay: `${(0.1 + i * 0.038).toFixed(3)}s` }}
+                  >
+                    {ch}
+                  </span>
+                )
+              )}
+            </span>
+            <span className="block mt-2 animate-slide-up [animation-delay:0.55s] [animation-fill-mode:both]">
               für{" "}
               <span className="relative inline-block" style={{ perspective: "800px" }}>
                 <span key={wordIndex} className="animate-word text-gradient-animate">

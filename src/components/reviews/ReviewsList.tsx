@@ -7,6 +7,8 @@ import Image from "next/image";
 import { ReviewCard } from "./ReviewCard";
 import { ReviewsFilter, type CategoryCounts } from "./ReviewsFilter";
 import { ReviewsPagination } from "./ReviewsPagination";
+import { ScoreDistribution } from "./ScoreDistribution";
+import { TopPicks, type TopPick } from "./TopPicks";
 import { ScrollReveal } from "@/components/home/ScrollReveal";
 import { SpotlightCard } from "@/components/home/SpotlightCard";
 import { CircularBadge } from "./CircularBadge";
@@ -43,9 +45,14 @@ interface ApiResponse {
   reviews: Review[];
   pagination: PaginationData;
   categoryCounts?: CategoryCounts;
+  scoreDistribution?: number[];
+  topPicks?: TopPick[];
 }
 
 const headline = "Reviews";
+
+const subline =
+  "Games, Filme und Serien – geprüft, bewertet und auf den Punkt gebracht. Der Nerdiction-Index bündelt jede Wertung auf einen Blick.";
 
 function readingTime(content: string): number {
   return Math.max(1, Math.ceil((content || "").split(/\s+/).length / 200));
@@ -56,6 +63,8 @@ export function ReviewsList() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [pagination, setPagination] = useState<PaginationData | null>(null);
   const [categoryCounts, setCategoryCounts] = useState<CategoryCounts | null>(null);
+  const [scoreDistribution, setScoreDistribution] = useState<number[] | null>(null);
+  const [topPicks, setTopPicks] = useState<TopPick[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
@@ -85,6 +94,8 @@ export function ReviewsList() {
         setReviews(data.reviews);
         setPagination(data.pagination);
         setCategoryCounts(data.categoryCounts ?? null);
+        setScoreDistribution(data.scoreDistribution ?? null);
+        setTopPicks(data.topPicks ?? []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten");
         setReviews([]);
@@ -220,8 +231,16 @@ export function ReviewsList() {
               </h1>
 
               <p className="mt-5 max-w-2xl text-base md:text-lg text-muted-foreground leading-relaxed text-balance">
-                Games, Filme und Serien – geprüft, bewertet und auf den Punkt gebracht.
-                Der Nerdiction-Index bündelt jede Wertung auf einen Blick.
+                {subline.split(" ").map((word, i) => (
+                  <span
+                    key={i}
+                    className="hero-word"
+                    style={{ animationDelay: `${480 + i * 26}ms` }}
+                  >
+                    {word}
+                    {i < subline.split(" ").length - 1 ? "\u00A0" : ""}
+                  </span>
+                ))}
               </p>
 
               {renderStats()}
@@ -230,7 +249,7 @@ export function ReviewsList() {
             <CircularBadge
               text="Nerdiction ✦ Reviews Index ✦ Nerdiction ✦ Reviews Index ✦"
               core="N"
-              className="hidden lg:inline-flex mt-6 shrink-0"
+              className="hidden lg:inline-flex mt-6 shrink-0 animate-float-y-slow"
             />
           </div>
 

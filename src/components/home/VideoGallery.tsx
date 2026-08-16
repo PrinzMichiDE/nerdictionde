@@ -72,7 +72,7 @@ export function VideoGallery({ reviews }: { reviews: Review[] }) {
                     fill
                     unoptimized
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    className="img-bw object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   />
                   <div
                     className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent"

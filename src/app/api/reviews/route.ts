@@ -114,15 +114,21 @@ export async function GET(req: NextRequest) {
     const total = await prisma.review.count({ where });
     const totalPages = shouldPaginate ? Math.ceil(total / limit) : 1;
 
-    // Category counts for the filter tabs (ignore the category filter itself,
-    // but respect search/date/score so the numbers reflect the active result set)
+    // Aggregates for the index UI (ignore the category filter itself, but
+    // respect search/date/score so the numbers reflect the active result set)
     let categoryCounts: Record<string, number> | undefined;
+    let scoreDistribution: number[] | undefined;
     if (shouldPaginate) {
       const countWhere = { ...where };
       delete countWhere.category;
-      const [countGroups, countAll] = await Promise.all([
+      const [countGroups, scoreGroups, countAll] = await Promise.all([
         prisma.review.groupBy({
           by: ["category"],
+          where: countWhere,
+          _count: { _all: true },
+        }),
+        prisma.review.groupBy({
+          by: ["score"],
           where: countWhere,
           _count: { _all: true },
         }),
@@ -131,6 +137,11 @@ export async function GET(req: NextRequest) {
       categoryCounts = { all: countAll, game: 0, movie: 0, series: 0 };
       for (const group of countGroups) {
         categoryCounts[group.category as string] = group._count._all;
+      }
+      scoreDistribution = Array.from({ length: 10 }, () => 0);
+      for (const group of scoreGroups) {
+        const bucket = Math.min(9, Math.max(0, Math.floor((group.score || 0) / 10)));
+        scoreDistribution[bucket] += group._count._all;
       }
     }
 
@@ -142,6 +153,26 @@ export async function GET(req: NextRequest) {
         take: limit,
       } : {}),
     });
+
+    // Editor's picks: top scores not already visible on this page
+    let topPicks: Array<{ id: string; title: string; slug: string; score: number; category: string }> | undefined;
+    if (shouldPaginate && reviews.length > 0) {
+      topPicks = await prisma.review.findMany({
+        where: {
+          status: "published",
+          id: { notIn: reviews.map((r) => r.id) },
+        },
+        orderBy: [{ score: "desc" }, { createdAt: "desc" }],
+        take: 3,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          score: true,
+          category: true,
+        },
+      });
+    }
 
     // If all=true, return array directly for backward compatibility, otherwise return object
     if (all) {
@@ -159,6 +190,8 @@ export async function GET(req: NextRequest) {
         hasPrev: page > 1,
       },
       ...(categoryCounts ? { categoryCounts } : {}),
+      ...(scoreDistribution ? { scoreDistribution } : {}),
+      ...(topPicks ? { topPicks } : {}),
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
