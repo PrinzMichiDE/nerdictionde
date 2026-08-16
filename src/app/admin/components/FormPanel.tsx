@@ -196,15 +196,31 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
 
         <div className="space-y-2">
             <Label htmlFor="score">Score (0-100)</Label>
-            <Input
-            id="score"
-            type="number"
-            min="0"
-            max="100"
-            value={review.score}
-            onChange={(e) => handleChange("score", parseInt(e.target.value) || 0)}
-            className="rounded-lg"
-            />
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={review.score}
+                onChange={(e) => handleChange("score", parseInt(e.target.value) || 0)}
+                className="flex-1 accent-primary"
+                aria-label="Score"
+              />
+              <Input
+                id="score"
+                type="number"
+                min="0"
+                max="100"
+                value={review.score}
+                onChange={(e) => handleChange("score", parseInt(e.target.value) || 0)}
+                className="rounded-lg w-24 shrink-0"
+              />
+            </div>
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>0</span>
+              <span className={review.score >= 80 ? "text-green-500 font-bold" : ""}>80+ = Top</span>
+              <span>100</span>
+            </div>
         </div>
       </div>
 
@@ -293,7 +309,7 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
         
         {(review.youtubeVideos || []).length === 0 && (
           <p className="text-sm text-muted-foreground italic">
-            Keine Videos hinzugefügt. Klicken Sie auf "Video hinzufügen", um ein YouTube-Video oder einen Trailer hinzuzufügen.
+            Noch keine Videos hinzugefügt. Füge ein YouTube-Video oder einen Trailer hinzu.
           </p>
         )}
       </div>

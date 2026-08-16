@@ -5,8 +5,69 @@ import { QuickCreate } from "./components/QuickCreate";
 import { BulkCreate } from "./components/BulkCreate";
 import { ReviewList } from "./components/ReviewList";
 import { MassReviewCreation } from "./components/MassReviewCreation";
+import { Toaster } from "@/components/ui/toaster";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { Rocket, Database, ListVideo, List, Loader2, FileCheck, FilePen, FolderOpen } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface TabDef {
+  value: string;
+  label: string;
+  shortLabel: string;
+  icon: React.ReactNode;
+}
+
+const TABS: TabDef[] = [
+  { value: "quick", label: "Quick Create", shortLabel: "Quick", icon: <Rocket className="h-4 w-4" /> },
+  { value: "bulk", label: "Massen-Erstellung", shortLabel: "Massen", icon: <Database className="h-4 w-4" /> },
+  { value: "mass-200", label: "Massen-Jobs", shortLabel: "Jobs", icon: <ListVideo className="h-4 w-4" /> },
+  { value: "list", label: "Alle Beiträge", shortLabel: "Liste", icon: <List className="h-4 w-4" /> },
+];
+
+function StatsBar() {
+  const [stats, setStats] = useState<{ total: number; published: number; drafts: number } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/reviews?all=true")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !Array.isArray(data)) return;
+        setStats({
+          total: data.length,
+          published: data.filter((r) => r.status === "published").length,
+          drafts: data.filter((r) => r.status === "draft").length,
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const items = [
+    { label: "Gesamt", value: stats?.total, icon: FolderOpen, color: "text-foreground", bg: "bg-muted" },
+    { label: "Veröffentlicht", value: stats?.published, icon: FileCheck, color: "text-green-600", bg: "bg-green-500/10" },
+    { label: "Entwürfe", value: stats?.drafts, icon: FilePen, color: "text-yellow-600", bg: "bg-yellow-500/10" },
+  ];
+
+  return (
+    <div className="grid grid-cols-3 gap-2 md:gap-4">
+      {items.map((item) => (
+        <div key={item.label} className={cn("rounded-xl border p-3 md:p-4 flex items-center gap-2 md:gap-3", item.bg)}>
+          <item.icon className={cn("h-4 w-4 md:h-5 md:w-5 shrink-0", item.color)} />
+          <div className="min-w-0">
+            <div className="text-lg md:text-2xl font-bold leading-tight">
+              {stats ? item.value : <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+            </div>
+            <div className="text-[10px] md:text-xs text-muted-foreground truncate">{item.label}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function AdminTabs() {
   const searchParams = useSearchParams();
@@ -33,35 +94,23 @@ function AdminTabs() {
 
   return (
     <Tabs value={tab} onValueChange={handleTabChange} className="space-y-4 md:space-y-6">
-      <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-w-4xl">
-        <TabsTrigger 
-          value="quick" 
-          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
-        >
-          <span className="hidden sm:inline">Quick Create</span>
-          <span className="sm:hidden">Quick</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="bulk" 
-          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
-        >
-          <span className="hidden sm:inline">Massen-Erstellung</span>
-          <span className="sm:hidden">Massen</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="mass-200" 
-          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
-        >
-          <span className="hidden lg:inline">Massen-Jobs</span>
-          <span className="lg:hidden">Mass</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="list" 
-          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
-        >
-          <span className="hidden sm:inline">Alle Beiträge</span>
-          <span className="sm:hidden">Liste</span>
-        </TabsTrigger>
+      <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-2 max-w-4xl">
+        {TABS.map((t) => (
+          <TabsTrigger
+            key={t.value}
+            value={t.value}
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm px-2 md:px-4"
+          >
+            <span className="hidden sm:inline-flex items-center gap-1.5">
+              {t.icon}
+              {t.label}
+            </span>
+            <span className="sm:hidden inline-flex items-center gap-1.5">
+              {t.icon}
+              {t.shortLabel}
+            </span>
+          </TabsTrigger>
+        ))}
       </TabsList>
       <TabsContent value="quick" className="space-y-4 mt-6">
         <QuickCreate />
@@ -92,9 +141,11 @@ export default function AdminPage() {
       </div>
 
       <Suspense fallback={<div className="flex items-center justify-center py-16">Laden...</div>}>
+        <StatsBar />
         <AdminTabs />
       </Suspense>
+
+      <Toaster />
     </div>
   );
 }
-

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Send, Sparkles, Wand2, MessageSquare, Zap, CheckCircle } from "lucide-react";
 import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
 
 interface AIAssistantProps {
   review: Review;
@@ -15,6 +16,7 @@ interface AIAssistantProps {
 export function AIAssistant({ review, setReview }: AIAssistantProps) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleAction = async (action: string) => {
     setLoading(true);
@@ -23,9 +25,17 @@ export function AIAssistant({ review, setReview }: AIAssistantProps) {
         input: `${action}. Nutze eine journalistische Struktur mit Überschriften und integriere gelegentlich Bild-Platzhalter wie ![[IMAGE_1]], ![[IMAGE_2]] etc. (bis IMAGE_5), falls diese den Text bereichern. WICHTIG: Erwähne NIEMALS, dass dieser Text von einer KI generiert wurde. Schreibe als Nerdiction-Experte. Review-Titel: "${review.title}". Aktueller Inhalt: ${review.content}` 
       });
       setReview({ ...review, content: response.data.content });
+      toast({
+        title: "Inhalt aktualisiert",
+        description: "Der generierte Text wurde in den Inhalt übernommen.",
+      });
     } catch (error) {
       console.error("Action failed:", error);
-      alert("Anfrage fehlgeschlagen.");
+      toast({
+        title: "Anfrage fehlgeschlagen",
+        description: "Fehler bei der KI-Anfrage.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -42,6 +52,11 @@ export function AIAssistant({ review, setReview }: AIAssistantProps) {
         setPrompt("");
     } catch (error) {
         console.error("Chat failed:", error);
+        toast({
+          title: "Anfrage fehlgeschlagen",
+          description: "Fehler bei der KI-Anfrage.",
+          variant: "destructive",
+        });
     } finally {
         setLoading(false);
     }

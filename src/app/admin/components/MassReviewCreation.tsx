@@ -398,7 +398,7 @@ export function MassReviewCreation() {
             <List className="h-12 w-12 text-muted-foreground/30 mb-4" />
             <h3 className="text-lg font-medium text-muted-foreground">Kein Job ausgewählt</h3>
             <p className="text-sm text-muted-foreground/70 max-w-xs mt-2">
-              Wählen Sie einen Job aus der Liste aus oder starten Sie einen neuen, um Details anzuzeigen.
+              Wähle einen Job aus der Liste aus oder starte einen neuen, um Details anzuzeigen.
             </p>
           </div>
         ) : (

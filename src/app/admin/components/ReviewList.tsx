@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Review } from "@/types/review";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Edit, Eye, Search, Filter, Loader2, X, Trash2 } from "lucide-react";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Edit, Eye, Search, Filter, Loader2, X, Trash2, Gamepad2, Film, Tv, ArrowUpDown, CheckCircle2, Circle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { ScoreBadge } from "@/components/reviews/ScoreBadge";
@@ -21,40 +21,68 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
+
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  game: <Gamepad2 className="h-3.5 w-3.5" />,
+  movie: <Film className="h-3.5 w-3.5" />,
+  series: <Tv className="h-3.5 w-3.5" />,
+};
+
+type SortKey = "date-desc" | "date-asc" | "score-desc" | "score-asc" | "title-asc" | "title-desc";
+
+function ReviewSkeleton() {
+  return (
+    <Card className="overflow-hidden">
+      <div className="flex flex-col sm:flex-row animate-pulse">
+        <div className="w-full sm:w-48 h-48 sm:h-auto aspect-video sm:aspect-square bg-muted" />
+        <div className="flex-1 p-6 space-y-3">
+          <div className="h-4 bg-muted rounded w-1/3" />
+          <div className="h-6 bg-muted rounded w-2/3" />
+          <div className="h-4 bg-muted rounded w-full" />
+          <div className="h-4 bg-muted rounded w-5/6" />
+          <div className="flex gap-2 pt-3">
+            <div className="h-9 bg-muted rounded flex-1" />
+            <div className="h-9 bg-muted rounded w-20" />
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
 
 export function ReviewList() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { toast } = useToast();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") || "all");
   const [categoryFilter, setCategoryFilter] = useState<string>(searchParams.get("category") || "all");
+  const [sortBy, setSortBy] = useState<SortKey>((searchParams.get("sort") as SortKey) || "date-desc");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [reviewToDelete, setReviewToDelete] = useState<Review | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [togglingStatusId, setTogglingStatusId] = useState<string | null>(null);
+  const urlSyncTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync URL params with state
+  // Debounced sync of filter/sort state to URL
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (searchQuery) {
-      params.set("search", searchQuery);
-    } else {
-      params.delete("search");
-    }
-    if (statusFilter !== "all") {
-      params.set("status", statusFilter);
-    } else {
-      params.delete("status");
-    }
-    if (categoryFilter !== "all") {
-      params.set("category", categoryFilter);
-    } else {
-      params.delete("category");
-    }
-    params.set("tab", "list");
-    router.replace(`/admin?${params.toString()}`, { scroll: false });
-  }, [searchQuery, statusFilter, categoryFilter, router, searchParams]);
+    if (urlSyncTimeout.current) clearTimeout(urlSyncTimeout.current);
+    urlSyncTimeout.current = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (searchQuery) params.set("search", searchQuery);
+      if (statusFilter !== "all") params.set("status", statusFilter);
+      if (categoryFilter !== "all") params.set("category", categoryFilter);
+      if (sortBy !== "date-desc") params.set("sort", sortBy);
+      params.set("tab", "list");
+      router.replace(`/admin?${params.toString()}`, { scroll: false });
+    }, 400);
+    return () => {
+      if (urlSyncTimeout.current) clearTimeout(urlSyncTimeout.current);
+    };
+  }, [searchQuery, statusFilter, categoryFilter, sortBy, router]);
 
   useEffect(() => {
     fetchReviews();
@@ -76,11 +104,41 @@ export function ReviewList() {
       setReviews(reviews.filter((r) => r.id !== reviewToDelete.id));
       setDeleteDialogOpen(false);
       setReviewToDelete(null);
+      toast({
+        title: "Gelöscht",
+        description: `"${reviewToDelete.title}" wurde entfernt.`,
+      });
     } catch (error: any) {
       console.error("Error deleting review:", error);
-      alert(error.response?.data?.error || "Fehler beim Löschen des Beitrags");
+      toast({
+        title: "Löschen fehlgeschlagen",
+        description: error.response?.data?.error || "Fehler beim Löschen des Beitrags",
+        variant: "destructive",
+      });
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const toggleStatus = async (review: Review) => {
+    setTogglingStatusId(review.id);
+    const nextStatus = review.status === "published" ? "draft" : "published";
+    try {
+      await axios.put(`/api/reviews/${review.id}`, { ...review, status: nextStatus });
+      setReviews(reviews.map((r) => (r.id === review.id ? { ...r, status: nextStatus } : r)));
+      toast({
+        title: nextStatus === "published" ? "Veröffentlicht" : "Zurück in Entwurf",
+        description: `"${review.title}" ist jetzt ${nextStatus === "published" ? "online" : "ein Entwurf"}.`,
+      });
+    } catch (error: any) {
+      console.error("Error toggling status:", error);
+      toast({
+        title: "Statuswechsel fehlgeschlagen",
+        description: error.response?.data?.error || "Fehler beim Ändern des Status",
+        variant: "destructive",
+      });
+    } finally {
+      setTogglingStatusId(null);
     }
   };
 
@@ -102,30 +160,54 @@ export function ReviewList() {
     }
   };
 
-  const filteredReviews = reviews.filter((review) => {
+  const filteredReviews = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
-    let matchesSearch = true;
+    let result = reviews.filter((review) => {
+      let matchesSearch = true;
 
-    if (query) {
-      const searchInContent = review.content?.toLowerCase().replace(/[#*`\[\]()]/g, "") || "";
-      const searchInContentEn = review.content_en?.toLowerCase().replace(/[#*`\[\]()]/g, "") || "";
-      
-      matchesSearch =
-        review.title.toLowerCase().includes(query) ||
-        review.slug.toLowerCase().includes(query) ||
-        (review.title_en?.toLowerCase().includes(query) ?? false) ||
-        searchInContent.includes(query) ||
-        searchInContentEn.includes(query) ||
-        review.category.toLowerCase().includes(query) ||
-        (review.pros?.some(pro => pro.toLowerCase().includes(query)) ?? false) ||
-        (review.cons?.some(con => con.toLowerCase().includes(query)) ?? false);
+      if (query) {
+        const searchInContent = review.content?.toLowerCase().replace(/[#*`\[\]()]/g, "") || "";
+        const searchInContentEn = review.content_en?.toLowerCase().replace(/[#*`\[\]()]/g, "") || "";
+        
+        matchesSearch =
+          review.title.toLowerCase().includes(query) ||
+          review.slug.toLowerCase().includes(query) ||
+          (review.title_en?.toLowerCase().includes(query) ?? false) ||
+          searchInContent.includes(query) ||
+          searchInContentEn.includes(query) ||
+          review.category.toLowerCase().includes(query) ||
+          (review.pros?.some(pro => pro.toLowerCase().includes(query)) ?? false) ||
+          (review.cons?.some(con => con.toLowerCase().includes(query)) ?? false);
+      }
+
+      const matchesStatus = statusFilter === "all" || review.status === statusFilter;
+      const matchesCategory = categoryFilter === "all" || review.category === categoryFilter;
+
+      return matchesSearch && matchesStatus && matchesCategory;
+    });
+
+    switch (sortBy) {
+      case "date-asc":
+        result = result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case "score-desc":
+        result = result.sort((a, b) => b.score - a.score);
+        break;
+      case "score-asc":
+        result = result.sort((a, b) => a.score - b.score);
+        break;
+      case "title-asc":
+        result = result.sort((a, b) => a.title.localeCompare(b.title, "de"));
+        break;
+      case "title-desc":
+        result = result.sort((a, b) => b.title.localeCompare(a.title, "de"));
+        break;
+      default:
+        result = result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
 
-    const matchesStatus = statusFilter === "all" || review.status === statusFilter;
-    const matchesCategory = categoryFilter === "all" || review.category === categoryFilter;
-
-    return matchesSearch && matchesStatus && matchesCategory;
-  });
+    return result;
+  }, [reviews, searchQuery, statusFilter, categoryFilter, sortBy]);
 
   const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString("de-DE", {
@@ -137,8 +219,11 @@ export function ReviewList() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-4">
+        <div className="h-24 bg-muted rounded-xl animate-pulse" />
+        {[1, 2, 3].map((i) => (
+          <ReviewSkeleton key={i} />
+        ))}
       </div>
     );
   }
@@ -171,17 +256,17 @@ export function ReviewList() {
 
           {/* Filters Row */}
           <div className="flex flex-col sm:flex-row gap-4">
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-[180px] rounded-lg">
-            <Filter className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle Status</SelectItem>
-            <SelectItem value="published">Veröffentlicht</SelectItem>
-            <SelectItem value="draft">Entwurf</SelectItem>
-          </SelectContent>
-        </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[180px] rounded-lg">
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alle Status</SelectItem>
+                <SelectItem value="published">Veröffentlicht</SelectItem>
+                <SelectItem value="draft">Entwurf</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-full sm:w-[180px] rounded-lg">
                 <SelectValue placeholder="Kategorie" />
@@ -193,6 +278,20 @@ export function ReviewList() {
                 <SelectItem value="series">Series</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortKey)}>
+              <SelectTrigger className="w-full sm:w-[220px] rounded-lg">
+                <ArrowUpDown className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Sortierung" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date-desc">Neueste zuerst</SelectItem>
+                <SelectItem value="date-asc">Älteste zuerst</SelectItem>
+                <SelectItem value="score-desc">Beste Bewertung</SelectItem>
+                <SelectItem value="score-asc">Niedrigste Bewertung</SelectItem>
+                <SelectItem value="title-asc">Titel A-Z</SelectItem>
+                <SelectItem value="title-desc">Titel Z-A</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </Card>
@@ -202,6 +301,18 @@ export function ReviewList() {
         <span>
           {filteredReviews.length} {filteredReviews.length === 1 ? "Beitrag" : "Beiträge"} gefunden
         </span>
+        {(searchQuery || statusFilter !== "all" || categoryFilter !== "all") && (
+          <button
+            onClick={() => {
+              setSearchQuery("");
+              setStatusFilter("all");
+              setCategoryFilter("all");
+            }}
+            className="text-xs text-primary hover:underline font-medium"
+          >
+            Filter zurücksetzen
+          </button>
+        )}
       </div>
 
       {/* Reviews List */}
@@ -239,7 +350,10 @@ export function ReviewList() {
                           variant="outline"
                           className="capitalize text-xs font-semibold border-primary/30 bg-primary/5"
                         >
-                          {review.category}
+                          <span className="inline-flex items-center gap-1">
+                            {CATEGORY_ICONS[review.category] || null}
+                            {review.category}
+                          </span>
                         </Badge>
                         <Badge
                           variant={review.status === "published" ? "default" : "secondary"}
@@ -281,6 +395,22 @@ export function ReviewList() {
                         Bearbeiten
                       </Button>
                     </Link>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleStatus(review)}
+                      disabled={togglingStatusId === review.id}
+                      title={review.status === "published" ? "In Entwurf verschieben" : "Veröffentlichen"}
+                      className="shrink-0"
+                    >
+                      {togglingStatusId === review.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : review.status === "published" ? (
+                        <Circle className="h-4 w-4" />
+                      ) : (
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      )}
+                    </Button>
                     {review.status === "published" && (
                       <Link href={`/reviews/${review.slug}`} target="_blank">
                         <Button variant="outline" size="sm">
@@ -323,7 +453,7 @@ export function ReviewList() {
           <DialogHeader>
             <DialogTitle>Beitrag löschen?</DialogTitle>
             <DialogDescription>
-              Möchtest du den Beitrag "{reviewToDelete?.title}" wirklich löschen?
+              Möchtest du den Beitrag &quot;{reviewToDelete?.title}&quot; wirklich löschen?
               Diese Aktion kann nicht rückgängig gemacht werden.
             </DialogDescription>
           </DialogHeader>
@@ -361,4 +491,3 @@ export function ReviewList() {
     </div>
   );
 }
-

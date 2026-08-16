@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Database, CheckCircle2, XCircle, Film, Tv } from "lucide-react";
 import axios from "axios";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 interface Genre {
   id: number;
@@ -33,6 +34,7 @@ interface BulkCreateResult {
 type Category = "game" | "movie" | "series";
 
 export function BulkCreate() {
+  const { toast } = useToast();
   const [category, setCategory] = useState<Category>("game");
   const [genres, setGenres] = useState<Genre[]>([]);
   const [tmdbMovieGenres, setTmdbMovieGenres] = useState<Genre[]>([]);
@@ -106,7 +108,11 @@ export function BulkCreate() {
 
   const handleBulkCreate = async () => {
     if (!limit || parseInt(limit) <= 0) {
-      alert("Bitte gib eine gültige Anzahl an.");
+      toast({
+        title: "Ungültige Anzahl",
+        description: "Bitte gib eine gültige Anzahl an.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -148,9 +154,17 @@ export function BulkCreate() {
       const response = await axios.post(endpoint, requestBody);
 
       setResult(response.data.results);
+      toast({
+        title: "Massenerstellung abgeschlossen",
+        description: `${response.data.results.successful} von ${response.data.results.total} Reviews erstellt.`,
+      });
     } catch (error: any) {
       console.error("Bulk create failed:", error);
-      alert("Fehler bei der Massenerstellung: " + (error.response?.data?.error || error.message));
+      toast({
+        title: "Massenerstellung fehlgeschlagen",
+        description: error.response?.data?.error || error.message || "Unbekannter Fehler",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }

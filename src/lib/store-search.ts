@@ -44,13 +44,22 @@ export async function searchEpicStore(gameName: string): Promise<string | null> 
       country: "DE",
     };
 
+    // Epic deprecated the old "graphql.epicgames.com/graphql" endpoint (returns 404).
+    // The storefront now serves GraphQL from "store.epicgames.com/graphql", which is
+    // protected by anti-bot measures – so this remains a best-effort fallback.
     const response = await axios.post(
-      "https://graphql.epicgames.com/graphql",
+      "https://store.epicgames.com/graphql",
       { query, variables },
       {
         headers: {
           "Content-Type": "application/json",
+          "Accept": "application/json",
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
+          "Origin": "https://store.epicgames.com",
+          "Referer": "https://store.epicgames.com/",
         },
+        timeout: 15000,
       }
     );
 
@@ -61,8 +70,13 @@ export async function searchEpicStore(gameName: string): Promise<string | null> 
     }
 
     return null;
-  } catch (error) {
-    console.error(`Error searching Epic Store for ${gameName}:`, error);
+  } catch (error: any) {
+    // Best-effort fallback: Epic IDs normally come from IGDB. Epic's anti-bot
+    // protection frequently rejects datacenter requests with 403/404, so keep this quiet.
+    const status = error?.response?.status;
+    console.warn(
+      `Epic Store search skipped for ${gameName} (${status || "network error"}), relying on IGDB external IDs`
+    );
     return null;
   }
 }
