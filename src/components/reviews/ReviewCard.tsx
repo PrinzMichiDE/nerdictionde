@@ -28,11 +28,13 @@ export function ReviewCard({ review, index }: ReviewCardProps) {
       href={`/reviews/${review.slug}`}
       className="group block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
     >
-      <article className="review-card flex h-full flex-col overflow-hidden rounded-sm border border-border bg-card">
+      <article
+        className="review-card flex h-full flex-col overflow-hidden rounded-sm border border-border bg-card"
+        style={{ "--cat": style.color } as CSSProperties}
+      >
         <div className="review-card-image shine relative aspect-[16/9] w-full bg-muted">
           <span
             className="cat-bar"
-            style={{ "--cat": style.color } as CSSProperties}
             aria-hidden="true"
           />
           {typeof index === "number" && (
@@ -70,6 +72,11 @@ export function ReviewCard({ review, index }: ReviewCardProps) {
               {getVerdict(review.score)}
             </span>
           </div>
+
+          <span className="review-card-cta">
+            Lesen
+            <ArrowRight />
+          </span>
         </div>
 
         <div className="flex flex-1 flex-col gap-2.5 p-4">
@@ -100,7 +107,6 @@ export function ReviewCard({ review, index }: ReviewCardProps) {
 
           <h3
             className="review-title-underline font-serif text-xl font-semibold leading-snug line-clamp-2 transition-colors group-hover:text-primary"
-            style={{ "--cat": style.color } as CSSProperties}
           >
             {review.title}
           </h3>

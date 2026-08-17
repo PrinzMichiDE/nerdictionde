@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type CSSProperties } from "react";
+import { useState, useEffect, useRef, type CSSProperties } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,7 +16,7 @@ import { ScoreRing } from "./ScoreRing";
 import { StatCounter } from "./StatCounter";
 import { Review } from "@/types/review";
 import { Skeleton } from "@/components/shared/Skeleton";
-import { ArrowRight, SearchX, AlertTriangle, RefreshCw, Clock3 } from "lucide-react";
+import { ArrowRight, ArrowUp, SearchX, AlertTriangle, RefreshCw, Clock3 } from "lucide-react";
 import { getCategoryStyle, getVerdict, stripMarkdown } from "@/lib/review-category";
 
 const verdictTickerItems = [
@@ -68,6 +68,7 @@ export function ReviewsList() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const toTopRef = useRef<HTMLButtonElement>(null);
 
   const query = searchParams.get("query") || "";
   const category = searchParams.get("category") || "";
@@ -107,6 +108,15 @@ export function ReviewsList() {
 
     fetchReviews();
   }, [searchParams, reloadKey]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const btn = toTopRef.current;
+      if (btn) btn.classList.toggle("is-visible", window.scrollY > 800);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   function hasActiveFilters() {
     return (
@@ -215,6 +225,7 @@ export function ReviewsList() {
           aria-hidden="true"
         />
         <div className="noise pointer-events-none absolute inset-0 opacity-[0.045]" aria-hidden="true" />
+        <span className="hero-scan" aria-hidden="true" />
         <div className="relative py-10 md:py-14 lg:py-16">
           <div className="flex items-start justify-between gap-8">
             <div className="max-w-3xl">
@@ -324,7 +335,7 @@ export function ReviewsList() {
           <>
             {/* Featured Spotlight */}
             {featuredReview && (
-              <ScrollReveal variant="up">
+              <ScrollReveal variant="up" className="reveal-view-hero">
                 <SpotlightCard
                   tilt={true}
                   intensity={3}
@@ -445,7 +456,7 @@ export function ReviewsList() {
 
             {/* Score Distribution */}
             {scoreDistribution && pagination && pagination.total > 0 && (
-              <ScrollReveal variant="up" className="mb-10">
+              <ScrollReveal variant="up" className="reveal-view-section mb-10">
                 <ScoreDistribution
                   data={scoreDistribution}
                   total={pagination.total}
@@ -454,41 +465,46 @@ export function ReviewsList() {
             )}
 
             {/* Editorial Section Header */}
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-2 border-b-2 border-foreground pb-3">
-              <div>
-                <span className="kicker text-primary">03 · {hasActiveFilters() ? "Suche" : "Der Index"}</span>
-                <h2 className="mt-1 font-serif text-2xl md:text-3xl font-semibold tracking-tight">
-                  {hasActiveFilters() ? "Suchergebnisse" : "Alle Reviews"}
-                </h2>
-              </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pb-1">
-                <span className="kicker text-muted-foreground" style={{ fontSize: "0.625rem" }}>
-                  {pagination?.total} {pagination?.total === 1 ? "Review" : "Reviews"}
-                  {pagination && pagination.totalPages > 1 && (
-                    <> · Seite {pagination.page}/{pagination.totalPages}</>
-                  )}
-                </span>
-                {activeFilterCount > 0 && (
-                  <span className="kicker text-primary" style={{ fontSize: "0.625rem" }}>
-                    {activeFilterCount}{" "}
-                    {activeFilterCount === 1 ? "Filter aktiv" : "Filter aktiv"}
+            <ScrollReveal variant="up" className="reveal-view-section">
+              <div className="mb-6 flex flex-wrap items-end justify-between gap-2 border-b-2 border-foreground pb-3">
+                <div>
+                  <span className="kicker text-primary">03 · {hasActiveFilters() ? "Suche" : "Der Index"}</span>
+                  <h2 className="mt-1 font-serif text-2xl md:text-3xl font-semibold tracking-tight">
+                    {hasActiveFilters() ? "Suchergebnisse" : "Alle Reviews"}
+                  </h2>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pb-1">
+                  <span className="kicker text-muted-foreground" style={{ fontSize: "0.625rem" }}>
+                    {pagination?.total} {pagination?.total === 1 ? "Review" : "Reviews"}
+                    {pagination && pagination.totalPages > 1 && (
+                      <> · Seite {pagination.page}/{pagination.totalPages}</>
+                    )}
                   </span>
-                )}
+                  {activeFilterCount > 0 && (
+                    <span className="kicker text-primary" style={{ fontSize: "0.625rem" }}>
+                      {activeFilterCount}{" "}
+                      {activeFilterCount === 1 ? "Filter aktiv" : "Filter aktiv"}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
+            </ScrollReveal>
 
-            {/* Grid */}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {otherReviews.map((review, index) => (
-                <ScrollReveal
-                  key={review.id}
-                  variant="up"
-                  delay={Math.min(index * 70, 420)}
-                  className="h-full"
-                >
-                  <ReviewCard review={review} index={index} />
-                </ScrollReveal>
-              ))}
+            {/* Grid + Editorial Watermark */}
+            <div className="relative">
+              <span className="index-watermark" aria-hidden="true">Index</span>
+              <div className="relative z-1 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {otherReviews.map((review, index) => (
+                  <ScrollReveal
+                    key={review.id}
+                    variant="up"
+                    delay={Math.min(index * 70, 420)}
+                    className="reveal-view h-full"
+                  >
+                    <ReviewCard review={review} index={index} />
+                  </ScrollReveal>
+                ))}
+              </div>
             </div>
 
             {pagination && (
@@ -500,7 +516,7 @@ export function ReviewsList() {
 
             {/* Editor's Picks */}
             {!hasActiveFilters() && topPicks.length > 0 && (
-              <ScrollReveal variant="up" className="pt-4">
+              <ScrollReveal variant="up" className="reveal-view pt-4">
                 <TopPicks picks={topPicks} />
               </ScrollReveal>
             )}
@@ -539,6 +555,16 @@ export function ReviewsList() {
           </div>
         )}
       </div>
+
+      {/* Back-to-Top */}
+      <button
+        ref={toTopRef}
+        aria-label="Nach oben"
+        className="to-top"
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      >
+        <ArrowUp />
+      </button>
     </div>
   );
 }

@@ -1036,8 +1036,8 @@
 .review-card:hover {
   transform: translateY(-4px);
   box-shadow:
-    0 24px 50px -20px color-mix(in oklab, var(--primary) 34%, transparent),
-    0 0 0 1px color-mix(in oklab, var(--primary) 28%, transparent);
+    0 24px 50px -20px color-mix(in oklab, var(--cat, var(--primary)) 34%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--cat, var(--primary)) 28%, transparent);
 }
 
 .review-card-image {
@@ -1376,6 +1376,7 @@
   gap: clamp(0.25rem, 1vw, 0.625rem);
   height: 10rem;
   padding-top: 1.5rem;
+  position: relative;
 }
 
 .dist-col {
@@ -1700,4 +1701,257 @@
   z-index: -1;
   pointer-events: none;
   opacity: 0.025;
+}
+
+/* =====================================================================
+   Round 5 — Scroll-Driven, Scan-Line, Watermark, Back-to-Top, Ø-Marker
+   ===================================================================== */
+
+/* --- Scroll-Driven Card Reveal (Progressive Enhancement) --- */
+@keyframes view-in {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .reveal-view {
+    animation: view-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+  .reveal-view:nth-child(3n+2) {
+    animation-range: entry 4% entry 46%;
+  }
+  .reveal-view:nth-child(3n) {
+    animation-range: entry 8% entry 50%;
+  }
+  .reveal-view-hero {
+    animation: view-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 50%;
+  }
+  .reveal-view-section {
+    animation: view-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+}
+
+/* Fallback: hide for no-support (ScrollReveal handles it) */
+@supports not (animation-timeline: view()) {
+  .reveal-view,
+  .reveal-view-hero,
+  .reveal-view-section {
+    /* handled by ScrollReveal IntersectionObserver fallback */
+  }
+}
+
+/* --- Hero Scan-Line Sweep --- */
+.hero-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -2%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 5%,
+    color-mix(in oklab, var(--primary) 55%, transparent) 50%,
+    transparent 95%
+  );
+  pointer-events: none;
+  animation: scan 9.5s ease-in-out 1.5s infinite;
+}
+
+@keyframes scan {
+  0%   { top: -2%; opacity: 0; }
+  6%   { opacity: 1; }
+  94%  { opacity: 1; }
+  100% { top: 102%; opacity: 0; }
+}
+
+/* --- Sticky Filter-Bar Scroll-Progress Hairline --- */
+.filter-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    var(--primary),
+    color-mix(in oklab, var(--chart-2) 70%, var(--primary))
+  );
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+@supports (animation-timeline: scroll()) {
+  .filter-progress {
+    animation: progress-fill linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+@keyframes progress-fill {
+  to { transform: scaleX(1); }
+}
+
+/* --- Editorial Grid Watermark --- */
+.index-watermark {
+  position: absolute;
+  right: -2%;
+  top: -3rem;
+  font-family: var(--font-libre-bodoni);
+  font-size: clamp(5rem, 20vw, 16rem);
+  font-weight: 600;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in oklab, var(--foreground) 7%, transparent);
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+@supports (animation-timeline: scroll()) {
+  .index-watermark {
+    animation: wm-drift linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0% 90%;
+  }
+}
+
+@keyframes wm-drift {
+  from { transform: translateY(18px) rotate(-2deg); }
+  to   { transform: translateY(-22px) rotate(0deg); }
+}
+
+/* --- Review-Card CTA Pill (hover slide-in over image) --- */
+.review-card-cta {
+  position: absolute;
+  bottom: 0.625rem;
+  right: 0.625rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3rem 0.625rem 0.3rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--cat, var(--primary));
+  border-radius: var(--radius-sm);
+  z-index: 2;
+  transform: translateY(10px);
+  opacity: 0;
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.review-card:hover .review-card-cta {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.review-card-cta svg {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+/* --- Score-Distribution: Ø-Average Marker --- */
+.dist-avg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.dist-avg::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 1.5rem;
+  border-left: 1.5px dashed color-mix(in oklab, var(--foreground) 22%, transparent);
+}
+
+.dist-avg-label {
+  position: absolute;
+  left: -1rem;
+  top: -0.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--foreground);
+  background: var(--card);
+  padding: 0.15rem 0.35rem;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+@keyframes avg-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 18%, transparent); }
+  50%      { box-shadow: 0 0 10px 2px color-mix(in oklab, var(--primary) 14%, transparent); }
+}
+
+.dist-avg-label {
+  animation: avg-pulse 3.5s ease-in-out infinite;
+}
+
+/* --- Back-to-Top Button --- */
+.to-top {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+  pointer-events: none;
+}
+
+.to-top.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.to-top:hover {
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px -10px color-mix(in oklab, var(--primary) 30%, transparent);
+}
+
+.to-top:active {
+  transform: scale(0.93);
+}
+
+.to-top svg {
+  width: 1rem;
+  height: 1rem;
 }

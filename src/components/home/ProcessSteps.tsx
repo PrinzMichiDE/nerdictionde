@@ -1,6 +1,7 @@
 import { Search, Gauge, Medal, type LucideIcon } from "lucide-react";
 import { SectionHeading } from "./SectionHeading";
 import { ScrollReveal } from "./ScrollReveal";
+import { SpotlightCard } from "./SpotlightCard";
 
 interface Step {
   icon: LucideIcon;
@@ -65,7 +66,8 @@ export function ProcessSteps() {
 
         {steps.map(({ icon: Icon, number, title, description, chip, tint }, i) => (
           <ScrollReveal key={number} variant="up" delay={i * 140} className="h-full">
-            <article className="group relative h-full overflow-hidden rounded-3xl border border-border bg-card p-8 transition-all duration-500 hover:-translate-y-1.5 hover:border-primary/25 hover:shadow-2xl hover:shadow-primary/10">
+            <SpotlightCard tilt={false} className="h-full rounded-3xl">
+              <article className="group relative h-full overflow-hidden rounded-3xl border border-border bg-card p-8 transition-all duration-500 hover:-translate-y-1.5 hover:border-primary/25 hover:shadow-2xl hover:shadow-primary/10">
               {/* Ghost-Nummer */}
               <span
                 className="pointer-events-none absolute -top-3 right-4 font-serif text-7xl font-semibold tracking-tight"
@@ -112,6 +114,7 @@ export function ProcessSteps() {
                 </span>
               </div>
             </article>
+            </SpotlightCard>
           </ScrollReveal>
         ))}
       </div>

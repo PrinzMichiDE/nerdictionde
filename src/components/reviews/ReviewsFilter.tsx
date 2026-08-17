@@ -134,6 +134,7 @@ export function ReviewsFilter({ categoryCounts }: ReviewsFilterProps) {
 
   return (
     <div className="filter-bar sticky top-16 z-30 -mx-4 px-4 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8 xl:-mx-12 xl:px-12">
+      <span className="filter-progress" aria-hidden="true" />
       <div className="py-4 space-y-4">
         {/* Row 1 — Kategorie-Tabs + Suche */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">

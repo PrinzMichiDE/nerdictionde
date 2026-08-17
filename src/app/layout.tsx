@@ -6,6 +6,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
+import { CursorGlow } from "@/components/shared/CursorGlow";
 import { BackToTop } from "@/components/shared/BackToTop";
 import { SupportTopBanner } from "@/components/shared/SupportTopBanner";
 import { SupportBanner } from "@/components/shared/SupportBanner";

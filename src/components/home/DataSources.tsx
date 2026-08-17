@@ -1,6 +1,7 @@
 import { ShieldCheck } from "lucide-react";
 import { SectionHeading } from "./SectionHeading";
 import { ScrollReveal } from "./ScrollReveal";
+import { SpotlightCard } from "./SpotlightCard";
 import { cn } from "@/lib/utils";
 
 interface DataSource {
@@ -62,10 +63,11 @@ export function DataSources() {
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {sources.map(({ wordmark, name, description, usage, tint }, i) => (
           <ScrollReveal key={name} variant="up" delay={(i % 4) * 110} className="h-full">
-            <article
-              className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl"
-              style={{ ["--src-tint" as string]: tint }}
-            >
+            <SpotlightCard tilt={false} className="h-full rounded-2xl">
+              <article
+                className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl"
+                style={{ ["--src-tint" as string]: tint }}
+              >
               <div
                 className="absolute -top-14 -right-14 size-40 rounded-full opacity-0 blur-3xl transition-opacity duration-700 group-hover:opacity-30"
                 style={{ background: tint }}
@@ -91,7 +93,8 @@ export function DataSources() {
                   {usage}
                 </span>
               </div>
-            </article>
+              </article>
+            </SpotlightCard>
           </ScrollReveal>
         ))}
       </div>
