@@ -10,6 +10,38 @@ function randomInt(min: number, max: number): number {
   return min + Math.floor(Math.random() * (max - min + 1));
 }
 
+function generateViewCount(): number {
+  const roll = Math.random();
+  if (roll < 0.5) return randomInt(12, 80);
+  if (roll < 0.8) return randomInt(80, 250);
+  if (roll < 0.95) return randomInt(250, 800);
+  return randomInt(800, 2500);
+}
+
+export async function bumpViewCounts(): Promise<number> {
+  try {
+    const threads = await prisma.forumThread.findMany({
+      select: { id: true, viewCount: true, commentCount: true },
+    });
+
+    let updated = 0;
+    for (const thread of threads) {
+      const base = thread.commentCount * randomInt(3, 8);
+      const noise = randomInt(5, 40);
+      const newViews = thread.viewCount + base + noise;
+
+      await prisma.forumThread.update({
+        where: { id: thread.id },
+        data: { viewCount: newViews },
+      });
+      updated++;
+    }
+    return updated;
+  } catch {
+    return 0;
+  }
+}
+
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -212,6 +244,7 @@ export async function generateForumThreads(
             content: thread.content,
             excerpt: thread.excerpt,
             author: thread.author,
+            viewCount: generateViewCount(),
           },
         });
 

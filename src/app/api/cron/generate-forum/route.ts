@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateForumThreads, generateForumCommentsForThread } from "@/lib/forum-generation";
+import { generateForumThreads, generateForumCommentsForThread, bumpViewCounts } from "@/lib/forum-generation";
 import prisma from "@/lib/prisma";
 
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -50,8 +50,10 @@ export async function POST(req: NextRequest) {
   const totalCreated = Object.values(results).reduce((sum, r) => sum + r.created, 0);
   const totalComments = Object.values(results).reduce((sum, r) => sum + r.commentsAdded, 0);
 
+  const viewsUpdated = await bumpViewCounts();
+
   return NextResponse.json({
-    message: `${totalCreated} neue Threads, ${totalComments} neue Kommentare`,
+    message: `${totalCreated} neue Threads, ${totalComments} neue Kommentare, ${viewsUpdated} Views aktualisiert`,
     results,
   });
 }
