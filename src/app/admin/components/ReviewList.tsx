@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Review } from "@/types/review";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +65,8 @@ export function ReviewList() {
   const [reviewToDelete, setReviewToDelete] = useState<Review | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [togglingStatusId, setTogglingStatusId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const urlSyncTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Debounced sync of filter/sort state to URL
@@ -76,13 +78,19 @@ export function ReviewList() {
       if (statusFilter !== "all") params.set("status", statusFilter);
       if (categoryFilter !== "all") params.set("category", categoryFilter);
       if (sortBy !== "date-desc") params.set("sort", sortBy);
+      if (currentPage > 1) params.set("page", String(currentPage));
       params.set("tab", "list");
       router.replace(`/admin?${params.toString()}`, { scroll: false });
     }, 400);
     return () => {
       if (urlSyncTimeout.current) clearTimeout(urlSyncTimeout.current);
     };
-  }, [searchQuery, statusFilter, categoryFilter, sortBy, router]);
+  }, [searchQuery, statusFilter, categoryFilter, sortBy, currentPage, router]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, categoryFilter, sortBy]);
 
   useEffect(() => {
     fetchReviews();
@@ -209,6 +217,12 @@ export function ReviewList() {
     return result;
   }, [reviews, searchQuery, statusFilter, categoryFilter, sortBy]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredReviews.length / itemsPerPage));
+  const paginatedReviews = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredReviews.slice(start, start + itemsPerPage);
+  }, [filteredReviews, currentPage, itemsPerPage]);
+
   const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString("de-DE", {
       year: "numeric",
@@ -300,25 +314,43 @@ export function ReviewList() {
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>
           {filteredReviews.length} {filteredReviews.length === 1 ? "Beitrag" : "Beiträge"} gefunden
+          {filteredReviews.length > itemsPerPage && (
+            <> — Seite {currentPage} von {totalPages}</>
+          )}
         </span>
-        {(searchQuery || statusFilter !== "all" || categoryFilter !== "all") && (
-          <button
-            onClick={() => {
-              setSearchQuery("");
-              setStatusFilter("all");
-              setCategoryFilter("all");
+        <div className="flex items-center gap-3">
+          {(searchQuery || statusFilter !== "all" || categoryFilter !== "all") && (
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setStatusFilter("all");
+                setCategoryFilter("all");
+              }}
+              className="text-xs text-primary hover:underline font-medium"
+            >
+              Filter zurücksetzen
+            </button>
+          )}
+          <select
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
             }}
-            className="text-xs text-primary hover:underline font-medium"
+            className="text-xs border rounded px-2 py-1 bg-background"
           >
-            Filter zurücksetzen
-          </button>
-        )}
+            <option value={10}>10 pro Seite</option>
+            <option value={25}>25 pro Seite</option>
+            <option value={50}>50 pro Seite</option>
+            <option value={100}>100 pro Seite</option>
+          </select>
+        </div>
       </div>
 
       {/* Reviews List */}
-      {filteredReviews.length > 0 ? (
+      {paginatedReviews.length > 0 ? (
         <div className="grid gap-4">
-          {filteredReviews.map((review) => (
+          {paginatedReviews.map((review) => (
             <Card
               key={review.id}
               className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/20"
@@ -444,6 +476,57 @@ export function ReviewList() {
               ? "Versuche andere Filter oder Suchbegriffe."
               : "Erstelle deinen ersten Review im Quick Create Tab."}
           </p>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1 pt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          >
+            Zurück
+          </Button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter((page) => {
+              if (totalPages <= 7) return true;
+              if (page === 1 || page === totalPages) return true;
+              if (Math.abs(page - currentPage) <= 1) return true;
+              return false;
+            })
+            .reduce<(number | "...")[]>((acc, page, idx, arr) => {
+              if (idx > 0 && page - (arr[idx - 1] as number) > 1) acc.push("...");
+              acc.push(page);
+              return acc;
+            }, [])
+            .map((page, idx) =>
+              page === "..." ? (
+                <span key={`ellipsis-${idx}`} className="px-2 text-muted-foreground">
+                  …
+                </span>
+              ) : (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(page)}
+                  className="min-w-[36px]"
+                >
+                  {page}
+                </Button>
+              )
+            )}
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          >
+            Weiter
+          </Button>
         </div>
       )}
 

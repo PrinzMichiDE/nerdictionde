@@ -39,6 +39,10 @@
     {
       "path": "/api/cron/backfill-review-enrichment",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/regenerate-zero-score-reviews",
+      "schedule": "0 3 * * *"
     }
   ]
 }

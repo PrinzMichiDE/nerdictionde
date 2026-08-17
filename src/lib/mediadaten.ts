@@ -16,6 +16,8 @@ interface MediaStats {
   averageReviewReadTime: string;
   topCountry: string;
   lastUpdated: string;
+  visitorGrowth: string;
+  pageViewGrowth: string;
 }
 
 export interface MonthlyDataPoint {
@@ -59,11 +61,6 @@ export function getMediaStats(): MediaStats {
     basePageViews * Math.pow(pageViewGrowthRate, monthsSinceStart)
   );
   
-  // Format numbers with thousand separators
-  const formatNumber = (num: number): string => {
-    return new Intl.NumberFormat('de-DE').format(num);
-  };
-  
   // Calculate average session duration (slightly improving over time)
   const baseDuration = 4.5; // minutes
   const durationImprovement = monthsSinceStart * 0.05;
@@ -98,13 +95,23 @@ export function getMediaStats(): MediaStats {
   
   // Top country (Germany for German site)
   const topCountry = "Deutschland";
-  
+
+  // Growth compared to previous month
+  const prevMonthVisitors = Math.round(baseVisitors * Math.pow(visitorGrowthRate, monthsSinceStart - 1));
+  const prevMonthPageViews = Math.round(basePageViews * Math.pow(pageViewGrowthRate, monthsSinceStart - 1));
+  const visitorGrowthPct = prevMonthVisitors > 0
+    ? ((monthlyVisitors - prevMonthVisitors) / prevMonthVisitors * 100).toFixed(1)
+    : "0.0";
+  const pageViewGrowthPct = prevMonthPageViews > 0
+    ? ((monthlyPageViews - prevMonthPageViews) / prevMonthPageViews * 100).toFixed(1)
+    : "0.0";
+
   // Last updated date (previous month)
   const lastUpdated = new Date(year, month, 1).toLocaleDateString("de-DE", {
     year: "numeric",
     month: "long",
   });
-  
+
   return {
     monthlyVisitors: monthlyVisitors,
     monthlyPageViews: monthlyPageViews,
@@ -118,6 +125,8 @@ export function getMediaStats(): MediaStats {
     averageReviewReadTime: `${avgReadTime} Min.`,
     topCountry: topCountry,
     lastUpdated: lastUpdated,
+    visitorGrowth: `+${visitorGrowthPct}%`,
+    pageViewGrowth: `+${pageViewGrowthPct}%`,
   };
 }
 

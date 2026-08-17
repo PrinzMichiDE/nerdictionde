@@ -3,7 +3,7 @@ import openai, { OPENAI_MODEL } from "@/lib/openai";
 import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
 import { uploadImage } from "@/lib/blob";
 import { calculatePublicationDate } from "@/lib/date-utils";
-import { TMDBMovie, TMDBSeries, getTMDBImageUrl } from "@/lib/tmdb";
+import { TMDBMovie, TMDBSeries, getTMDBImageUrl, getTMDBMovieById, getTMDBSeriesById } from "@/lib/tmdb";
 import { searchGameProduct, buildGameResearchSummary, buildResearchSummary, searchMovieProduct, searchSeriesProduct } from "@/lib/tavily";
 import type { TavilySearchResponse } from "@/lib/tavily";
 import type { SteamGameInfo } from "@/lib/steam";
@@ -1706,4 +1706,273 @@ export async function generateSeriesReviewContent(
       score: 70,
     };
   }
+}
+
+/**
+ * Regenerate a review that has score=0 and is older than 30 days.
+ * Fetches fresh data from IGDB/TMDB and updates the review in-place.
+ */
+export async function regenerateZeroScoreReview(
+  reviewId: string
+): Promise<{ success: boolean; newScore?: number; error?: string }> {
+  const review = await prisma.review.findUnique({
+    where: { id: reviewId },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      category: true,
+      igdbId: true,
+      tmdbId: true,
+      score: true,
+      images: true,
+      createdAt: true,
+      releaseDate: true,
+    },
+  });
+
+  if (!review) return { success: false, error: "Review not found" };
+  if (review.score !== 0) return { success: false, error: "Review score is not 0" };
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  if (review.createdAt > thirtyDaysAgo) {
+    return { success: false, error: "Review is not older than 30 days" };
+  }
+
+  if (review.releaseDate) {
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+    if (review.releaseDate > oneDayAgo) {
+      return { success: false, error: "Release date +1 day has not passed yet" };
+    }
+  }
+
+  let generated:
+    | {
+        de: { title: string; content: string; pros: string[]; cons: string[] };
+        en: { title: string; content: string; pros: string[]; cons: string[] };
+        score: number;
+      }
+    | undefined;
+
+  if (review.category === "game" && review.igdbId) {
+    const gameData = await getIGDBGameById(review.igdbId);
+    if (!gameData) return { success: false, error: "IGDB game not found" };
+
+    let storeIds: {
+      steamAppId?: string;
+      epicId?: string;
+      gogId?: string;
+    } = {};
+    try {
+      const { findStoreIds } = await import("./store-search");
+      storeIds = await findStoreIds(gameData.name, gameData.id);
+    } catch {
+      // Non-blocking
+    }
+
+    let steamData: SteamGameInfo | null = null;
+    if (storeIds.steamAppId) {
+      try {
+        const { getSteamAppDetails, getSteamReviewSummary } = await import("./steam");
+        const [details, reviews] = await Promise.allSettled([
+          getSteamAppDetails(storeIds.steamAppId),
+          getSteamReviewSummary(storeIds.steamAppId),
+        ]);
+        if (details.status === "fulfilled" && details.value) {
+          steamData = details.value;
+          if (reviews.status === "fulfilled" && reviews.value) {
+            steamData.reviewSummary = reviews.value;
+          }
+        }
+      } catch {
+        // Non-blocking
+      }
+    }
+
+    generated = await generateReviewContent(gameData, 0, { steamData });
+
+    // Re-upload images if needed
+    const imageUrls: string[] = [];
+    if (gameData.cover?.url) {
+      try {
+        const coverUrl = gameData.cover.url.startsWith("//")
+          ? "https:" + gameData.cover.url
+          : gameData.cover.url;
+        const highResCoverUrl = coverUrl.replace("t_thumb", "t_720p");
+        const syncedUrl = await uploadImage(highResCoverUrl, `${review.slug}-cover.jpg`);
+        imageUrls.push(syncedUrl);
+      } catch {
+        imageUrls.push(gameData.cover.url.replace("t_thumb", "t_720p"));
+      }
+    }
+    if (gameData.screenshots && gameData.screenshots.length > 0) {
+      const screenshotUrls = gameData.screenshots.slice(0, 5).map((s: any) =>
+        s.url.startsWith("//")
+          ? "https:" + s.url.replace("t_thumb", "t_1080p")
+          : s.url.replace("t_thumb", "t_1080p")
+      );
+      for (let i = 0; i < screenshotUrls.length; i++) {
+        try {
+          const syncedUrl = await uploadImage(screenshotUrls[i], `${review.slug}-screen-${i + 1}.jpg`);
+          imageUrls.push(syncedUrl);
+        } catch {
+          imageUrls.push(screenshotUrls[i]);
+        }
+      }
+    }
+
+    const imagesToUse = imageUrls.length > 0 ? imageUrls : review.images;
+    const contentDe = replaceImagePlaceholders(generated.de.content, imagesToUse, review.title);
+    const contentEn = replaceImagePlaceholders(generated.en.content, imagesToUse, review.title);
+
+    let seoMeta: { metaDescription: string; metaKeywords: string } | null = null;
+    try {
+      seoMeta = await generateSEOMetadata(generated.de.title, contentDe, "game");
+    } catch {
+      // Non-blocking
+    }
+
+    await prisma.review.update({
+      where: { id: review.id },
+      data: {
+        title: generated.de.title,
+        title_en: generated.en.title,
+        content: contentDe,
+        content_en: contentEn,
+        score: generated.score,
+        pros: generated.de.pros,
+        pros_en: generated.en.pros,
+        cons: generated.de.cons,
+        cons_en: generated.en.cons,
+        images: imagesToUse,
+        metaDescription: seoMeta?.metaDescription ?? null,
+        metaKeywords: seoMeta?.metaKeywords ?? null,
+      },
+    });
+
+    generateAndSaveCommentsForReview(review.id, {
+      reviewTitle: generated.de.title,
+      score: generated.score,
+      pros: generated.de.pros,
+      cons: generated.de.cons,
+      category: "game",
+    }).catch((e) => console.warn("Comment regeneration failed:", e));
+
+    generateAndAttachTagsForReview(review.id, {
+      reviewTitle: generated.de.title,
+      category: "game",
+      score: generated.score,
+      contentExcerpt: generated.de.content?.substring(0, 500),
+    }).catch((e) => console.warn("Tag regeneration failed:", e));
+
+    return { success: true, newScore: generated.score };
+  }
+
+  if (review.category === "movie" && review.tmdbId) {
+    const movieData = await getTMDBMovieById(review.tmdbId);
+    if (!movieData) return { success: false, error: "TMDB movie not found" };
+
+    generated = await generateMovieReviewContent(movieData);
+
+    const imagesToUse = review.images;
+    const contentDe = replaceImagePlaceholders(generated.de.content, imagesToUse, review.title);
+    const contentEn = replaceImagePlaceholders(generated.en.content, imagesToUse, review.title);
+
+    let seoMeta: { metaDescription: string; metaKeywords: string } | null = null;
+    try {
+      seoMeta = await generateSEOMetadata(generated.de.title, contentDe, "movie");
+    } catch {
+      // Non-blocking
+    }
+
+    await prisma.review.update({
+      where: { id: review.id },
+      data: {
+        title: generated.de.title,
+        title_en: generated.en.title,
+        content: contentDe,
+        content_en: contentEn,
+        score: generated.score,
+        pros: generated.de.pros,
+        pros_en: generated.en.pros,
+        cons: generated.de.cons,
+        cons_en: generated.en.cons,
+        metaDescription: seoMeta?.metaDescription ?? null,
+        metaKeywords: seoMeta?.metaKeywords ?? null,
+      },
+    });
+
+    generateAndSaveCommentsForReview(review.id, {
+      reviewTitle: generated.de.title,
+      score: generated.score,
+      pros: generated.de.pros,
+      cons: generated.de.cons,
+      category: "movie",
+    }).catch((e) => console.warn("Comment regeneration failed:", e));
+
+    generateAndAttachTagsForReview(review.id, {
+      reviewTitle: generated.de.title,
+      category: "movie",
+      score: generated.score,
+      contentExcerpt: generated.de.content?.substring(0, 500),
+    }).catch((e) => console.warn("Tag regeneration failed:", e));
+
+    return { success: true, newScore: generated.score };
+  }
+
+  if (review.category === "series" && review.tmdbId) {
+    const seriesData = await getTMDBSeriesById(review.tmdbId);
+    if (!seriesData) return { success: false, error: "TMDB series not found" };
+
+    generated = await generateSeriesReviewContent(seriesData);
+
+    const imagesToUse = review.images;
+    const contentDe = replaceImagePlaceholders(generated.de.content, imagesToUse, review.title);
+    const contentEn = replaceImagePlaceholders(generated.en.content, imagesToUse, review.title);
+
+    let seoMeta: { metaDescription: string; metaKeywords: string } | null = null;
+    try {
+      seoMeta = await generateSEOMetadata(generated.de.title, contentDe, "series");
+    } catch {
+      // Non-blocking
+    }
+
+    await prisma.review.update({
+      where: { id: review.id },
+      data: {
+        title: generated.de.title,
+        title_en: generated.en.title,
+        content: contentDe,
+        content_en: contentEn,
+        score: generated.score,
+        pros: generated.de.pros,
+        pros_en: generated.en.pros,
+        cons: generated.de.cons,
+        cons_en: generated.en.cons,
+        metaDescription: seoMeta?.metaDescription ?? null,
+        metaKeywords: seoMeta?.metaKeywords ?? null,
+      },
+    });
+
+    generateAndSaveCommentsForReview(review.id, {
+      reviewTitle: generated.de.title,
+      score: generated.score,
+      pros: generated.de.pros,
+      cons: generated.de.cons,
+      category: "series",
+    }).catch((e) => console.warn("Comment regeneration failed:", e));
+
+    generateAndAttachTagsForReview(review.id, {
+      reviewTitle: generated.de.title,
+      category: "series",
+      score: generated.score,
+      contentExcerpt: generated.de.content?.substring(0, 500),
+    }).catch((e) => console.warn("Tag regeneration failed:", e));
+
+    return { success: true, newScore: generated.score };
+  }
+
+  return { success: false, error: `Unsupported category or missing ID: ${review.category}` };
 }
