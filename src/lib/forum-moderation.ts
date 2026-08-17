@@ -10,27 +10,33 @@ export interface ModerationResult {
  * Returns whether the comment should be approved or rejected, with a reason.
  */
 export async function moderateForumComment(text: string): Promise<ModerationResult> {
-  const prompt = `Du bist ein Forum-Moderator für eine Gaming-, Film- und Serien-Community. 
-Prüfe den folgenden Kommentar auf Verstöße gegen Community-Regeln.
+  const prompt = `Du bist ein Forum-Moderator für eine Gaming-, Film- und Serien-Community.
+Prüfe den folgenden Kommentar auf ECHTE Verstöße gegen Community-Regeln.
 
 Kommentar: "${text}"
 
-Bewerte ob der Kommentar:
-- Hassrede, Diskriminierung oder Beleidigungen enthält
-- Spam oder Werbung ist
-- Extrem toxisch oder giftig ist
-- Against the rules of a friendly community discussion is
-- Sexuell explizit oder unangemessen ist
-- Persönliche Daten von Dritten preisgibt
-- Offensichtlich trollt oder provoziert
+WICHTIG: Folgendes ist ERLAUBT und darf NICHT abgelehnt werden:
+- Umgangssprache, Slang, Jugendsprache
+- Rechtschreibfehler und Tippfehler
+- Emojis, Abkürzungen (tbh, imho, lol, etc.)
+- Starke Meinungen und harte Kritik
+- Flapsige oder direkte Art
+- Kurze Antworten wie "same", "ist ok", "nein"
+- Meinungsverschiedenheiten
+
+NUR ablehnen bei:
+- Hassrede, Rassismus, Sexismus, Diskriminierung
+- Persönliche Beleidigungen und Drohungen
+- Spam, Werbung, Links zu fragwürdigen Seiten
+- Sexuell explizite Inhalte
+- Doxxing (persönliche Daten von anderen)
+- Extrem toxisches Verhalten (nur persönliche Angriffe, nicht Kritik)
 
 Antworte NUR mit einem JSON-Objekt:
 {
   "approved": true oder false,
   "reason": "Kurze Begründung auf Deutsch (max 100 Zeichen)"
-}
-
-Sei dabei fair und Community-freundlich. Normale Kritik, auch scharfe Wortwahl, ist erlaubt. Nur echte Verstöße sollen abgelehnt werden.`;
+}`;
 
   try {
     const response = await openai.chat.completions.create({

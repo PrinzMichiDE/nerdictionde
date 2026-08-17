@@ -53,32 +53,49 @@ async function generateThreadsForCategory(
 ): Promise<GeneratedThread[]> {
   const categoryLabel = getCategoryLabel(category);
 
-  const prompt = `Erstelle genau ${count} realistische, untereinander unterschiedliche Forum-Diskussionsthemen zum Bereich "${categoryLabel}".
+  const prompt = `Erstelle genau ${count} realistische Forum-Diskussionsthemen zum Bereich "${categoryLabel}".
 
-Jedes Thema soll eine naturally klingende Diskussion anregen – wie in einem echten Gaming/Film/Serien-Forum.
+Stell dir vor du liest echte Beiträge auf Reddit, GamePro oder MyFilme. So sollen die Titel und Einleitungen klingen.
+
+STRENG VERBOTEN:
+- Keine Prefixe wie "Tipp:", "Neue Indie-Perlen:", "Empfehlung:", "Fragen an", "Diskussion:"
+- Keine werblichen oder journalistischen Formulierungen
+- Keine Überschriften die nach Magazin-Artikel klingen
+- Keine Ausrufezeichen am Ende von Titeln
+- Keine Doppelpunkt-Strukturen wie "Topic: Text" oder "Frage: Text"
+
+SO SOLL ES KLINGEN:
+- Normale Leute die diskutieren wollen
+- Titel wie man sie in echten Foren sieht: kurze Frage, Meinung, Vergleich, oder坛系
+- Einleitung klingt wie jemand der seine Meinung schreibt, nicht wie ein Journalist
+
+Beispiele für GUTE Titel:
+- "Ist Elden Ring wirklich so gut wie alle sagen?"
+- "Welche Serie habt ihr dieses Jahr abgebrochen?"
+- "Spider-Man 3 oder Batman Begins – was war euer Film des Jahres?"
+- "Warum spielt keiner mehr mit mir Online?"
+
+Beispiele für SCHLECHTE Titel (NIE so):
+- "Tipp: Die besten Indie-Spiele 2026"
+- "Neue Indie-Perlen: Diese Spiele dürft ihr nicht verpassen"
+- "Die Top 10 Gaming-Highlights des Monats"
 
 Anforderungen:
 - Themen aktuell und relevant (2026)
-- Verschiedene Subthemen: Rankings, Meinungen, Empfehlungen, Vergleiche, News, Fragen
-- Verschiedene Tönungen: enthusiastisch, kritisch, neugierig, diskussionswürdig
-- Titel sind prägnant und klickwürdig (wie in echten Foren)
-- Alle ${count} Themen inhaltlich klar voneinander abgrenzen
-- Keine Beleidigungen, keine Markennamen erfinden
-
-Für jedes Thema:
-1. Einen prägnanten Titel (max 80 Zeichen)
-2. Einen kurzen Einleitungstext als Thread-Start (3-8 Sätze), der das Thema erläutert
-3. Eine Kurzbeschreibung (1-2 Sätze, max 160 Zeichen)
-4. Einen fiktiven Autor-Namen
+- Verschiedene Subthemen: Rankings, Meinungen, Empfehlungen, Vergleiche, Fragen
+- Titel 5-80 Zeichen, klingen wie ein normaler Foren-User
+- Einleitung 3-8 Sätze, schreibt wie ein Mensch der diskutieren will
+- Kurzbeschreibung 1-2 Sätze, max 160 Zeichen
+- Autor ist ein Fake-Name wie "RetroGamer88", "MovieBuff2026"
 
 Antworte NUR mit einem JSON-Objekt im Format:
 {
   "threads": [
     {
       "title": "Titel des Threads",
-      "content": "Einleitungstext als Markdown...",
+      "content": "Einleitungstext...",
       "excerpt": "Kurzbeschreibung",
-      "author": "Fiktiver Name"
+      "author": "Username"
     }
   ]
 }`;
@@ -101,24 +118,37 @@ Antworte NUR mit einem JSON-Objekt im Format:
 async function generateCommentsForThread(
   threadTitle: string,
   threadContent: string,
-  category: string,
+  _category: string,
   count: number
 ): Promise<GeneratedForumComment[]> {
-  const categoryLabel = getCategoryLabel(category);
 
-  const prompt = `Erstelle genau ${count} realistische, untereinander unterschiedliche Forum-Kommentare zu folgendem Diskussionsthema im Bereich "${categoryLabel}".
+  const prompt = `Erstelle genau ${count} Forum-Kommentare zu folgendem Thema.
 
 Thema: ${threadTitle}
 Startbeitrag: ${threadContent.substring(0, 500)}
 
-Anforderungen:
-- Jeder Kommentar 1-5 Sätze, natürlich und authentisch
-- Verschiedene Perspektiven: zustimmend, kritisch, neutral, ergänzend, persönliche Erfahrung
-- Verschiedene Stile: kurz bestätigend, ausführlich, Frage, Tip, Gegenmeinung
-- Alle Kommentare inhaltlich klar voneinander abgrenzen
-- Keine Sätze oder Formulierungen wiederholen
-- Keine Beleidigungen
-- Autorennamen sollen wie echte Forum-Usernamen klingen (keine echten Namen, sondern Usernicks wie "GamerJörg92", "PixelQueen", "CineMax", "SerienFan2000" etc.)
+STRENG VERBOTEN:
+- Keine formellen oder journalistischen Formulierungen
+- Keineperfekten Grammatik-Sätze (das klingt nach KI!)
+- Keine Wiederholungen wie "Ich finde das super toll und großartig"
+- Keine Floskeln wie "Insgesamt lässt sich sagen", "Zusammenfassend"
+
+SO SOLL ES KLINGEN:
+- Wie echte User die auf ihrem Handy tippen
+- Umgangssprache ist erlaubt: "geht gar nicht", "ist echt krass", "verstehe ich null"
+- Kurze Sätze, manchmal nur ein Satz
+- Emojis sind okay aber sparsam: 😂 👍 🤔
+- Rechtschreibfehler passieren (aber nicht übertreiben)
+- Manche kommentieren kurz "same" oder "bin da完全"
+- Persönliche Anekdote: "hab das letzte Jahr gespielt und..."
+- Frage am Ende: "jemand das gleiche Problem?"
+- Vergleiche: "ist besser als X tbh"
+- Kritik ohne auszuschweifen: "nichts besonderes ehrlich gesagt"
+
+Autorennamen sollen wie echte Foren-User klingen:
+- GamerJörg92, PixelQueen, CineMax, SerienFan2000
+- xX_DarkPhoenix_Xx, NerdLight, CouchPotato42, RetroKing
+- Konsolenkind, PCMasterRace88, FilmNerdBerlin
 
 Antworte NUR mit einem JSON-Objekt im Format:
 {
