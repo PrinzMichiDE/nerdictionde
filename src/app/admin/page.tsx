@@ -6,10 +6,11 @@ import { BulkCreate } from "./components/BulkCreate";
 import { ReviewList } from "./components/ReviewList";
 import { MassReviewCreation } from "./components/MassReviewCreation";
 import { ReleaseSyncButton } from "./components/ReleaseSyncButton";
+import { ForumGenerator } from "./components/ForumGenerator";
 import { Toaster } from "@/components/ui/toaster";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useState, useEffect } from "react";
-import { Rocket, Database, ListVideo, List, Loader2, FileCheck, FilePen, FolderOpen } from "lucide-react";
+import { Rocket, Database, ListVideo, List, Loader2, FileCheck, FilePen, FolderOpen, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TabDef {
@@ -24,6 +25,7 @@ const TABS: TabDef[] = [
   { value: "bulk", label: "Massen-Erstellung", shortLabel: "Massen", icon: <Database className="h-4 w-4" /> },
   { value: "mass-200", label: "Massen-Jobs", shortLabel: "Jobs", icon: <ListVideo className="h-4 w-4" /> },
   { value: "list", label: "Alle Beiträge", shortLabel: "Liste", icon: <List className="h-4 w-4" /> },
+  { value: "forum", label: "Forum", shortLabel: "Forum", icon: <MessageSquare className="h-4 w-4" /> },
 ];
 
 function StatsBar() {
@@ -95,7 +97,7 @@ function AdminTabs() {
 
   return (
     <Tabs value={tab} onValueChange={handleTabChange} className="space-y-4 md:space-y-6">
-      <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-2 max-w-4xl">
+      <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-2 max-w-5xl">
         {TABS.map((t) => (
           <TabsTrigger
             key={t.value}
@@ -124,6 +126,9 @@ function AdminTabs() {
       </TabsContent>
       <TabsContent value="list" className="space-y-4 mt-6">
         <ReviewList />
+      </TabsContent>
+      <TabsContent value="forum" className="space-y-4 mt-6">
+        <ForumGenerator />
       </TabsContent>
     </Tabs>
   );

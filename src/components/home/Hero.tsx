@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +24,7 @@ const trustItems = [
 
 export function Hero() {
   const [wordIndex, setWordIndex] = useState(0);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const orbsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const id = setInterval(
@@ -35,24 +35,30 @@ export function Hero() {
   }, []);
 
   useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+
+    let raf = 0;
     const onMove = (e: MouseEvent) => {
-      setMouse({
-        x: (e.clientX / window.innerWidth - 0.5) * 2,
-        y: (e.clientY / window.innerHeight - 0.5) * 2,
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const nx = (e.clientX / window.innerWidth - 0.5) * 2;
+        const ny = (e.clientY / window.innerHeight - 0.5) * 2;
+        if (orbsRef.current) {
+          orbsRef.current.style.setProperty("--mx", `${nx}`);
+          orbsRef.current.style.setProperty("--my", `${ny}`);
+        }
       });
     };
-    window.addEventListener("mousemove", onMove);
-    return () => window.removeEventListener("mousemove", onMove);
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
-  const orbStyle = (depth: number, baseX: number, baseY: number) => ({
-    transform: `translate3d(${mouse.x * depth}px, ${mouse.y * depth}px, 0)`,
-    left: `${baseX}%`,
-    top: `${baseY}%`,
-  });
-
   return (
-    <section className="full-bleed hero-vignette relative overflow-hidden -mt-8 md:-mt-12 lg:-mt-16 pb-20 md:pb-28 lg:pb-36">
+    <section className="full-bleed hero-vignette relative overflow-hidden -mt-8 md:-mt-12 lg:-mt-16 pb-20 md:pb-28 lg:pb-36" style={{ contain: "layout style paint" }}>
       {/* ===== Hintergrund-Schichten ===== */}
       <div className="absolute inset-0 bg-mesh" aria-hidden="true" />
       <div
@@ -61,33 +67,39 @@ export function Hero() {
       />
       <div className="absolute inset-0 noise opacity-[0.045] pointer-events-none" aria-hidden="true" />
 
-      {/* Aurora-Orbs (Parallax auf Maus) */}
-      <div
-        aria-hidden="true"
-        className="absolute w-[34rem] h-[34rem] rounded-full blur-[110px] animate-aurora pointer-events-none"
-        style={{
-          ...orbStyle(28, -12, -18),
-          background: "color-mix(in oklab, var(--primary) 34%, transparent)",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute w-[28rem] h-[28rem] rounded-full blur-[100px] animate-aurora pointer-events-none"
-        style={{
-          ...orbStyle(-18, 78, 10),
-          background: "color-mix(in oklab, oklch(0.6 0.16 210) 26%, transparent)",
-          animationDelay: "-6s",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute w-[26rem] h-[26rem] rounded-full blur-[110px] animate-aurora pointer-events-none"
-        style={{
-          ...orbStyle(14, 55, 68),
-          background: "color-mix(in oklab, oklch(0.6 0.15 320) 20%, transparent)",
-          animationDelay: "-12s",
-        }}
-      />
+      {/* Aurora-Orbs (Parallax auf Maus – via CSS vars, no React re-renders) */}
+      <div ref={orbsRef} className="absolute inset-0 pointer-events-none" aria-hidden="true"
+        style={{ "--mx": 0, "--my": 0 } as React.CSSProperties}>
+        <div
+          className="absolute w-[34rem] h-[34rem] rounded-full blur-[110px] animate-aurora pointer-events-none will-change-transform"
+          style={{
+            transform: `translate3d(calc(var(--mx) * 28px), calc(var(--my) * 28px), 0)`,
+            left: "-12%",
+            top: "-18%",
+            background: "color-mix(in oklab, var(--primary) 34%, transparent)",
+          }}
+        />
+        <div
+          className="absolute w-[28rem] h-[28rem] rounded-full blur-[100px] animate-aurora pointer-events-none will-change-transform"
+          style={{
+            transform: `translate3d(calc(var(--mx) * -18px), calc(var(--my) * -18px), 0)`,
+            left: "78%",
+            top: "10%",
+            background: "color-mix(in oklab, oklch(0.6 0.16 210) 26%, transparent)",
+            animationDelay: "-6s",
+          }}
+        />
+        <div
+          className="absolute w-[26rem] h-[26rem] rounded-full blur-[110px] animate-aurora pointer-events-none will-change-transform"
+          style={{
+            transform: `translate3d(calc(var(--mx) * 14px), calc(var(--my) * 14px), 0)`,
+            left: "55%",
+            top: "68%",
+            background: "color-mix(in oklab, oklch(0.6 0.15 320) 20%, transparent)",
+            animationDelay: "-12s",
+          }}
+        />
+      </div>
 
       {/* Rotierende Deko-Ringe */}
       <div

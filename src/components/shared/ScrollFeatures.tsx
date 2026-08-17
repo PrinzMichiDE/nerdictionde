@@ -1,106 +1,83 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ChevronUp } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ChevronUp } from "lucide-react";
 
 export function ReadingProgressBar() {
-  const [progress, setProgress] = useState(0);
+  const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let ticking = false;
     const updateProgress = () => {
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      const scrollTop = window.scrollY;
-      const totalScroll = documentHeight - windowHeight;
-      const scrollProgress = totalScroll > 0 ? (scrollTop / totalScroll) * 100 : 0;
-      setProgress(scrollProgress);
+      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalScroll > 0 && barRef.current) {
+        barRef.current.style.width = `${(window.scrollY / totalScroll) * 100}%`;
+      }
+      ticking = false;
     };
 
-    window.addEventListener("scroll", updateProgress, { passive: true });
-    updateProgress();
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(updateProgress);
+      }
+    };
 
-    return () => window.removeEventListener("scroll", updateProgress);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    updateProgress();
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-1 bg-muted z-50">
+    <div className="fixed top-0 left-0 right-0 h-1 bg-muted z-50" aria-hidden="true">
       <div
-        className="h-full bg-primary transition-all duration-150 ease-out"
-        style={{ width: `${progress}%` }}
+        ref={barRef}
+        className="h-full bg-primary transition-[width] duration-150 ease-out will-change-[width]"
       />
     </div>
   );
 }
 
 export function ScrollToTop() {
-  const [isVisible, setIsVisible] = useState(false);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
+    let ticking = false;
     const toggleVisibility = () => {
-      setIsVisible(window.scrollY > 400);
+      if (btnRef.current) {
+        const visible = window.scrollY > 400;
+        btnRef.current.style.opacity = visible ? "1" : "0";
+        btnRef.current.style.transform = visible ? "translateY(0)" : "translateY(16px)";
+        btnRef.current.style.pointerEvents = visible ? "auto" : "none";
+      }
+      ticking = false;
     };
 
-    window.addEventListener("scroll", toggleVisibility, { passive: true });
-    return () => window.removeEventListener("scroll", toggleVisibility);
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(toggleVisibility);
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <Button
+      ref={btnRef}
       onClick={scrollToTop}
       size="icon"
-      className={cn(
-        "fixed bottom-8 right-8 z-50 rounded-md shadow-md transition-all duration-300",
-        isVisible
-          ? "opacity-100 translate-y-0"
-          : "opacity-0 translate-y-4 pointer-events-none"
-      )}
+      className="fixed bottom-8 right-8 z-50 rounded-md shadow-md opacity-0 pointer-events-none transition-[transform,opacity] duration-300"
       aria-label="Nach oben scrollen"
     >
       <ChevronUp className="h-5 w-5" />
     </Button>
-  );
-}
-
-interface StickyNavProps {
-  children: React.ReactNode;
-  offset?: number;
-  className?: string;
-}
-
-export function StickyNav({ children, offset = 0, className = "" }: StickyNavProps) {
-  const [isSticky, setIsSticky] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsSticky(window.scrollY > offset);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [offset]);
-
-  return (
-    <div
-      className={cn(
-        "transition-all duration-300",
-        isSticky
-          ? "fixed top-0 left-0 right-0 z-40 bg-background border-b border-border shadow-sm"
-          : "relative",
-        className
-      )}
-    >
-      {children}
-    </div>
   );
 }

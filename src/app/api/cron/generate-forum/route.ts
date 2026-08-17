@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     let commentsAdded = 0;
 
     try {
-      const gen = await generateForumThreads(category, 5);
+      const gen = await generateForumThreads(category, 3);
       created = gen.created;
       errors.push(...gen.errors);
 

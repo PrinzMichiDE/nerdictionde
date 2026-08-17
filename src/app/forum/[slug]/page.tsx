@@ -12,24 +12,28 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const thread = await prisma.forumThread.findUnique({ where: { slug } });
-  if (!thread) return {};
+  try {
+    const { slug } = await params;
+    const thread = await prisma.forumThread.findUnique({ where: { slug } });
+    if (!thread) return {};
 
-  const url = `${getSiteUrl()}/forum/${slug}`;
-  return {
-    title: `${thread.title} - Nerdiction Forum`,
-    description: thread.excerpt,
-    alternates: { canonical: url },
-    openGraph: {
-      type: "article",
-      title: thread.title,
+    const url = `${getSiteUrl()}/forum/${slug}`;
+    return {
+      title: `${thread.title} - Nerdiction Forum`,
       description: thread.excerpt,
-      url,
-      siteName: "Nerdiction",
-      locale: "de_DE",
-    },
-  };
+      alternates: { canonical: url },
+      openGraph: {
+        type: "article",
+        title: thread.title,
+        description: thread.excerpt,
+        url,
+        siteName: "Nerdiction",
+        locale: "de_DE",
+      },
+    };
+  } catch {
+    return {};
+  }
 }
 
 const categoryConfig = {
@@ -60,32 +64,41 @@ export default async function ForumThreadPage({
 }) {
   const { slug } = await params;
 
-  const thread = await prisma.forumThread.findUnique({
-    where: { slug },
-    include: {
-      review: {
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          score: true,
-          category: true,
-          images: true,
+  let thread;
+  try {
+    thread = await prisma.forumThread.findUnique({
+      where: { slug },
+      include: {
+        review: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            score: true,
+            category: true,
+            images: true,
+          },
+        },
+        comments: {
+          where: { status: "approved" },
+          orderBy: { createdAt: "asc" },
         },
       },
-      comments: {
-        where: { status: "approved" },
-        orderBy: { createdAt: "asc" },
-      },
-    },
-  });
+    });
+  } catch {
+    notFound();
+  }
 
   if (!thread) notFound();
 
-  await prisma.forumThread.update({
-    where: { id: thread.id },
-    data: { viewCount: { increment: 1 } },
-  });
+  try {
+    await prisma.forumThread.update({
+      where: { id: thread.id },
+      data: { viewCount: { increment: 1 } },
+    });
+  } catch {
+    // ignore view count error
+  }
 
   const config = categoryConfig[thread.category as keyof typeof categoryConfig] ?? categoryConfig.gaming;
   const Icon = config.icon;

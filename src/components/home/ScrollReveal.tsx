@@ -22,6 +22,27 @@ const variantClasses: Record<RevealVariant, string> = {
   fade: "reveal-fade",
 };
 
+let sharedObserver: IntersectionObserver | null = null;
+const pendingElements = new Map<Element, (visible: boolean) => void>();
+
+function getSharedObserver() {
+  if (sharedObserver) return sharedObserver;
+  sharedObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const cb = pendingElements.get(entry.target);
+        if (entry.isIntersecting && cb) {
+          cb(true);
+          pendingElements.delete(entry.target);
+          sharedObserver!.unobserve(entry.target);
+        }
+      }
+    },
+    { threshold: 0.12, rootMargin: "0px 0px -60px 0px" }
+  );
+  return sharedObserver;
+}
+
 export function ScrollReveal({
   children,
   variant = "up",
@@ -34,26 +55,22 @@ export function ScrollReveal({
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || visible) return;
 
     if (!("IntersectionObserver" in window)) {
-      const id = globalThis.setTimeout(() => setVisible(true), 0);
-      return () => globalThis.clearTimeout(id);
+      const tid = globalThis.setTimeout(() => setVisible(true), 0);
+      return () => globalThis.clearTimeout(tid);
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -60px 0px" }
-    );
-
+    const observer = getSharedObserver();
+    pendingElements.set(el, setVisible);
     observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+
+    return () => {
+      pendingElements.delete(el);
+      observer.unobserve(el);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div

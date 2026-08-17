@@ -1,9 +1,10 @@
 import prisma from "@/lib/prisma";
 import { ForumThreadCard } from "@/components/forum/ForumThreadCard";
 import { ForumCategoryFilter } from "@/components/forum/ForumCategoryFilter";
+import { ForumHeader } from "@/components/forum/ForumHeader";
 import { Metadata } from "next";
 import { getSiteUrl } from "@/lib/seo";
-import { MessageSquareText } from "lucide-react";
+import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Forum - Nerdiction",
@@ -23,6 +24,55 @@ export const metadata: Metadata = {
   },
 };
 
+async function fetchThreads(validCategory?: string) {
+  try {
+    const where = validCategory ? { category: validCategory } : {};
+
+    const [threads, totalThreads] = await Promise.all([
+      prisma.forumThread.findMany({
+        where,
+        orderBy: { lastActivityAt: "desc" },
+        take: 50,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          category: true,
+          excerpt: true,
+          author: true,
+          commentCount: true,
+          viewCount: true,
+          lastActivityAt: true,
+          createdAt: true,
+          _count: { select: { comments: { where: { status: "approved" } } } },
+        },
+      }),
+      prisma.forumThread.count({ where }),
+    ]);
+
+    return { threads, totalThreads };
+  } catch {
+    return { threads: [], totalThreads: 0 };
+  }
+}
+
+async function getSession() {
+  try {
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("twitch_session")?.value;
+    if (!sessionToken) return null;
+
+    const { jwtVerify } = await import("jose");
+    const JWT_SECRET = new TextEncoder().encode(
+      process.env.JWT_SECRET || "your-secret-key-change-in-production-min-32-chars"
+    );
+    const payload = (await jwtVerify(sessionToken, JWT_SECRET)).payload as unknown as { username?: string };
+    return { username: payload.username ?? null };
+  } catch {
+    return null;
+  }
+}
+
 export default async function ForumPage({
   searchParams,
 }: {
@@ -34,46 +84,15 @@ export default async function ForumPage({
       ? category
       : undefined;
 
-  const where = validCategory ? { category: validCategory } : {};
-
-  const threads = await prisma.forumThread.findMany({
-    where,
-    orderBy: { lastActivityAt: "desc" },
-    take: 50,
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      category: true,
-      excerpt: true,
-      author: true,
-      commentCount: true,
-      viewCount: true,
-      lastActivityAt: true,
-      createdAt: true,
-      _count: { select: { comments: { where: { status: "approved" } } } },
-    },
-  });
-
-  const totalThreads = await prisma.forumThread.count({ where });
+  const { threads, totalThreads } = await fetchThreads(validCategory);
+  const session = await getSession();
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
-      <header className="space-y-4">
-        <div className="flex items-center gap-3">
-          <MessageSquareText className="size-8 text-primary" />
-          <div>
-            <span className="kicker text-primary">Community</span>
-            <h1 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight">
-              Forum
-            </h1>
-          </div>
-        </div>
-        <p className="text-muted-foreground max-w-2xl">
-          Diskutiere über Gaming, Filme und Serien. Teile deine Meinung,
-          stelle Fragen und tausche dich mit der Community aus.
-        </p>
-      </header>
+      <ForumHeader
+        isLoggedIn={!!session}
+        displayName={session?.username ?? null}
+      />
 
       <ForumCategoryFilter activeCategory={validCategory} />
 
@@ -94,14 +113,15 @@ export default async function ForumPage({
           ))
         ) : (
           <div className="text-center py-16 border border-border rounded-md bg-card">
-            <MessageSquareText className="size-12 text-muted-foreground/40 mx-auto mb-4" />
             <p className="text-muted-foreground font-medium">
               {validCategory
                 ? "Keine Threads in dieser Kategorie."
                 : "Noch keine Threads vorhanden."}
             </p>
             <p className="text-sm text-muted-foreground/70 mt-1">
-              Schau später wieder vorbei!
+              {session
+                ? "Erstelle den ersten Thread!"
+                : "Schau später wieder vorbei!"}
             </p>
           </div>
         )}

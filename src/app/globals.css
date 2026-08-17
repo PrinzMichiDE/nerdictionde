@@ -353,6 +353,18 @@
 }
 
 /* ==========================================================================
+   Performance: CSS Containment
+   ========================================================================== */
+
+section, article {
+  contain: layout style paint;
+}
+
+.marquee, .ticker {
+  contain: layout style;
+}
+
+/* ==========================================================================
    Nerdiction Landing Design System — Maximales CSS
    ========================================================================== */
 
@@ -428,10 +440,10 @@
   transform: translateY(28px);
   transition:
     opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform, filter;
+  will-change: opacity, transform;
+  contain: layout style;
 }
 
 .reveal-left {
@@ -509,6 +521,7 @@
   backdrop-filter: blur(18px) saturate(1.4);
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
   border: 1px solid oklch(0.45 0 0 / 0.12);
+  contain: layout style;
 }
 
 .dark .glass {
@@ -612,6 +625,7 @@
 .spotlight-card {
   position: relative;
   transform-style: preserve-3d;
+  contain: layout style;
 }
 
 .spotlight-card::before {
@@ -727,18 +741,21 @@
   will-change: transform;
 }
 
-/* --- Pulsierender Glow (Featured Ring) --- */
+/* --- Pulsierender Glow (Featured Ring) - use pseudo-element for composited animation --- */
 @keyframes pulse-glow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 oklch(0.9 0.05 20 / 0.28);
+    opacity: 0.28;
+    transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 34px 4px oklch(0.9 0.05 20 / 0.18);
+    opacity: 0.18;
+    transform: scale(1.4);
   }
 }
 
 .animate-pulse-glow {
+  position: relative;
   animation: pulse-glow 3.2s ease-in-out infinite;
 }
 
@@ -776,20 +793,7 @@
   animation: spin-slow 26s linear infinite reverse;
 }
 
-@keyframes pulse-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 45%, transparent);
-  }
-  50% {
-    box-shadow:
-      0 0 34px 6px color-mix(in oklab, var(--primary) 22%, transparent);
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3.6s ease-in-out infinite;
-}
+/* pulse-glow keyframes defined above - removed duplicate */
 
 @keyframes word-in {
   from {
@@ -981,6 +985,7 @@
     );
   animation: score-fill 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-play-state: paused;
+  contain: layout style;
 }
 
 .reveal-visible .score-ring,
@@ -1027,6 +1032,7 @@
 /* --- Editorial Review-Card --- */
 .review-card {
   position: relative;
+  contain: layout style;
   transition:
     transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
@@ -1179,6 +1185,7 @@
   backdrop-filter: blur(16px) saturate(1.3);
   -webkit-backdrop-filter: blur(16px) saturate(1.3);
   border-bottom: 1px solid var(--border);
+  contain: layout style;
 }
 
 /* --- Hero Dekorationen --- */
@@ -1343,7 +1350,6 @@
 .hero-word {
   display: inline-block;
   animation: word-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-  will-change: transform, opacity;
 }
 
 /* --- Card-Index-Nummer --- */
@@ -1377,6 +1383,7 @@
   height: 10rem;
   padding-top: 1.5rem;
   position: relative;
+  contain: layout style;
 }
 
 .dist-col {
@@ -1459,6 +1466,7 @@
   gap: 1rem;
   padding: 1.125rem 0.875rem;
   border-radius: var(--radius-sm);
+  contain: layout style;
   transition:
     background 0.35s ease,
     transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1603,14 +1611,12 @@
 @keyframes ring-glow {
   0%,
   100% {
-    box-shadow:
-      0 0 0 0 color-mix(in oklab, var(--primary) 40%, transparent),
-      inset 0 0 0 1px color-mix(in oklab, var(--primary) 25%, transparent);
+    opacity: 0.4;
+    transform: scale(1);
   }
   50% {
-    box-shadow:
-      0 0 26px 6px color-mix(in oklab, var(--primary) 25%, transparent),
-      inset 0 0 0 1px color-mix(in oklab, var(--primary) 40%, transparent);
+    opacity: 0.25;
+    transform: scale(1.08);
   }
 }
 
@@ -1657,6 +1663,7 @@
 .ken-burns {
   animation: ken-burns 26s ease-in-out infinite;
   will-change: transform;
+  contain: layout style paint;
 }
 
 /* --- Kicker-Linie mit Shimmer --- */
@@ -1902,8 +1909,8 @@
 }
 
 @keyframes avg-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 18%, transparent); }
-  50%      { box-shadow: 0 0 10px 2px color-mix(in oklab, var(--primary) 14%, transparent); }
+  0%, 100% { opacity: 0.18; transform: scale(1); }
+  50%      { opacity: 0.14; transform: scale(1.15); }
 }
 
 .dist-avg-label {
@@ -2094,6 +2101,7 @@
     --header-bg 0.5s cubic-bezier(0.16, 1, 0.3, 1),
     --header-border-opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  contain: layout style;
 }
 
 .site-header[data-scrolled="true"] {

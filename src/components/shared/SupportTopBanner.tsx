@@ -6,17 +6,16 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export function SupportTopBanner() {
-  const [isVisible, setIsVisible] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    // Check if top banner was dismissed
     const dismissed = localStorage.getItem("support-top-banner-dismissed");
-    if (!dismissed) {
-      setIsVisible(true);
-    }
+    if (!dismissed) setVisible(true);
+    setHydrated(true);
   }, []);
 
-  if (!isVisible) return null;
+  if (!hydrated || !visible) return null;
 
   return (
     <div className="w-full bg-muted border-b border-border py-3 md:py-4 px-4 md:px-6 lg:px-8">
@@ -50,7 +49,7 @@ export function SupportTopBanner() {
           
           <button
             onClick={() => {
-              setIsVisible(false);
+              setVisible(false);
               localStorage.setItem("support-top-banner-dismissed", "true");
             }}
             className="text-muted-foreground hover:text-foreground transition-colors p-1 md:p-1.5"

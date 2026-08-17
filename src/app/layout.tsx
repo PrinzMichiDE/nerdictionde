@@ -22,12 +22,14 @@ const publicSans = Public_Sans({
   variable: "--font-public-sans",
   subsets: ["latin"],
   display: "swap",
+  preload: true,
 });
 
 const libreBodoni = Libre_Bodoni({
   variable: "--font-libre-bodoni",
   subsets: ["latin"],
   display: "swap",
+  preload: true,
 });
 
 const siteUrl = getSiteUrl();
@@ -138,12 +140,12 @@ export default function RootLayout({
           <SupportBanner />
         </ThemeProvider>
         <Analytics />
-        {/* Google Analytics */}
+        {/* Google Analytics – lazy to avoid blocking render */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-G2MC0LJ614"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="google-analytics" strategy="afterInteractive">
+        <Script id="google-analytics" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
