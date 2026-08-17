@@ -5,7 +5,7 @@ export const SITE_NAME = "Nerdiction";
 export function getSiteUrl(): string {
   return (
     process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://nerdiction.de")
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://www.nerdiction.de")
   );
 }
 

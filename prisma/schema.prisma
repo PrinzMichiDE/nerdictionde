@@ -46,6 +46,7 @@ model Review {
   episodeReviews  EpisodeReview[]
   gameProgress    GameProgress[]
   videoChapters   VideoChapter[]
+  forumThreads    ForumThread[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -407,6 +408,7 @@ model TwitchUser {
   contentCalendar     ContentCalendarEntry[]
   multiStreamConfig   MultiStreamConfig?     @relation("MultiStreamConfigUser")
   youtubeVodQueue     YouTubeVODQueue[]
+  forumComments       ForumComment[]
 
   @@index([twitchId])
   @@index([username])
@@ -1412,4 +1414,46 @@ model YouTubeVODQueue {
 
   @@index([userId])
   @@index([status])
+}
+
+model ForumThread {
+  id              String          @id @default(cuid())
+  title           String
+  slug            String          @unique
+  category        String          // "gaming" | "movies" | "series"
+  content         String          // Markdown
+  excerpt         String          // Kurzbeschreibung
+  author          String          // Display-Name
+  reviewId        String?         // Optional: Review-bezogener Thread
+  review          Review?         @relation(fields: [reviewId], references: [id], onDelete: SetNull)
+  commentCount    Int             @default(0)
+  viewCount       Int             @default(0)
+  lastActivityAt  DateTime        @default(now())
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  comments        ForumComment[]
+
+  @@index([slug])
+  @@index([category])
+  @@index([category, createdAt])
+  @@index([lastActivityAt])
+}
+
+model ForumComment {
+  id                  String      @id @default(cuid())
+  text                String
+  author              String      // Display-Name
+  thread              ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  threadId            String
+  userId              String?     // TwitchUser ID (null = Gast/AI)
+  user                TwitchUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  isAiGenerated       Boolean     @default(false)
+  status              String      @default("approved") // "pending" | "approved" | "rejected"
+  aiModerationNote    String?
+  createdAt           DateTime    @default(now())
+
+  @@index([threadId])
+  @@index([threadId, status])
+  @@index([userId])
 }

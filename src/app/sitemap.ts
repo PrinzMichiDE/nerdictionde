@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://nerdiction.de");
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://www.nerdiction.de");
 
   // Statische Seiten
   const staticPages: MetadataRoute.Sitemap = [

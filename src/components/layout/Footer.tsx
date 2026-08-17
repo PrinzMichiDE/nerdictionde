@@ -8,6 +8,7 @@ export function Footer() {
   const navigationLinks = [
     { href: "/", label: "Startseite", icon: null },
     { href: "/reviews", label: "Alle Reviews", icon: FileText },
+    { href: "/forum", label: "Forum", icon: null },
     { href: "/releases", label: "Release Kalender", icon: null },
     { href: "/analytics", label: "Statistik", icon: BarChart3 },
   ];
