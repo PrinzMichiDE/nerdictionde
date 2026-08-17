@@ -37,12 +37,10 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
 
     let filtered = reviews;
 
-    // Filter by category
     if (selectedFilters.size > 0) {
       filtered = filtered.filter((review) => selectedFilters.has(review.category));
     }
 
-    // Filter by query
     if (trimmedQuery) {
       const lowerQuery = trimmedQuery.toLowerCase();
       filtered = filtered.filter(
@@ -55,16 +53,14 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
     return filtered.slice(0, 8);
   }, [query, selectedFilters, reviews]);
 
-  // Fetch reviews if not provided
   useEffect(() => {
     if (reviews.length === 0) {
       fetch("/api/reviews?all=true")
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) {
-            setReviews(data.slice(0, 100)); // Limit for performance
+            setReviews(data.slice(0, 100));
           } else if (data?.reviews && Array.isArray(data.reviews)) {
-            // Handle paginated response format
             setReviews(data.reviews.slice(0, 100));
           }
         })
@@ -146,8 +142,8 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
   return (
     <div ref={searchRef} className="relative w-full max-w-2xl lg:max-w-3xl">
       {/* Search Input */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+      <div className="search-field search-shine relative rounded-sm border border-input bg-background/50">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
         <Input
           ref={inputRef}
           type="text"
@@ -160,40 +156,46 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
             activeIndex >= 0 ? `search-result-${results[activeIndex]?.id}` : undefined
           }
           autoComplete="off"
-          placeholder="Suche nach Reviews... (⌘K)"
+          placeholder="Suche nach Reviews..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleInputKeyDown}
-          className="pl-11 pr-10 h-11 text-base border focus:border-primary rounded-sm"
+          className="pl-11 pr-20 h-11 text-sm border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
         />
-        {query && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
-            aria-label="Suche löschen"
-            onClick={() => {
-              setQuery("");
-              setActiveIndex(-1);
-              inputRef.current?.focus();
-            }}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
+        {/* Kbd badge */}
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 z-10">
+          {query && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-6"
+              aria-label="Suche löschen"
+              onClick={() => {
+                setQuery("");
+                setActiveIndex(-1);
+                inputRef.current?.focus();
+              }}
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          <kbd className="kbd-badge">
+            <span className="text-[10px]">⌘</span>K
+          </kbd>
+        </div>
       </div>
 
       {/* Search Results Dropdown */}
       {isOpen && (
-        <Card className="absolute top-full mt-2 w-full shadow-lg z-50 max-h-[600px] overflow-hidden">
+        <Card className="absolute top-full mt-2 w-full shadow-xl z-50 max-h-[600px] overflow-hidden border border-border/50">
           <CardContent className="p-0" id="global-search-results">
             {/* Filter Tags */}
             <div className="p-4 border-b border-border">
               <div className="flex items-center gap-2 mb-3">
-                <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium text-muted-foreground">
-                  Filter:
+                <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Filter
                 </span>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -206,13 +208,13 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
                       key={category}
                       onClick={() => toggleFilter(category)}
                       aria-pressed={isSelected}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-sm text-sm font-medium transition-colors ${
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-xs font-semibold transition-all duration-200 ${
                         isSelected
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                       }`}
                     >
-                      <Icon className="h-3.5 w-3.5" />
+                      <Icon className="h-3 w-3" />
                       {category.charAt(0).toUpperCase() + category.slice(1)}
                     </button>
                   );
@@ -240,31 +242,46 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
                         aria-selected={activeIndex === index}
                         onClick={() => handleResultClick(review.slug)}
                         onMouseEnter={() => setActiveIndex(index)}
-                        className={`w-full p-3 rounded-sm transition-colors text-left group ${
-                          activeIndex === index ? "bg-muted" : "hover:bg-muted"
+                        className={`w-full p-3 rounded-sm transition-all duration-200 text-left group ${
+                          activeIndex === index
+                            ? "bg-muted"
+                            : "hover:bg-muted"
                         }`}
                       >
                         <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-sm bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+                          <div className="p-1.5 rounded-sm bg-primary/10 text-primary group-hover:bg-primary/15 transition-colors">
                             <Icon className="h-4 w-4" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold group-hover:text-primary transition-colors line-clamp-1">
+                            <h4 className="font-semibold text-sm group-hover:text-primary transition-colors line-clamp-1">
                               {review.title}
                             </h4>
-                            <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                            <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
                               {review.content?.substring(0, 100)}...
                             </p>
                             <div className="flex items-center gap-2 mt-2">
-                              <span className="text-xs font-medium text-primary">
-                                Score: {review.score}/100
+                              <span className="text-xs font-bold text-primary tabular-nums">
+                                {review.score}/100
                               </span>
-                              <span className="text-xs text-muted-foreground">•</span>
-                              <span className="text-xs text-muted-foreground capitalize">
+                              <span className="text-xs text-muted-foreground/40">|</span>
+                              <span className="text-xs text-muted-foreground capitalize font-medium">
                                 {review.category}
                               </span>
                             </div>
                           </div>
+                          <svg
+                            className="size-4 text-muted-foreground/30 group-hover:text-primary transition-all duration-300 group-hover:translate-x-0.5 shrink-0 mt-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                            />
+                          </svg>
                         </div>
                       </button>
                     );
@@ -272,16 +289,21 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
                 </div>
               ) : query || selectedFilters.size > 0 ? (
                 <div className="p-8 text-center">
-                  <p className="text-muted-foreground">Keine Ergebnisse gefunden</p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <div className="inline-flex items-center justify-center size-12 rounded-full bg-muted mb-3">
+                    <Search className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">Keine Ergebnisse</p>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Versuche andere Suchbegriffe oder Filter
                   </p>
                 </div>
               ) : (
                 <div className="p-8 text-center">
-                  <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <p className="text-muted-foreground">Beginne mit der Suche...</p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <div className="inline-flex items-center justify-center size-12 rounded-full bg-muted mb-3">
+                    <Search className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">Beginne mit der Suche</p>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Verwende Filter oder gib einen Suchbegriff ein
                   </p>
                 </div>
@@ -291,21 +313,21 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
             {/* Quick Actions */}
             {!query && selectedFilters.size === 0 && (
               <div className="p-4 border-t border-border bg-muted/30">
-                <p className="text-xs font-medium text-muted-foreground mb-2">
-                  Quick Actions:
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2.5">
+                  Schnellzugriff
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Link
                     href="/reviews"
-                    className="px-3 py-1.5 rounded-sm bg-background border border-border hover:border-primary hover:text-primary text-sm font-medium transition-colors"
+                    className="px-3 py-1.5 rounded-sm bg-background border border-border hover:border-primary/40 hover:text-primary text-xs font-semibold transition-all duration-200"
                   >
                     Alle Reviews
                   </Link>
                   <Link
                     href="/reviews?sort=score-desc"
-                    className="px-3 py-1.5 rounded-sm bg-background border border-border hover:border-primary hover:text-primary text-sm font-medium transition-colors"
+                    className="px-3 py-1.5 rounded-sm bg-background border border-border hover:border-primary/40 hover:text-primary text-xs font-semibold transition-all duration-200"
                   >
-                    Top Reviews
+                    Top Bewertete
                   </Link>
                 </div>
               </div>
