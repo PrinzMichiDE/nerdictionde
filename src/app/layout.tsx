@@ -153,6 +153,7 @@ export default function RootLayout({
             gtag('config', 'G-G2MC0LJ614');
           `}
         </Script>
+        <Analytics />
       </body>
     </html>
   );
