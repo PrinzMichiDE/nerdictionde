@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MessageSquare, Eye, Clock, Gamepad2, Film, Tv } from "lucide-react";
+import { VoteButtons } from "@/components/shared/VoteButtons";
 
 const categoryConfig = {
   gaming: { label: "Gaming", icon: Gamepad2, color: "text-purple-500 dark:text-purple-400" },
@@ -8,6 +9,7 @@ const categoryConfig = {
 } as const;
 
 interface ForumThreadCardProps {
+  id: string;
   title: string;
   slug: string;
   category: string;
@@ -15,6 +17,7 @@ interface ForumThreadCardProps {
   author: string;
   commentCount: number;
   viewCount: number;
+  score?: number;
   lastActivityAt: string | Date;
 }
 
@@ -34,6 +37,7 @@ function timeAgo(date: Date | string): string {
 }
 
 export function ForumThreadCard({
+  id,
   title,
   slug,
   category,
@@ -41,6 +45,7 @@ export function ForumThreadCard({
   author,
   commentCount,
   viewCount,
+  score = 0,
   lastActivityAt,
 }: ForumThreadCardProps) {
   const config = categoryConfig[category as keyof typeof categoryConfig] ?? categoryConfig.gaming;
@@ -52,6 +57,12 @@ export function ForumThreadCard({
       className="group block border border-border rounded-md p-5 bg-card hover:border-muted-foreground/30 transition-all"
     >
       <div className="flex items-start gap-4">
+        <div
+          className="shrink-0 pt-1"
+          onClick={(e) => e.preventDefault()}
+        >
+          <VoteButtons targetType="thread" targetId={id} initialScore={score} />
+        </div>
         <div className="flex-1 min-w-0 space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider ${config.color}`}>

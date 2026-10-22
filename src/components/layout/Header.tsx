@@ -7,6 +7,7 @@ import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { GlobalSearch } from "@/components/shared/GlobalSearch";
 import { BrandMark } from "@/components/shared/BrandMark";
+import { ProfileLink } from "@/components/shared/ProfileLink";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -76,6 +77,7 @@ export function Header() {
         {/* Actions */}
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
           <ThemeToggle />
+          <ProfileLink />
           <MobileNav />
         </div>
       </div>

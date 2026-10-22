@@ -17,7 +17,8 @@
     "generate:icons": "node scripts/generate-favicons.mjs",
     "create-game-reviews": "tsx scripts/create-200-game-reviews.ts",
     "regenerate-movie-series": "tsx scripts/regenerate-movie-series-content.ts",
-    "regenerate-review-content": "tsx scripts/regenerate-review-content.ts"
+    "regenerate-review-content": "tsx scripts/regenerate-review-content.ts",
+    "news:sync": "tsx scripts/generate-news.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -37,6 +38,7 @@
     "@tavily/core": "^0.6.4",
     "@tiptap/react": "^3.14.0",
     "@tiptap/starter-kit": "^3.14.0",
+    "@types/web-push": "^3.6.4",
     "@types/xml2js": "^0.4.14",
     "@vercel/analytics": "^1.6.1",
     "@vercel/blob": "^2.0.0",
@@ -63,6 +65,7 @@
     "rss-parser": "^3.13.0",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.4.0",
+    "web-push": "^3.6.7",
     "xml2js": "^0.6.2",
     "zod": "^4.3.4"
   },

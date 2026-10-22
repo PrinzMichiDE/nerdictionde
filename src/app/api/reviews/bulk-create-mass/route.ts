@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getIGDBGamesBulkLarge, BulkQueryOptions } from "@/lib/igdb";
-import { 
-  processGame, 
-  processMovie, 
-  processSeries, 
-  generateSlug 
+import {
+  processGame,
+  processMovie,
+  processSeries,
+  processHardware,
+  generateSlug,
 } from "@/lib/review-generation";
 import { requireAdminAuth } from "@/lib/auth";
 import { createJob, updateJob, addToQueue, updateQueueItem, getJob } from "@/lib/job-status";
@@ -12,8 +13,10 @@ import { resumeRunningJobs } from "@/lib/job-resume";
 import { randomUUID } from "crypto";
 import { BulkQueryOptions as TMDBBulkQueryOptions } from "@/lib/tmdb";
 import { getTMDBMoviesBulkLarge, getTMDBSeriesBulkLarge } from "@/lib/tmdb-large";
+import { HARDWARE_CATALOG } from "@/lib/hardware-catalog";
+import prisma from "@/lib/prisma";
 
-type ReviewCategory = "game" | "movie" | "series";
+type ReviewCategory = "game" | "movie" | "series" | "hardware";
 
 interface BulkCreateMassOptions {
   category: ReviewCategory;
@@ -96,7 +99,40 @@ export async function POST(req: NextRequest) {
           items = await getTMDBSeriesBulkLarge(count, seriesQueryOptions);
           console.log(`✅ Fetched ${items.length} series from TMDB (requested: ${count})`);
           break;
-        
+
+        case "hardware":
+          // Upsert catalog products into the Hardware table and use those records
+          for (const item of HARDWARE_CATALOG.slice(0, count)) {
+            const slugBase = `${item.manufacturer}-${item.model || item.name}`
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-|-$/g, "");
+            let slug = slugBase;
+            let attempt = 0;
+            while (await prisma.hardware.findUnique({ where: { slug } })) {
+              attempt++;
+              slug = `${slugBase}-${attempt}`;
+            }
+            const hw = await prisma.hardware.upsert({
+              where: { slug },
+              create: {
+                name: item.name,
+                name_en: item.name,
+                slug,
+                type: item.type,
+                manufacturer: item.manufacturer,
+                model: item.model || null,
+                specs: item.specs,
+                msrp: item.msrp ?? null,
+                releaseDate: item.releaseDate ? new Date(item.releaseDate) : null,
+              },
+              update: {},
+            });
+            items.push(hw);
+          }
+          console.log(`✅ Prepared ${items.length} hardware products from catalog`);
+          break;
+
         default:
           return NextResponse.json(
             { error: `Unsupported category: ${category}` },
@@ -305,10 +341,16 @@ async function processItemsAsync(
               () => processSeries(item, { status, skipExisting: true })
             );
             break;
-          
+
+          case "hardware":
+            result = await retryWithBackoff(
+              () => processHardware(item, { status, skipExisting: true })
+            );
+            break;
+
           default:
             result = { success: false, error: `Unsupported category: ${category}` };
-        }
+          }
 
         if (result.success && result.reviewId) {
           results.successful++;

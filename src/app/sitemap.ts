@@ -1,6 +1,8 @@
 import { MetadataRoute } from "next";
 import prisma from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
@@ -19,6 +21,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/news`,
+      lastModified: new Date(),
+      changeFrequency: "hourly",
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/releases`,
@@ -113,6 +121,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
+  // Dynamische Seiten: News (inkl. EN-Variante über hreflang)
+  const newsArticles = await prisma.newsArticle.findMany({
+    where: {
+      status: "published",
+    },
+    select: {
+      slug: true,
+      updatedAt: true,
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
+
+  const newsPages: MetadataRoute.Sitemap = newsArticles.map((article) => {
+    const url = `${baseUrl}/news/${article.slug}`;
+    return {
+      url,
+      lastModified: article.updatedAt,
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+      alternates: {
+        languages: {
+          de: url,
+          en: `${url}?lang=en`,
+          "x-default": url,
+        },
+      },
+    };
+  });
+
   // Kombiniere alle Seiten
-  return [...staticPages, ...reviewPages];
+  return [...staticPages, ...reviewPages, ...newsPages];
 }

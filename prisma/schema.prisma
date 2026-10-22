@@ -36,9 +36,12 @@ model Review {
   metaDescription String? // SEO meta description (150-160 chars)
   metaKeywords    String? // SEO meta keywords (comma-separated)
   releaseDate     DateTime? // Release date for games, movies, series, hardware
-  hardware        Hardware?       @relation(fields: [hardwareId], references: [id], onDelete: SetNull)
+  userRatingCount Int           @default(0)
+  userRatingAvg   Float         @default(0)
+  hardware        Hardware?     @relation(fields: [hardwareId], references: [id], onDelete: SetNull)
   comments        Comment[]
   userRatings     UserRating[]
+  bookmarks       Bookmark[]
   tags            ReviewTag[]
   priceHistory    PriceHistory[]
   deals           Deal[]
@@ -47,8 +50,8 @@ model Review {
   gameProgress    GameProgress[]
   videoChapters   VideoChapter[]
   forumThreads    ForumThread[]
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   @@index([slug])
   @@index([category, status])
@@ -70,14 +73,19 @@ model Comment {
 }
 
 model UserRating {
-  id        String   @id @default(cuid())
+  id        String      @id @default(cuid())
+  userId    String
+  user      TwitchUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
   score     Int // 0-10
-  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  text      String?     @db.Text
+  review    Review      @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   reviewId  String
-  createdAt DateTime @default(now())
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
-  @@unique([reviewId]) // Ein Rating pro Review (später mit User-ID erweitern)
+  @@unique([userId, reviewId])
   @@index([reviewId])
+  @@index([userId])
 }
 
 model Hardware {
@@ -409,6 +417,11 @@ model TwitchUser {
   multiStreamConfig   MultiStreamConfig?     @relation("MultiStreamConfigUser")
   youtubeVodQueue     YouTubeVODQueue[]
   forumComments       ForumComment[]
+  userRatings         UserRating[]
+  votes               Vote[]
+  bookmarks           Bookmark[]
+  pushSubscriptions   PushSubscription[]
+  notificationPrefs   NotificationPreference? @relation("NotificationPreferenceUser")
 
   @@index([twitchId])
   @@index([username])
@@ -1428,6 +1441,7 @@ model ForumThread {
   review          Review?         @relation(fields: [reviewId], references: [id], onDelete: SetNull)
   commentCount    Int             @default(0)
   viewCount       Int             @default(0)
+  score           Int             @default(0)
   lastActivityAt  DateTime        @default(now())
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
@@ -1451,9 +1465,124 @@ model ForumComment {
   isAiGenerated       Boolean     @default(false)
   status              String      @default("approved") // "pending" | "approved" | "rejected"
   aiModerationNote    String?
+  score               Int         @default(0)
   createdAt           DateTime    @default(now())
 
   @@index([threadId])
   @@index([threadId, status])
   @@index([userId])
+}
+
+// Community Models
+
+model Vote {
+  id         String      @id @default(cuid())
+  userId     String
+  user       TwitchUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetType String      // "thread" | "comment" | "review"
+  targetId   String
+  value      Int         // -1 oder 1
+  createdAt  DateTime    @default(now())
+
+  @@unique([userId, targetType, targetId])
+  @@index([targetType, targetId])
+}
+
+model Bookmark {
+  id        String      @id @default(cuid())
+  userId    String
+  user      TwitchUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewId  String
+  review    Review      @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+
+  @@unique([userId, reviewId])
+  @@index([userId])
+}
+
+// Streaming Tools - Game Overlays
+
+model GameOverlay {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  category     String   // "minigame" | "animated" | "chat-game" | "alert"
+  description  String?
+  htmlCode     String   @db.Text
+  config       Json?
+  previewImage String?
+  license      String   // "MIT" | "CC0" | "CC-BY"
+  author       String?
+  sourceUrl    String?
+  isPublic     Boolean  @default(true)
+  downloads    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([category])
+  @@index([isPublic])
+}
+
+// News (KI-generierte Beiträge aus RSS-Feeds)
+
+model NewsArticle {
+  id              String   @id @default(cuid())
+  title           String
+  title_en        String?
+  slug            String   @unique
+  excerpt         String?
+  excerpt_en      String?
+  content         String // Markdown (DE)
+  content_en      String? // Markdown (EN)
+  category        String   @default("Gaming") // "Gaming" | "Filme & Serien" | "Hardware" | "Technik" | "Unterhaltung" | "Wirtschaft"
+  tags            String[]
+  sourceUrl       String? // Original-Link aus dem RSS-Feed
+  sourceName      String? // Name der ursprünglichen Publikation
+  rssGuid         String?  @unique // Dedupe-Schlüssel aus dem Feed
+  status          String   @default("published") // "draft" | "published"
+  metaDescription String?
+  metaKeywords    String?
+  publishedAt     DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([slug])
+  @@index([status, publishedAt])
+  @@index([category])
+  @@index([rssGuid])
+}
+
+// News (KI-generierte Beiträge aus RSS-Feeds)
+
+model NewsSyncState {
+  id        String   @id @default("singleton")
+  lastRunAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Push Notifications
+
+model PushSubscription {
+  id        String      @id @default(cuid())
+  userId    String
+  user      TwitchUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime    @default(now())
+
+  @@index([userId])
+  @@unique([endpoint])
+}
+
+model NotificationPreference {
+  id       String      @id @default(cuid())
+  userId   String      @unique
+  user     TwitchUser  @relation("NotificationPreferenceUser", fields: [userId], references: [id], onDelete: Cascade)
+  games    Boolean     @default(true)
+  movies   Boolean     @default(true)
+  series   Boolean     @default(true)
+  hardware Boolean     @default(true)
+  deals    Boolean     @default(true)
+  forum    Boolean     @default(true)
 }

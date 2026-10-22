@@ -4,7 +4,7 @@ import { ForumCategoryFilter } from "@/components/forum/ForumCategoryFilter";
 import { ForumHeader } from "@/components/forum/ForumHeader";
 import { Metadata } from "next";
 import { getSiteUrl } from "@/lib/seo";
-import { cookies } from "next/headers";
+import { getServerSession } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "Forum - Nerdiction",
@@ -42,6 +42,7 @@ async function fetchThreads(validCategory?: string) {
           author: true,
           commentCount: true,
           viewCount: true,
+          score: true,
           lastActivityAt: true,
           createdAt: true,
           _count: { select: { comments: { where: { status: "approved" } } } },
@@ -53,23 +54,6 @@ async function fetchThreads(validCategory?: string) {
     return { threads, totalThreads };
   } catch {
     return { threads: [], totalThreads: 0 };
-  }
-}
-
-async function getSession() {
-  try {
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get("twitch_session")?.value;
-    if (!sessionToken) return null;
-
-    const { jwtVerify } = await import("jose");
-    const JWT_SECRET = new TextEncoder().encode(
-      process.env.JWT_SECRET || "your-secret-key-change-in-production-min-32-chars"
-    );
-    const payload = (await jwtVerify(sessionToken, JWT_SECRET)).payload as unknown as { username?: string };
-    return { username: payload.username ?? null };
-  } catch {
-    return null;
   }
 }
 
@@ -85,7 +69,7 @@ export default async function ForumPage({
       : undefined;
 
   const { threads, totalThreads } = await fetchThreads(validCategory);
-  const session = await getSession();
+  const session = await getServerSession();
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
@@ -101,6 +85,7 @@ export default async function ForumPage({
           threads.map((thread) => (
             <ForumThreadCard
               key={thread.id}
+              id={thread.id}
               title={thread.title}
               slug={thread.slug}
               category={thread.category}
@@ -108,6 +93,7 @@ export default async function ForumPage({
               author={thread.author}
               commentCount={thread._count.comments}
               viewCount={thread.viewCount}
+              score={thread.score}
               lastActivityAt={thread.lastActivityAt}
             />
           ))

@@ -4,7 +4,17 @@ import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
 import { uploadImage } from "@/lib/blob";
 import { calculatePublicationDate } from "@/lib/date-utils";
 import { TMDBMovie, TMDBSeries, getTMDBImageUrl, getTMDBMovieById, getTMDBSeriesById } from "@/lib/tmdb";
-import { searchGameProduct, buildGameResearchSummary, buildResearchSummary, searchMovieProduct, searchSeriesProduct } from "@/lib/tavily";
+import {
+  searchGameProduct,
+  buildGameResearchSummary,
+  buildResearchSummary,
+  searchMovieProduct,
+  searchSeriesProduct,
+  searchHardwareProduct,
+  extractProductSpecs,
+  extractTavilyImages,
+} from "@/lib/tavily";
+import { generateReviewImages } from "@/lib/image-generation";
 import type { TavilySearchResponse } from "@/lib/tavily";
 import type { SteamGameInfo } from "@/lib/steam";
 import { getIGDBGameById } from "@/lib/igdb";
@@ -15,6 +25,8 @@ import {
 import { generateAndAttachTagsForReview } from "@/lib/tag-generation";
 import { replaceImagePlaceholders } from "@/lib/image-placeholder";
 import { generateSEOMetadata } from "@/lib/seo-generation";
+
+export type ReviewCategoryType = "game" | "movie" | "series" | "hardware";
 
 // Helper function to generate slug from title
 export function generateSlug(title: string): string {
@@ -310,7 +322,7 @@ export function computeScoreBand(
 }
 
 interface StructuredReviewPromptOptions {
-  category: "game" | "movie" | "series";
+  category: ReviewCategoryType;
   itemName: string;
   contextLines: string[];
   sections: ReviewSection[];
@@ -342,7 +354,7 @@ export function buildStructuredReviewPrompt(options: StructuredReviewPromptOptio
   } = options;
 
   const categoryLabel =
-    category === "game" ? "Game-Review" : category === "movie" ? "Film-Review" : "Serien-Review";
+    category === "game" ? "Game-Review" : category === "movie" ? "Film-Review" : category === "series" ? "Serien-Review" : "Hardware-Review";
 
   const retryHint = isRetry
     ? `HINWEIS: Dein letzter Versuch wurde wegen Überlänge abgeschnitten. Halte dich strikt an ca. ${wordTarget} Wörter pro Sprache, damit das JSON vollständig bleibt.`
@@ -924,6 +936,294 @@ export async function processGame(
     return { success: true, reviewId: review.id };
   } catch (error: any) {
     console.error(`Error processing game ${gameData.name}:`, error);
+    return { success: false, error: error.message };
+  }
+}
+
+const HARDWARE_TYPE_LABELS: Record<string, string> = {
+  gpu: "Grafikkarte",
+  cpu: "Prozessor",
+  motherboard: "Mainboard",
+  ram: "Arbeitsspeicher",
+  storage: "SSD / Festplatte",
+  psu: "Netzteil",
+  case: "Gehäuse",
+  cooler: "Kühler",
+  monitor: "Monitor",
+  keyboard: "Tastatur",
+  mouse: "Maus",
+  headset: "Headset",
+  controller: "Controller",
+  console: "Konsole",
+};
+
+/**
+ * Generate hardware review content using OpenAI with Tavily research + specs extraction.
+ */
+export async function generateHardwareReviewContent(
+  hardwareData: any,
+  retryCount = 0,
+  options?: {
+    tavilySearchResults?: TavilySearchResponse;
+  }
+): Promise<{
+  de: { title: string; content: string; pros: string[]; cons: string[] };
+  en: { title: string; content: string; pros: string[]; cons: string[] };
+  score: number;
+  specs?: any;
+}> {
+  const isRetry = retryCount > 0;
+
+  const name = hardwareData.name || "Unbekanntes Produkt";
+  const manufacturer = hardwareData.manufacturer || "";
+  const model = hardwareData.model || "";
+  const type = hardwareData.type || "hardware";
+  const typeLabel = HARDWARE_TYPE_LABELS[type] || "Hardware";
+
+  // Tavily research (best-effort, non-blocking)
+  let tavilySearchResults = options?.tavilySearchResults;
+  if (!tavilySearchResults) {
+    try {
+      console.log(`🔍 Searching Tavily for hardware ${name}...`);
+      tavilySearchResults = await searchHardwareProduct(name, manufacturer);
+    } catch (error) {
+      console.warn(`⚠️  Tavily search failed for ${name}:`, error);
+    }
+  }
+
+  const extractedSpecs = tavilySearchResults ? extractProductSpecs(tavilySearchResults) : null;
+
+  const contextLines = [
+    `Produktname: ${name}`,
+    manufacturer ? `Hersteller: ${manufacturer}` : "",
+    model ? `Modell: ${model}` : "",
+    `Kategorie: ${typeLabel}`,
+    hardwareData.releaseDate
+      ? `Erscheinungsdatum: ${new Date(hardwareData.releaseDate).toLocaleDateString("de-DE")}`
+      : "",
+    hardwareData.msrp ? `UVP / Straßenpreis: ${hardwareData.msrp} EUR` : "",
+    extractedSpecs?.price ? `Recherchierter Preis: ${extractedSpecs.price}` : "",
+    hardwareData.specs && typeof hardwareData.specs === "object"
+      ? `Technische Daten (Hersteller): ${JSON.stringify(hardwareData.specs)}`
+      : "",
+    extractedSpecs?.specs && Object.keys(extractedSpecs.specs).length > 0
+      ? `Technische Daten (Recherche): ${JSON.stringify(extractedSpecs.specs)}`
+      : "",
+    extractedSpecs?.description ? `Beschreibung: ${extractedSpecs.description}` : "",
+    ...(tavilySearchResults ? buildResearchSummary(tavilySearchResults, 6, 500) : []),
+  ].filter(Boolean);
+
+  const sections: ReviewSection[] = [
+    {
+      de: "Einleitung",
+      en: "Introduction",
+      description: "Stimme den Leser ein: Worum geht es, warum ist das Produkt relevant, Einordnung in Markt und Kategorie.",
+    },
+    {
+      de: "Design & Verarbeitung",
+      en: "Design & Build Quality",
+      description: "Materialien, Haptik, Optik, RGB-Beleuchtung, Platzierung von Anschlüssen, Verarbeitungsqualität.",
+    },
+    {
+      de: "Leistung & Benchmarks",
+      en: "Performance & Benchmarks",
+      description: "Messbare Leistung, Vergleich mit Vorgänger und Konkurrenz, reale Anwendungsfälle (Gaming, Produktivität).",
+    },
+    {
+      de: "Features & Konnektivität",
+      en: "Features & Connectivity",
+      description: "Schnittstellen, Software, Besonderheiten, mitgeliefertes Zubehör, Kompatibilität.",
+    },
+    {
+      de: "Preis & Leistung",
+      en: "Price & Value",
+      description: "Straßenpreis, Positionierung im Markt, Aufpreis gegenüber der Konkurrenz, Wann es sich lohnt.",
+    },
+    {
+      de: "Vergleich mit Alternativen",
+      en: "Comparison with Alternatives",
+      description: "Direkter Vergleich mit 2-3 Konkurrenten in der gleichen Preis- und Leistungsklasse.",
+    },
+    {
+      de: "Für wen lohnt sich das Produkt?",
+      en: "Who Is This For?",
+      description: "Zielgruppe, Anwendungsfall, Einsteiger vs. Enthusiast, Kaufempfehlung.",
+    },
+    {
+      de: "Fazit",
+      en: "Verdict",
+      description: "Gesamturteil, Begründung des Scores und klare Kaufempfehlung.",
+    },
+  ];
+
+  const referenceRatings: string[] = [];
+  if (extractedSpecs?.rating) {
+    referenceRatings.push(`Fachpresse/Community ca. ${extractedSpecs.rating}/10`);
+  }
+
+  const scoreBand = extractedSpecs?.rating
+    ? computeScoreBand(extractedSpecs.rating)
+    : undefined;
+
+  const prompt = buildStructuredReviewPrompt({
+    category: "hardware",
+    itemName: name,
+    contextLines,
+    sections,
+    wordTarget: 1600,
+    imageCount: 4,
+    isRetry,
+    includeSpecs: true,
+    referenceRating: referenceRatings.join("; ") || undefined,
+    scoreBand,
+  });
+
+  try {
+    const result = await generateContent(prompt, name, retryCount);
+    return result;
+  } catch (error) {
+    console.error(`Final error generating hardware content for ${name}:`, error);
+    return {
+      de: {
+        title: `${name} Test`,
+        content: `## Einleitung\n\n${name} ist ein interessantes Produkt im Bereich ${typeLabel}, das es wert ist, genauer betrachtet zu werden.\n\n## Fazit\n\nEin solides Produkt mit eigenen Stärken und Schwächen.`,
+        pros: ["Gute Leistung", "Solide Verarbeitung"],
+        cons: ["Preis könnte günstiger sein"],
+      },
+      en: {
+        title: `${name} Review`,
+        content: `## Introduction\n\n${name} is an interesting ${typeLabel.toLowerCase()} worth taking a closer look at.\n\n## Verdict\n\nA solid product with its own strengths and weaknesses.`,
+        pros: ["Good performance", "Solid build"],
+        cons: ["Price could be lower"],
+      },
+      score: 70,
+    };
+  }
+}
+
+/**
+ * Process a single hardware product: generate AI review, images, comments and tags.
+ */
+export async function processHardware(
+  hardwareData: any,
+  options: { status: "draft" | "published"; skipExisting: boolean }
+): Promise<{ success: boolean; reviewId?: string; error?: string }> {
+  try {
+    // Prevent duplicates by hardwareId when available
+    if (hardwareData.id) {
+      const existingByHardware = await prisma.review.findFirst({
+        where: { hardwareId: hardwareData.id },
+      });
+      if (existingByHardware) {
+        return { success: false, error: "Already exists" };
+      }
+    }
+
+    const reviewContent = await generateHardwareReviewContent(hardwareData, 0);
+
+    const baseName = reviewContent.de.title || hardwareData.name;
+    let slug = generateSlug(baseName);
+    let slugAttempts = 0;
+    while (await prisma.review.findUnique({ where: { slug } })) {
+      slugAttempts++;
+      if (slugAttempts > 10) {
+        slug = `${generateSlug(baseName)}-${Date.now().toString(36)}`;
+        break;
+      }
+      slug = `${generateSlug(baseName)}-${Math.random().toString(36).substring(2, 7)}`;
+    }
+
+    // Generate images (Tavily first, then DALL-E fallback)
+    let imageUrls: string[] = [];
+    let tavilyResults: TavilySearchResponse | null = null;
+    try {
+      tavilyResults = await searchHardwareProduct(hardwareData.name, hardwareData.manufacturer);
+    } catch {
+      // non-blocking
+    }
+
+    try {
+      imageUrls = await generateReviewImages({
+        productName: hardwareData.name,
+        productType: HARDWARE_TYPE_LABELS[hardwareData.type] || "Hardware",
+        manufacturer: hardwareData.manufacturer,
+        style: "professional",
+        count: 4,
+        tavilySearchResults: tavilyResults || undefined,
+      });
+    } catch (error) {
+      console.warn(`⚠️  Image generation failed for ${hardwareData.name}:`, error);
+    }
+
+    // Also try to reuse existing product images from the Hardware table
+    if (hardwareData.images && Array.isArray(hardwareData.images) && hardwareData.images.length > 0) {
+      imageUrls = [...hardwareData.images, ...imageUrls].slice(0, 6);
+    }
+
+    const contentDe = replaceImagePlaceholders(reviewContent.de.content, imageUrls, hardwareData.name);
+    const contentEn = replaceImagePlaceholders(reviewContent.en.content, imageUrls, hardwareData.name);
+
+    let seoMeta: { metaDescription: string; metaKeywords: string } | null = null;
+    try {
+      seoMeta = await generateSEOMetadata(baseName, contentDe, "hardware");
+    } catch {
+      // Non-blocking
+    }
+
+    const manufacturer = hardwareData.manufacturer || "";
+    const specs = reviewContent.specs || hardwareData.specs || null;
+    const releaseDate = hardwareData.releaseDate ? new Date(hardwareData.releaseDate) : null;
+
+    const review = await prisma.review.create({
+      data: {
+        title: reviewContent.de.title,
+        title_en: reviewContent.en.title,
+        slug,
+        category: "hardware",
+        content: contentDe,
+        content_en: contentEn,
+        score: reviewContent.score,
+        pros: reviewContent.de.pros,
+        pros_en: reviewContent.en.pros,
+        cons: reviewContent.de.cons,
+        cons_en: reviewContent.en.cons,
+        images: imageUrls,
+        status: options.status,
+        hardwareId: hardwareData.id || null,
+        specs,
+        metadata: {
+          manufacturer,
+          model: hardwareData.model || null,
+          type: hardwareData.type || null,
+          msrp: hardwareData.msrp ?? null,
+          releaseDate: hardwareData.releaseDate || null,
+        },
+        metaDescription: seoMeta?.metaDescription ?? null,
+        metaKeywords: seoMeta?.metaKeywords ?? null,
+        releaseDate,
+        createdAt: calculatePublicationDate(releaseDate ? releaseDate.getTime() / 1000 : undefined),
+      },
+    });
+
+    generateAndSaveCommentsForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      score: reviewContent.score,
+      pros: reviewContent.de.pros,
+      cons: reviewContent.de.cons,
+      category: "hardware",
+    }).catch((e) => console.warn("Comment generation for hardware review failed:", e));
+
+    generateAndAttachTagsForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      category: "hardware",
+      score: reviewContent.score,
+      metadata: { genres: [manufacturer, HARDWARE_TYPE_LABELS[hardwareData.type] || "Hardware"].filter(Boolean) },
+      contentExcerpt: reviewContent.de.content?.substring(0, 500),
+    }).catch((e) => console.warn("Tag generation for hardware review failed:", e));
+
+    return { success: true, reviewId: review.id };
+  } catch (error: any) {
+    console.error(`Error processing hardware ${hardwareData.name}:`, error);
     return { success: false, error: error.message };
   }
 }

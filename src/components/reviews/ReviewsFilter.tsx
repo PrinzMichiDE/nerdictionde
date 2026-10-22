@@ -12,6 +12,7 @@ import {
   Gamepad2,
   Film,
   Tv,
+  Cpu,
   RotateCcw,
   SlidersHorizontal,
 } from "lucide-react";
@@ -25,12 +26,14 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useSwipe } from "@/lib/use-swipe";
 
 export interface CategoryCounts {
   all: number;
   game: number;
   movie: number;
   series: number;
+  hardware: number;
 }
 
 interface ReviewsFilterProps {
@@ -42,6 +45,7 @@ const categoryTabs = [
   { value: "game", label: "Games", icon: Gamepad2, color: "var(--chart-3)" },
   { value: "movie", label: "Filme", icon: Film, color: "var(--chart-2)" },
   { value: "series", label: "Serien", icon: Tv, color: "var(--chart-5)" },
+  { value: "hardware", label: "Hardware", icon: Cpu, color: "var(--chart-1)" },
 ] as const;
 
 const scoreKeyShortcut = "/";
@@ -124,6 +128,20 @@ export function ReviewsFilter({ categoryCounts }: ReviewsFilterProps) {
     router.push("/reviews", { scroll: false });
   };
 
+  // Swipe left/right on the tabs switches to the next/previous category (mobile PWA)
+  const swipe = useSwipe({
+    onSwipeLeft: () => {
+      const idx = categoryTabs.findIndex((t) => t.value === category);
+      const next = categoryTabs[(idx + 1) % categoryTabs.length];
+      if (next) handleCategoryChange(next.value);
+    },
+    onSwipeRight: () => {
+      const idx = categoryTabs.findIndex((t) => t.value === category);
+      const prev = categoryTabs[(idx - 1 + categoryTabs.length) % categoryTabs.length];
+      if (prev) handleCategoryChange(prev.value);
+    },
+  });
+
   const hasActiveFilters =
     query ||
     category !== "all" ||
@@ -142,6 +160,7 @@ export function ReviewsFilter({ categoryCounts }: ReviewsFilterProps) {
             role="tablist"
             aria-label="Kategorie filtern"
             className="flex items-center gap-1 overflow-x-auto pb-1 lg:pb-0"
+            {...swipe}
           >
             {categoryTabs.map((tab) => {
               const Icon = tab.icon;

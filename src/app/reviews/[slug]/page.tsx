@@ -19,6 +19,7 @@ import { GameMetadata } from "@/components/reviews/GameMetadata";
 import { MovieSeriesMetadata } from "@/components/reviews/MovieSeriesMetadata";
 import { TableOfContents } from "@/components/reviews/TableOfContents";
 import { RelatedReviews } from "@/components/reviews/RelatedReviews";
+import { HardwareMetadata } from "@/components/reviews/HardwareMetadata";
 import { ReviewProgress } from "@/components/reviews/ReviewProgress";
 import { ShareButtons } from "@/components/reviews/ShareButtons";
 import { YouTubeEmbed } from "@/components/reviews/YouTubeEmbed";
@@ -27,6 +28,9 @@ import { GameProgressTracker } from "@/components/reviews/GameProgressTracker";
 import { SpoilerWarning } from "@/components/reviews/SpoilerWarning";
 import { SpoilerSection } from "@/components/reviews/SpoilerSection";
 import { getCategoryStyle } from "@/lib/review-category";
+import { getServerSession } from "@/lib/session";
+import { UserRatingSection } from "@/components/reviews/UserRatingSection";
+import { BookmarkButton } from "@/components/shared/BookmarkButton";
 
 export async function generateMetadata({
   params,
@@ -181,6 +185,21 @@ export default async function ReviewDetailPage({
   });
 
   if (!review) notFound();
+
+  const session = await getServerSession();
+
+  const [userRating, isBookmarked] = await Promise.all([
+    session
+      ? prisma.userRating.findUnique({
+          where: { userId_reviewId: { userId: session.userId, reviewId: review.id } },
+        })
+      : null,
+    session
+      ? prisma.bookmark.findUnique({
+          where: { userId_reviewId: { userId: session.userId, reviewId: review.id } },
+        })
+      : null,
+  ]);
 
   const title = isEn && review.title_en ? review.title_en : review.title;
   const content = isEn && review.content_en ? review.content_en : review.content;
@@ -421,8 +440,14 @@ export default async function ReviewDetailPage({
               {title}
             </h1>
 
-            <div className="pt-1">
+            <div className="pt-1 flex items-center gap-1">
               <ShareButtons title={title} url={`/reviews/${slug}`} />
+              {session && (
+                <BookmarkButton
+                  reviewId={review.id}
+                  initialBookmarked={!!isBookmarked}
+                />
+              )}
             </div>
           </div>
 
@@ -601,9 +626,18 @@ export default async function ReviewDetailPage({
 
               {/* Series Metadata Section */}
               {review.category === "series" && review.metadata && (
-                <MovieSeriesMetadata 
-                  metadata={review.metadata as any} 
+                <MovieSeriesMetadata
+                  metadata={review.metadata as any}
                   category="series"
+                  isEn={isEn}
+                />
+              )}
+
+              {/* Hardware Metadata Section */}
+              {review.category === "hardware" && (
+                <HardwareMetadata
+                  metadata={review.metadata as any}
+                  specs={review.specs as Record<string, any> | null}
                   isEn={isEn}
                 />
               )}
@@ -752,6 +786,14 @@ export default async function ReviewDetailPage({
             </div>
 
           </div>
+
+          <UserRatingSection
+            reviewId={review.id}
+            userRatingAvg={review.userRatingAvg}
+            userRatingCount={review.userRatingCount}
+            isLoggedIn={!!session}
+            initialUserRating={userRating ? { score: userRating.score, text: userRating.text } : null}
+          />
         </aside>
       </div>
     </article>

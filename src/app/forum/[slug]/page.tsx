@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import { getSiteUrl } from "@/lib/seo";
 import { ForumCommentSection } from "@/components/forum/ForumCommentSection";
 import { ArrowLeft, MessageSquare, Eye, Clock, Gamepad2, Film, Tv } from "lucide-react";
-import { cookies } from "next/headers";
+import { getServerSession } from "@/lib/session";
 
 export async function generateMetadata({
   params,
@@ -82,6 +82,15 @@ export default async function ForumThreadPage({
         comments: {
           where: { status: "approved" },
           orderBy: { createdAt: "asc" },
+          select: {
+            id: true,
+            text: true,
+            author: true,
+            userId: true,
+            isAiGenerated: true,
+            score: true,
+            createdAt: true,
+          },
         },
       },
     });
@@ -106,20 +115,10 @@ export default async function ForumThreadPage({
   let isLoggedIn = false;
   let displayName: string | null = null;
 
-  try {
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get("twitch_session")?.value;
-    if (sessionToken) {
-      const { jwtVerify } = await import("jose");
-      const JWT_SECRET = new TextEncoder().encode(
-        process.env.JWT_SECRET || "your-secret-key-change-in-production-min-32-chars"
-      );
-      const payload = (await jwtVerify(sessionToken, JWT_SECRET)).payload as unknown as { username?: string };
-      isLoggedIn = true;
-      displayName = payload.username ?? null;
-    }
-  } catch {
-    // not logged in
+  const session = await getServerSession();
+  if (session) {
+    isLoggedIn = true;
+    displayName = session.username;
   }
 
   const formattedDate = thread.createdAt.toLocaleDateString("de-DE", {

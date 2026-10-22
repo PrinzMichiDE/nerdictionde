@@ -4,6 +4,7 @@ import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Footer } from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import { CursorGlow } from "@/components/shared/CursorGlow";
@@ -11,6 +12,9 @@ import { BackToTop } from "@/components/shared/BackToTop";
 import { SupportTopBanner } from "@/components/shared/SupportTopBanner";
 import { SupportBanner } from "@/components/shared/SupportBanner";
 import { ReadingProgressBar } from "@/components/shared/ScrollFeatures";
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { Toaster } from "@/components/ui/toaster";
 import {
   generateOrganizationSchema,
   generateWebsiteSchema,
@@ -131,14 +135,18 @@ export default function RootLayout({
           </a>
           <main
             id="main-content"
-            className="flex-1 container mx-auto py-8 md:py-12 lg:py-16 px-4 md:px-6 lg:px-8 xl:px-12 max-w-7xl scroll-mt-24"
+            className="flex-1 container mx-auto py-8 md:py-12 lg:py-16 px-4 md:px-6 lg:px-8 xl:px-12 max-w-7xl scroll-mt-24 pb-20 md:pb-8"
           >
             {children}
           </main>
           <Footer />
           <BackToTop />
           <SupportBanner />
+          <InstallPrompt />
+          <MobileBottomNav />
+          <Toaster />
         </ThemeProvider>
+        <ServiceWorkerRegister />
         <Analytics />
         {/* Google Analytics – lazy to avoid blocking render */}
         <Script

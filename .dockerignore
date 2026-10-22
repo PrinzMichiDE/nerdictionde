@@ -1,0 +1,43 @@
+# Keep the Docker build context small and free of local artifacts/secrets.
+# The image installs dependencies itself, so no local node_modules is needed.
+
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+.next
+out
+build
+coverage
+
+.git
+.gitignore
+.github
+.vercel
+.vscode
+.idea
+
+# Never send local secrets into the build context
+.env
+.env.*
+!.env.example
+
+# Local/generated files
+*.tsbuildinfo
+next-env.d.ts
+scripts/.output
+prisma/*.db
+prisma/*.db-journal
+
+# Docs and tooling config that the build does not need
+README.md
+FAVICON_SETUP.md
+TWITCH_TOOLS_SETUP.md
+IMPROVEMENTS.md
+fix_migration.sql
+Dockerfile*
+docker-compose*
+!Dockerfile
+.dockerignore

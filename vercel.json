@@ -43,6 +43,10 @@
     {
       "path": "/api/cron/generate-forum",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/generate-news",
+      "schedule": "0 9 * * *"
     }
   ]
 }

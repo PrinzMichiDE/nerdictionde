@@ -134,7 +134,7 @@ export async function GET(req: NextRequest) {
         }),
         prisma.review.count({ where: countWhere }),
       ]);
-      categoryCounts = { all: countAll, game: 0, movie: 0, series: 0 };
+      categoryCounts = { all: countAll, game: 0, movie: 0, series: 0, hardware: 0 };
       for (const group of countGroups) {
         categoryCounts[group.category as string] = group._count._all;
       }

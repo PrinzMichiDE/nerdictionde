@@ -6,7 +6,7 @@ export interface ReviewCategoryStyle {
   color: string;
 }
 
-export const REVIEW_CATEGORIES: ReviewCategory[] = ["game", "movie", "series"];
+export const REVIEW_CATEGORIES: ReviewCategory[] = ["game", "movie", "series", "hardware"];
 
 export const reviewCategoryStyles: Record<ReviewCategory, ReviewCategoryStyle> = {
   game: {
@@ -23,6 +23,11 @@ export const reviewCategoryStyles: Record<ReviewCategory, ReviewCategoryStyle> =
     label: "Serien",
     dot: "var(--chart-5)",
     color: "var(--chart-5)",
+  },
+  hardware: {
+    label: "Hardware",
+    dot: "var(--chart-1)",
+    color: "var(--chart-1)",
   },
 };
 

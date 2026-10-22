@@ -1,34 +1,34 @@
+# syntax=docker/dockerfile:1
+
 # Stage 1: Dependencies
-FROM node:20-alpine AS deps
-# Update Alpine packages for security patches
-RUN apk update && apk upgrade && apk add --no-cache libc6-compat && rm -rf /var/cache/apk/*
+FROM node:22-alpine AS deps
+# Update Alpine packages for security patches.
+# libc6-compat + openssl are required by the Prisma engines on musl.
+RUN apk update && apk upgrade && apk add --no-cache libc6-compat openssl && rm -rf /var/cache/apk/*
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
-# Copy package files first for better layer caching
+# Install dependencies based on the preferred package manager.
+# Copy package files first for better layer caching.
 COPY package.json package-lock.json* ./
 RUN npm ci --ignore-scripts && \
     npm cache clean --force
 
 # Stage 2: Builder
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Update Alpine packages for security patches
-RUN apk update && apk upgrade && rm -rf /var/cache/apk/*
+RUN apk update && apk upgrade && apk add --no-cache libc6-compat openssl && rm -rf /var/cache/apk/*
 
-# Copy dependencies from deps stage
+# Reuse the dependencies installed in the deps stage (includes devDependencies
+# needed for the Next.js/TypeScript build).
 COPY --from=deps /app/node_modules ./node_modules
 
 # Copy package files and Prisma schema for better caching
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma
 
-# Install all dependencies (including devDependencies) for build
-RUN npm ci --ignore-scripts && \
-    npm cache clean --force
-
-# Copy source code
+# Copy source code (.dockerignore keeps node_modules/.next/.env out)
 COPY . .
 
 # Next.js collects completely anonymous telemetry data about general usage.
@@ -39,18 +39,29 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Set dummy DATABASE_URL for build-time generation (not used for actual connection)
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
 ENV DIRECT_URL="postgresql://dummy:dummy@localhost:5432/dummy?schema=public"
+
+# NEXT_PUBLIC_* values are inlined into the client bundle at build time and
+# therefore have to be provided as build args (the workflow passes them in).
+ARG NEXT_PUBLIC_BASE_URL=""
+ARG NEXT_PUBLIC_SITE_URL=""
+ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY=""
+ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
+
 RUN npx prisma generate
 
 # Build Next.js application
 RUN npm run build
 
 # Stage 3: Runner
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
-# Update Alpine packages for security patches
+# Update Alpine packages for security patches.
+# openssl is needed by the Prisma query engine at runtime, curl by HEALTHCHECK.
 RUN apk update && apk upgrade && \
-    apk add --no-cache curl && \
+    apk add --no-cache curl openssl && \
     rm -rf /var/cache/apk/*
 
 ENV NODE_ENV=production

@@ -132,6 +132,35 @@ export function generateItemListSchema(
   };
 }
 
+export function generateArticleSchema(input: {
+  headline: string;
+  description: string;
+  url: string;
+  datePublished: string;
+  dateModified: string;
+  author?: string;
+  image?: string;
+}) {
+  const url = getSiteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: input.headline,
+    description: input.description,
+    url: input.url,
+    datePublished: input.datePublished,
+    dateModified: input.dateModified,
+    inLanguage: "de-DE",
+    publisher: {
+      "@type": "Organization",
+      name: "Nerdiction",
+      url,
+    },
+    ...(input.author ? { author: { "@type": "Person", name: input.author } } : {}),
+    ...(input.image ? { image: [input.image] } : {}),
+  };
+}
+
 export function generateOrganizationSchema() {
   const url = getSiteUrl();
   return {

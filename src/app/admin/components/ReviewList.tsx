@@ -290,6 +290,7 @@ export function ReviewList() {
                 <SelectItem value="game">Game</SelectItem>
                 <SelectItem value="movie">Movie</SelectItem>
                 <SelectItem value="series">Series</SelectItem>
+                <SelectItem value="hardware">Hardware</SelectItem>
               </SelectContent>
             </Select>
             <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortKey)}>

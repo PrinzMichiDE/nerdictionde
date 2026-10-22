@@ -10,13 +10,13 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { 
   Loader2, Play, Pause, CheckCircle2, XCircle, Clock, Database, 
-  TrendingUp, Film, Tv, RefreshCcw, List, ChevronDown, ChevronUp, ExternalLink, Plus
+  TrendingUp, Film, Tv, Cpu, RefreshCcw, List, ChevronDown, ChevronUp, ExternalLink, Plus
 } from "lucide-react";
 import axios from "axios";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
-type ReviewCategory = "game" | "movie" | "series";
+type ReviewCategory = "game" | "movie" | "series" | "hardware";
 
 interface JobItem {
   name: string;
@@ -208,6 +208,7 @@ export function MassReviewCreation() {
       case "game": return <Database className="h-4 w-4" />;
       case "movie": return <Film className="h-4 w-4" />;
       case "series": return <Tv className="h-4 w-4" />;
+      case "hardware": return <Cpu className="h-4 w-4" />;
       default: return <Database className="h-4 w-4" />;
     }
   };
@@ -243,6 +244,7 @@ export function MassReviewCreation() {
                   <SelectItem value="game">Games</SelectItem>
                   <SelectItem value="movie">Filme</SelectItem>
                   <SelectItem value="series">Serien</SelectItem>
+                  <SelectItem value="hardware">Hardware</SelectItem>
                 </SelectContent>
               </Select>
             </div>

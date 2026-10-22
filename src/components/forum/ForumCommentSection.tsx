@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Twitch } from "lucide-react";
+import { VoteButtons } from "@/components/shared/VoteButtons";
 
 interface ForumComment {
   id: string;
@@ -13,6 +14,7 @@ interface ForumComment {
   author: string;
   userId: string | null;
   isAiGenerated: boolean;
+  score?: number;
   createdAt: string | Date;
 }
 
@@ -277,6 +279,13 @@ export function ForumCommentSection({
                   <p className="text-sm text-foreground/85 leading-relaxed">
                     {comment.text}
                   </p>
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <VoteButtons
+                    targetType="comment"
+                    targetId={comment.id}
+                    initialScore={comment.score ?? 0}
+                  />
                 </div>
               </div>
             </div>
