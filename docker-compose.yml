@@ -1,0 +1,47 @@
+name: nerdiction
+
+# Self-hosting stack: PostgreSQL + the published application image.
+# Start with: docker compose up -d
+# The app reads runtime configuration from .env (see README > Docker).
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-nerdiction}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nerdiction}
+      POSTGRES_DB: ${POSTGRES_DB:-nerdiction}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      # Exposed so `npx prisma migrate deploy` can run from the host.
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nerdiction} -d ${POSTGRES_DB:-nerdiction}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  app:
+    # Pin a release with IMAGE_TAG=1.2.3 (git tag pushes publish semver tags).
+    image: ghcr.io/prinzmichide/nerdictionde:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      # Always point the app at the bundled database, regardless of what
+      # DATABASE_URL in .env says (that one is usually the hosted database).
+      DATABASE_URL: postgresql://${POSTGRES_USER:-nerdiction}:${POSTGRES_PASSWORD:-nerdiction}@db:5432/${POSTGRES_DB:-nerdiction}?schema=public
+      DIRECT_URL: postgresql://${POSTGRES_USER:-nerdiction}:${POSTGRES_PASSWORD:-nerdiction}@db:5432/${POSTGRES_DB:-nerdiction}?schema=public
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+    ports:
+      - "3000:3000"
+
+volumes:
+  db_data:

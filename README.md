@@ -36,6 +36,29 @@ The production image is built and published by the `Docker Image` workflow
 It uses the multi-stage [`Dockerfile`](Dockerfile) and stores the image in the
 GitHub Container Registry (GHCR), so no extra secrets are needed.
 
+### Docker Compose (App + PostgreSQL)
+
+[`docker-compose.yml`](docker-compose.yml) startet die veröffentlichte App zusammen
+mit einer PostgreSQL-Datenbank:
+
+```bash
+# 1. Datenbank starten
+docker compose up -d db
+
+# 2. Schema einspielen (läuft vom Host gegen die Compose-Datenbank)
+DATABASE_URL="postgresql://nerdiction:nerdiction@localhost:5432/nerdiction?schema=public" \
+  npx prisma migrate deploy
+
+# 3. App starten
+docker compose up -d
+```
+
+Die App läuft danach auf `http://localhost:3000`. Das Image bringt keinen
+Prisma-CLI mit, deshalb der Migrationsschritt vom Host. Zugangsdaten und
+Datenbankname lassen sich über `POSTGRES_USER`, `POSTGRES_PASSWORD` und
+`POSTGRES_DB` überschreiben; die App bekommt die passende `DATABASE_URL`
+automatisch. Alle übrigen Variablen kommen aus `.env`.
+
 ### Pull and run
 
 ```bash
