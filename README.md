@@ -42,6 +42,9 @@ GitHub Container Registry (GHCR), so no extra secrets are needed.
 mit einer PostgreSQL-Datenbank:
 
 ```bash
+# 0. Konfiguration anlegen
+cp .env.example .env   # Werte eintragen, mindestens JWT_SECRET, ENCRYPTION_KEY, ADMIN_TOKEN
+
 # 1. Datenbank starten
 docker compose up -d db
 
