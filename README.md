@@ -105,6 +105,106 @@ docker build -t nerdictionde:local .
 docker run --env-file .env -p 3000:3000 nerdictionde:local
 ```
 
+## Projektstruktur
+
+Die Anwendung ist eine Next.js 16-App mit App Router, React 19, TypeScript, Tailwind CSS 4 und shadcn/ui. Die Daten werden mit Prisma und PostgreSQL verwaltet.
+
+### Wichtigste Verzeichnisse
+
+| Verzeichnis | Inhalt |
+|-------------|--------|
+| `src/app` | App-Router-Seiten und API-Routen |
+| `src/components` | React-Komponenten (shadcn/ui unter `components/ui`) |
+| `src/lib` | Prisma-Client, Hilfsfunktionen, API-Schemas |
+| `prisma` | Datenmodell (`schema.prisma`) und Migrationen |
+| `tests` | Unit-Tests mit Vitest |
+| `scripts` | Hilfsskripte (z. B. `verify.sh`) |
+| `docs` | Projektdokumentation (PROGRESS, ROADMAP, DECISIONS, Feature-Specs) |
+
+### Datenmodell (Auszug)
+
+Kernmodelle in `prisma/schema.prisma`:
+
+- **Review** – Produkttests (Games, Filme, Serien, Hardware) mit Score, Pros/Cons, Kommentaren, Bewertungen, Lesezeichen
+- **Comment** – Kommentare zu Reviews, optional als Antwort auf einen anderen Kommentar (`parentId`)
+- **UserRating** – Nutzerbewertungen (0–10) zu Reviews
+- **Bookmark** – Gespeicherte Reviews pro Nutzer
+- **NewsletterSubscription** – Newsletter-Abonnements mit Double-Optin (`confirmationToken`, `isActive`)
+- **Deal** / **PriceHistory** – Angebote und Preisverlauf zu Reviews
+- **NewsArticle** – KI-generierte Newsbeiträge aus RSS-Feeds
+- **TwitchUser** und zugehörige Modelle – Streaming-Tools für Twitch
+
+## Entwicklung
+
+### Erste Schritte
+
+```bash
+# 1. Abhängigkeiten installieren
+npm install
+
+# 2. Umgebungsvariablen anlegen
+cp .env.example .env
+# Mindestens DATABASE_URL, JWT_SECRET, ENCRYPTION_KEY, ADMIN_TOKEN eintragen
+
+# 3. Datenbank starten (z. B. mit Docker Compose)
+docker compose up -d db
+
+# 4. Prisma-Client generieren und Migrationen anwenden
+npx prisma generate
+npx prisma migrate dev
+
+# 5. Entwicklungsserver starten
+npm run dev
+```
+
+Die App läuft dann auf `http://localhost:3000`.
+
+### Verfügbare npm-Scripts
+
+| Script | Beschreibung |
+|--------|--------------|
+| `npm run dev` | Entwicklungsserver (Webpack) |
+| `npm run build` | Produktions-Build (Prisma generate + Next.js Build) |
+| `npm run start` | Produktionsserver |
+| `npm run lint` | ESLint |
+| `npm run type-check` | TypeScript-Typprüfung |
+| `npm run verify` | Build + Typprüfung + Lint + Tests |
+| `npm test` | Unit-Tests mit Vitest |
+| `npm run test:e2e` | E2E-Tests |
+
+### Qualitätsschranken
+
+Vor jedem Commit wird über einen Pre-Commit-Hook Format, Lint und ein Secret-Scan geprüft. Die CI (GitHub Actions) führt bei jedem Push auf `main` und `auto/dev` das `verify`-Skript aus (Build, Typprüfung, Lint, Tests).
+
+### Datenbank-Migrationen
+
+```bash
+# Neue Migration erstellen
+npx prisma migrate dev --name <name>
+
+# Migrationen auf eine bestehende Datenbank anwenden
+npx prisma migrate deploy
+
+# Prisma Studio öffnen (Datenbank im Browser)
+npx prisma studio
+```
+
+Migrationen sind reversibel. Destruktive Änderungen (z. B. Spalten löschen) werden nur mit entsprechender Dokumentation und Rückführungs-Schritt durchgeführt.
+
+## Umgebungsvariablen
+
+Wichtige Variablen (aus `.env`):
+
+- `DATABASE_URL` – Verbindung zur PostgreSQL-Datenbank
+- `JWT_SECRET` – Schlüssel für JWT-Token
+- `ENCRYPTION_KEY` – Schlüssel für Verschlüsselung
+- `ADMIN_TOKEN` – Token für Admin-Authentifizierung
+- `NEXT_PUBLIC_BASE_URL` – Basis-URL der App (Build-Zeit)
+- `NEXT_PUBLIC_SITE_URL` – Öffentliche URL der Seite (Build-Zeit)
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY` – VAPID-Schlüssel für Push-Benachrichtigungen
+
+Alle weiteren Variablen (API-Keys für IGDB, TMDB, Steam, OpenAI, Tavily usw.) werden zur Laufzeit gelesen.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
