@@ -22,7 +22,8 @@
     "regenerate-movie-series": "tsx scripts/regenerate-movie-series-content.ts",
     "regenerate-review-content": "tsx scripts/regenerate-review-content.ts",
     "news:sync": "tsx scripts/generate-news.ts",
-    "test:e2e": "e2e run"
+    "test:e2e": "e2e run",
+    "verify": "bash scripts/verify.sh"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
