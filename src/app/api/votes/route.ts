@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
     await prisma.forumThread.update({ where: { id: targetId }, data: { score: newScore } });
   } else if (targetType === "comment") {
     await prisma.forumComment.update({ where: { id: targetId }, data: { score: newScore } });
+    await prisma.comment.update({ where: { id: targetId }, data: { score: newScore } });
   }
 
   const userVote = await prisma.vote.findUnique({
