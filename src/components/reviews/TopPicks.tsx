@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { ScoreRing } from "./ScoreRing";
+import { ScoreBlock } from "@/components/shared/ScoreBlock";
 import { getCategoryStyle } from "@/lib/review-category";
 
 export interface TopPick {
@@ -59,7 +59,7 @@ export function TopPicks({ picks }: TopPicksProps) {
                   </h3>
                 </div>
 
-                <ScoreRing score={pick.score} size={44} ringWidth={3} className="shrink-0" />
+                <ScoreBlock score={pick.score} />
                 <ArrowRight className="pick-arrow size-4 shrink-0 text-primary" />
               </Link>
               {i < picks.length - 1 && <div className="pick-rule" aria-hidden="true" />}

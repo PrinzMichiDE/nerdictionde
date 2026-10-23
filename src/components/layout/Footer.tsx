@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Mail, Heart, FileText, BarChart3, Handshake, FileCheck } from "lucide-react";
+import { Heart, FileText, BarChart3, Handshake, FileCheck, Users } from "lucide-react";
 import { BrandMark } from "@/components/shared/BrandMark";
+import { NewsletterSignup } from "@/components/shared/NewsletterSignup";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -44,13 +45,7 @@ export function Footer() {
                 Professionelle Game-, Film- und Serien-Reviews für fundierte
                 Unterhaltungsentscheidungen. Unabhängig, ehrlich und mit System.
               </p>
-              <a
-                href="mailto:kontakt@nerdiction.de"
-                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit"
-              >
-                <Mail className="size-4" />
-                kontakt@nerdiction.de
-              </a>
+              <NewsletterSignup source="footer" className="mt-6 max-w-xs" />
             </div>
 
             {/* Navigation */}
@@ -103,14 +98,19 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="border-t border-border py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
-              &copy; {currentYear} Nerdiction. Alle Rechte vorbehalten.
-            </p>
-            <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
-              Mit <Heart className="size-3.5 text-primary fill-current" /> für die Community
+        {/* Social Proof + Bottom bar */}
+        <div className="border-t border-border py-8 md:py-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
+            <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+              <Users className="size-4 text-primary fill-current" aria-hidden="true" />
+              <span>
+                Unabhängige Tests für die Community — {currentYear} Nerdiction.
+                Alle Rechte vorbehalten.
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5 md:order-first">
+              Mit <Heart className="size-3.5 text-primary fill-current" /> für die
+              Community
             </p>
           </div>
         </div>

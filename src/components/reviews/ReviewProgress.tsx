@@ -22,7 +22,7 @@ export function ReviewProgress() {
   return (
     <div className="fixed top-16 left-0 w-full h-1 z-[60] pointer-events-none" aria-hidden="true">
       <div 
-        className="h-full bg-primary transition-all duration-150 ease-out motion-safe:transition-[width]"
+        className="h-full bg-primary transition-[width] duration-150 ease-out"
         style={{ width: `${progress}%` }}
       />
     </div>

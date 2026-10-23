@@ -3,18 +3,18 @@ name: Ribbon
 slug: ribbon
 genre: atmospheric
 paper: light 98.5 85
-display: high-contrast-serif Newsreader italic
+display: grotesk-sans Instrument Sans
 accent: chromatic-teal 190
 posture: committed
 keywords: sleep, sound, soundscape, audio, night, rest, calm, wellness, meditation, white noise, ambient, listen, headphones, wind down, bedtime, quiet, breathing, app, subscription
-material: warm off-white or blue-black night, Newsreader light italic over Figtree, machined parts lit from above, the hour drawn as light on a generated canvas, one signal
+material: warm off-white or blue-black night, Instrument Sans at a quiet weight over Figtree, machined parts lit from above, the hour drawn as light on a generated canvas, one signal
 photo: muted sepia=14
 pictured: Night Notes, Stage hero, in the two-in-the-morning colourway
 ---
 
 # Ribbon
 
-The hour before sleep, set quietly: Newsreader italic at its lightest for every head, Figtree in a soft grey for reading, hairline rules instead of boxes, and the night itself drawn as slow light behind a machined instrument that really sets the levels. The calm comes from light type, slow light and well-made parts. It is not a glossy wellness app and not a sky of stars and moons.
+The hour before sleep, set quietly: Instrument Sans at 400, upright and tightly set, for every head, Figtree in a soft grey for reading, hairline rules instead of boxes, and the night itself drawn as slow light behind a machined instrument that really sets the levels. The calm comes from light type, slow light and well-made parts. It is not a glossy wellness app and not a sky of stars and moons.
 
 ## Tokens
 
@@ -30,11 +30,11 @@ The hour before sleep, set quietly: Newsreader italic at its lightest for every 
   --edge-light: inset 0 1px 0 oklch(100% 0 0 / 0.5);
   --shadow-part: 0 1px 0 oklch(20% 0.01 80 / 0.25), 0 10px 18px -6px oklch(20% 0.01 80 / 0.3);
   --shadow-panel: 0 1px 0 oklch(20% 0.01 80 / 0.2), 0 24px 48px -16px oklch(20% 0.02 80 / 0.35);
-  --font-display: "Newsreader", Georgia, serif; --font-body: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Instrument Sans", ui-sans-serif, system-ui, sans-serif; --font-body: "Figtree", ui-sans-serif, system-ui, sans-serif;
   --font-outlier: "JetBrains Mono", ui-monospace, monospace;
   --radius-card: 20px; --radius-part: 6px; --radius-pill: 999px; --rule-hair: 1px;
   --shadow-card: none;
-  --tracking-display: -0.022em; --display-weight: 300;
+  --tracking-display: -0.035em; --display-weight: 400;
 }
 ```
 
@@ -48,7 +48,7 @@ One dial, the colourway, stated in the stamp (`ribbon: two-in-the-morning`). The
 
 ## Type
 
-- **Display:** Newsreader italic 300 at opsz 72, `--tracking-display`, line-height 1.02. Declared italic system (stamp `waive 38ii`): every head at every level, true italic, `font-synthesis: none`, one weight, one colour. Big figures and levels take the display italic too, lining and tabular.
+- **Display:** Instrument Sans 400, upright, `--tracking-display`, line-height 1.04, sentence case, one colour; 500 for small titles (a panel's name, the wordmark). Big figures and levels take the display face too, lining and tabular.
 - **Body:** Figtree 400 at 17px, line-height 1.6, in `--color-muted`; Figtree 500 for a part's name and value.
 - **Labels:** Figtree 500 a step smaller, sentence case, untracked, `--color-muted`, tabular figures on values.
 
@@ -63,9 +63,9 @@ One dial, the colourway, stated in the stamp (`ribbon: two-in-the-morning`). The
 ## Range
 
 - **The instrument as the hero:** the product's controls built as a machined panel that really works, beside a one-line head, over the drawn night.
-- **Rows as a list of levels:** each part's name in display italic on hairlines, its line in Figtree, its level as an italic figure; the same panel in the app's frame beside it, synced.
+- **Rows as a list of levels:** each part's name in the display face on hairlines, its line in Figtree, its level as a display figure; the same panel in the app's frame beside it, synced.
 - **Time as a drawn curve:** what changes over the night drawn as lines falling together across the width, columns marking the moments, levels in tabular Figtree beneath.
-- **Price under the horizon:** the figure in display italic at 8 to 10rem over the same land and lit row, one Figtree line, the lit pill.
+- **Price under the horizon:** the figure in the display face at 8 to 10rem over the same land and lit row, one Figtree line, the lit pill.
 
 ## Controls
 
@@ -83,7 +83,7 @@ Calm and specific: the hour, the sound, how loud. Never a promise of perfect sle
 
 ## Do-nots
 
-- Never a roman or a heavy head; the light italic is the system at every level.
+- Never an italic or a heavy head; the display stays upright at 400 and 500.
 - Never a starfield, a moon, a navy-to-violet gradient or a stock sleeper.
 - Never a plastic or flat control on the instrument; parts are machined, lit from above, one light.
 - Never a drawn waveform or equaliser; levels live on faders and lines.
@@ -91,11 +91,11 @@ Calm and specific: the hour, the sound, how loud. Never a promise of perfect sle
 ## Build hint
 
 ```html
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@1,6..72,300&family=Figtree:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&family=Figtree:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 ```
 
 ```css
-h1, h2, h3 { font-style: italic; font-weight: 300; font-variation-settings: "opsz" 72; font-synthesis: none; line-height: 1.02; }
+h1, h2, h3 { font-weight: 400; font-synthesis: none; line-height: 1.04; }
 .btn { min-height: 52px; padding: 0 var(--space-lg); border: var(--rule-hair) solid var(--color-rule); border-radius: var(--radius-pill); background: linear-gradient(var(--color-paper-2), var(--color-paper-3)); box-shadow: var(--edge-light), var(--shadow-part); color: var(--color-ink); font: 500 var(--text-md)/1 var(--font-body); }
 .btn--primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-accent-ink); }
 .btn:active { transform: translateY(1px); }

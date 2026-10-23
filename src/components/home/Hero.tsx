@@ -1,276 +1,175 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import type { Review } from "@/types/review";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowRight,
-  Sparkles,
-  Gamepad2,
-  Film,
-  Tv,
-  ShieldCheck,
-  Star,
-  Trophy,
-} from "lucide-react";
+import { getCategoryStyle, getVerdict } from "@/lib/review-category";
+import { ArrowRight } from "lucide-react";
+import { SpotlightCard } from "@/components/home/SpotlightCard";
 
-const rotatingWords = ["Games", "Filme", "Serien", "Hardware"];
+interface HeroProps {
+  latest: Review | null;
+  stats: { label: string; value: string }[];
+}
 
-const trustItems = [
-  { icon: ShieldCheck, label: "100% unabhängig" },
-  { icon: Star, label: "Transparente Scores" },
-  { icon: Trophy, label: "Professionelle Tests" },
-];
-
-export function Hero() {
-  const [wordIndex, setWordIndex] = useState(0);
-  const orbsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const id = setInterval(
-      () => setWordIndex((i) => (i + 1) % rotatingWords.length),
-      2600
-    );
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    if (window.matchMedia("(pointer: coarse)").matches) return;
-
-    let raf = 0;
-    const onMove = (e: MouseEvent) => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        const nx = (e.clientX / window.innerWidth - 0.5) * 2;
-        const ny = (e.clientY / window.innerHeight - 0.5) * 2;
-        if (orbsRef.current) {
-          orbsRef.current.style.setProperty("--mx", `${nx}`);
-          orbsRef.current.style.setProperty("--my", `${ny}`);
-        }
-      });
-    };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, []);
+export function Hero({ latest, stats }: HeroProps) {
+  const image = latest?.images?.[0];
+  const category = latest ? getCategoryStyle(latest.category) : null;
 
   return (
-    <section className="full-bleed hero-vignette relative overflow-hidden -mt-8 md:-mt-12 lg:-mt-16 pb-20 md:pb-28 lg:pb-36" style={{ contain: "layout style paint" }}>
-      {/* ===== Hintergrund-Schichten ===== */}
-      <div className="absolute inset-0 bg-mesh" aria-hidden="true" />
-      <div
-        className="absolute inset-0 bg-grid opacity-60 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_35%,#000_20%,transparent_75%)]"
-        aria-hidden="true"
-      />
-      <div className="absolute inset-0 noise opacity-[0.045] pointer-events-none" aria-hidden="true" />
-
-      {/* Aurora-Orbs (Parallax auf Maus – via CSS vars, no React re-renders) */}
-      <div ref={orbsRef} className="absolute inset-0 pointer-events-none" aria-hidden="true"
-        style={{ "--mx": 0, "--my": 0 } as React.CSSProperties}>
+    <section className="relative border-b border-border pb-12 md:pb-16 overflow-hidden">
+      {/* Aurora-Hintergrund (dekorativ, reduziert bei Reduced Motion) */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
         <div
-          className="absolute w-[34rem] h-[34rem] rounded-full blur-[110px] animate-aurora pointer-events-none will-change-transform"
+          className="animate-blob rounded-full mix-blend-multiply filter blur-3xl opacity-20"
           style={{
-            transform: `translate3d(calc(var(--mx) * 28px), calc(var(--my) * 28px), 0)`,
-            left: "-12%",
-            top: "-18%",
-            background: "color-mix(in oklab, var(--primary) 34%, transparent)",
+            background: "color-mix(in oklab, var(--primary) 35%, transparent)",
+            width: "40rem",
+            height: "40rem",
+            top: "-10%",
+            left: "10%",
           }}
+          aria-hidden="true"
         />
         <div
-          className="absolute w-[28rem] h-[28rem] rounded-full blur-[100px] animate-aurora pointer-events-none will-change-transform"
+          className="animate-blob rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-[spin-slow_26s_linear_infinite_reverse]"
           style={{
-            transform: `translate3d(calc(var(--mx) * -18px), calc(var(--my) * -18px), 0)`,
-            left: "78%",
+            background: "color-mix(in oklab, var(--chart-2) 30%, transparent)",
+            width: "34rem",
+            height: "34rem",
             top: "10%",
-            background: "color-mix(in oklab, oklch(0.6 0.16 210) 26%, transparent)",
-            animationDelay: "-6s",
+            right: "10%",
+            animationDelay: "-8s",
           }}
+          aria-hidden="true"
         />
-        <div
-          className="absolute w-[26rem] h-[26rem] rounded-full blur-[110px] animate-aurora pointer-events-none will-change-transform"
-          style={{
-            transform: `translate3d(calc(var(--mx) * 14px), calc(var(--my) * 14px), 0)`,
-            left: "55%",
-            top: "68%",
-            background: "color-mix(in oklab, oklch(0.6 0.15 320) 20%, transparent)",
-            animationDelay: "-12s",
-          }}
-        />
+        <div className="hero-scan" aria-hidden="true" />
       </div>
 
-      {/* Rotierende Deko-Ringe */}
-      <div
-        aria-hidden="true"
-        className="absolute -left-40 top-1/2 -translate-y-1/2 size-[36rem] rounded-full border border-dashed opacity-20 animate-ring-spin hidden lg:block"
-        style={{ borderColor: "color-mix(in oklab, var(--primary) 60%, transparent)" }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute -right-48 top-1/3 size-[30rem] rounded-full border border-dashed opacity-15 animate-ring-spin-reverse hidden lg:block"
-        style={{ borderColor: "color-mix(in oklab, var(--primary) 60%, transparent)" }}
-      />
+      <div className="relative z-10 grid items-end gap-10 lg:grid-cols-12 lg:gap-12">
+        <div className="lg:col-span-7">
+          <div className="flex items-center gap-2.5 mb-2">
+            <span className="kicker-line" aria-hidden="true" />
+            <span className="kicker text-primary font-semibold uppercase tracking-wider">
+              Magazin
+            </span>
+          </div>
+          <div className="relative inline-block mb-6">
+            <span
+              className="ghost-num text-[4rem] md:text-[6rem] lg:text-[8rem] select-none"
+              aria-hidden="true"
+            >
+              01
+            </span>
+            <h1 className="font-serif text-5xl font-semibold leading-[1.02] tracking-tight text-balance sm:text-6xl lg:text-7xl xl:text-[5.5rem] -mt-6 relative z-10">
+              Ehrliche Produkttests.
+            </h1>
+          </div>
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+            Wir testen Games, Filme, Serien und Hardware und legen jede Wertung
+            offen.
+          </p>
 
-      {/* ===== Floatende Glaskarten ===== */}
-      <div
-        aria-hidden="true"
-        className="hidden xl:block absolute right-[6%] top-[16%] animate-float-y-slow"
-      >
-        <div className="glass gradient-border rounded-2xl px-5 py-4 shadow-2xl shadow-primary/10">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="size-3.5 fill-amber-400 text-amber-400" />
+          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
+            <Button asChild size="lg" className="h-12 rounded-full px-7 text-base font-semibold">
+              <Link href="/reviews" className="group inline-flex items-center gap-2">
+                Alle Tests lesen
+                <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+              </Link>
+            </Button>
+            <Link
+              href="#so-testen-wir"
+              className="rounded-sm text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              So werten wir
+            </Link>
+          </div>
+
+          {stats.length > 0 && (
+            <dl className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-sm border border-border bg-border sm:grid-cols-4">
+              {stats.map((stat) => (
+                <div key={stat.label} className="bg-background px-4 py-3">
+                  <dt className="text-xs text-muted-foreground">{stat.label}</dt>
+                  <dd className="mt-1 font-serif text-2xl font-semibold tabular-nums">
+                    {stat.value}
+                  </dd>
+                </div>
               ))}
-            </div>
-          </div>
-          <p className="mt-2 text-sm font-semibold text-foreground">
-            &quot;Endlich ehrliche Tests!&quot;
-          </p>
-          <p className="text-xs text-muted-foreground mt-0.5">★ Leser der Woche</p>
+            </dl>
+          )}
         </div>
-      </div>
 
-      <div
-        aria-hidden="true"
-        className="hidden xl:block absolute left-[5%] bottom-[22%] animate-float-y"
-      >
-        <div className="glass gradient-border rounded-2xl px-5 py-4 shadow-2xl shadow-primary/10">
-          <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-muted-foreground">
-            Redaktions-Favorit
-          </p>
-          <p className="mt-1 font-serif text-2xl font-semibold text-gradient">9.4 / 10</p>
-          <p className="text-xs text-muted-foreground">Phänomenal</p>
-        </div>
-      </div>
-
-      {/* Ghost-Wort im Hintergrund */}
-      <span
-        aria-hidden="true"
-        className="ghost-word hidden md:block text-[16vw] text-stroke opacity-[0.35]"
-      >
-        Nerdiction
-      </span>
-
-      {/* ===== Content ===== */}
-      <div className="hero-exit relative z-10 mx-auto max-w-7xl px-4 md:px-6 lg:px-8 xl:px-12 pt-16 md:pt-24 lg:pt-32">
-        <div className="flex flex-col items-center text-center">
-          {/* Badge */}
-          <div
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold animate-slide-up [animation-delay:0.05s] [animation-fill-mode:both]"
-            style={{
-              background: "color-mix(in oklab, var(--primary) 12%, transparent)",
-              border: "1px solid color-mix(in oklab, var(--primary) 30%, transparent)",
-              color: "var(--primary)",
-            }}
-          >
-            <Sparkles className="size-4 animate-pulse" />
-            <span className="text-glow">Unabhängiges Nerd-Magazin</span>
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 bg-current" />
-              <span className="relative inline-flex size-2 rounded-full bg-current" />
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="mt-8 font-serif text-5xl sm:text-6xl md:text-7xl xl:text-8xl font-semibold tracking-tight leading-[1.04] text-balance">
-            <span className="block">
-              {"Ehrliche Reviews".split("").map((ch, i) =>
-                ch === " " ? (
-                  <span key={i}>{"\u00A0"}</span>
-                ) : (
-                  <span
-                    key={i}
-                    className="hero-char"
-                    style={{ animationDelay: `${(0.1 + i * 0.038).toFixed(3)}s` }}
-                  >
-                    {ch}
-                  </span>
-                )
-              )}
-            </span>
-            <span className="block mt-2 animate-slide-up [animation-delay:0.55s] [animation-fill-mode:both]">
-              für{" "}
-              <span className="relative inline-block" style={{ perspective: "800px" }}>
-                <span key={wordIndex} className="animate-word text-gradient-animate">
-                  {rotatingWords[wordIndex]}
-                </span>
-              </span>
-            </span>
-          </h1>
-
-          {/* Subline */}
-          <p className="mt-7 max-w-2xl text-base md:text-xl text-muted-foreground leading-relaxed text-pretty animate-slide-up [animation-delay:0.3s] [animation-fill-mode:both]">
-            Nerdiction testet <strong className="font-semibold text-foreground">Games, Filme, Serien und Hardware</strong>{" "}
-            unabhängig, transparent und mit Leidenschaft – damit du weißt, worauf du dich einlässt.
-          </p>
-
-          {/* CTAs */}
-          <div className="mt-10 flex flex-col sm:flex-row items-center gap-4 animate-slide-up [animation-delay:0.45s] [animation-fill-mode:both]">
-            <Button
-              asChild
-              size="lg"
-              className="shine group relative h-13 rounded-full px-8 py-4 text-base font-semibold shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35 transition-all duration-300 hover:-translate-y-0.5"
-            >
-              <Link href="/reviews" className="relative z-[2] inline-flex items-center gap-2">
-                Reviews entdecken
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="group h-13 rounded-full px-8 py-4 text-base font-semibold border-2 backdrop-blur-sm bg-background/40 transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent"
-            >
-              <Link href="/reviews?sort=score-desc" className="inline-flex items-center gap-2">
-                <Trophy className="size-4 text-amber-500" />
-                Top-Tests ansehen
-              </Link>
-            </Button>
-          </div>
-
-          {/* Trust Indicators */}
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 animate-slide-up [animation-delay:0.6s] [animation-fill-mode:both]">
-            {trustItems.map(({ icon: Icon, label }, i) => (
-              <div key={label} className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Icon
-                  className="size-4"
-                  style={{ color: ["var(--primary)", "oklch(0.65 0.16 200)", "oklch(0.68 0.15 60)"][i % 3] }}
-                />
-                <span className="font-medium">{label}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Kategorie-Pills */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3 animate-slide-up [animation-delay:0.7s] [animation-fill-mode:both]">
-            {[
-              { icon: Gamepad2, label: "Games", href: "/reviews?category=game" },
-              { icon: Film, label: "Filme", href: "/reviews?category=movie" },
-              { icon: Tv, label: "Serien", href: "/reviews?category=series" },
-            ].map(({ icon: Icon, label, href }) => (
+        {latest && category && (
+          <div className="lg:col-span-5">
+            <SpotlightCard tilt intensity={4} className="h-full">
               <Link
-                key={label}
-                href={href}
-                className="group inline-flex items-center gap-2 rounded-full border border-border bg-background/60 backdrop-blur-sm px-4 py-2 text-sm font-medium text-muted-foreground transition-all duration-300 hover:border-primary/40 hover:text-foreground hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10"
+                href={`/reviews/${latest.slug}`}
+                className="group block overflow-hidden rounded-sm border border-border bg-card transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <Icon className="size-4 text-primary transition-transform group-hover:scale-110" />
-                {label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
+                <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+                  {image ? (
+                    <Image
+                      src={image}
+                      alt={latest.title}
+                      fill
+                      priority
+                      unoptimized
+                      sizes="(max-width: 1024px) 100vw, 40vw"
+                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                      Kein Bild
+                    </div>
+                  )}
+                  <span
+                    className="absolute left-3 top-3 rounded-sm bg-background px-2 py-1 text-xs font-medium"
+                    style={{ color: category.color }}
+                  >
+                    {category.label}
+                  </span>
+                </div>
 
-      {/* Scroll-Indikator */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground animate-slide-up [animation-delay:1s] [animation-fill-mode:both]">
-        <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em]">Scrollen</span>
-        <span className="flex h-9 w-5 items-start justify-center rounded-full border border-muted-foreground/40 p-1.5">
-          <span className="size-1.5 rounded-full bg-primary animate-scroll-dot" />
-        </span>
+                <div className="flex items-start justify-between gap-4 p-5">
+                  <div className="min-w-0">
+                    <span className="text-xs text-muted-foreground">Zuletzt getestet</span>
+                    <h2 className="mt-1 font-serif text-2xl font-semibold leading-snug text-balance transition-colors group-hover:text-primary">
+                      {latest.title}
+                    </h2>
+                  </div>
+                  <div
+                    className="shrink-0 rounded-sm border border-border bg-card px-3 py-2 text-center"
+                    style={{
+                      color:
+                        latest.score >= 90
+                          ? "var(--chart-3)"
+                          : latest.score >= 75
+                            ? "var(--chart-2)"
+                            : latest.score >= 50
+                              ? "var(--chart-4)"
+                              : latest.score >= 25
+                                ? "var(--chart-1)"
+                                : "var(--destructive)",
+                    }}
+                  >
+                    <span className="font-serif text-xl font-semibold tabular-nums">
+                      {latest.score}
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      {getVerdict(latest.score)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-border px-5 py-3 text-sm">
+                  <span className="font-medium">Test lesen</span>
+                  <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </div>
+              </Link>
+            </SpotlightCard>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,0 +1,16 @@
+{
+  "target": 2,
+  "created": [
+    {
+      "igdbId": 1020,
+      "name": "Grand Theft Auto V",
+      "reviewId": "cmvjvk4640000mmhwi280j7hi"
+    },
+    {
+      "igdbId": 72,
+      "name": "Portal 2",
+      "reviewId": "cmvjvyij20006mmhwlyvc51mr"
+    }
+  ],
+  "failed": []
+}

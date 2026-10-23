@@ -103,7 +103,7 @@ export function CreateThreadDialog({ isLoggedIn, displayName }: CreateThreadDial
 
         {success ? (
           <div className="py-8 text-center">
-            <p className="text-green-600 dark:text-green-400 font-medium">
+            <p className="font-medium" style={{ color: "var(--chart-4)" }}>
               Thread erfolgreich erstellt!
             </p>
           </div>

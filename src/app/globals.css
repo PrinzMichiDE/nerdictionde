@@ -81,6 +81,13 @@
   --sidebar-accent-foreground: oklch(0.2 0.01 90);
   --sidebar-border: oklch(0.9 0.006 85);
   --sidebar-ring: oklch(0.55 0.2 12);
+  --avatar-1: oklch(0.55 0.2 12);
+  --avatar-2: oklch(0.6 0.15 200);
+  --avatar-3: oklch(0.5 0.12 140);
+  --avatar-4: oklch(0.6 0.15 45);
+  --avatar-5: oklch(0.55 0.15 300);
+  --avatar-6: oklch(0.7 0.18 15);
+  --avatar-7: oklch(0.75 0.2 160);
 }
 
 .dark {
@@ -152,10 +159,10 @@
   }
 
   .kicker {
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
   }
 
   .prose-serif-headings {
@@ -424,14 +431,11 @@ section, article {
   animation: border-rotate 7s linear infinite;
 }
 
-/* --- Full-bleed Sektionen (über den Container hinaus) --- */
+/* --- Full-bleed Sektionen (ohne 100vw, Floor-konform) --- */
 .full-bleed {
   position: relative;
-  left: 50%;
-  right: 50%;
-  width: 100vw;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* --- Scroll-Reveal --- */
@@ -2083,6 +2087,11 @@ section, article {
   color: var(--primary);
 }
 
+.nav-link[data-active="true"] .nav-link-bar,
+.nav-link:hover .nav-link-bar {
+  transform: scaleX(1);
+}
+
 /* --- Header Scroll States --- */
 .site-header {
   --header-blur: 12px;
@@ -2328,3 +2337,101 @@ section, article {
     transform: translateY(0) scale(0.98);
   }
 }
+
+/* ==========================================================================
+   Druckansicht (Review-Detailseite)
+   ========================================================================== */
+@media print {
+  * {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  a {
+    text-decoration: underline;
+    color: #000 !important;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.75rem;
+    word-break: break-all;
+  }
+
+  /* Navigations- und Chrom-Elemente unterdrücken */
+  header,
+  nav,
+  .site-header,
+  aside,
+  .ReadingProgressBar,
+  .ScrollToTop,
+  [data-testid="scroll-to-top"],
+  .site-footer,
+  .mobile-nav,
+  .global-search,
+  .theme-toggle,
+  .profile-link {
+    display: none !important;
+  }
+
+  /* Review-Artikel auf volle Breite, sauberer Fließtext */
+  article {
+    contain: none !important;
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    break-inside: avoid;
+  }
+
+  article > * {
+    break-inside: auto;
+  }
+
+  h1, h2, h3, h4 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  /* Bilder nicht größer als nötig, dennoch sichtbar */
+  figure img,
+  .aspect-video img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  figcaption {
+    font-size: 0.7rem;
+    color: #333;
+  }
+
+  /* Sidebar (Score-Karte, Tags, Nutzerwertung) am Ende des Artikels einblenden */
+  article > div.grid,
+  article > aside,
+  section[aria-label="Frequently Asked Questions"],
+  section[aria-label="Häufige Fragen"],
+  .prose {
+    break-inside: auto;
+  }
+
+  /* Kommentare und interaktive Blöcke aus dem Druck entfernen */
+  .CommentSection,
+  .comment-section,
+  [aria-label*="Kommentar"],
+  .RelatedReviews,
+  .related-reviews,
+  .ReviewProgress,
+  .review-progress {
+    display: none !important;
+  }
+
+  @page {
+    margin: 1.5cm 2cm;
+  }
+}
+

@@ -1,36 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef, type CSSProperties } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ReviewCard } from "./ReviewCard";
-import { ReviewsFilter, type CategoryCounts } from "./ReviewsFilter";
-import { ReviewsPagination } from "./ReviewsPagination";
-import { ScoreDistribution } from "./ScoreDistribution";
-import { TopPicks, type TopPick } from "./TopPicks";
-import { ScrollReveal } from "@/components/home/ScrollReveal";
-import { SpotlightCard } from "@/components/home/SpotlightCard";
-import { CircularBadge } from "./CircularBadge";
-import { ScoreRing } from "./ScoreRing";
-import { StatCounter } from "./StatCounter";
 import { Review } from "@/types/review";
+import { ScoreBlock } from "@/components/shared/ScoreBlock";
+import { ScoreDistribution } from "@/components/reviews/ScoreDistribution";
+import { CategoryChips } from "@/components/shared/CategoryChips";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/shared/Skeleton";
-import { ArrowRight, ArrowUp, SearchX, AlertTriangle, RefreshCw, Clock3 } from "lucide-react";
-import { getCategoryStyle, getVerdict, stripMarkdown } from "@/lib/review-category";
-
-const verdictTickerItems = [
-  "Phänomenal",
-  "Hervorragend",
-  "Gut",
-  "Solide",
-  "Mittelmaß",
-  "Enttäuschend",
-  "Unabhängig",
-  "Redaktionstest",
-  "Kaufberatung",
-  "Fundiert",
-];
+import { ChevronDown, Search } from "lucide-react";
 
 interface PaginationData {
   page: number;
@@ -44,527 +24,350 @@ interface PaginationData {
 interface ApiResponse {
   reviews: Review[];
   pagination: PaginationData;
-  categoryCounts?: CategoryCounts;
-  scoreDistribution?: number[];
-  topPicks?: TopPick[];
+  categoryCounts?: Record<string, number>;
 }
 
-const headline = "Reviews";
-
-const subline =
-  "Games, Filme und Serien – geprüft, bewertet und auf den Punkt gebracht. Der Nerdiction-Index bündelt jede Wertung auf einen Blick.";
-
-function readingTime(content: string): number {
-  return Math.max(1, Math.ceil((content || "").split(/\s+/).length / 200));
-}
+const SORTS = [
+  { value: "date-desc", label: "Neueste zuerst" },
+  { value: "score-desc", label: "Höchste Wertung" },
+  { value: "score-asc", label: "Niedrigste Wertung" },
+];
 
 export function ReviewsList() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [reviews, setReviews] = useState<Review[]>([]);
   const [pagination, setPagination] = useState<PaginationData | null>(null);
-  const [categoryCounts, setCategoryCounts] = useState<CategoryCounts | null>(null);
-  const [scoreDistribution, setScoreDistribution] = useState<number[] | null>(null);
-  const [topPicks, setTopPicks] = useState<TopPick[]>([]);
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
-  const toTopRef = useRef<HTMLButtonElement>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const query = searchParams.get("query") || "";
-  const category = searchParams.get("category") || "";
-  const sort = searchParams.get("sort") || "date-desc";
-  const minScore = searchParams.get("minScore") || "";
-  const maxScore = searchParams.get("maxScore") || "";
-  const dateFilter = searchParams.get("dateFilter") || "all";
-  const page = searchParams.get("page") || "1";
+  const fetchReviews = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
 
-  useEffect(() => {
-    async function fetchReviews() {
-      setIsLoading(true);
-      setError(null);
+    try {
+      const params = new URLSearchParams(searchParams.toString());
+      const response = await fetch(`/api/reviews?${params.toString()}`);
 
-      try {
-        const params = new URLSearchParams(searchParams.toString());
-        const response = await fetch(`/api/reviews?${params.toString()}`);
-
-        if (!response.ok) {
-          throw new Error("Fehler beim Laden der Reviews");
-        }
-
-        const data: ApiResponse = await response.json();
-        setReviews(data.reviews);
-        setPagination(data.pagination);
-        setCategoryCounts(data.categoryCounts ?? null);
-        setScoreDistribution(data.scoreDistribution ?? null);
-        setTopPicks(data.topPicks ?? []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten");
-        setReviews([]);
-        setPagination(null);
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error("Fehler beim Laden der Reviews");
       }
-    }
 
-    fetchReviews();
-  }, [searchParams, reloadKey]);
+      const data: ApiResponse = await response.json();
+      setReviews(data.reviews);
+      setPagination(data.pagination);
+      setCategoryCounts(data.categoryCounts ?? {});
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten");
+      setReviews([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
-    const onScroll = () => {
-      const btn = toTopRef.current;
-      if (btn) btn.classList.toggle("is-visible", window.scrollY > 800);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    fetchReviews();
+  }, [fetchReviews]);
 
-  function hasActiveFilters() {
-    return (
-      query ||
-      category !== "all" ||
-      sort !== "date-desc" ||
-      dateFilter !== "all" ||
-      minScore ||
-      maxScore
-    );
+  let prevPageUrl = "";
+  let nextPageUrl = "";
+  if (pagination) {
+    const baseParams = new URLSearchParams(searchParams.toString());
+    if (pagination.hasPrev) {
+      const p = new URLSearchParams(baseParams.toString());
+      p.set("page", String(pagination.page - 1));
+      prevPageUrl = "?" + p.toString();
+    }
+    if (pagination.hasNext) {
+      const p = new URLSearchParams(baseParams.toString());
+      p.set("page", String(pagination.page + 1));
+      nextPageUrl = "?" + p.toString();
+    }
   }
 
-  const activeFilterCount =
-    (query ? 1 : 0) +
-    (category !== "all" ? 1 : 0) +
-    (sort !== "date-desc" ? 1 : 0) +
-    (dateFilter !== "all" ? 1 : 0) +
-    (minScore || maxScore ? 1 : 0);
+  const currentSort = searchParams.get("sort") || "date-desc";
 
-  const featuredReview = !hasActiveFilters() && page === "1" && reviews.length > 0 ? reviews[0] : null;
-  const otherReviews = featuredReview ? reviews.slice(1) : reviews;
+  const setParam = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    params.delete("page");
+    router.push("?" + params.toString());
+  };
 
-  const avgScore =
-    reviews.length > 0
-      ? Math.round((reviews.reduce((acc, r) => acc + (r.score || 0), 0) / reviews.length) * 10) / 10
-      : 0;
-  const bestScore = reviews.length > 0 ? Math.max(...reviews.map((r) => r.score || 0)) : 0;
+  // Filter by search query client-side
+  const filteredReviews = searchQuery
+    ? reviews.filter((r) =>
+        r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (r.category && r.category.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+    : reviews;
 
-  const renderStats = () => (
-    <div className="flex flex-wrap gap-3 pt-2">
-      {[
-        {
-          label: "Reviews",
-          value: pagination ? (
-            <StatCounter value={pagination.total} />
-          ) : (
-            <Skeleton className="h-8 w-16" />
-          ),
-        },
-        {
-          label: "Ø Wertung",
-          value: reviews.length > 0 ? <StatCounter value={avgScore} decimals={1} /> : <span>–</span>,
-        },
-        {
-          label: "Beste Wertung",
-          value: reviews.length > 0 ? <StatCounter value={bestScore} /> : <span>–</span>,
-        },
-      ].map((stat) => (
-        <div
-          key={stat.label}
-          className="stat-chip inline-flex items-baseline gap-2.5 rounded-sm border border-border bg-card/70 px-4 py-2.5"
-        >
-          <span className="font-serif text-2xl md:text-3xl font-semibold tabular-nums">
-            {stat.value}
-          </span>
-          <span className="kicker text-muted-foreground" style={{ fontSize: "0.625rem" }}>
-            {stat.label}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
+  // Top 3 highest-scoring reviews
+  const topReviews = [...filteredReviews]
+    .sort((a, b) => (b.score || 0) - (a.score || 0))
+    .slice(0, 3);
 
-  const renderTicker = () => (
-    <div className="full-bleed overflow-hidden border-y border-border bg-muted/40 py-3">
-      <div className="marquee" style={{ "--marquee-speed": "46s" } as CSSProperties}>
-        <div className="marquee-track">
-          {[0, 1].map((row) => (
-            <div key={row} className="flex items-center">
-              {verdictTickerItems.map((label, i) => (
-                <span
-                  key={`${row}-${label}-${i}`}
-                  className="inline-flex items-center gap-3 px-5 font-serif text-sm md:text-base font-medium italic text-muted-foreground whitespace-nowrap"
-                >
-                  {label}
-                  <span className="text-primary not-italic" aria-hidden="true">
-                    ✦
-                  </span>
-                </span>
-              ))}
+  // Distribution data for ScoreDistribution component
+  const distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  filteredReviews.forEach((r) => {
+    const band = Math.min(9, Math.floor((r.score || 0) / 10));
+    distribution[band]++;
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-10 pb-16">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="space-y-4">
+              <Skeleton className="aspect-[16/9] w-full rounded-sm" />
+              <Skeleton className="h-4 w-1/3 rounded-sm" />
+              <Skeleton className="h-6 w-3/4 rounded-sm" />
+              <Skeleton className="h-4 w-full rounded-sm" />
             </div>
           ))}
         </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (error) {
+    return (
+      <EmptyState
+        title="Fehler beim Laden"
+        description={error}
+      />
+    );
+  }
+
+  if (filteredReviews.length === 0) {
+    return (
+      <EmptyState
+        title={searchQuery ? "Keine Ergebnisse" : "Noch keine Reviews"}
+        description={searchQuery
+          ? `Keine Reviews für „${searchQuery}".`
+          : "Es sind noch keine Tests veröffentlicht. Schau später wieder vorbei."}
+      />
+    );
+  }
 
   return (
-    <div className="pb-16">
-      {/* ======================= HERO ======================= */}
-      <header className="relative overflow-hidden border-b border-border">
-        <div
-          className="bg-grid absolute inset-0 opacity-60 [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_75%)]"
-          aria-hidden="true"
-        />
-        <div
-          className="bg-mesh absolute inset-0 opacity-70"
-          aria-hidden="true"
-        />
-        <div
-          className="pointer-events-none absolute -top-20 left-[15%] h-64 w-64 rounded-full bg-primary/20 blur-3xl animate-aurora"
-          aria-hidden="true"
-        />
-        <div
-          className="pointer-events-none absolute -bottom-24 right-[10%] h-80 w-80 rounded-full bg-chart-2/15 blur-3xl animate-aurora [animation-delay:6s]"
-          aria-hidden="true"
-        />
-        <div className="noise pointer-events-none absolute inset-0 opacity-[0.045]" aria-hidden="true" />
-        <span className="hero-scan" aria-hidden="true" />
-        <div className="relative py-10 md:py-14 lg:py-16">
-          <div className="flex items-start justify-between gap-8">
-            <div className="max-w-3xl">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span className="kicker text-primary">Das Magazin</span>
-                <span className="text-muted-foreground" aria-hidden="true">·</span>
-                <span className="kicker text-muted-foreground">Unabhängige Tests & Kritiken</span>
-              </div>
+    <div className="pb-16 space-y-12">
+      {/* Header + Category Chips */}
+      <div className="border-b border-border pb-8">
+        <div className="flex flex-col gap-6">
+          <div>
+            <h1 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
+              Reviews
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {pagination?.total ?? filteredReviews.length} unabhängige Tests — Games, Filme, Serien, Hardware.
+            </p>
+          </div>
 
-              <h1 className="mt-4 font-serif text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.05]">
-                {headline.split("").map((ch, i) => (
-                  <span
-                    key={i}
-                    className="hero-char"
-                    style={{ animationDelay: `${120 + i * 45}ms` }}
-                  >
-                    {ch}
-                  </span>
-                ))}
-                <span className="ml-4 align-top inline-flex items-center rounded-sm border border-primary/40 px-2.5 py-1 font-sans text-[0.625rem] md:text-xs font-bold uppercase tracking-[0.22em] text-primary">
-                  Index
-                </span>
-              </h1>
-
-              <p className="mt-5 max-w-2xl text-base md:text-lg text-muted-foreground leading-relaxed text-balance">
-                {subline.split(" ").map((word, i) => (
-                  <span
-                    key={i}
-                    className="hero-word"
-                    style={{ animationDelay: `${480 + i * 26}ms` }}
-                  >
-                    {word}
-                    {i < subline.split(" ").length - 1 ? "\u00A0" : ""}
-                  </span>
-                ))}
-              </p>
-
-              {renderStats()}
-            </div>
-
-            <CircularBadge
-              text="Nerdiction ✦ Reviews Index ✦ Nerdiction ✦ Reviews Index ✦"
-              core="N"
-              className="hidden lg:inline-flex mt-6 shrink-0 animate-float-y-slow"
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <CategoryChips
+              categoryCounts={categoryCounts}
+              totalCount={pagination?.total ?? filteredReviews.length}
             />
-          </div>
 
-          <div className="mt-10 flex items-center gap-4">
-            <span className="hero-rule" aria-hidden="true" />
-            <span className="kicker text-muted-foreground whitespace-nowrap" style={{ fontSize: "0.625rem" }}>
-              Ausgabe {new Date().getFullYear()}
-            </span>
-            <span className="hero-rule" aria-hidden="true" />
-          </div>
-        </div>
-      </header>
-
-      {renderTicker()}
-
-      {/* ======================= FILTER ======================= */}
-      <ReviewsFilter categoryCounts={categoryCounts} />
-
-      {/* ======================= CONTENT ======================= */}
-      <div className="pt-10">
-        {isLoading ? (
-          <div className="space-y-12">
-            <div className="grid gap-6 lg:grid-cols-12">
-              <div className="lg:col-span-5 space-y-4">
-                <Skeleton className="skeleton-shimmer h-5 w-32 rounded-sm" />
-                <Skeleton className="skeleton-shimmer h-10 w-full rounded-sm" />
-                <Skeleton className="skeleton-shimmer h-4 w-3/4 rounded-sm" />
-                <Skeleton className="skeleton-shimmer h-4 w-2/3 rounded-sm" />
+            <div className="flex items-center gap-3">
+              {/* Search */}
+              <div className="relative flex-1 sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Titel suchen..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-input bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                />
               </div>
-              <div className="lg:col-span-7">
-                <Skeleton className="skeleton-shimmer aspect-[16/10] w-full rounded-sm" />
-              </div>
-            </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="space-y-3">
-                  <Skeleton className="skeleton-shimmer aspect-[16/9] w-full rounded-sm" />
-                  <Skeleton className="skeleton-shimmer h-4 w-1/3 rounded-sm" />
-                  <Skeleton className="skeleton-shimmer h-6 w-3/4 rounded-sm" />
-                  <Skeleton className="skeleton-shimmer h-4 w-full rounded-sm" />
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : error ? (
-          <div className="py-24">
-            <div className="mx-auto max-w-md rounded-sm border border-destructive/25 bg-destructive/5 p-10 text-center">
-              <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-full border border-destructive/30 text-destructive">
-                <AlertTriangle className="size-6" />
-              </div>
-              <h2 className="font-serif text-2xl font-semibold">Ups, da lief etwas schief</h2>
-              <p className="mt-2 text-sm text-muted-foreground">{error}</p>
+
+              {/* Sort toggle */}
               <button
-                onClick={() => setReloadKey((k) => k + 1)}
-                className="mt-6 inline-flex items-center gap-2 rounded-sm bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onClick={() => setFilterOpen(!filterOpen)}
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors shrink-0"
+                aria-expanded={filterOpen}
+                aria-label="Sortierung öffnen"
               >
-                <RefreshCw className="size-4" />
-                Erneut versuchen
-              </button>
-            </div>
-          </div>
-        ) : reviews.length > 0 ? (
-          <>
-            {/* Featured Spotlight */}
-            {featuredReview && (
-              <ScrollReveal variant="up" className="reveal-view-hero">
-                <SpotlightCard
-                  tilt={true}
-                  intensity={3}
-                  className="gradient-border group mb-12 overflow-hidden rounded-sm border border-border bg-card"
-                >
-                  <div className="grid lg:grid-cols-12">
-                    <div className="relative flex flex-col justify-between gap-6 border-b border-border p-6 md:p-8 lg:col-span-5 lg:border-b-0 lg:border-r">
-                      <span
-                        className="ghost-num absolute -top-2 right-4 text-[7rem] md:text-[9rem]"
-                        aria-hidden="true"
-                      >
-                        01
-                      </span>
-
-                      <div className="relative">
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                          <span className="kicker text-primary">Featured</span>
-                          <span className="text-muted-foreground" aria-hidden="true">·</span>
-                          <span
-                            className="kicker"
-                            style={{
-                              color: getCategoryStyle(featuredReview.category).color,
-                            }}
-                          >
-                            {getCategoryStyle(featuredReview.category).label}
-                          </span>
-                        </div>
-
-                        <h2 className="mt-3 font-serif text-3xl md:text-4xl font-semibold tracking-tight leading-[1.1] line-clamp-2 group-hover:text-primary transition-colors">
-                          {featuredReview.title}
-                        </h2>
-
-                        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                          <time
-                            dateTime={
-                              featuredReview.createdAt instanceof Date
-                                ? featuredReview.createdAt.toISOString()
-                                : featuredReview.createdAt
-                            }
-                          >
-                            {new Date(featuredReview.createdAt).toLocaleDateString("de-DE", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })}
-                          </time>
-                          <span aria-hidden="true">·</span>
-                          <span className="inline-flex items-center gap-1">
-                            <Clock3 className="size-3.5" />
-                            {readingTime(featuredReview.content)} Min. Lesezeit
-                          </span>
-                          <span aria-hidden="true">·</span>
-                          <span className="font-semibold text-foreground">
-                            {getVerdict(featuredReview.score)}
-                          </span>
-                        </div>
-
-                        <p className="mt-4 text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-3">
-                          {stripMarkdown(featuredReview.content || "").substring(0, 260)}…
-                        </p>
-                      </div>
-
-                      <Link
-                        href={`/reviews/${featuredReview.slug}`}
-                        className="group/cta relative inline-flex w-fit items-center gap-2 rounded-sm bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        Review lesen
-                        <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-1" />
-                      </Link>
-                    </div>
-
-                    <div className="relative lg:col-span-7">
-                      <div className="spotlight relative h-full min-h-[280px] lg:min-h-full overflow-hidden bg-muted">
-                        {featuredReview.images?.[0] ? (
-                          <Image
-                            src={featuredReview.images[0]}
-                            alt={featuredReview.title}
-                            fill
-                            priority
-                            unoptimized
-                            sizes="(max-width: 1024px) 100vw, 58vw"
-                            className="spotlight-img object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-muted">
-                            <span className="text-muted-foreground text-sm font-medium">
-                              Kein Bild
-                            </span>
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-
-                        <div className="animate-pulse-glow absolute right-4 top-4 rounded-full">
-                          <ScoreRing
-                            score={featuredReview.score}
-                            size={76}
-                            ringWidth={5}
-                            hole="oklch(0.16 0.004 90 / 0.85)"
-                            showVerdict
-                          />
-                        </div>
-
-                        <span className="spotlight-corner spotlight-corner-tl" aria-hidden="true" />
-                        <span className="spotlight-corner spotlight-corner-br" aria-hidden="true" />
-
-                        <div className="absolute bottom-4 left-4">
-                          <span className="kicker inline-flex items-center gap-2 rounded-sm bg-black/60 px-2.5 py-1.5 text-[0.625rem] font-semibold text-white backdrop-blur-sm">
-                            Nerdiction-Empfehlung
-                            <span className="text-primary" aria-hidden="true">✦</span>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </SpotlightCard>
-              </ScrollReveal>
-            )}
-
-            {/* Score Distribution */}
-            {scoreDistribution && pagination && pagination.total > 0 && (
-              <ScrollReveal variant="up" className="reveal-view-section mb-10">
-                <ScoreDistribution
-                  data={scoreDistribution}
-                  total={pagination.total}
-                />
-              </ScrollReveal>
-            )}
-
-            {/* Editorial Section Header */}
-            <ScrollReveal variant="up" className="reveal-view-section">
-              <div className="mb-6 flex flex-wrap items-end justify-between gap-2 border-b-2 border-foreground pb-3">
-                <div>
-                  <span className="kicker text-primary">03 · {hasActiveFilters() ? "Suche" : "Der Index"}</span>
-                  <h2 className="mt-1 font-serif text-2xl md:text-3xl font-semibold tracking-tight">
-                    {hasActiveFilters() ? "Suchergebnisse" : "Alle Reviews"}
-                  </h2>
-                </div>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pb-1">
-                  <span className="kicker text-muted-foreground" style={{ fontSize: "0.625rem" }}>
-                    {pagination?.total} {pagination?.total === 1 ? "Review" : "Reviews"}
-                    {pagination && pagination.totalPages > 1 && (
-                      <> · Seite {pagination.page}/{pagination.totalPages}</>
-                    )}
-                  </span>
-                  {activeFilterCount > 0 && (
-                    <span className="kicker text-primary" style={{ fontSize: "0.625rem" }}>
-                      {activeFilterCount}{" "}
-                      {activeFilterCount === 1 ? "Filter aktiv" : "Filter aktiv"}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </ScrollReveal>
-
-            {/* Grid + Editorial Watermark */}
-            <div className="relative">
-              <span className="index-watermark" aria-hidden="true">Index</span>
-              <div className="relative z-1 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {otherReviews.map((review, index) => (
-                  <ScrollReveal
-                    key={review.id}
-                    variant="up"
-                    delay={Math.min(index * 70, 420)}
-                    className="reveal-view h-full"
-                  >
-                    <ReviewCard review={review} index={index} />
-                  </ScrollReveal>
-                ))}
-              </div>
-            </div>
-
-            {pagination && (
-              <ReviewsPagination
-                totalPages={pagination.totalPages}
-                currentPage={pagination.page}
-              />
-            )}
-
-            {/* Editor's Picks */}
-            {!hasActiveFilters() && topPicks.length > 0 && (
-              <ScrollReveal variant="up" className="reveal-view pt-4">
-                <TopPicks picks={topPicks} />
-              </ScrollReveal>
-            )}
-          </>
-        ) : (
-          /* Empty State */
-          <div className="py-24">
-            <div className="mx-auto max-w-md rounded-sm border border-dashed border-border bg-muted/30 p-10 text-center">
-              <div className="relative mx-auto mb-5 flex size-16 items-center justify-center">
-                <div
-                  className="animate-spin-slow absolute inset-0 rounded-full border border-dashed border-muted-foreground/40"
+                Sortieren
+                <ChevronDown
+                  className={`size-4 transition-transform duration-200 ${filterOpen ? "rotate-180" : ""}`}
                   aria-hidden="true"
+                  style={{ transition: "transform 0.2s ease" }}
                 />
-                <div className="flex size-12 items-center justify-center rounded-full border border-border bg-card text-muted-foreground">
-                  <SearchX className="size-5" />
+              </button>
+
+              {filterOpen && (
+                <div className="absolute right-0 top-12 z-10 rounded-lg border border-border bg-card p-3 shadow-lg sm:relative sm:top-0 sm:z-auto sm:shadow-none sm:rounded-sm sm:p-0">
+                  <div className="flex flex-col gap-2 min-w-[180px]">
+                    <span className="text-xs font-medium text-muted-foreground">Sortierung</span>
+                    {SORTS.map((s) => (
+                      <button
+                        key={s.value}
+                        onClick={() => setParam("sort", s.value)}
+                        className={`text-left text-sm rounded-sm px-2 py-1.5 transition-colors ${
+                          currentSort === s.value
+                            ? "bg-accent text-foreground font-medium"
+                            : "hover:bg-accent/50"
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <h2 className="font-serif text-2xl font-semibold">
-                {hasActiveFilters() ? "Keine Treffer" : "Noch keine Reviews"}
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {hasActiveFilters()
-                  ? "Versuche andere Suchbegriffe oder lockere die Filter."
-                  : "Schau bald wieder vorbei – die Redaktion arbeitet daran."}
-              </p>
-              {hasActiveFilters() && (
-                <Link
-                  href="/reviews"
-                  className="mt-6 inline-flex items-center gap-2 rounded-sm bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  Alle Filter zurücksetzen
-                  <ArrowRight className="size-4" />
-                </Link>
               )}
             </div>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Back-to-Top */}
-      <button
-        ref={toTopRef}
-        aria-label="Nach oben"
-        className="to-top"
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      >
-        <ArrowUp />
-      </button>
+      {/* Score Distribution */}
+      <ScoreDistribution data={distribution} total={filteredReviews.length} />
+
+      {/* Top bewertet */}
+      {topReviews.length >= 2 && (
+        <section className="space-y-4">
+          <span className="kicker text-primary">Beste Wertungen</span>
+          <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight">
+            Top bewertet
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {topReviews.map((review, i) => (
+              <Link
+                key={review.id}
+                href={`/reviews/${review.slug}`}
+                className="group block rounded-lg border border-border bg-card overflow-hidden hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+              >
+                <div className="flex items-stretch">
+                  {review.images?.[0] && (
+                    <div className="w-28 sm:w-32 shrink-0 bg-muted overflow-hidden">
+                      <Image
+                        src={review.images[0]}
+                        alt={review.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="128px"
+                      />
+                    </div>
+                  )}
+                  <div className="flex-1 p-4 flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="kicker text-xs text-muted-foreground">
+                        #{i + 1}
+                      </span>
+                      <span className="kicker text-xs text-muted-foreground">·</span>
+                      <span className="kicker text-xs capitalize">{review.category}</span>
+                    </div>
+                    <h3 className="font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary">
+                      {review.title}
+                    </h3>
+                    <div className="mt-auto flex items-center gap-2">
+                      <ScoreBlock score={review.score} />
+                      <span className="text-xs text-muted-foreground">
+                        {review.score >= 90
+                          ? "Phänomenal"
+                          : review.score >= 80
+                          ? "Hervorragend"
+                          : review.score >= 70
+                          ? "Gut"
+                          : "Solide"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Reviews Grid */}
+      <section aria-label="Alle Reviews">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredReviews.map((review) => (
+            <Link
+              key={review.id}
+              href={`/reviews/${review.slug}`}
+              className="block group"
+            >
+              <article className="border border-border rounded-lg bg-card p-4 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors">
+                {review.images?.[0] && (
+                  <div className="aspect-[16/9] w-full rounded-md bg-muted overflow-hidden mb-3">
+                    <Image
+                      src={review.images[0]}
+                      alt={review.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                  </div>
+                )}
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="kicker inline-flex items-center gap-1 text-xs capitalize">
+                    {review.category}
+                  </span>
+                </div>
+                <h3 className="font-semibold text-foreground group-hover:text-primary leading-snug">
+                  {review.title}
+                </h3>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <ScoreBlock score={review.score} />
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(review.createdAt).toLocaleDateString("de-DE", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+              </article>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between gap-4 border-t border-border pt-6">
+          <span className="text-sm text-muted-foreground">
+            {pagination.total} Reviews
+          </span>
+          <div className="flex items-center gap-1">
+            {pagination.hasPrev && (
+              <Link
+                href={prevPageUrl}
+                className="px-3 py-1.5 text-sm rounded-md border border-border bg-background hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+                aria-label="Vorherige Seite"
+              >
+                Vorherige
+              </Link>
+            )}
+            <span className="px-3 py-1.5 text-sm rounded-md border border-border bg-card">
+              Seite {pagination.page} von {pagination.totalPages}
+            </span>
+            {pagination.hasNext && (
+              <Link
+                href={nextPageUrl}
+                className="px-3 py-1.5 text-sm rounded-md border border-border bg-background hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+                aria-label="Nächste Seite"
+              >
+                Nächste
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

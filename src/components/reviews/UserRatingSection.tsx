@@ -68,7 +68,7 @@ export function UserRatingSection({
           , um diese Review zu bewerten.
         </p>
       ) : submitted ? (
-        <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-500">
+        <div className="flex items-center gap-2 text-sm" style={{ color: "var(--chart-4)" }}>
           <Star className="size-4 fill-current" />
           Danke für deine Bewertung!
         </div>
@@ -83,9 +83,7 @@ export function UserRatingSection({
                 onClick={() => setScore(n)}
                 className={cn(
                   "p-0.5 transition-colors",
-                  n <= displayScore
-                    ? "text-yellow-500"
-                    : "text-muted-foreground/40"
+                  n <= displayScore ? "text-chart-4" : ""
                 )}
                 aria-label={`${n} von 10`}
               >
@@ -94,6 +92,11 @@ export function UserRatingSection({
                     "size-5",
                     n <= displayScore && "fill-current"
                   )}
+                  style={
+                    n > displayScore
+                      ? { color: "var(--muted-foreground)", opacity: 0.4 }
+                      : undefined
+                  }
                 />
               </button>
             ))}

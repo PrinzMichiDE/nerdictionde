@@ -16,9 +16,13 @@
     "type-check": "tsc --noEmit",
     "generate:icons": "node scripts/generate-favicons.mjs",
     "create-game-reviews": "tsx scripts/create-200-game-reviews.ts",
+    "create-500-game-reviews": "tsx scripts/create-500-game-reviews.ts",
+    "create-series-reviews": "tsx scripts/create-500-series-reviews.ts",
+    "create-movie-reviews": "tsx scripts/create-500-movie-reviews.ts",
     "regenerate-movie-series": "tsx scripts/regenerate-movie-series-content.ts",
     "regenerate-review-content": "tsx scripts/regenerate-review-content.ts",
-    "news:sync": "tsx scripts/generate-news.ts"
+    "news:sync": "tsx scripts/generate-news.ts",
+    "test:e2e": "e2e run"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -70,13 +74,16 @@
     "zod": "^4.3.4"
   },
   "devDependencies": {
+    "@e2e-dev/web": "^0.15.2",
     "@next/bundle-analyzer": "^16.1.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20.19.27",
     "@types/pg": "^8.16.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "ai": "^7.0.0",
     "dotenv": "^17.2.3",
+    "e2e": "^0.21.2",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.1.1",
     "eslint-plugin-prettier": "^5.5.4",

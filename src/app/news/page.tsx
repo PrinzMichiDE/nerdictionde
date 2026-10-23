@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Newspaper, ArrowRight, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import prisma from "@/lib/prisma";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
@@ -12,14 +11,14 @@ import { NewsSyncTrigger } from "@/components/news/NewsSyncTrigger";
 export const metadata: Metadata = {
   title: "News",
   description:
-    "Aktuelle, KI-erstellte News aus der Nerd-Welt – Gaming, Filme & Serien, Hardware und Technik. Stündlich aktualisiert aus ausgewählten RSS-Quellen.",
+    "Aktuelle News aus der Nerd-Welt – Gaming, Filme & Serien, Hardware und Technik.",
   alternates: {
     canonical: "/news",
   },
   openGraph: {
     type: "website",
     title: "News | Nerdiction",
-    description: "Aktuelle News aus der Nerd-Welt – stündlich aktualisiert.",
+    description: "Aktuelle News aus der Nerd-Welt.",
     url: `${getSiteUrl()}/news`,
     siteName: "Nerdiction",
     locale: "de_DE",
@@ -27,7 +26,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     title: "News | Nerdiction",
-    description: "Aktuelle News aus der Nerd-Welt – stündlich aktualisiert.",
+    description: "Aktuelle News aus der Nerd-Welt.",
+    images: [`${getSiteUrl()}/icon-512.png`],
   },
 };
 
@@ -64,15 +64,14 @@ export default async function NewsPage() {
             <Newspaper className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <span className="kicker text-primary">Nerdiction News</span>
             <h1 className="font-serif text-4xl md:text-5xl font-semibold tracking-tight mt-1">
               News
             </h1>
           </div>
         </div>
         <p className="text-muted-foreground text-lg md:text-xl max-w-3xl">
-          Stündlich aktualisiert: KI-erstellte Beiträge zu den wichtigsten Meldungen
-          aus Gaming, Filmen & Serien, Hardware und Technik – basierend auf kuratierten RSS-Quellen.
+          Aktuelle Beiträge zu Gaming, Filmen & Serien, Hardware und Technik –
+          basierend auf kuratierten Quellen.
         </p>
       </div>
 
@@ -83,13 +82,15 @@ export default async function NewsPage() {
           {/* Featured */}
           {featured && (
             <Link href={`/news/${featured.slug}`} className="block group">
-              <Card className="overflow-hidden transition-colors group-hover:border-primary/50">
+              <Card className="overflow-hidden border border-border">
                 <CardContent className="p-6 md:p-8 space-y-4">
                   <div className="flex flex-wrap items-center gap-3">
-                    <Badge variant="secondary">{featured.category}</Badge>
+                    <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      {featured.category}
+                    </span>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Clock className="h-3.5 w-3.5" />
-                      {format(new Date(featured.publishedAt), "dd. MMMM yyyy, HH:mm", { locale: de })}
+                      {format(new Date(featured.publishedAt), "dd. MMMM yyyy", { locale: de })}
                     </span>
                   </div>
                   <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight group-hover:text-primary transition-colors">
@@ -113,10 +114,12 @@ export default async function NewsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {rest.map((article) => (
                 <Link key={article.id} href={`/news/${article.slug}`} className="block group">
-                  <Card className="h-full transition-colors group-hover:border-primary/50">
+                  <Card className="h-full border border-border">
                     <CardContent className="p-5 space-y-3 flex flex-col h-full">
                       <div className="flex items-center justify-between gap-2">
-                        <Badge variant="outline">{article.category}</Badge>
+                        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          {article.category}
+                        </span>
                         <span className="text-xs text-muted-foreground">
                           {format(new Date(article.publishedAt), "dd.MM.yyyy", { locale: de })}
                         </span>
@@ -128,18 +131,6 @@ export default async function NewsPage() {
                         <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
                           {article.excerpt}
                         </p>
-                      )}
-                      {article.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
-                          {article.tags.slice(0, 3).map((tag) => (
-                            <span
-                              key={tag}
-                              className="text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5"
-                            >
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
                       )}
                     </CardContent>
                   </Card>

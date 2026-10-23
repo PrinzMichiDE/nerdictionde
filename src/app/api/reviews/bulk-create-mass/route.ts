@@ -101,8 +101,10 @@ export async function POST(req: NextRequest) {
           break;
 
         case "hardware":
-          // Upsert catalog products into the Hardware table and use those records
-          for (const item of HARDWARE_CATALOG.slice(0, count)) {
+          // Use catalog to create/get hardware entries without reviews
+          let createdHw = 0;
+          for (const item of HARDWARE_CATALOG) {
+            if (items.length >= count) break;
             const slugBase = `${item.manufacturer}-${item.model || item.name}`
               .toLowerCase()
               .replace(/[^a-z0-9]+/g, "-")
@@ -112,6 +114,7 @@ export async function POST(req: NextRequest) {
             while (await prisma.hardware.findUnique({ where: { slug } })) {
               attempt++;
               slug = `${slugBase}-${attempt}`;
+              if (attempt > 20) break;
             }
             const hw = await prisma.hardware.upsert({
               where: { slug },
@@ -122,15 +125,30 @@ export async function POST(req: NextRequest) {
                 type: item.type,
                 manufacturer: item.manufacturer,
                 model: item.model || null,
-                specs: item.specs,
+                specs: item.specs || {},
                 msrp: item.msrp ?? null,
                 releaseDate: item.releaseDate ? new Date(item.releaseDate) : null,
               },
               update: {},
             });
-            items.push(hw);
+            // Check if already has review
+            const hasReview = await prisma.review.findFirst({
+              where: { hardwareId: hw.id },
+            });
+            if (!hasReview) {
+              items.push(hw);
+              createdHw++;
+            }
           }
-          console.log(`✅ Prepared ${items.length} hardware products from catalog`);
+          // If still not enough, try to find any existing without reviews
+          if (items.length < count) {
+            const more = await prisma.hardware.findMany({
+              where: { reviews: { none: {} } },
+              take: count - items.length,
+            });
+            items.push(...more);
+          }
+          console.log(`✅ Prepared ${items.length} hardware products without reviews`);
           break;
 
         default:

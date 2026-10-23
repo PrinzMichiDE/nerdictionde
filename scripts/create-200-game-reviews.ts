@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { getIGDBGamesBulkLarge, BulkQueryOptions } from "../src/lib/igdb";
 import { processGame, generateSlug } from "../src/lib/review-generation";
@@ -17,7 +18,9 @@ interface ProgressState {
   lastProcessedIndex: number;
 }
 
-const PROGRESS_FILE = path.join(process.cwd(), "scripts", "game-reviews-progress.json");
+const PROGRESS_FILE = process.env.PROGRESS_FILE
+  ? path.resolve(process.cwd(), process.env.PROGRESS_FILE)
+  : path.join(process.cwd(), "scripts", "game-reviews-progress.json");
 
 // Load progress state
 function loadProgress(): ProgressState | null {
@@ -83,14 +86,14 @@ async function retryWithBackoff<T>(
 }
 
 async function main() {
-  const TARGET_COUNT = 200;
-  const BATCH_SIZE = 5; // Process 5 games at a time
+  const TARGET_COUNT = Number(process.env.TARGET_COUNT) || 200;
+  const BATCH_SIZE = Number(process.env.BATCH_SIZE) || 5; // Process 5 games at a time
   const DELAY_BETWEEN_BATCHES = 3000; // 3 seconds between batches
   const DELAY_BETWEEN_GAMES = 2000; // 2 seconds between individual games
-  const STATUS = "draft" as const;
+  const STATUS = process.env.REVIEW_STATUS === "published" ? "published" as const : "draft" as const;
   const SKIP_EXISTING = true;
 
-  console.log("🚀 Starting mass creation of 200 Game Reviews");
+  console.log(`🚀 Starting mass creation of ${TARGET_COUNT} Game Reviews`);
   console.log("=" .repeat(60));
 
   // Check for existing progress
@@ -98,7 +101,11 @@ async function main() {
   let games: any[] = [];
   let progress: ProgressState;
 
-  if (existingProgress && existingProgress.lastProcessedIndex < existingProgress.totalGames - 1) {
+  if (
+    existingProgress &&
+    existingProgress.totalGames === TARGET_COUNT &&
+    existingProgress.lastProcessedIndex < existingProgress.totalGames - 1
+  ) {
     console.log(`📂 Found existing progress:`);
     console.log(`   Processed: ${existingProgress.processed}/${existingProgress.totalGames}`);
     console.log(`   Successful: ${existingProgress.successful}`);

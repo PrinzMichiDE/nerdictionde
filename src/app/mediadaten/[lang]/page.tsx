@@ -106,7 +106,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
               <Link
                 key={l}
                 href={`/mediadaten/${l}`}
-                className={`px-2.5 py-1 text-xs font-semibold rounded-full border transition-all duration-200 ${
+                className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${
                   l === lang
                     ? "bg-primary text-primary-foreground border-primary shadow-sm shadow-primary/25"
                     : "bg-background/60 hover:bg-muted border-border/60 text-muted-foreground hover:text-foreground"
@@ -138,11 +138,11 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
 
       {/* Important Notice */}
       <section className="reveal-view">
-        <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/5 to-transparent">
+        <Card className="border-border">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
-              <div className="size-10 rounded-lg bg-amber-500/15 flex items-center justify-center shrink-0">
-                <FileText className="size-5 text-amber-600 dark:text-amber-400" />
+              <div className="size-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                <FileText className="size-5 text-muted-foreground" />
               </div>
               <div className="flex-1 space-y-2">
                 <h3 className="font-serif text-lg font-semibold text-foreground">
@@ -185,20 +185,20 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {keyMetricCards.map((card, i) => (
-            <Card key={i} className="shine group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5">
+            <Card key={i} className="shine group relative overflow-hidden border border-border hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">{card.label}</CardTitle>
-                <div className="p-2 rounded-lg transition-colors duration-300" style={{ backgroundColor: `color-mix(in oklab, ${card.accent} 12%, transparent)` }}>
+                <div className="p-2 rounded-lg" style={{ backgroundColor: `color-mix(in oklab, ${card.accent} 12%, transparent)` }}>
                   <card.icon className="size-4" style={{ color: card.accent }} />
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold tracking-tight" style={{ color: card.accent }}>
+                  <span className="text-3xl font-bold tracking-tight">
                     {card.value}
                   </span>
                   {card.growth && (
-                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-0.5">
+                    <span className="text-xs font-semibold text-primary inline-flex items-center gap-0.5">
                       <ArrowUpRight className="size-3" />
                       {card.growth}
                     </span>
@@ -249,12 +249,12 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                       return (
                         <div key={index} className="flex-1 flex flex-col items-center justify-end h-full group/bar relative">
                           {/* Hover tooltip */}
-                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-10 px-2.5 py-1 rounded-md bg-foreground text-background text-[10px] font-semibold whitespace-nowrap opacity-0 group-hover/bar:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg">
+                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-10 px-2.5 py-1 rounded-md bg-foreground text-background text-[10px] font-semibold whitespace-nowrap opacity-0 group-hover/bar:opacity-100 pointer-events-none shadow-lg">
                             {formatMediaNumber(data.visitors, locale)}
                             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-foreground rotate-45 rounded-[1px]" />
                           </div>
                           <div
-                            className="w-full rounded-t-sm transition-all duration-300 ease-out group-hover/bar:brightness-110 group-hover/bar:shadow-lg group-hover/bar:shadow-primary/20 cursor-pointer"
+                            className="w-full rounded-t-sm group-hover/bar:brightness-110 group-hover/bar:shadow-lg group-hover/bar:shadow-primary/20 cursor-pointer"
                             style={{
                               height: `${barHeight}%`,
                               minHeight: '4px',
@@ -296,12 +296,12 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                       const barHeight = Math.max(heightPercent, 2);
                       return (
                         <div key={index} className="flex-1 flex flex-col items-center justify-end h-full group/bar relative">
-                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-10 px-2.5 py-1 rounded-md bg-foreground text-background text-[10px] font-semibold whitespace-nowrap opacity-0 group-hover/bar:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg">
+                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-10 px-2.5 py-1 rounded-md bg-foreground text-background text-[10px] font-semibold whitespace-nowrap opacity-0 group-hover/bar:opacity-100 pointer-events-none shadow-lg">
                             {formatMediaNumber(data.pageViews, locale)}
                             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-foreground rotate-45 rounded-[1px]" />
                           </div>
                           <div
-                            className="w-full rounded-t-sm transition-all duration-300 ease-out group-hover/bar:brightness-110 group-hover/bar:shadow-lg group-hover/bar:shadow-primary/20 cursor-pointer"
+                            className="w-full rounded-t-sm group-hover/bar:brightness-110 group-hover/bar:shadow-lg group-hover/bar:shadow-primary/20 cursor-pointer"
                             style={{
                               height: `${barHeight}%`,
                               minHeight: '4px',

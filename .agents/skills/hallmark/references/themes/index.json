@@ -1,5 +1,5 @@
 {
- "built": "2026-10-21",
+ "built": "2026-10-22",
  "themes": [
   {
    "name": "Almanac",
@@ -606,6 +606,54 @@
    "picture": "references/themes/dose.jpg"
   },
   {
+   "name": "Dusk",
+   "slug": "dusk",
+   "genre": "modern-minimal",
+   "posture": "committed",
+   "paper": {
+    "band": "dark",
+    "L": 17.5,
+    "hue": 268
+   },
+   "display": {
+    "class": "grotesk-sans",
+    "face": "Wix Madefor Display"
+   },
+   "accent": {
+    "band": "cool",
+    "hue": 274
+   },
+   "keywords": [
+    "treasury",
+    "banking",
+    "fintech",
+    "payments",
+    "reconciliation",
+    "ledger",
+    "accounting",
+    "close",
+    "month end",
+    "audit",
+    "balance",
+    "cash management",
+    "payouts",
+    "settlement",
+    "compliance",
+    "controller",
+    "bookkeeping",
+    "finance team",
+    "invoicing",
+    "payroll",
+    "overnight",
+    "automation"
+   ],
+   "material": "a real landscape at the turn of the light behind the hero, slate below it, the product in smoked glass with a lit top edge, Wix Madefor Display at a quiet weight over Wix Madefor Text, bone wells for light surfaces, one periwinkle signal and one apricot",
+   "file": "references/themes/dusk.md",
+   "photo": "natural con=4 vib=6",
+   "pictured": "Narrative Workflow, Stage hero",
+   "picture": "references/themes/dusk.jpg"
+  },
+  {
    "name": "Editorial",
    "slug": "editorial",
    "genre": "editorial",
@@ -1063,52 +1111,6 @@
    "picture": "references/themes/kiln.jpg"
   },
   {
-   "name": "Ledger",
-   "slug": "ledger",
-   "genre": "modern-minimal",
-   "posture": "committed",
-   "paper": {
-    "band": "dark",
-    "L": 19,
-    "hue": 18
-   },
-   "display": {
-    "class": "grotesk-sans",
-    "face": "Instrument Sans"
-   },
-   "accent": {
-    "band": "chromatic-teal",
-    "hue": 182
-   },
-   "keywords": [
-    "treasury",
-    "banking",
-    "fintech",
-    "payments",
-    "reconciliation",
-    "ledger",
-    "accounting",
-    "close",
-    "month end",
-    "audit",
-    "balance",
-    "cash management",
-    "payouts",
-    "settlement",
-    "compliance",
-    "controller",
-    "bookkeeping",
-    "finance team",
-    "invoicing",
-    "payroll"
-   ],
-   "material": "oxblood binding engraved like a share certificate, bone ink, Instrument Sans with old-style Cormorant Garamond figures, ruled rows and double-ruled totals, foil-stamped bone plates, two inks with one job each",
-   "file": "references/themes/ledger.md",
-   "photo": "duotone paper ink",
-   "pictured": "Narrative Workflow, Stage hero",
-   "picture": "references/themes/ledger.jpg"
-  },
-  {
    "name": "Loom",
    "slug": "loom",
    "genre": "editorial",
@@ -1484,8 +1486,8 @@
     "hue": 85
    },
    "display": {
-    "class": "high-contrast-serif",
-    "face": "Newsreader italic"
+    "class": "grotesk-sans",
+    "face": "Instrument Sans"
    },
    "accent": {
     "band": "chromatic-teal",
@@ -1512,7 +1514,7 @@
     "app",
     "subscription"
    ],
-   "material": "warm off-white or blue-black night, Newsreader light italic over Figtree, machined parts lit from above, the hour drawn as light on a generated canvas, one signal",
+   "material": "warm off-white or blue-black night, Instrument Sans at a quiet weight over Figtree, machined parts lit from above, the hour drawn as light on a generated canvas, one signal",
    "file": "references/themes/ribbon.md",
    "photo": "muted sepia=14",
    "pictured": "Night Notes, Stage hero, in the two-in-the-morning colourway",

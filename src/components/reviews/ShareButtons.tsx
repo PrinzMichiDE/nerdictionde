@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Share2, Link as LinkIcon, Twitter, Facebook, Check } from "lucide-react";
+import { Link as LinkIcon, Twitter, Facebook, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 interface ShareButtonsProps {
   title: string;
@@ -35,11 +34,11 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
         variant="outline"
         size="sm"
         onClick={copyToClipboard}
-        className="h-9 rounded-full px-4 gap-2 border-2 transition-all hover:border-primary/50"
+        className="h-9 rounded-full px-4 gap-2 transition-colors hover:border-primary/50"
       >
         {copied ? (
           <>
-            <Check className="size-4 text-green-500" />
+            <Check className="size-4 text-primary" />
             <span className="text-xs font-semibold">Kopiert</span>
           </>
         ) : (
@@ -54,7 +53,7 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
         variant="outline"
         size="icon"
         onClick={shareTwitter}
-        className="size-9 rounded-full border-2 transition-all hover:border-sky-500/50 hover:text-sky-500"
+        className="size-9 rounded-full border-2 transition-colors hover:border-primary/50 hover:text-primary"
         aria-label="Auf Twitter teilen"
       >
         <Twitter className="size-4" />
@@ -64,7 +63,7 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
         variant="outline"
         size="icon"
         onClick={shareFacebook}
-        className="size-9 rounded-full border-2 transition-all hover:border-blue-600/50 hover:text-blue-600"
+        className="size-9 rounded-full border-2 transition-colors hover:border-primary/50 hover:text-primary"
         aria-label="Auf Facebook teilen"
       >
         <Facebook className="size-4" />
@@ -72,4 +71,3 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
     </div>
   );
 }
-

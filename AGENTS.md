@@ -27,6 +27,8 @@ Standardverhalten, wenn beide dasselbe regeln.
 | `migrate-to-e2e` | tester-army/e2e | Bestehende Playwright/Cypress-Suite portieren |
 | `create-verification-skill` | tester-army/e2e | Projektlokalen `verify-<app>`-Skill erzeugen |
 | `scrapling-official` | D4Vinci/Scrapling | Scraping/Crawling mit Python |
+| `omni-*`/`cli-*` | cheaper-inference/OmniRoute | AI-Gateway: Setup, Modell-/Provider-Katalog, Budget, Troubleshooting |
+| `ifixai` | ifixai-ai/iFixAi | Audit eines Agents: Regelkonformität, Prompt-Injection, Governance |
 
 Aktualisieren: `npx skills update` (Versionen stehen in `skills-lock.json`).
 
@@ -100,6 +102,67 @@ Aktualisieren: `npx skills update` (Versionen stehen in `skills-lock.json`).
 - CLI-Aufrufe immer mit `--ai-targeted` (Prompt-Injection-Schutz).
 - `robots.txt`, Nutzungsbedingungen und Rate-Limits respektieren; keine
   Umgehung von Bezahlschranken oder Logins.
+
+## Regel 6 — OmniRoute: Gateway nur mit Free-Tier-Modellen
+
+- OmniRoute läuft lokal als Gateway (`http://localhost:20128`) und ist
+  OpenAI-kompatibel. Für dieses Projekt zählt eine Regel: **nur Modelle ohne
+  Kosten**. Kein Modell, dessen Provider Geld pro Token berechnet, egal wie
+  günstig — auch nicht als Fallback am Ende einer Kette.
+- Belegt wird das an der Quelle: `omniroute providers available --category free`
+  oder `omniroute providers available --json` und dort der Kategorie-/Preis-
+  Eintrag; für die Konfiguration `omniroute providers list --json`. Lässt sich
+  ein Modell dort nicht als kostenlos belegen, wird es nicht eingesetzt und
+  nicht in ein Routing aufgenommen.
+- Routing-Combos, Fallback-Ketten und Alias-Vorgaben sind so zu bauen, dass
+  jedes Glied in der Kette kostenlos ist. Reicht das Free-Budget nicht, wird
+  der Lauf abgebrochen oder auf ein lokales Modell ausgewichen, statt still
+  auf ein bezahltes Modell zu wechseln.
+- Kostenkontrolle: `omniroute providers test-all --json`, `omniroute keys list`
+  und `omniroute health` vor längeren Läufen. Logs und Verbrauch über
+  `omniroute usage` prüfen, sobald Zweifel bestehen.
+- Niemals Zugangsdaten, API-Keys oder Cursor-/Provider-Tokens in Code, Logs,
+  Commits oder Antworten schreiben. Keys liegen in `.env` (gitignored) oder in
+  OmniRoutes eigener Konfiguration.
+- Läuft der lokale Server nicht, ist die Antwort „Gateway nicht erreichbar" —
+  keine erfundenen Modellnamen, keine Rate-Schlüsse auf Preise. Bei fehlender
+  Information nachfragen.
+- Für dieses Next.js-Repo gilt: OmniRoute hilft bei Inhalten und Scripts
+  (`src/lib/review-generation.ts`, `src/lib/news-generation.ts`,
+  `scripts/`), ersetzt aber keine Projekt-Dependency und wird nicht in
+  Produktionspfade wie API-Routen oder Cronjobs eingebaut, ohne dass der
+  Nutzer es verlangt.
+
+## Regel 7 — iFixAi nur auf Zuruf, mit Kosten-Vorlauf
+
+- `ifixai` ist ein Prüfwerkzeug, kein Hintergrunddienst. Einsatz nur, wenn der
+  Nutzer ausdrücklich einen Audit verlangt („audit my agent", „run iFixAi",
+  „prüfe, ob der Agent macht, was er soll").
+- Reihenfolge vor jedem Lauf, ohne Abkürzung:
+  1. Ziel klären: echter Agent über HTTP (`--provider http --endpoint <url>`,
+     Standard) oder Ersatzmodell. Beides benennen, der Nutzer entscheidet.
+  2. `--dry-run` zeigen und die erwarteten Kosten nennen, bevor irgendetwas
+     abgerechnet wird.
+  3. Erst nach ausdrücklichem Ja starten.
+- Keys und Kosten: Der iFixAi-Lauf verbraucht zwei getrennte Bezahlpfade —
+  das getestete System (SUT) und die Richter. Beide Keys kommen aus der
+  Umgebung, nie aus der Kommandozeile, nie in Antworten oder Commits. In
+  diesem Projekt gilt zusätzlich Regel 6: für Richter und Ersatzmodell sind
+  kostenlose Modelle zu bevorzugen, sofern es die Qualität des Urteils
+  zulässt; ein bezahlter Richter ist nur mit klarer Ansage erlaubt.
+- Vertraulichkeit: Dieses Repo enthält keine Nutzerdaten von Nerdiction.
+  Fixtures, System-Prompts und Auszüge aus Produktionscode dürfen nur mit
+  ausdrücklicher Freigabe in einen Audit wandern, weil sie an fremde Anbieter
+  gehen. Standard ist ein abstrahiertes Fixture.
+- Ergebnisse gehören nach `ifixai-results/` und werden im Projekt nicht
+  versioniert. Scorecards nicht schönreden: ein schwaches Ergebnis wird
+  benannt, mit Fundstelle und Vorschlag, statt es zu erklären.
+- `ifixai.yaml` nicht committen (Keys stehen als Umgebungsvariablen-Name
+  darin). Telemetrie bleibt aus, solange der Nutzer nichts anderes sagt:
+  `--no-telemetry` oder `IFIXAI_TELEMETRY=0`.
+- Werkzeug fehlt? `ifixai` ist hier nicht installiert und `uv`/`uvx` gibt es
+  nicht. Dann nennen, was fehlt (`pip install "ifixai[<provider>]"` bzw. `uv`),
+  statt einen Lauf zu behaupten.
 
 ## Konflikte
 

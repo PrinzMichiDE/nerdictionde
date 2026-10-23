@@ -84,6 +84,7 @@ export interface BulkQueryOptions {
   platformId?: number;
   releaseYear?: number;
   minRating?: number;
+  releasedOnly?: boolean;
   limit?: number;
   offset?: number;
   sortBy?: "popularity" | "rating" | "release_date" | "name";
@@ -97,6 +98,7 @@ export async function getIGDBGamesBulk(options: BulkQueryOptions = {}) {
     platformId,
     releaseYear,
     minRating,
+    releasedOnly,
     limit = 50,
     offset = 0,
     sortBy = "total_rating_count",
@@ -124,6 +126,10 @@ export async function getIGDBGamesBulk(options: BulkQueryOptions = {}) {
   
   if (minRating !== undefined && minRating !== null) {
     whereConditions.push(`rating >= ${Math.floor(minRating)}`);
+  }
+
+  if (releasedOnly) {
+    whereConditions.push(`first_release_date <= ${Math.floor(Date.now() / 1000)}`);
   }
   
   // Ensure we only get games with cover and summary

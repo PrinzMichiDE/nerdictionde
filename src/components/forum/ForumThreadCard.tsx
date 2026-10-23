@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { MessageSquare, Eye, Clock, Gamepad2, Film, Tv } from "lucide-react";
+import { MessageSquare, Eye, Clock, TrendingUp, Gamepad2, Film, Tv } from "lucide-react";
 import { VoteButtons } from "@/components/shared/VoteButtons";
 
 const categoryConfig = {
-  gaming: { label: "Gaming", icon: Gamepad2, color: "text-purple-500 dark:text-purple-400" },
-  movies: { label: "Filme", icon: Film, color: "text-amber-500 dark:text-amber-400" },
-  series: { label: "Serien", icon: Tv, color: "text-sky-500 dark:text-sky-400" },
+  gaming: { label: "Gaming", icon: Gamepad2, color: "var(--chart-1)" },
+  movies: { label: "Filme", icon: Film, color: "var(--chart-3)" },
+  series: { label: "Serien", icon: Tv, color: "var(--chart-5)" },
 } as const;
 
 interface ForumThreadCardProps {
@@ -19,6 +19,8 @@ interface ForumThreadCardProps {
   viewCount: number;
   score?: number;
   lastActivityAt: string | Date;
+  createdAt: string | Date;
+  isTrending?: boolean;
 }
 
 function timeAgo(date: Date | string): string {
@@ -47,29 +49,43 @@ export function ForumThreadCard({
   viewCount,
   score = 0,
   lastActivityAt,
+  isTrending,
 }: ForumThreadCardProps) {
-  const config = categoryConfig[category as keyof typeof categoryConfig] ?? categoryConfig.gaming;
+  const config =
+    categoryConfig[category as keyof typeof categoryConfig] ?? categoryConfig.gaming;
   const Icon = config.icon;
 
   return (
     <Link
       href={`/forum/${slug}`}
-      className="group block border border-border rounded-md p-5 bg-card hover:border-muted-foreground/30 transition-all"
+      className="group block border border-border rounded-sm p-5 bg-card hover:border-muted-foreground/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
     >
+      {isTrending && (
+        <div className="flex items-center gap-1.5 -mt-0.5 mb-2.5">
+          <TrendingUp className="size-3.5" style={{ color: config.color }} />
+          <span
+            className="kicker text-xs"
+            style={{ color: config.color }}
+          >
+            Trending
+          </span>
+        </div>
+      )}
+
       <div className="flex items-start gap-4">
-        <div
-          className="shrink-0 pt-1"
-          onClick={(e) => e.preventDefault()}
-        >
+        <div className="shrink-0 pt-1" onClick={(e) => e.preventDefault()}>
           <VoteButtons targetType="thread" targetId={id} initialScore={score} />
         </div>
         <div className="flex-1 min-w-0 space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider ${config.color}`}>
+            <span
+              className="inline-flex items-center gap-1.5 text-xs font-semibold"
+              style={{ color: config.color }}
+            >
               <Icon className="size-3.5" />
               {config.label}
             </span>
-            <span className="text-xs text-muted-foreground">·</span>
+            <span className="text-xs text-muted-foreground" aria-hidden="true">·</span>
             <span className="text-xs text-muted-foreground">von {author}</span>
           </div>
 

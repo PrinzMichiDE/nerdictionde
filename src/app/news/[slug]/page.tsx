@@ -5,11 +5,11 @@ import { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlugCustomId from "rehype-slug-custom-id";
-import { ArrowLeft, Clock, ExternalLink, Tag } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, ExternalLink, Tag } from "lucide-react";
 import { getSiteUrl, generateArticleSchema } from "@/lib/seo";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { MetaLine } from "@/components/shared/MetaLine";
 
 export async function generateMetadata({
   params,
@@ -101,13 +101,11 @@ export default async function NewsDetailPage({
       </Link>
 
       <header className="space-y-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <Badge variant="secondary">{article.category}</Badge>
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5" />
-            {format(new Date(article.publishedAt), "dd. MMMM yyyy, HH:mm", { locale: de })}
-          </span>
-        </div>
+        <MetaLine
+          category={article.category}
+          date={article.publishedAt}
+          readingTime={Math.max(1, Math.ceil((article.content || "").split(/\s+/).length / 200))}
+        />
 
         <h1 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight">
           {title}

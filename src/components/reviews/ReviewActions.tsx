@@ -1,0 +1,51 @@
+"use client";
+
+import { Printer } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ShareButtons } from "./ShareButtons";
+import { BookmarkButton } from "@/components/shared/BookmarkButton";
+import { CompareButton } from "./CompareButton";
+
+interface ReviewActionsProps {
+  title: string;
+  url: string;
+  slug: string;
+  reviewId: string;
+  isLoggedIn: boolean;
+  initialBookmarked?: boolean;
+}
+
+export function ReviewActions({
+  title,
+  url,
+  slug,
+  reviewId,
+  isLoggedIn,
+  initialBookmarked,
+}: ReviewActionsProps) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <ShareButtons title={title} url={url} />
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => window.print()}
+        className="h-9 rounded-full px-4 gap-2 transition-colors hover:border-primary/50"
+        aria-label="Review drucken"
+      >
+        <Printer className="size-4" />
+        <span className="text-xs font-semibold">Drucken</span>
+      </Button>
+
+      <CompareButton slug={slug} className="flex-1" />
+
+      {isLoggedIn && (
+        <BookmarkButton
+          reviewId={reviewId}
+          initialBookmarked={initialBookmarked}
+        />
+      )}
+    </div>
+  );
+}

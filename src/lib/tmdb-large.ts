@@ -31,6 +31,7 @@ export async function getTMDBMoviesBulkLarge(
     genreId,
     releaseYear,
     minRating,
+    releaseDateLte,
     sortBy = "popularity",
     order = "desc",
   } = options;
@@ -60,6 +61,10 @@ export async function getTMDBMoviesBulkLarge(
 
       if (minRating !== undefined) {
         params["vote_average.gte"] = minRating;
+      }
+
+      if (releaseDateLte) {
+        params["primary_release_date.lte"] = releaseDateLte;
       }
 
       // Determine sort parameter

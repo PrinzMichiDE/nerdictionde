@@ -1560,6 +1560,20 @@ model NewsSyncState {
   updatedAt DateTime @updatedAt
 }
 
+// Newsletter (E-Mail-Abonnement für neue Tests)
+
+model NewsletterSubscription {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String?  // z. B. "homepage", "review-detail"
+  subscribedAt DateTime @default(now())
+  unsubscribedAt DateTime?
+  isActive  Boolean  @default(true)
+
+  @@index([email])
+  @@index([isActive])
+}
+
 // Push Notifications
 
 model PushSubscription {

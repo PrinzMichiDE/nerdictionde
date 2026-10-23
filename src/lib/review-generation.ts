@@ -248,7 +248,7 @@ export async function generateContent(
       model: OPENAI_MODEL,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
-      max_tokens: 16000, // Increased for longer content (5000-10000 words per language)
+      max_tokens: 32000, // Truncated responses lost the score field at 16000
     });
 
     let contentRaw = aiResponse.choices[0].message.content || "{}";
@@ -267,7 +267,7 @@ export async function generateContent(
 
     try {
       const parsed = JSON.parse(contentRaw);
-      if (!parsed.de || !parsed.de.content || !parsed.en || !parsed.en.content) {
+      if (!parsed.de || !parsed.de.content || !parsed.en || !parsed.en.content || typeof parsed.score !== "number") {
         throw new Error("Missing essential content fields");
       }
       return parsed;
@@ -284,7 +284,7 @@ export async function generateContent(
 
       const repaired = repairJson(contentRaw, parseError, itemName);
       
-      if ((!repaired.en || !repaired.en.content) && retryCount < 1) {
+      if ((!repaired.en || !repaired.en.content || typeof repaired.score !== "number") && retryCount < 1) {
         console.log(`Repaired JSON for ${itemName} is still missing content. Retrying...`);
         return generateContent(prompt + RETRY_HINT, itemName, retryCount + 1);
       }
@@ -881,6 +881,18 @@ export async function processGame(
     const contentDe = replaceImagePlaceholders(reviewContent.de.content, imageUrls, gameData.name);
     const contentEn = replaceImagePlaceholders(reviewContent.en.content, imageUrls, gameData.name);
 
+    // The model occasionally omits the score after JSON repair. A missing
+    // required Int would make prisma.review.create fail and lose the review.
+    const parsedScore = Number(reviewContent.score);
+    const referenceScore = Number(
+      gameData.total_rating ?? gameData.aggregated_rating ?? gameData.rating
+    );
+    const score = Number.isFinite(parsedScore)
+      ? Math.min(100, Math.max(0, Math.round(parsedScore)))
+      : Number.isFinite(referenceScore) && referenceScore > 0
+        ? Math.min(100, Math.max(0, Math.round(referenceScore)))
+        : 70;
+
     let seoMeta: { metaDescription: string; metaKeywords: string } | null = null;
     try {
       seoMeta = await generateSEOMetadata(reviewContent.de.title, contentDe, "game");
@@ -896,7 +908,7 @@ export async function processGame(
         category: "game",
         content: contentDe,
         content_en: contentEn,
-        score: reviewContent.score,
+        score,
         pros: reviewContent.de.pros,
         pros_en: reviewContent.en.pros,
         cons: reviewContent.de.cons,
@@ -955,6 +967,53 @@ const HARDWARE_TYPE_LABELS: Record<string, string> = {
   headset: "Headset",
   controller: "Controller",
   console: "Konsole",
+  smartphone: "Smartphone",
+  headphone: "Kopfhörer",
+  earbuds: "True Wireless Earbuds",
+  speaker: "Lautsprecher",
+  "robot-vacuum": "Saugroboter",
+  smartwatch: "Smartwatch",
+  ev: "Elektromobil",
+  drone: "Drohne",
+  "3d-printer": "3D-Drucker",
+  "smart-display": "Smart Display",
+  "smart-hub": "Smart-Home-Hub",
+  "smart-lighting": "Smart Lighting",
+  thermostat: "Smart Thermostat",
+  "video-doorbell": "Smart Video-Türklingel",
+  "security-camera": "Smart Überwachungskamera",
+  "smart-lock": "Smart Lock",
+  "smart-blind": "Smart Rollladenmotor",
+  sensor: "Smart Home Sensor",
+  "smart-plug": "Smart Steckdose",
+  scooter: "Elektro-Tretroller",
+  ebike: "E-Bike",
+  "action-camera": "Action Camera",
+  "360-camera": "360° Kamera",
+  "cycling-computer": "Fahrradcomputer",
+  "backpack": "Rucksack",
+  "satellite-communicator": "Satellitenkommunikator",
+  "cycling-shoes": "Fahrradschuhe",
+  "cycling-helmet": "Fahrradhelm",
+  "rear-light": "Rücklicht",
+  "bike-computer": "Bike Computer",
+  "heads-up-display": "HUD",
+  "building-set": "Klemmbaustein-Set",
+  tablet: "Tablet",
+  "vr-headset": "VR-Headset",
+  tv: "Fernseher",
+  "vacuum-cleaner": "Staubsauger",
+  "air-purifier": "Luftreiniger",
+  "smart-lighting-strip": "LED-Streifen",
+  "coffee-machine": "Kaffeemaschine",
+  "hair-dryer": "Haartrockner",
+  epilator: "Epilierer",
+  shaver: "Rasierer",
+  "air-fryer": "Heißluftfritteuse",
+  "smart-speaker": "Smart Speaker",
+  "smart-thermostat": "Smart Thermostat",
+  "cycling-accessories": "Fahrradzubehör",
+  "outdoor-gear": "Outdoor-Ausrüstung",
 };
 
 /**
@@ -1589,6 +1648,15 @@ export async function processMovie(
     if (existingById) return { success: false, error: "Already exists" };
 
     const reviewContent = await generateMovieReviewContent(movieData);
+
+    // The model occasionally omits the score; fall back to the TMDB rating
+    // instead of failing the insert with a missing required field.
+    const referenceScore = Number(movieData.vote_average);
+    const score = Number.isFinite(Number(reviewContent.score))
+      ? Math.min(100, Math.max(0, Math.round(Number(reviewContent.score))))
+      : Number.isFinite(referenceScore) && referenceScore > 0
+        ? Math.round(referenceScore * 10)
+        : 70;
     
     // Generate slug and ensure uniqueness
     let slug = generateSlug(reviewContent.de.title || movieData.title);
@@ -1670,7 +1738,7 @@ export async function processMovie(
         category: "movie",
         content: contentDe,
         content_en: contentEn,
-        score: reviewContent.score,
+        score,
         pros: reviewContent.de.pros,
         pros_en: reviewContent.en.pros,
         cons: reviewContent.de.cons,
@@ -1688,7 +1756,7 @@ export async function processMovie(
 
     generateAndSaveCommentsForReview(review.id, {
       reviewTitle: reviewContent.de.title,
-      score: reviewContent.score,
+      score,
       pros: reviewContent.de.pros,
       cons: reviewContent.de.cons,
       category: "movie",
@@ -1697,7 +1765,7 @@ export async function processMovie(
     generateAndAttachTagsForReview(review.id, {
       reviewTitle: reviewContent.de.title,
       category: "movie",
-      score: reviewContent.score,
+      score,
       metadata: { genres: movieMetadata.genres },
       contentExcerpt: reviewContent.de.content?.substring(0, 500),
     }).catch((e) => console.warn("Tag generation for movie review failed:", e));

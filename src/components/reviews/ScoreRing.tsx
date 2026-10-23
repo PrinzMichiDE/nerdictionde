@@ -102,7 +102,7 @@ export function ScoreRing({
           className="score-ring-inner font-bold"
           style={{ fontSize }}
         >
-          {display}
+          {!inView ? safeScore : display}
         </span>
       </div>
       {showVerdict && (

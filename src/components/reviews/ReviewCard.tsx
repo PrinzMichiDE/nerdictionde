@@ -1,14 +1,16 @@
+"use client";
+
 import Link from "next/link";
-import { Review } from "@/types/review";
-import { ScoreRing } from "./ScoreRing";
-import { ArrowRight, Clock3 } from "lucide-react";
 import Image from "next/image";
-import { getCategoryStyle, getVerdict, stripMarkdown } from "@/lib/review-category";
+import { Review } from "@/types/review";
+import { ScoreBlock } from "@/components/shared/ScoreBlock";
+import { getCategoryStyle, getVerdict } from "@/lib/review-category";
+import { ArrowRight, Clock3 } from "lucide-react";
 import type { CSSProperties } from "react";
+import { CompareButton } from "./CompareButton";
 
 interface ReviewCardProps {
   review: Review;
-  /** Laufende Nummer für den Editorial-Index (0-basiert) */
   index?: number;
 }
 
@@ -20,7 +22,7 @@ export function ReviewCard({ review, index }: ReviewCardProps) {
   });
 
   const style = getCategoryStyle(review.category);
-  const snippet = stripMarkdown(review.content || "").substring(0, 150);
+  const snippet = (review.content || "").split(/\s+/).slice(0, 30).join(" ") + "…";
   const readingTime = Math.max(1, Math.ceil((review.content || "").split(/\s+/).length / 200));
 
   return (
@@ -59,12 +61,7 @@ export function ReviewCard({ review, index }: ReviewCardProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
           <div className="absolute top-2.5 right-2.5">
-            <ScoreRing
-              score={review.score}
-              size={48}
-              ringWidth={3.5}
-              hole="var(--card)"
-            />
+            <ScoreBlock score={review.score} />
           </div>
 
           <div className="absolute bottom-2.5 left-3">
@@ -112,12 +109,15 @@ export function ReviewCard({ review, index }: ReviewCardProps) {
           </h3>
 
           <p className="line-clamp-3 text-sm text-muted-foreground leading-relaxed">
-            {snippet}…
+            {snippet}
           </p>
 
-          <div className="mt-auto flex items-center justify-between border-t border-border pt-3 text-sm">
-            <span className="font-semibold text-primary">Weiterlesen</span>
-            <ArrowRight className="review-card-arrow size-4 text-primary" />
+          <div className="mt-auto flex flex-col gap-2 border-t border-border pt-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-primary">Weiterlesen</span>
+              <ArrowRight className="review-card-arrow size-4 text-primary" />
+            </div>
+            <CompareButton slug={review.slug} />
           </div>
         </div>
       </article>

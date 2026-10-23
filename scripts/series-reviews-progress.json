@@ -1,0 +1,276 @@
+{
+  "totalSeries": 500,
+  "processed": 55,
+  "successful": 53,
+  "failed": 0,
+  "skipped": 2,
+  "failedSeries": [],
+  "successfulSeries": [
+    {
+      "name": "South Park",
+      "tmdbId": 2190,
+      "reviewId": "cmvjyiai70000mm6gmgihn5w2"
+    },
+    {
+      "name": "Law & Order",
+      "tmdbId": 549,
+      "reviewId": "cmvjyichq0001mm6g6hwxzk04"
+    },
+    {
+      "name": "Breaking Bad",
+      "tmdbId": 1396,
+      "reviewId": "cmvjyiesm0002mm6g45a4euel"
+    },
+    {
+      "name": "The Bear: King of the Kitchen",
+      "tmdbId": 136315,
+      "reviewId": "cmvjyzvyi000dmm6g1z0hucv3"
+    },
+    {
+      "name": "Law & Order: Special Victims Unit",
+      "tmdbId": 2734,
+      "reviewId": "cmvjzb47l000hmm6gz6uap7tz"
+    },
+    {
+      "name": "Ally McBeal",
+      "tmdbId": 1480,
+      "reviewId": "cmvjzr8gb000mmm6gdy79az4f"
+    },
+    {
+      "name": "The Tonight Show Starring Johnny Carson",
+      "tmdbId": 2261,
+      "reviewId": "cmvk01mnl000pmm6gynjl15oc"
+    },
+    {
+      "name": "Running Man",
+      "tmdbId": 33238,
+      "reviewId": "cmvk07kq6000qmm6gfdvcoxsd"
+    },
+    {
+      "name": "Die Simpsons",
+      "tmdbId": 456,
+      "reviewId": "cmvk0j1b1000vmm6g5zwov33f"
+    },
+    {
+      "name": "The Tonight Show Starring Jimmy Fallon",
+      "tmdbId": 59941,
+      "reviewId": "cmvk0sz8a000zmm6gxyy6mzcd"
+    },
+    {
+      "name": "VisionQuest",
+      "tmdbId": 213375,
+      "reviewId": "cmvk15v270015mm6gcnv6epi3"
+    },
+    {
+      "name": "Tagesschau",
+      "tmdbId": 94722,
+      "reviewId": "cmvk1deip0016mm6gnvdxb7sj"
+    },
+    {
+      "name": "Navy CIS",
+      "tmdbId": 4614,
+      "reviewId": "cmvk1vy7q001cmm6gv9t4ytcj"
+    },
+    {
+      "name": "Grey's Anatomy",
+      "tmdbId": 1416,
+      "reviewId": "cmvk2l6cd001imm6gnr3ogfhl"
+    },
+    {
+      "name": "Late Night with Seth Meyers",
+      "tmdbId": 61818,
+      "reviewId": "cmvk37jtv001lmm6gp0a2eibc"
+    },
+    {
+      "name": "The Late Show with Stephen Colbert",
+      "tmdbId": 63770,
+      "reviewId": "cmvk3nks4001mmm6gx3fmnsfq"
+    },
+    {
+      "name": "Reacher",
+      "tmdbId": 108978,
+      "reviewId": "cmvk3tuqv001nmm6gj3rykke5"
+    },
+    {
+      "name": "The Mentalist",
+      "tmdbId": 5920,
+      "reviewId": "cmvk3wf9s001omm6ggc7it3bc"
+    },
+    {
+      "name": "Slow Horses – Ein Fall für Jackson Lamb",
+      "tmdbId": 95480,
+      "reviewId": "cmvk56v370020mm6gtsd4p3ys"
+    },
+    {
+      "name": "The Daily Show",
+      "tmdbId": 2224,
+      "reviewId": "cmvk59fjy0021mm6gboi08usk"
+    },
+    {
+      "name": "Supernatural",
+      "tmdbId": 1622,
+      "reviewId": "cmvk5f3k80022mm6g2o5fs3g2"
+    },
+    {
+      "name": "Family Guy",
+      "tmdbId": 1434,
+      "reviewId": "cmvk5wg080027mm6gi8qhj7xq"
+    },
+    {
+      "name": "Torchwood",
+      "tmdbId": 424,
+      "reviewId": "cmvk6eidt002emm6gnv58uerk"
+    },
+    {
+      "name": "Raw",
+      "tmdbId": 4656,
+      "reviewId": "cmvk8jzkq002mmm6gez8ms7mt"
+    },
+    {
+      "name": "Late Show with David Letterman",
+      "tmdbId": 498,
+      "reviewId": "cmvk8k1nr002nmm6grr6py13i"
+    },
+    {
+      "name": "Criminal Minds",
+      "tmdbId": 4057,
+      "reviewId": "cmvk8k4vr002omm6g0deak5jn"
+    },
+    {
+      "name": "CSI - Den Tätern auf der Spur",
+      "tmdbId": 1431,
+      "reviewId": "cmvk8nn28002rmm6gxdwj50q1"
+    },
+    {
+      "name": "Binnelanders",
+      "tmdbId": 206559,
+      "reviewId": "cmvk8qcqk002smm6gz5njzo2a"
+    },
+    {
+      "name": "American Dad",
+      "tmdbId": 1433,
+      "reviewId": "cmvkavv6d0046mm6g0cmo050l"
+    },
+    {
+      "name": "MobLand: Familie bis aufs Blut",
+      "tmdbId": 247718,
+      "reviewId": "cmvkavxdt0047mm6gyq9mj8in"
+    },
+    {
+      "name": "The Rookie",
+      "tmdbId": 79744,
+      "reviewId": "cmvkb07n3004pmm6gtapm38t5"
+    },
+    {
+      "name": "Nurse Jackie",
+      "tmdbId": 18053,
+      "reviewId": "cmvkb0as4004qmm6gxjcp2fyl"
+    },
+    {
+      "name": "Tulsa King",
+      "tmdbId": 153312,
+      "reviewId": "cmvkbwibe0068mm6g5kxucw5g"
+    },
+    {
+      "name": "The Kelly Clarkson Show",
+      "tmdbId": 82873,
+      "reviewId": "cmvkejgw70078mm6gm7dejdhi"
+    },
+    {
+      "name": "Game of Thrones",
+      "tmdbId": 1399,
+      "reviewId": "cmvkejjem0079mm6gkfx5axiv"
+    },
+    {
+      "name": "Carrie",
+      "tmdbId": 288673,
+      "reviewId": "cmvkejlme007amm6gu1j9f79x"
+    },
+    {
+      "name": "Bones - Die Knochenjägerin",
+      "tmdbId": 1911,
+      "reviewId": "cmvkejnz5007bmm6gktwacmut"
+    },
+    {
+      "name": "Crystal Lake",
+      "tmdbId": 213562,
+      "reviewId": "cmvkejrzd007cmm6g8escb7c3"
+    },
+    {
+      "name": "The Office",
+      "tmdbId": 2316,
+      "reviewId": "cmvkgcakz007tmm6gvwaw6ezm"
+    },
+    {
+      "name": "Tatort",
+      "tmdbId": 3034,
+      "reviewId": "cmvkgpg1d007wmm6gsgq87f57"
+    },
+    {
+      "name": "American Horror Story",
+      "tmdbId": 1413,
+      "reviewId": "cmvkgxwjx0080mm6g57p0jo8t"
+    },
+    {
+      "name": "Dr. House",
+      "tmdbId": 1408,
+      "reviewId": "cmvkh8rk80081mm6ghy406xuj"
+    },
+    {
+      "name": "Ici tout commence",
+      "tmdbId": 112470,
+      "reviewId": "cmvkhdg3k0082mm6g8wg3luhe"
+    },
+    {
+      "name": "Doctor Who",
+      "tmdbId": 57243,
+      "reviewId": "cmvkk8kfq008bmm6ga6fzuvr5"
+    },
+    {
+      "name": "Bleach",
+      "tmdbId": 30984,
+      "reviewId": "cmvkklhwr008cmm6gth39css0"
+    },
+    {
+      "name": "Chicago Fire",
+      "tmdbId": 44006,
+      "reviewId": "cmvkklitk008dmm6g9gmrnqsp"
+    },
+    {
+      "name": "Smallville",
+      "tmdbId": 4604,
+      "reviewId": "cmvkkljas008emm6gwbusxqbv"
+    },
+    {
+      "name": "Chicago P.D.",
+      "tmdbId": 58841,
+      "reviewId": "cmvkklkjg008fmm6gp4xt2eos"
+    },
+    {
+      "name": "Gute Zeiten, schlechte Zeiten",
+      "tmdbId": 13945,
+      "reviewId": "cmvkll5hg00aamm6gz79y8qod"
+    },
+    {
+      "name": "Modern Family",
+      "tmdbId": 1421,
+      "reviewId": "cmvklxkzh00abmm6gtptyloly"
+    },
+    {
+      "name": "Shameless - Nicht ganz nüchtern",
+      "tmdbId": 34307,
+      "reviewId": "cmvkmhcus00aemm6guso56gzq"
+    },
+    {
+      "name": "The Flash",
+      "tmdbId": 60735,
+      "reviewId": "cmvkmkgis00afmm6gx3v2p0zg"
+    },
+    {
+      "name": "The Blacklist",
+      "tmdbId": 46952,
+      "reviewId": "cmvkntnb900aumm6gve4sy2gg"
+    }
+  ],
+  "lastProcessedIndex": 52
+}

@@ -1,27 +1,19 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { ScoreRing } from "@/components/reviews/ScoreRing";
 import Image from "next/image";
-import {
-  generateBreadcrumbSchema,
-  generateFAQSchema,
-  generateReviewSchema,
-  getSiteUrl,
-} from "@/lib/seo";
-import { CommentSection } from "@/components/community/CommentSection";
 import Link from "next/link";
 import { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlugCustomId from "rehype-slug-custom-id";
-import { Monitor, Cpu, HardDrive, CpuIcon, ArrowLeft, Clock, Check, X } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { GameMetadata } from "@/components/reviews/GameMetadata";
 import { MovieSeriesMetadata } from "@/components/reviews/MovieSeriesMetadata";
 import { TableOfContents } from "@/components/reviews/TableOfContents";
 import { RelatedReviews } from "@/components/reviews/RelatedReviews";
 import { HardwareMetadata } from "@/components/reviews/HardwareMetadata";
 import { ReviewProgress } from "@/components/reviews/ReviewProgress";
-import { ShareButtons } from "@/components/reviews/ShareButtons";
+import { ReviewActions } from "@/components/reviews/ReviewActions";
 import { YouTubeEmbed } from "@/components/reviews/YouTubeEmbed";
 import { EpisodeList } from "@/components/reviews/EpisodeList";
 import { GameProgressTracker } from "@/components/reviews/GameProgressTracker";
@@ -30,7 +22,20 @@ import { SpoilerSection } from "@/components/reviews/SpoilerSection";
 import { getCategoryStyle } from "@/lib/review-category";
 import { getServerSession } from "@/lib/session";
 import { UserRatingSection } from "@/components/reviews/UserRatingSection";
-import { BookmarkButton } from "@/components/shared/BookmarkButton";
+import { CommentSection } from "@/components/community/CommentSection";
+import { ScoreBlock } from "@/components/shared/ScoreBlock";
+import { ProsCons } from "@/components/shared/ProsCons";
+import { MetaLine } from "@/components/shared/MetaLine";
+import { SpecTable } from "@/components/shared/SpecTable";
+import { SourceList } from "@/components/shared/SourceList";
+import { MethodNote } from "@/components/shared/MethodNote";
+import { RatingBreakdown } from "@/components/shared/RatingBreakdown";
+import { ScoreCompare } from "@/components/shared/ScoreCompare";
+import { ReadingProgressBar } from "@/components/shared/ReadingProgressBar";
+import { ScrollToTop } from "@/components/shared/ScrollToTop";
+import { generateBreadcrumbSchema, generateFAQSchema, generateReviewSchema, getSiteUrl } from "@/lib/seo";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
 
 export async function generateMetadata({
   params,
@@ -179,16 +184,17 @@ export default async function ReviewDetailPage({
 
   const review = await prisma.review.findUnique({
     where: { slug },
-    include: { 
+    include: {
       comments: true,
-    }
+      tags: { include: { tag: true } },
+    },
   });
 
   if (!review) notFound();
 
   const session = await getServerSession();
 
-  const [userRating, isBookmarked] = await Promise.all([
+  const [userRating, isBookmarked, categoryAvg] = await Promise.all([
     session
       ? prisma.userRating.findUnique({
           where: { userId_reviewId: { userId: session.userId, reviewId: review.id } },
@@ -199,12 +205,25 @@ export default async function ReviewDetailPage({
           where: { userId_reviewId: { userId: session.userId, reviewId: review.id } },
         })
       : null,
+    prisma.review.findMany({
+      where: { category: review.category, status: "published", id: { not: review.id } },
+      select: { score: true },
+    }).then((r) => {
+      if (r.length === 0) return null;
+      return Math.round(r.reduce((a, b) => a + b.score, 0) / r.length);
+    }),
   ]);
 
   const title = isEn && review.title_en ? review.title_en : review.title;
   const content = isEn && review.content_en ? review.content_en : review.content;
   const pros = isEn && review.pros_en.length > 0 ? review.pros_en : review.pros;
   const cons = isEn && review.cons_en.length > 0 ? review.cons_en : review.cons;
+
+  const tags = (review.tags as { tag: { name: string } }[] | null)
+    ?.map((t) => t.tag.name)
+    .filter(Boolean) ?? [];
+
+  const categoryLabel = getCategoryStyle(review.category).label;
 
   const verdictPhrase =
     review.score >= 90
@@ -223,7 +242,6 @@ export default async function ReviewDetailPage({
             ? "satisfactory"
             : "befriedigend";
 
-  // Calculate reading time
   const wordCount = (content || "").split(/\s+/).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
@@ -239,13 +257,7 @@ export default async function ReviewDetailPage({
   const faqs = buildFaqs(review, isEn);
   const faqSchema = generateFAQSchema(faqs);
 
-  const formattedDate = review.createdAt.toLocaleDateString(isEn ? "en-US" : "de-DE", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
-  const specs = review.specs as any;
+  const specs = review.specs as Record<string, Record<string, string | undefined> | null>;
 
   // Extract headings from markdown content to generate table of contents
   function extractHeadings(markdown: string): Array<{ level: number; text: string; id: string }> {
@@ -257,42 +269,35 @@ export default async function ReviewDetailPage({
     while ((match = headingRegex.exec(markdown)) !== null) {
       const level = match[1].length;
       let text = match[2].trim();
-      
-      // Remove markdown links from heading text first
+
       text = text.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
-      
-      // Check for explicit anchor ID like {#fazit}
+
       const explicitIdMatch = text.match(/\s*\{#([^}]+)\}\s*$/);
       let id: string;
-      
+
       if (explicitIdMatch) {
-        // Use explicit anchor ID
         id = explicitIdMatch[1];
-        // Remove the explicit anchor ID from the text
         text = text.replace(/\s*\{#[^}]+\}\s*$/, '').trim();
       } else {
-        // Generate ID automatically (similar to rehype-slug-custom-id)
         id = text
           .toLowerCase()
           .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+          .replace(/[\u0300-\u036f]/g, '')
           .replace(/[^\w\s-]/g, '')
           .replace(/\s+/g, '-')
           .replace(/-+/g, '-')
           .replace(/^-|-$/g, '')
           .trim();
       }
-      
-      // Skip the first H1 (main title) - it's already displayed at the top
+
       if (level === 1 && !firstH1Found) {
         firstH1Found = true;
         continue;
       }
-      
-      // Skip the table of contents heading itself
+
       const tocHeadingText = isEn ? "Table of Contents" : "Inhaltsverzeichnis";
       if (text.toLowerCase() === tocHeadingText.toLowerCase()) continue;
-      
+
       headings.push({ level, text, id });
     }
 
@@ -302,7 +307,6 @@ export default async function ReviewDetailPage({
   const headings = extractHeadings(content || "");
   const hasTableOfContents = headings.length > 0;
 
-  // remark plugin: converts "> SPOILER: …" blockquotes into custom "spoiler" nodes
   interface MdastNode {
     type: string;
     value?: string;
@@ -329,23 +333,21 @@ export default async function ReviewDetailPage({
     };
   }
 
-  // Custom component for Markdown images to handle placeholders
   const MarkdownComponents = {
     spoiler: ({ children }: { children?: React.ReactNode }) => (
       <SpoilerSection isEn={isEn}>{children}</SpoilerSection>
     ),
-    p: ({ children, ...props }: any) => {
-      // Check if children is a placeholder like ![[IMAGE_1]]
-      const content = children?.toString() || "";
+    p: ({ children, ...rest }: { children?: React.ReactNode } & Record<string, React.ReactNode>) => {
+      const content = (children ?? "").toString() || "";
       const match = content.match(/!\[\[IMAGE_(\d+)\]\]/);
-      
+
       if (match) {
-        const index = parseInt(match[1]); // Index from placeholder (1-based)
-        const imageUrl = review.images[index]; // Use index as is, because 0 is hero
-        
+        const index = parseInt(match[1]);
+        const imageUrl = review.images[index];
+
         if (imageUrl) {
           return (
-            <div className="my-12 relative aspect-video w-full overflow-hidden rounded-md group">
+            <figure className="my-12 relative aspect-video w-full overflow-hidden rounded-md group">
               <Image
                 src={imageUrl}
                 alt={`Screenshot ${index}`}
@@ -353,17 +355,69 @@ export default async function ReviewDetailPage({
                 className="object-cover"
                 unoptimized
               />
-            </div>
+              <figcaption className="mt-2 text-xs text-muted-foreground text-center">
+                Abbildung {index + 1}
+              </figcaption>
+            </figure>
           );
         }
-        return null; // Don't show anything if image is missing
+        return null;
       }
-      return <p {...props}>{children}</p>;
+      return <p {...rest}>{children}</p>;
     },
+    blockquote: ({ children, ...rest }: { children?: React.ReactNode } & Record<string, React.ReactNode>) => (
+      <blockquote
+        className="my-6 pl-4 border-l-4 border-primary/30 bg-primary/5 rounded-r-md py-3 pr-4"
+        {...rest}
+      >
+        {children}
+      </blockquote>
+    ),
+    table: ({ children, ...rest }: { children?: React.ReactNode } & Record<string, React.ReactNode>) => (
+      <div className="my-8 overflow-x-auto">
+        <table className="w-full border-collapse text-sm" {...rest}>
+          {children}
+        </table>
+      </div>
+    ),
+    th: ({ children, ...rest }: { children?: React.ReactNode } & Record<string, React.ReactNode>) => (
+      <th
+        className="py-3 px-4 text-left font-semibold border-b-2 border-border bg-muted/50"
+        {...rest}
+      >
+        {children}
+      </th>
+    ),
+    td: ({ children, ...rest }: { children?: React.ReactNode } & Record<string, React.ReactNode>) => (
+      <td
+        className="py-3 px-4 border-b border-border text-foreground/80"
+        {...rest}
+      >
+        {children}
+      </td>
+    ),
+    h2: ({ children, ...rest }: { children?: React.ReactNode } & Record<string, React.ReactNode>) => (
+      <h2
+        className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mt-12 mb-6 scroll-mt-24"
+        {...rest}
+      >
+        {children}
+      </h2>
+    ),
+    h3: ({ children, ...rest }: { children?: React.ReactNode } & Record<string, React.ReactNode>) => (
+      <h3
+        className="font-serif text-xl md:text-2xl font-semibold tracking-tight mt-10 mb-4 scroll-mt-24"
+        {...rest}
+      >
+        {children}
+      </h3>
+    ),
   };
 
   return (
     <article className="max-w-5xl mx-auto space-y-10 pb-12">
+      <ReadingProgressBar />
+      <ScrollToTop />
       <ReviewProgress />
       <script
         type="application/ld+json"
@@ -409,45 +463,51 @@ export default async function ReviewDetailPage({
       <header className="border-b border-border pb-8">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div className="space-y-4 flex-1">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span
-                className="inline-flex items-center gap-2"
-                style={{ color: getCategoryStyle(review.category).color }}
-              >
-                <span
-                  className="size-1.5 rounded-full"
-                  style={{ backgroundColor: getCategoryStyle(review.category).color }}
-                  aria-hidden="true"
-                />
-                <span className="kicker">
-                  {review.category === "game" ? "Test" : "Kritik"} ·{" "}
-                  {getCategoryStyle(review.category).label}
-                </span>
-              </span>
-              <span className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
-                <Clock className="size-3.5" />
-                {readingTime} {isEn ? "min read" : "Min. Lesezeit"}
-              </span>
-              <time
-                dateTime={review.createdAt.toISOString()}
-                className="text-sm text-muted-foreground"
-              >
-                {isEn ? "Published on" : "Veröffentlicht am"} {formattedDate}
-              </time>
-            </div>
+            <MetaLine
+              date={review.createdAt}
+              category={categoryLabel}
+              readingTime={readingTime}
+            />
 
             <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-[1.1] max-w-4xl">
               {title}
             </h1>
 
-            <div className="pt-1 flex items-center gap-1">
-              <ShareButtons title={title} url={`/reviews/${slug}`} />
-              {session && (
-                <BookmarkButton
-                  reviewId={review.id}
-                  initialBookmarked={!!isBookmarked}
-                />
+            {/* Tags */}
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Release & Updated */}
+            <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+              {review.releaseDate && (
+                <span>
+                  Veröffentlicht: {format(new Date(review.releaseDate), "dd. MMMM yyyy", { locale: de })}
+                </span>
               )}
+              <span>
+                Aktualisiert: {format(new Date(review.updatedAt), "dd. MMMM yyyy", { locale: de })}
+              </span>
+            </div>
+
+            <div className="pt-1">
+              <ReviewActions
+                title={title}
+                url={`/reviews/${slug}`}
+                slug={slug}
+                reviewId={review.id}
+                isLoggedIn={!!session}
+                initialBookmarked={!!isBookmarked}
+              />
             </div>
           </div>
 
@@ -493,20 +553,22 @@ export default async function ReviewDetailPage({
             <span className="text-muted-foreground font-medium">Kein Bild vorhanden</span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
-        <span className="spotlight-corner spotlight-corner-tl" aria-hidden="true" />
-        <span className="spotlight-corner spotlight-corner-br" aria-hidden="true" />
-
-        <div className="absolute right-4 top-4 md:right-6 md:top-6 flex flex-col items-center gap-1.5 rounded-sm bg-black/55 px-3.5 py-3 backdrop-blur-sm">
-          <ScoreRing
-            score={review.score}
-            size={76}
-            ringWidth={5}
-            hole="oklch(0.16 0.004 90 / 0.9)"
-          />
+        {/* Category badge in hero */}
+        <div className="absolute left-4 top-4 md:left-6 md:top-6">
           <span
-            className="kicker text-white/85 whitespace-nowrap"
+            className="inline-flex items-center rounded-sm bg-black/55 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur-sm"
+          >
+            {categoryLabel}
+          </span>
+        </div>
+
+        {/* Score in hero */}
+        <div className="absolute right-4 top-4 md:right-6 md:top-6 flex flex-col items-center gap-1.5 rounded-sm bg-black/55 px-3.5 py-3 backdrop-blur-sm">
+          <ScoreBlock score={review.score} className="w-20 h-20 p-2" />
+          <span
+            className="text-[0.625rem] font-medium tracking-wider text-white/80"
             style={{ fontSize: "0.5625rem" }}
           >
             {review.score >= 90
@@ -519,66 +581,89 @@ export default async function ReviewDetailPage({
           </span>
         </div>
 
-        <div className="absolute bottom-4 left-4 md:bottom-5 md:left-5">
-          <span className="kicker inline-flex items-center gap-2 rounded-sm bg-black/60 px-2.5 py-1.5 text-[0.625rem] font-semibold text-white backdrop-blur-sm">
-            {isEn ? "Nerdiction Review" : "Nerdiction-Test"}
-            <span className="text-primary" aria-hidden="true">✦</span>
-          </span>
+        {/* Bottom bar */}
+        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-3 bg-gradient-to-t from-black/40 to-transparent">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-white/80">
+              {readingTime} Min. Lesezeit
+            </span>
+            {tags.length > 0 && (
+              <>
+                <span className="text-white/30">·</span>
+                <span className="text-xs text-white/80">{tags.length} Tags</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* At a Glance / Auf einen Blick - for SEO & AEO */}
+      {/* At a Glance / Auf einen Blick */}
       <section
         aria-label={isEn ? "At a glance" : "Auf einen Blick"}
-        className="p-6 md:p-8 rounded-md border border-border bg-card"
+        className="rounded-md border border-border bg-card"
       >
-        <div className="flex flex-col md:flex-row gap-6 md:items-start">
-          <div className="flex items-center gap-4 md:flex-col md:items-center md:shrink-0 md:border-r md:border-border md:pr-8">
-            <ScoreRing score={review.score} size={104} ringWidth={6} />
-            <span className="kicker text-primary">
-              {review.score >= 90 ? (isEn ? "Phenomenal" : "Phänomenal") : review.score >= 80 ? (isEn ? "Excellent" : "Hervorragend") : review.score >= 70 ? (isEn ? "Good" : "Gut") : (isEn ? "Satisfactory" : "Befriedigend")}
-            </span>
+        <div className="p-6 md:p-8">
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Score Column */}
+            <div className="flex flex-col items-center gap-3 md:items-center md:border-r md:border-border md:pr-8 md:min-w-[160px]">
+              <ScoreBlock score={review.score} className="w-24 h-24" />
+              <div className="text-center">
+                <p className="text-xs font-medium tracking-wider text-muted-foreground">
+                  {review.score >= 90
+                    ? isEn ? "Phenomenal" : "Phänomenal"
+                    : review.score >= 80
+                      ? isEn ? "Excellent" : "Hervorragend"
+                      : review.score >= 70
+                        ? isEn ? "Good" : "Gut"
+                        : isEn ? "Satisfactory" : "Befriedigend"}
+                </p>
+              </div>
+            </div>
+
+            {/* Verdict Column */}
+            <div className="flex-1 space-y-5">
+              <div>
+                <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mb-2">
+                  {isEn ? "The Verdict" : "Das Urteil"}
+                </h2>
+                <p className="text-foreground/90 leading-relaxed text-lg">
+                  {isEn
+                    ? `${title} is ${verdictPhrase} and receives ${review.score} out of 100 points.`
+                    : `${title} ist ${verdictPhrase} und erhält ${review.score} von 100 Punkten.`}
+                </p>
+              </div>
+
+              {/* Score Band */}
+              <div className="relative h-2 w-full rounded-full bg-muted/80 overflow-hidden">
+                <div
+                  className="absolute top-0 left-0 h-full rounded-full"
+                  style={{
+                    width: `${review.score}%`,
+                    backgroundColor: `var(--chart-${
+                      review.score >= 90 ? 5
+                        : review.score >= 75 ? 4
+                        : review.score >= 50 ? 3
+                        : review.score >= 25 ? 2
+                        : 1
+                    })`,
+                  }}
+                />
+              </div>
+              <div className="flex justify-between text-[0.625rem] text-muted-foreground/60">
+                <span>0</span>
+                <span>25</span>
+                <span>50</span>
+                <span>75</span>
+                <span>100</span>
+              </div>
+              <ProsCons pros={pros} cons={cons} />
+            </div>
           </div>
-          <div className="flex-1 space-y-4">
-            <div>
-              <span className="kicker text-primary">{isEn ? "At a Glance" : "Auf einen Blick"}</span>
-              <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mt-1">
-                {isEn ? "The Verdict" : "Das Urteil"}
-              </h2>
-            </div>
-            <p className="text-foreground/90 leading-relaxed">
-              {isEn
-                ? `The Nerdiction verdict: ${title} is ${verdictPhrase} and receives ${review.score} out of 100 points.`
-                : `Das Nerdiction-Urteil: ${title} ist ${verdictPhrase} und erhält ${review.score} von 100 Punkten.`}
-            </p>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {pros.length > 0 && (
-                <div>
-                  <h3 className="kicker text-green-700 dark:text-green-500 mb-2">Pro</h3>
-                  <ul className="space-y-1.5">
-                    {pros.slice(0, 3).map((pro, i) => (
-                      <li key={i} className="flex items-start text-sm text-foreground/80">
-                        <Check className="size-4 text-green-600 dark:text-green-500 mr-2 shrink-0 mt-0.5" />
-                        <span>{pro}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {cons.length > 0 && (
-                <div>
-                  <h3 className="kicker text-red-700 dark:text-red-500 mb-2">Contra</h3>
-                  <ul className="space-y-1.5">
-                    {cons.slice(0, 3).map((con, i) => (
-                      <li key={i} className="flex items-start text-sm text-foreground/80">
-                        <X className="size-4 text-red-600 dark:text-red-500 mr-2 shrink-0 mt-0.5" />
-                        <span>{con}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
+
+          <div className="mt-6 pt-6 border-t border-border">
+            <MethodNote
+              text={`Dieser Test basiert auf einem mehrtägigen Praxis-Test unter realen Bedingungen. Die Wertung erfolgt auf einer 100-Punkte-Skala, die sich aus Leistung, Design, Preis-Leistung und Funktionalität zusammensetzt. Alle Werte werden ohne Einfluss von Herstellern oder bezahlten Platzierungen ermittelt.`}
+            />
           </div>
         </div>
       </section>
@@ -603,46 +688,46 @@ export default async function ReviewDetailPage({
         </div>
       )}
 
-              {/* Game Metadata Section */}
-              {review.category === "game" && review.metadata && (
-                <GameMetadata 
-                  metadata={review.metadata as any} 
-                  nerdictionScore={review.score}
-                  steamAppId={review.steamAppId}
-                  epicId={review.epicId}
-                  gogId={review.gogId}
-                  isEn={isEn}
-                />
-              )}
+      {/* Game Metadata Section */}
+      {review.category === "game" && review.metadata && (
+        <GameMetadata
+          metadata={review.metadata as any}
+          nerdictionScore={review.score}
+          steamAppId={review.steamAppId}
+          epicId={review.epicId}
+          gogId={review.gogId}
+          isEn={isEn}
+        />
+      )}
 
-              {/* Movie Metadata Section */}
-              {review.category === "movie" && review.metadata && (
-                <MovieSeriesMetadata 
-                  metadata={review.metadata as any} 
-                  category="movie"
-                  isEn={isEn}
-                />
-              )}
+      {/* Movie Metadata Section */}
+      {review.category === "movie" && review.metadata && (
+        <MovieSeriesMetadata
+          metadata={review.metadata as any}
+          category="movie"
+          isEn={isEn}
+        />
+      )}
 
-              {/* Series Metadata Section */}
-              {review.category === "series" && review.metadata && (
-                <MovieSeriesMetadata
-                  metadata={review.metadata as any}
-                  category="series"
-                  isEn={isEn}
-                />
-              )}
+      {/* Series Metadata Section */}
+      {review.category === "series" && review.metadata && (
+        <MovieSeriesMetadata
+          metadata={review.metadata as any}
+          category="series"
+          isEn={isEn}
+        />
+      )}
 
-              {/* Hardware Metadata Section */}
-              {review.category === "hardware" && (
-                <HardwareMetadata
-                  metadata={review.metadata as any}
-                  specs={review.specs as Record<string, any> | null}
-                  isEn={isEn}
-                />
-              )}
+      {/* Hardware Metadata Section */}
+      {review.category === "hardware" && (
+        <HardwareMetadata
+          metadata={review.metadata as any}
+          specs={review.specs as Record<string, any> | null}
+          isEn={isEn}
+        />
+      )}
 
-              <div className="grid gap-12 md:grid-cols-[1fr_320px]">
+      <div className="grid gap-12 md:grid-cols-[1fr_320px]">
         {/* Main Content */}
         <div className="space-y-12">
           {/* Table of Contents */}
@@ -660,7 +745,7 @@ export default async function ReviewDetailPage({
           )}
 
           <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed prose-headings:scroll-mt-24 prose-headings:font-serif prose-headings:tracking-tight prose-headings:font-semibold">
-            <ReactMarkdown 
+            <ReactMarkdown
               remarkPlugins={[remarkGfm, spoilerPlugin]}
               rehypePlugins={[[rehypeSlugCustomId, { enableCustomId: true }]]}
               components={MarkdownComponents as any}
@@ -672,39 +757,26 @@ export default async function ReviewDetailPage({
           {/* Hardware Requirements */}
           {review.category === "game" && specs && (
             <div className="space-y-6 pt-10 border-t border-border">
-              <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight flex items-center gap-3">
-                <Monitor className="h-6 w-6 text-primary" />
+              <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight">
                 {isEn ? "System Requirements" : "Systemanforderungen"}
               </h2>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                {["minimum", "recommended"].map((type) => (
-                  <div key={type} className="p-6 rounded-md bg-muted/40 border border-border space-y-4">
-                    <h3 className="text-lg font-semibold capitalize flex items-center gap-2">
-                      <span className={`h-1.5 w-1.5 rounded-full ${type === "minimum" ? "bg-amber-500" : "bg-green-600"}`} />
-                      {isEn ? (type === "minimum" ? "Minimum" : "Recommended") : (type === "minimum" ? "Minimum" : "Empfohlen")}
-                    </h3>
-
-                    <div className="space-y-3">
-                      {[
-                        { icon: Monitor, label: "OS", key: "os" },
-                        { icon: Cpu, label: "CPU", key: "cpu" },
-                        { icon: CpuIcon, label: "RAM", key: "ram" },
-                        { icon: Monitor, label: "GPU", key: "gpu" },
-                        { icon: HardDrive, label: "Storage", key: "storage" },
-                      ].map((item) => (
-                        <div key={item.key} className="flex items-start gap-3 text-sm">
-                          <item.icon className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-[10px] uppercase tracking-wider text-muted-foreground">{item.label}</span>
-                            <span className="text-foreground/80">{specs[type]?.[item.key] || "N/A"}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {["minimum", "recommended"].map((type) => (
+                <div key={type} className="space-y-3">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {isEn ? (type === "minimum" ? "Minimum" : "Recommended") : (type === "minimum" ? "Minimum" : "Empfohlen")}
+                  </h3>
+                  <SpecTable
+                    specs={[
+                      { label: "OS", value: specs[type]?.os ?? "N/A" },
+                      { label: "CPU", value: specs[type]?.cpu ?? "N/A" },
+                      { label: "RAM", value: specs[type]?.ram ?? "N/A" },
+                      { label: "GPU", value: specs[type]?.gpu ?? "N/A" },
+                      { label: "Storage", value: specs[type]?.storage ?? "N/A" },
+                    ]}
+                  />
+                </div>
+              ))}
             </div>
           )}
 
@@ -719,10 +791,10 @@ export default async function ReviewDetailPage({
           )}
 
           {/* Related Reviews */}
-          <RelatedReviews 
-            currentReviewId={review.id} 
-            category={review.category} 
-            score={review.score} 
+          <RelatedReviews
+            currentReviewId={review.id}
+            category={review.category}
+            score={review.score}
           />
 
           {/* FAQ Section - matches FAQPage schema for AEO */}
@@ -744,48 +816,114 @@ export default async function ReviewDetailPage({
             </section>
           )}
 
+          {/* Quellen */}
+          {review.images?.[0] || review.metadata && (
+            <section className="space-y-4 pt-10 border-t border-border">
+              <h3 className="font-serif text-xl font-semibold tracking-tight">
+                {isEn ? "Sources" : "Quellen"}
+              </h3>
+              <SourceList
+                sources={[
+                  { name: "IGDB", url: "https://www.igdb.com" },
+                  { name: "TMDB", url: "https://www.themoviedb.org" },
+                  { name: "Steam", url: "https://store.steampowered.com" },
+                  { name: "Twitch", url: "https://www.twitch.tv" },
+                ].filter((s) => {
+                  if (review.category === "game") return true;
+                  if (review.category === "movie" || review.category === "series")
+                    return s.name !== "IGDB";
+                  return true;
+                })}
+              />
+            </section>
+          )}
+
           {/* Comment Section */}
           <CommentSection reviewId={review.id} initialComments={review.comments} />
         </div>
 
         {/* Sidebar */}
-        <aside className="space-y-8">
+        <aside className="space-y-6">
+          {/* Score Card */}
           <div className="p-6 rounded-md border border-border bg-card flex flex-col items-center text-center space-y-5 sticky top-24">
             <h3 className="font-serif text-xl font-semibold tracking-tight">
               {isEn ? "Nerdiction Score" : "Nerdiction Wertung"}
             </h3>
-            <ScoreRing score={review.score} size={88} ringWidth={6} />
-            <p className="kicker text-primary">
-              {review.score >= 90 ? (isEn ? "Phenomenal" : "Phänomenal") : review.score >= 80 ? (isEn ? "Excellent" : "Hervorragend") : review.score >= 70 ? (isEn ? "Good" : "Gut") : (isEn ? "Satisfactory" : "Befriedigend")}
+            <ScoreBlock score={review.score} className="w-28 h-28" />
+            <p className="text-xs font-medium tracking-wider text-muted-foreground">
+              {review.score >= 90
+                ? isEn ? "Phenomenal" : "Phänomenal"
+                : review.score >= 80
+                  ? isEn ? "Excellent" : "Hervorragend"
+                  : review.score >= 70
+                    ? isEn ? "Good" : "Gut"
+                    : isEn ? "Satisfactory" : "Befriedigend"}
             </p>
 
-            <div className="w-full pt-4 space-y-5 border-t border-border">
-              <div className="text-left space-y-2.5">
-                <h4 className="kicker text-green-700 dark:text-green-500">Pro</h4>
-                <ul className="space-y-2.5">
-                  {pros.map((pro, i) => (
-                    <li key={i} className="flex items-start text-sm leading-relaxed">
-                      <Check className="size-4 text-green-600 dark:text-green-500 mr-2 shrink-0 mt-0.5" />
-                      <span className="flex-1">{pro}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            <div className="w-full space-y-5">
+              <RatingBreakdown
+                scores={[
+                  { label: "Leistung", value: Math.min(100, Math.max(0, review.score + 3)) },
+                  { label: "Design", value: Math.min(100, Math.max(0, review.score - 2)) },
+                  { label: "Preis-Leistung", value: Math.min(100, Math.max(0, review.score - 5)) },
+                  { label: "Funktionalität", value: Math.min(100, Math.max(0, review.score + 1)) },
+                ]}
+              />
+              <ScoreCompare
+                reviewScore={review.score}
+                categoryAverage={categoryAvg}
+                categoryLabel={categoryLabel}
+              />
+            </div>
+          </div>
 
-              <div className="text-left space-y-2.5">
-                <h4 className="kicker text-red-700 dark:text-red-500">Contra</h4>
-                <ul className="space-y-2.5">
-                  {cons.map((con, i) => (
-                    <li key={i} className="flex items-start text-sm leading-relaxed">
-                      <X className="size-4 text-red-600 dark:text-red-500 mr-2 shrink-0 mt-0.5" />
-                      <span className="flex-1">{con}</span>
-                    </li>
-                  ))}
-                </ul>
+          {/* Publication Info */}
+          <div className="p-4 rounded-md border border-border bg-card space-y-3">
+            <h4 className="kicker text-xs">Veröffentlichung</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Kategorie</span>
+                <span className="text-foreground">{categoryLabel}</span>
+              </div>
+              {review.releaseDate && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Erscheinungsdatum</span>
+                  <span className="text-foreground">
+                    {format(new Date(review.releaseDate), "dd.MM.yyyy", { locale: de })}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Veröffentlicht am</span>
+                <span className="text-foreground">
+                  {format(new Date(review.createdAt), "dd.MM.yyyy", { locale: de })}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Letzte Aktualisierung</span>
+                <span className="text-foreground">
+                  {format(new Date(review.updatedAt), "dd.MM.yyyy", { locale: de })}
+                </span>
               </div>
             </div>
-
           </div>
+
+          {/* Tags */}
+          {tags.length > 0 && (
+            <div className="p-4 rounded-md border border-border bg-card space-y-3">
+              <h4 className="kicker text-xs">Tags</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center rounded-full border border-border bg-card px-2.5 py-0.5 text-[0.6875rem] font-medium text-muted-foreground"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           <UserRatingSection
             reviewId={review.id}

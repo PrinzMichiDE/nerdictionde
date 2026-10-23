@@ -1,128 +1,117 @@
 import prisma from "@/lib/prisma";
-import type { Prisma } from "@prisma/client";
-import { Review } from "@/types/review";
+import type { Review } from "@/types/review";
 import { Hero } from "@/components/home/Hero";
-import { Marquee } from "@/components/home/Marquee";
-import { StatsBar } from "@/components/home/StatsBar";
-import { TrustBadges } from "@/components/home/TrustBadges";
-import { FeaturedSpotlight } from "@/components/home/FeaturedSpotlight";
-import { LatestReviews } from "@/components/home/LatestReviews";
-import { VideoGallery } from "@/components/home/VideoGallery";
-import { CategoriesShowcase } from "@/components/home/CategoriesShowcase";
-import { DataSources } from "@/components/home/DataSources";
-import { ProcessSteps } from "@/components/home/ProcessSteps";
-import { FeatureGrid } from "@/components/home/FeatureGrid";
-import { ComparisonTable } from "@/components/home/ComparisonTable";
-import { Leaderboard } from "@/components/home/Leaderboard";
-import { TestimonialsGrid } from "@/components/home/TestimonialsGrid";
-import { VerdictTicker } from "@/components/home/VerdictTicker";
-import { FAQAccordion } from "@/components/home/FAQAccordion";
-import { CTASection } from "@/components/home/CTASection";
+import { EditorialPicks } from "@/components/home/EditorialPicks";
+import { HomeReviews } from "@/components/home/HomeReviews";
+import { ScoreScale } from "@/components/home/ScoreScale";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import { generateItemListSchema, getSiteUrl } from "@/lib/seo";
+import { NewsletterSignup } from "@/components/shared/NewsletterSignup";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: { absolute: "Nerdiction - Professional Game & Hardware Reviews" },
+  title: { absolute: "Nerdiction - Ehrliche Produkttests" },
   description:
-    "Die Plattform für detaillierte Hardware- und Game-Reviews für fundierte Kaufentscheidungen. Unabhängige Tests zu Games, Filmen und Serien.",
+    "Unabhängige Tests zu Games, Filmen, Serien und Hardware. Wir legen jede Wertung offen und testen ohne bezahlte Platzierungen.",
   alternates: {
     canonical: "/",
   },
 };
 
-export default async function HomePage() {
-  const highlightCategories = ["game", "movie", "series"];
+const CATEGORY_LABELS: Record<string, string> = {
+  game: "Games",
+  movie: "Filme",
+  series: "Serien",
+  hardware: "Hardware",
+};
 
-  let latestReviews: Review[] = [];
-  let topRatedReviews: Review[] = [];
-  let featuredReview: Review | null = null;
-  let stats = {
-    totalReviews: 0,
-    averageScore: 0,
-    gameReviews: 0,
-    movieReviews: 0,
-    seriesReviews: 0,
-  };
+const methodSteps = [
+  {
+    title: "Auswahl",
+    text: "Wir wählen Titel, die für die Community relevant sind, und prüfen die Fakten bei IGDB, TMDB und Steam.",
+  },
+  {
+    title: "Test",
+    text: "Mehrere Tage spielen, schauen oder ausprobieren. Performance, Design und Preis-Leistung erfassen wir getrennt.",
+  },
+  {
+    title: "Wertung",
+    text: "Aus den Einzelkriterien wird ein Score von 0 bis 100. Dazu kommen Pro und Contra in klaren Sätzen.",
+  },
+];
+
+export default async function HomePage() {
+  const highlightCategories = ["game", "movie", "series", "hardware"];
+
+  let reviews: Review[] = [];
+  let total = 0;
+  let average = 0;
+  const categoryCounts: Record<string, number> = {};
 
   try {
-    featuredReview = (await prisma.review.findFirst({
-      where: { status: "published", category: { in: highlightCategories } },
-      orderBy: { score: "desc" },
-    })) as unknown as Review | null;
-
-    const excludedIds = new Set<string>();
-    if (featuredReview) excludedIds.add(featuredReview.id);
-
-    const latestReviewsQuery: Prisma.ReviewFindManyArgs = {
-      where: {
-        status: "published",
-        category: { in: highlightCategories },
-        ...(featuredReview ? { id: { not: featuredReview.id } } : {}),
-      },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-    };
-
-    const topRatedQuery: Prisma.ReviewFindManyArgs = {
-      where: {
-        status: "published",
-        category: { in: highlightCategories },
-        ...(excludedIds.size > 0 ? { id: { notIn: Array.from(excludedIds) } } : {}),
-      },
-      orderBy: { score: "desc" },
-      take: 6,
-    };
-
-    const [latestResult, topRatedResult, countResult] = await Promise.all([
-      prisma.review.findMany(latestReviewsQuery),
-      prisma.review.findMany(topRatedQuery),
-      Promise.all([
-        prisma.review.count({ where: { status: "published", category: { in: highlightCategories } } }),
-        prisma.review.aggregate({
-          where: { status: "published", category: { in: highlightCategories } },
-          _avg: { score: true },
-        }),
-        prisma.review.count({ where: { status: "published", category: "game" } }),
-        prisma.review.count({ where: { status: "published", category: "movie" } }),
-        prisma.review.count({ where: { status: "published", category: "series" } }),
-      ]),
+    const [list, grouped] = await Promise.all([
+      prisma.review.findMany({
+        where: {
+          status: "published",
+          category: { in: highlightCategories },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 12,
+      }),
+      prisma.review.groupBy({
+        by: ["category"],
+        where: {
+          status: "published",
+          category: { in: highlightCategories },
+        },
+        _count: { _all: true },
+        _avg: { score: true },
+      }),
     ]);
 
-    latestReviews = latestResult as unknown as Review[];
-    topRatedReviews = topRatedResult as unknown as Review[];
-    const [total, avg, games, movies, series] = countResult;
-    stats = {
-      totalReviews: total,
-      averageScore: Math.round((avg._avg.score ?? 0) * 10) / 10,
-      gameReviews: games,
-      movieReviews: movies,
-      seriesReviews: series,
-    };
+    reviews = list as unknown as Review[];
 
-    latestReviews.forEach((r) => excludedIds.add(r.id));
-    topRatedReviews = topRatedReviews.filter((r) => !excludedIds.has(r.id));
+    let weightedScore = 0;
+    for (const row of grouped) {
+      const count = row._count._all;
+      categoryCounts[row.category] = count;
+      total += count;
+      weightedScore += (row._avg.score ?? 0) * count;
+    }
+    average = total > 0 ? weightedScore / total : 0;
   } catch (error) {
     console.error("Error fetching data:", error);
   }
 
-  const allFeatured = [featuredReview, ...latestReviews, ...topRatedReviews].filter(
-    Boolean
-  ) as Review[];
+  const formatScore = (value: number) =>
+    value.toLocaleString("de-DE", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    });
+
+  const stats =
+    total > 0
+      ? [
+          { label: "Tests", value: String(total) },
+          { label: "Ø-Wertung", value: formatScore(average) },
+          ...highlightCategories
+            .filter((category) => (categoryCounts[category] ?? 0) > 0)
+            .map((category) => ({
+              label: CATEGORY_LABELS[category] ?? category,
+              value: String(categoryCounts[category]),
+            })),
+        ]
+      : [];
+
   const itemListSchema = generateItemListSchema(
-    allFeatured.slice(0, 12).map((r) => ({
+    reviews.map((r) => ({
       name: r.title,
       url: `${getSiteUrl()}/reviews/${r.slug}`,
       image: r.images?.[0],
     }))
-  );
-
-  const videoReviews = Array.from(
-    new Map([...latestReviews, ...topRatedReviews].map((r) => [r.id, r])).values()
   );
 
   return (
@@ -132,87 +121,79 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
       />
 
-      {/* Hero */}
-      <Hero />
+      <Hero latest={reviews[0] ?? null} stats={stats} />
 
-      {/* Marquee */}
-      <Marquee />
+      <div className="mt-16 space-y-20 md:mt-20 md:space-y-28">
+        {reviews.length > 0 && <EditorialPicks reviews={reviews} />}
 
-      {/* Content-Sektionen */}
-      <div className="mx-auto max-w-7xl space-y-24 px-4 pt-16 pb-16 md:space-y-32 md:px-6 md:pt-24 md:pb-24 lg:space-y-40 lg:px-8 lg:pt-32 xl:px-12">
-        {/* Statistiken */}
-        <StatsBar stats={stats} />
-
-        {/* Vertrauens-Ribbon */}
-        <TrustBadges />
-
-        {/* Review der Woche */}
-        {featuredReview ? (
-          <FeaturedSpotlight review={featuredReview} />
+        {reviews.length > 0 ? (
+          <HomeReviews reviews={reviews} />
         ) : (
-          <section className="relative overflow-hidden rounded-[2rem] border border-border bg-card px-6 py-16 md:px-12 md:py-20">
-            <div className="absolute inset-0 bg-mesh opacity-60" aria-hidden="true" />
-            <div className="relative z-10 flex flex-col items-center gap-6 text-center">
-              <span className="inline-flex size-14 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10">
-                <Sparkles className="size-7 text-primary" />
-              </span>
-              <h2 className="max-w-xl font-serif text-3xl md:text-4xl font-semibold tracking-tight">
-                Bald erscheinen hier die ersten Reviews
-              </h2>
-              <p className="max-w-lg text-muted-foreground">
-                Unsere Redaktion arbeitet mit Hochdruck an den ersten ausführlichen Tests.
-              </p>
-              <Button asChild size="lg" className="shine group relative rounded-full px-8">
-                <Link href="/reviews" className="relative z-[2] inline-flex items-center gap-2">
-                  Alle Reviews entdecken
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-            </div>
+          <section className="rounded-sm border border-border bg-card p-10 text-center">
+            <h2 className="font-serif text-3xl font-semibold tracking-tight">
+              Die ersten Tests sind in Arbeit
+            </h2>
+            <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
+              Sobald wir die ersten Titel veröffentlichen, erscheinen sie hier mit
+              vollständiger Wertung.
+            </p>
+            <Button asChild size="lg" className="mt-6 rounded-full">
+              <Link href="/reviews">Zu den Reviews</Link>
+            </Button>
           </section>
         )}
 
-        {/* Neueste Reviews */}
-        <LatestReviews reviews={latestReviews} />
+        <section
+          id="so-testen-wir"
+          className="grid scroll-mt-24 gap-10 lg:grid-cols-12 lg:gap-12"
+        >
+          <div className="lg:col-span-5">
+            <h2 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl">
+              So testen wir
+            </h2>
+            <p className="mt-3 max-w-xl text-muted-foreground">
+              Jede Wertung entsteht nach demselben Ablauf. Wir dokumentieren, was wir
+              geprüft haben, und nennen die Quellen.
+            </p>
 
-        {/* Video-Reviews */}
-        <VideoGallery reviews={videoReviews} />
+            <ol className="mt-8 space-y-6">
+              {methodSteps.map((step, index) => (
+                <li key={step.title} className="flex gap-4 border-t border-border pt-4">
+                  <span className="font-serif text-2xl font-semibold tabular-nums text-primary">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <h3 className="font-medium">{step.title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                      {step.text}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
 
-        {/* Kategorien */}
-        <CategoriesShowcase
-          counts={{
-            game: stats.gameReviews,
-            movie: stats.movieReviews,
-            series: stats.seriesReviews,
-          }}
-        />
+            <p className="mt-6 text-sm text-muted-foreground">
+              Datenquellen: IGDB, TMDB, Steam und Twitch.
+            </p>
+          </div>
 
-        {/* Datenquellen */}
-        <DataSources />
+          <div className="lg:col-span-7">
+            <ScoreScale reviews={reviews} />
+          </div>
+        </section>
 
-        {/* Testmethode */}
-        <ProcessSteps />
-
-        {/* Warum Nerdiction */}
-        <FeatureGrid />
-
-        {/* Top-Rated Leaderboard */}
-        <Leaderboard reviews={topRatedReviews} />
-
-        {/* Vergleich */}
-        <ComparisonTable />
-
-        {/* Testimonials */}
-        <TestimonialsGrid />
-
-        {/* FAQ */}
-        <FAQAccordion />
-
-        {/* Verdict-Ticker */}
-        <VerdictTicker reviews={videoReviews} />
-
-        {/* Newsletter / CTA */}
-        <CTASection />
+        <section className="flex flex-col gap-6 border-t border-border pt-10 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+              Kein Test verpassen.
+            </h2>
+            <p className="mt-2 max-w-xl text-muted-foreground">
+              Melde dich für den Nerdiction-Newsletter an. Wir informieren dich,
+              sobald ein neuer Test veröffentlicht wird.
+            </p>
+          </div>
+          <NewsletterSignup source="homepage" className="max-w-md" />
+        </section>
       </div>
     </div>
   );

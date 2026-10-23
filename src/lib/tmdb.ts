@@ -114,6 +114,7 @@ export interface BulkQueryOptions {
   genreId?: number;
   releaseYear?: number;
   minRating?: number;
+  releaseDateLte?: string;
   limit?: number;
   offset?: number;
   sortBy?: "popularity" | "rating" | "release_date" | "title";

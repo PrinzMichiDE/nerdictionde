@@ -1,0 +1,37 @@
+🚀 Creating 2 game reviews for released games
+⚙️  Status=published, concurrency=1, progress=E:\Projects\nerdictionde\scripts\game-reviews-smoke-500.json
+(node:22676) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+📄 IGDB page 1: 100 games, 98 not reviewed yet
+Epic Store search skipped for Grand Theft Auto V (403), relying on IGDB external IDs
+🔍 Found store IDs for Grand Theft Auto V: { stores: [] }
+🔍 Searching Tavily for game Grand Theft Auto V...
+   ✅ 1/2 Grand Theft Auto V
+Epic Store search skipped for Portal 2 (403), relying on IGDB external IDs
+🔍 Found store IDs for Portal 2: { stores: [] }
+🔍 Searching Tavily for game Portal 2...
+JSON parsing error for Portal 2: Unterminated string in JSON at position 15708 (line 4 column 15623)
+Raw content length: 15708
+JSON repair failed for Portal 2, attempting aggressive repair
+Error in generation for Portal 2, retrying... SyntaxError: Unterminated string in JSON at position 15708 (line 4 column 15623)
+    at JSON.parse (<anonymous>)
+    at generateContent (E:\Projects\nerdictionde\src\lib\review-generation.ts:269:27)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewContent (E:\Projects\nerdictionde\src\lib\review-generation.ts:709:20)
+    at async processGame (E:\Projects\nerdictionde\src\lib\review-generation.ts:802:27)
+    at async processWithRetry (E:\Projects\nerdictionde\scripts\create-500-game-reviews.ts:68:18)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\create-500-game-reviews.ts:132:19)
+    at async Promise.all (index 0)
+    at async main (E:\Projects\nerdictionde\scripts\create-500-game-reviews.ts:129:23)
+JSON parsing error for Portal 2: Unterminated string in JSON at position 39290 (line 22 column 17217)
+Raw content length: 39290
+Successfully repaired JSON for Portal 2
+   ✅ 2/2 Portal 2
+
+============================================================
+✅ Created: 2/2
+❌ Failed: 0
+📝 Progress: E:\Projects\nerdictionde\scripts\game-reviews-smoke-500.json
+
+🎉 Target reached.
