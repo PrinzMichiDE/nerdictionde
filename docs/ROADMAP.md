@@ -34,7 +34,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] Newsletter Double-Optin + Bestätigungsseite (`/newsletter/confirm`) ← erledigt
 - [x] Deals / Preisverlauf-Widget auf Review-Detailseiten ← erledigt
 - [x] Barrierefreiheits-Verbesserungen Review-Detailseite (Fokus, ARIA) ← erledigt
-- [ ] **Kommentar-Antworten (verschachtelte Kommentare) auf Reviews** ← nächster Kandidat
+- [x] **Kommentar-Antworten (verschachtelte Kommentare) auf Reviews** ← erledigt
 - [ ] Kommentar-Voting (Up/Down auf Kommentare)
 - [ ] Review als PDF exportieren
 

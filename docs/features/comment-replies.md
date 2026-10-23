@@ -202,4 +202,14 @@ Response enthält jetzt auch `parentId` pro Kommentar.
 
 ## 13. Review (nach F6 ausgefüllt)
 
-*(Leer bis Self-Review)*
+**Ergebnis:** Alle Checklisten-Punkte erfüllt.
+
+- Alle 4 User Stories implementiert und getestet (7 API-Unit-Tests, alle grün).
+- Randfälle: ungültiger parentId → 400; Antwort auf Antwort (3. Ebene) → 400; leerer Text → 400; fremdes Review → 400; nicht existierender Review → 404; Parent-Löschung → SetNull (Antwort bleibt).
+- parentId serverseitig validiert (Existenz, Tiefe, Review-Zugehörigkeit).
+- Keine Performance-Fallen: einzelne findUnique für parentId, client-seitiges Nesting (keine N+1).
+- Migration reversibel (Rückwärts-SQL dokumentiert), bestehende Daten intakt (parentId nullable).
+- Abwärtskompatibel: bestehende Kommentare bleiben top-level (parentId=null).
+- UI: "Antworten"-Button mit aria-label, Antwortformular mit Fokus, eingerückte Kinder, Lade-/Fehler-/Erfolgszustände.
+- Code konsistent mit bestehender Architektur (App Router, Prisma, shadcn/ui, deutsche UI-Texte).
+- Lint auf neuen Dateien sauber (0 Errors, 1 ungenutzte Variable entfernt).
