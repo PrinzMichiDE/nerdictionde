@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { randomUUID } from "crypto";
 import prisma from "@/lib/prisma";
 
 const subscribeSchema = z.object({
@@ -21,25 +22,37 @@ export async function POST(req: NextRequest) {
 
     const { email, source } = parsed.data;
 
+    // Bestätigungs-Token generieren; Abonnement erst inaktiv,
+    // bis der Nutzer den Bestätigungs-Link aufgerufen hat (Double-Optin).
+    const confirmationToken = randomUUID();
+
     // Idempotent: Bestehendes Abonnement reaktivieren, sonst neu anlegen.
     const subscription = await prisma.newsletterSubscription.upsert({
       where: { email },
       update: {
-        isActive: true,
+        isActive: false,
+        confirmationToken,
         unsubscribedAt: null,
         ...(source ? { source } : {}),
       },
       create: {
         email,
         source,
-        isActive: true,
+        isActive: false,
+        confirmationToken,
       },
     });
 
     return NextResponse.json({
       success: true,
-      message: "Danke! Du bist für den Nerdiction-Newsletter angemeldet.",
-      data: { id: subscription.id, email: subscription.email },
+      message:
+        "Danke! Bitte bestaetige deine Anmeldung ueber den Bestätigungs-Link, den du erhalten hast.",
+      data: {
+        id: subscription.id,
+        email: subscription.email,
+        // MVP ohne E-Mail-Versand: Token sichtbar machen, damit bestaetigt werden kann.
+        confirmationToken,
+      },
     });
   } catch (error: any) {
     // Unique-Verstoss auf E-Mail defensiv abfangen (Race-Condition).
