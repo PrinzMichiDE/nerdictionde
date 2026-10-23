@@ -3,7 +3,7 @@
 ## Stand (2026-10-23)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: 48/48 grün (vitest, 10 Dateien). `lint`: 254 vorbestehende `no-explicit-any`-Errors (nicht blockierend), neue Dateien lint-sauber.
+- `type-check`: grün. `build`: grün. `tests`: 69/69 grün (vitest, 12 Dateien). `lint`: 254 vorbestehende `no-explicit-any`-Errors (nicht blockierend), neue Dateien lint-sauber.
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
   1. Newsletter Double-Optin + Bestätigungsseite
@@ -12,13 +12,13 @@
   4. Kommentar-Antworten (verschachtelte Kommentare) auf Reviews
 - Abgeschlossene Typ-B-Aufgaben:
   - CHANGELOG.md, README.md erweitert
-  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments
-  - 48 Tests insgesamt
+  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema
+  - 69 Tests insgesamt
 
 ## Nächster Schritt (Hauptschleife)
 
-Typ B: Unit-Tests für `src/lib/comment-schema.ts` und `src/lib/rating-schema.ts` (Zod-Validierung, rein logisch).
-Danach: Typ D-Feature aus Roadmap (Kommentar-Voting, PDF-Export, oder neuer Kandidat).
+Typ D: Neues Feature aus Roadmap — Kommentar-Voting (Up/Down auf Kommentare).
+Spec unter `docs/features/comment-voting.md` schreiben.
 
 ## Konventionen (aus AGENTS.md)
 
