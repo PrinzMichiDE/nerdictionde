@@ -8,6 +8,7 @@ export const createCommentSchema = z.object({
     .optional()
     .transform((val) => (val && val.trim() ? val.trim() : undefined))
     .default("Besucher"),
+  parentId: z.string().min(1).optional(),
 });
 
 export type CreateCommentInput = z.infer<typeof createCommentSchema>;
