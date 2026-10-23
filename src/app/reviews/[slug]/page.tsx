@@ -528,7 +528,8 @@ export default async function ReviewDetailPage({
           <div className="flex items-center self-start lg:self-end gap-1 bg-muted rounded-md p-1 text-xs font-semibold uppercase tracking-widest border border-border shrink-0">
             <Link
               href={`/reviews/${slug}`}
-              className={`px-4 py-2 rounded-[4px] transition-colors ${
+              aria-label="Auf Deutsch anzeigen"
+              className={`px-4 py-2 rounded-[4px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 !isEn
                   ? "bg-background text-foreground border border-border shadow-xs"
                   : "text-muted-foreground hover:text-foreground"
@@ -538,7 +539,8 @@ export default async function ReviewDetailPage({
             </Link>
             <Link
               href={`/reviews/${slug}?lang=en`}
-              className={`px-4 py-2 rounded-[4px] transition-colors ${
+              aria-label="Auf Englisch anzeigen"
+              className={`px-4 py-2 rounded-[4px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 isEn
                   ? "bg-background text-foreground border border-border shadow-xs"
                   : "text-muted-foreground hover:text-foreground"
