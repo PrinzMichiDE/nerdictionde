@@ -50,7 +50,9 @@ export function BulkCreate() {
   const [releaseYear, setReleaseYear] = useState<string>("");
   const [minRating, setMinRating] = useState<string>("");
   const [limit, setLimit] = useState<string>("20");
-  const [sortBy, setSortBy] = useState<"popularity" | "rating" | "release_date" | "name" | "title">("popularity");
+  type SortByValue = "popularity" | "rating" | "release_date" | "name" | "title";
+
+const [sortBy, setSortBy] = useState<SortByValue>("popularity");
   const [order, setOrder] = useState<"asc" | "desc">("desc");
   const [batchSize, setBatchSize] = useState<string>("5");
   const [delay, setDelay] = useState<string>("2000");
@@ -120,9 +122,27 @@ export function BulkCreate() {
     setResult(null);
 
     try {
-      const queryOptions: any = {
+      interface QueryOptions {
+        limit: number;
+        sortBy: "popularity" | "rating" | "release_date" | "name";
+        order: "asc" | "desc";
+        genreId?: number;
+        platformId?: number;
+        releaseYear?: number;
+        minRating?: number;
+      }
+
+      interface RequestBody {
+        batchSize: number;
+        delayBetweenBatches: number;
+        status: "draft" | "published";
+        skipExisting: boolean;
+        queryOptions: QueryOptions;
+      }
+
+      const queryOptions: QueryOptions = {
         limit: parseInt(limit),
-        sortBy: sortBy === "title" ? "name" : sortBy, // TMDB uses "name" for title sorting
+        sortBy: sortBy === "title" ? "name" : sortBy,
         order,
       };
 
@@ -134,11 +154,12 @@ export function BulkCreate() {
       if (minRating) queryOptions.minRating = parseFloat(minRating);
 
       let endpoint = "/api/reviews/bulk-create";
-      const requestBody: any = {
+      const requestBody: RequestBody = {
         batchSize: parseInt(batchSize) || 5,
         delayBetweenBatches: parseInt(delay) || 2000,
         status,
         skipExisting,
+        queryOptions,
       };
 
       if (category === "movie") {
@@ -158,11 +179,12 @@ export function BulkCreate() {
         title: "Massenerstellung abgeschlossen",
         description: `${response.data.results.successful} von ${response.data.results.total} Reviews erstellt.`,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Bulk create failed:", error);
+      const axiosError = error as { response?: { data: { error?: string } }; message?: string } | null;
       toast({
         title: "Massenerstellung fehlgeschlagen",
-        description: error.response?.data?.error || error.message || "Unbekannter Fehler",
+        description: axiosError?.response?.data?.error || axiosError?.message || "Unbekannter Fehler",
         variant: "destructive",
       });
     } finally {
@@ -283,7 +305,7 @@ export function BulkCreate() {
 
                   <div className="space-y-2">
                     <Label htmlFor="sortBy">Sortieren nach</Label>
-                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortByValue)}>
                       <SelectTrigger id="sortBy">
                         <SelectValue />
                       </SelectTrigger>
@@ -420,7 +442,7 @@ export function BulkCreate() {
 
                   <div className="space-y-2">
                     <Label htmlFor="movie-sortBy">Sortieren nach</Label>
-                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortByValue)}>
                       <SelectTrigger id="movie-sortBy">
                         <SelectValue />
                       </SelectTrigger>
@@ -435,7 +457,7 @@ export function BulkCreate() {
 
                   <div className="space-y-2">
                     <Label htmlFor="movie-order">Reihenfolge</Label>
-                    <Select value={order} onValueChange={(v) => setOrder(v as any)}>
+                    <Select value={order} onValueChange={(v) => setOrder(v as "asc" | "desc")}>
                       <SelectTrigger id="movie-order">
                         <SelectValue />
                       </SelectTrigger>
@@ -568,7 +590,7 @@ export function BulkCreate() {
 
                   <div className="space-y-2">
                     <Label htmlFor="series-sortBy">Sortieren nach</Label>
-                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortByValue)}>
                       <SelectTrigger id="series-sortBy">
                         <SelectValue />
                       </SelectTrigger>
@@ -583,7 +605,7 @@ export function BulkCreate() {
 
                   <div className="space-y-2">
                     <Label htmlFor="series-order">Reihenfolge</Label>
-                    <Select value={order} onValueChange={(v) => setOrder(v as any)}>
+                    <Select value={order} onValueChange={(v) => setOrder(v as "asc" | "desc")}>
                       <SelectTrigger id="series-order">
                         <SelectValue />
                       </SelectTrigger>
