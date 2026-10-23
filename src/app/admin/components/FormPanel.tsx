@@ -88,7 +88,6 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
               id="title"
               value={review.title}
               onChange={(e) => handleChange("title", e.target.value)}
-              className="rounded-lg"
             />
           </div>
 
@@ -96,7 +95,7 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
             <Label htmlFor="content">Inhalt (Markdown - DE)</Label>
             <Textarea
               id="content"
-              className="min-h-[400px] font-mono text-sm rounded-lg resize-none"
+              className="min-h-[400px] resize-none font-mono text-sm"
               value={review.content}
               onChange={(e) => handleChange("content", e.target.value)}
             />
@@ -104,18 +103,20 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
 
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
-                <Label className="text-green-500">Pros (DE)</Label>
+                <Label htmlFor="pros" className="text-success">Pros (DE)</Label>
                 <Textarea
-                className="min-h-[100px] rounded-lg border-green-500/20 focus:border-green-500"
+                id="pros"
+                className="min-h-[100px] border-success/20 focus:border-success"
                 value={review.pros.join("\n")}
                 onChange={(e) => handleChange("pros", e.target.value.split("\n").filter(line => line.trim() !== ""))}
                 />
             </div>
 
             <div className="space-y-2">
-                <Label className="text-red-500">Cons (DE)</Label>
+                <Label htmlFor="cons" className="text-destructive">Cons (DE)</Label>
                 <Textarea
-                className="min-h-[100px] rounded-lg border-red-500/20 focus:border-red-500"
+                id="cons"
+                className="min-h-[100px] border-destructive/20 focus:border-destructive"
                 value={review.cons.join("\n")}
                 onChange={(e) => handleChange("cons", e.target.value.split("\n").filter(line => line.trim() !== ""))}
                 />
@@ -130,7 +131,6 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
               id="title_en"
               value={review.title_en || ""}
               onChange={(e) => handleChange("title_en", e.target.value)}
-              className="rounded-lg"
             />
           </div>
 
@@ -138,7 +138,7 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
             <Label htmlFor="content_en">Content (Markdown - EN)</Label>
             <Textarea
               id="content_en"
-              className="min-h-[400px] font-mono text-sm rounded-lg resize-none"
+              className="min-h-[400px] resize-none font-mono text-sm"
               value={review.content_en || ""}
               onChange={(e) => handleChange("content_en", e.target.value)}
             />
@@ -146,18 +146,20 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
 
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
-                <Label className="text-green-500">Pros (EN)</Label>
+                <Label htmlFor="pros_en" className="text-success">Pros (EN)</Label>
                 <Textarea
-                className="min-h-[100px] rounded-lg border-green-500/20 focus:border-green-500"
+                id="pros_en"
+                className="min-h-[100px] border-success/20 focus:border-success"
                 value={(review.pros_en || []).join("\n")}
                 onChange={(e) => handleChange("pros_en", e.target.value.split("\n").filter(line => line.trim() !== ""))}
                 />
             </div>
 
             <div className="space-y-2">
-                <Label className="text-red-500">Cons (EN)</Label>
+                <Label htmlFor="cons_en" className="text-destructive">Cons (EN)</Label>
                 <Textarea
-                className="min-h-[100px] rounded-lg border-red-500/20 focus:border-red-500"
+                id="cons_en"
+                className="min-h-[100px] border-destructive/20 focus:border-destructive"
                 value={(review.cons_en || []).join("\n")}
                 onChange={(e) => handleChange("cons_en", e.target.value.split("\n").filter(line => line.trim() !== ""))}
                 />
@@ -172,18 +174,17 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
           id="slug"
           value={review.slug}
           onChange={(e) => handleChange("slug", e.target.value)}
-          className="rounded-lg"
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
             <Label htmlFor="category">Kategorie</Label>
             <Select 
                 value={review.category} 
                 onValueChange={(v) => handleChange("category", v)}
             >
-                <SelectTrigger className="rounded-lg">
+                <SelectTrigger>
                     <SelectValue placeholder="Kategorie" />
                 </SelectTrigger>
                 <SelectContent>
@@ -213,12 +214,12 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
                 max="100"
                 value={review.score}
                 onChange={(e) => handleChange("score", parseInt(e.target.value) || 0)}
-                className="rounded-lg w-24 shrink-0"
+                className="w-24 shrink-0"
               />
             </div>
-            <div className="flex justify-between text-[10px] text-muted-foreground">
+            <div className="flex justify-between text-xs text-muted-foreground">
               <span>0</span>
-              <span className={review.score >= 80 ? "text-green-500 font-bold" : ""}>80+ = Top</span>
+              <span className={review.score >= 80 ? "font-medium text-success" : ""}>80+ = Top</span>
               <span>100</span>
             </div>
         </div>
@@ -230,11 +231,12 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
         
         <div className="grid grid-cols-3 gap-2">
           {review.images.map((url, i) => (
-            <div key={i} className="relative aspect-video rounded-lg overflow-hidden border group">
+            <div key={i} className="group relative aspect-video overflow-hidden rounded-md border">
               <Image src={url} alt={`Bild ${i}`} fill className="object-cover" unoptimized />
               <button
                 onClick={() => removeImage(i)}
-                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label={`Bild ${i + 1} entfernen`}
+                className="absolute right-1 top-1 rounded-full bg-destructive p-1 text-destructive-foreground opacity-0 transition-opacity group-hover:opacity-100"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -242,13 +244,13 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
           ))}
           
           {review.category !== "game" && (
-            <label className="flex flex-col items-center justify-center aspect-video rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 cursor-pointer transition-colors bg-muted/5">
+            <label className="flex aspect-video cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-muted-foreground/40 bg-muted/5 transition-colors hover:border-primary/50">
               {uploading ? (
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               ) : (
                 <>
-                  <Upload className="h-6 w-6 text-muted-foreground mb-1" />
-                  <span className="text-[10px] text-muted-foreground">Hochladen</span>
+                  <Upload className="mb-1 h-6 w-6 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Hochladen</span>
                 </>
               )}
               <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={uploading} />
@@ -260,17 +262,19 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
       {/* YouTube Videos Management */}
       <div className="space-y-4 border-t pt-4">
         <Label className="flex items-center gap-2">
-          <Youtube className="h-4 w-4 text-red-500" />
+          <Youtube className="h-4 w-4" />
           YouTube Videos & Trailer
         </Label>
         
         <div className="flex gap-2">
           <Input
+            id="youtube-url"
             placeholder="YouTube URL oder Video-ID (z.B. dQw4w9WgXcQ)"
             value={newVideoUrl}
             onChange={(e) => setNewVideoUrl(e.target.value)}
             onKeyPress={handleVideoUrlKeyPress}
-            className="rounded-lg flex-1"
+            className="flex-1"
+            aria-label="YouTube URL oder Video-ID"
           />
           <Button
             type="button"
@@ -278,7 +282,7 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
             size="sm"
             onClick={addYouTubeVideo}
             disabled={!newVideoUrl.trim()}
-            className="rounded-lg"
+            aria-label="Video hinzufügen"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -287,9 +291,9 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
         {(review.youtubeVideos || []).length > 0 && (
           <div className="space-y-3">
             {(review.youtubeVideos || []).map((videoId, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-mono truncate text-muted-foreground">
+              <div key={i} className="flex items-center gap-3 rounded-md border bg-muted/30 p-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-mono text-sm text-muted-foreground">
                     {videoId}
                   </p>
                 </div>
@@ -298,7 +302,8 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
                   variant="ghost"
                   size="sm"
                   onClick={() => removeYouTubeVideo(i)}
-                  className="shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                  aria-label={`Video ${i + 1} entfernen`}
+                  className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -319,7 +324,7 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
             <Label htmlFor="specs">Systemanforderungen (JSON)</Label>
             <Textarea
               id="specs"
-              className="min-h-[150px] font-mono text-xs rounded-lg resize-none"
+              className="min-h-[150px] resize-none font-mono text-xs"
               value={JSON.stringify(review.specs || {}, null, 2)}
               onChange={(e) => {
                 try {
@@ -330,7 +335,7 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
                 }
               }}
             />
-            <p className="text-[10px] text-muted-foreground italic">Änderungen werden nur übernommen, wenn das JSON valide ist.</p>
+            <p className="text-xs text-muted-foreground italic">Änderungen werden nur übernommen, wenn das JSON valide ist.</p>
         </div>
       )}
     </div>

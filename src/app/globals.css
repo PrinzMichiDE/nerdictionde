@@ -1,3 +1,14 @@
+/* Hallmark · checked: 2026-10-23 · genre: editorial (inferred)
+ * floor: 0 FAIL · fixed: 9 (10a, 27, 54, 63, 67x3, 4, 29, 11)
+ * dropped: hero eyebrow "Magazin" with animated kicker line, ghost numeral 01,
+ *   aurora blobs and scan line, card index numerals, rank tiles, duplicate
+ *   verdict badge, image shine and bottom gradient, cursor-follow glow
+ * reworded: "Zuletzt getestet" + category pill to one meta line "Zuletzt getestet: Serien"
+ * answered: 26a · page.tsx holds no interactive element of its own; focus rings
+ *   live in the Button component and on the page links
+ * waive 26b · no form controls in the page files · active and disabled states
+ *   live in Button and NewsletterSignup
+ * built: the project · redesign: polish · v2.0.0 */
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -24,6 +35,10 @@
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
@@ -68,6 +83,13 @@
   --border: oklch(0.9 0.006 85);
   --input: oklch(0.915 0.005 85);
   --ring: oklch(0.55 0.2 12);
+  /* Hallmark · v2.0.0 · scope app · redesign full · theme brand (project tokens: warm paper, crimson primary, Public Sans) · shape app screen · built 2026-10-23 */
+  --success: oklch(0.55 0.12 150);
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.62 0.13 80);
+  --warning-foreground: oklch(0.985 0 0);
+  --dur-micro: 120ms;
+  --dur-short: 200ms;
   --chart-1: oklch(0.55 0.2 12);
   --chart-2: oklch(0.6 0.15 200);
   --chart-3: oklch(0.5 0.12 140);
@@ -109,6 +131,10 @@
   --border: oklch(0.26 0.008 90);
   --input: oklch(0.24 0.008 90);
   --ring: oklch(0.7 0.18 15);
+  --success: oklch(0.72 0.14 150);
+  --success-foreground: oklch(0.13 0.005 90);
+  --warning: oklch(0.75 0.13 85);
+  --warning-foreground: oklch(0.13 0.005 90);
   --chart-1: oklch(0.7 0.18 15);
   --chart-2: oklch(0.65 0.14 200);
   --chart-3: oklch(0.6 0.13 140);
@@ -156,6 +182,14 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 
   .kicker {
@@ -1684,27 +1718,6 @@ section, article {
   animation: gradient-pan 3.4s linear infinite;
 }
 
-/* --- Cursor Aura (Page-Level Radial-Glow) --- */
-.cursor-glow {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: radial-gradient(
-    720px circle at var(--gx, 50%) var(--gy, 50%),
-    color-mix(in oklab, var(--primary) 10%, transparent),
-    transparent 45%
-  );
-}
-
-.dark .cursor-glow {
-  background: radial-gradient(
-    720px circle at var(--gx, 50%) var(--gy, 50%),
-    color-mix(in oklab, var(--primary) 13%, transparent),
-    transparent 45%
-  );
-}
-
 /* --- Page Noise (feine Film-Korn-Textur) --- */
 .page-noise {
   position: fixed;
@@ -1972,370 +1985,9 @@ section, article {
    ===================================================================== */
 
 /* --- Scroll-driven Header Properties --- */
-@property --header-blur {
-  syntax: "<length>";
-  initial-value: 12px;
-  inherits: false;
-}
-
-@property --header-bg {
-  syntax: "<number>";
-  initial-value: 0.82;
-  inherits: false;
-}
-
-@property --header-border-opacity {
-  syntax: "<number>";
-  initial-value: 0;
-  inherits: false;
-}
-
-/* --- Pill Nav Indicator --- */
-@property --pill-x {
-  syntax: "<length>";
-  initial-value: 0px;
-  inherits: true;
-}
-
-@property --pill-w {
-  syntax: "<length>";
-  initial-value: 0px;
-  inherits: true;
-}
-
-.nav-pill {
-  position: absolute;
-  bottom: 4px;
-  left: 0;
-  height: calc(100% - 8px);
-  width: var(--pill-w);
-  transform: translateX(var(--pill-x));
-  border-radius: var(--radius-sm);
-  background: color-mix(in oklab, var(--primary) 10%, transparent);
-  pointer-events: none;
-  transition:
-    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.3s ease;
-  opacity: 0;
-  z-index: 0;
-}
-
-.nav-pill[data-visible="true"] {
-  opacity: 1;
-}
-
-/* --- Nav Link Underline (animated scale) --- */
-.nav-link-bar {
-  position: absolute;
-  bottom: 0;
-  left: 12px;
-  right: 12px;
-  height: 2px;
-  background: var(--primary);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  border-radius: 1px;
-}
-
-/* --- Nav Spotlight (follows cursor) --- */
-.nav-spotlight {
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius-sm);
-  background: radial-gradient(
-    340px circle at var(--mx, 50%) var(--my, 50%),
-    color-mix(in oklab, var(--primary) 7%, transparent),
-    transparent 60%
-  );
-  opacity: 0;
-  transition: opacity 0.35s ease;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.nav-link:hover .nav-spotlight,
-.nav-link[data-active="true"] .nav-spotlight {
-  opacity: 1;
-}
-
-/* --- Nav Link Container --- */
-.nav-link {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 100%;
-  padding: 0 14px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted-foreground);
-  text-decoration: none;
-  transition: color 0.3s ease;
-  z-index: 1;
-  cursor: pointer;
-}
-
-.nav-link:hover,
-.nav-link[data-active="true"] {
-  color: var(--foreground);
-}
-
-.nav-link[data-active="true"] {
-  color: var(--primary);
-}
-
-.nav-link[data-active="true"] .nav-link-bar,
-.nav-link:hover .nav-link-bar {
-  transform: scaleX(1);
-}
-
-/* --- Header Scroll States --- */
+/* --- Site Header --- */
 .site-header {
-  --header-blur: 12px;
-  --header-bg: 0.82;
-  --header-border-opacity: 0;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  width: 100%;
-  background: color-mix(in oklab, var(--background) calc(var(--header-bg) * 100%), transparent);
-  backdrop-filter: blur(var(--header-blur)) saturate(1.4);
-  -webkit-backdrop-filter: blur(var(--header-blur)) saturate(1.4);
-  border-bottom: 1px solid color-mix(in oklab, var(--border) calc(var(--header-border-opacity) * 100%), transparent);
-  transition:
-    --header-blur 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    --header-bg 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    --header-border-opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  contain: layout style;
-}
-
-.site-header[data-scrolled="true"] {
-  --header-blur: 22px;
-  --header-bg: 0.95;
-  --header-border-opacity: 1;
-  box-shadow:
-    0 1px 0 0 color-mix(in oklab, var(--primary) 8%, transparent),
-    0 8px 32px -12px color-mix(in oklab, var(--primary) 6%, transparent);
-}
-
-/* --- Brand Reveal Animation --- */
-@keyframes brand-reveal {
-  from {
-    clip-path: inset(0 0 100% 0);
-    opacity: 0;
-  }
-  to {
-    clip-path: inset(0);
-    opacity: 1;
-  }
-}
-
-.brand-reveal {
-  animation: brand-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.brand-reveal-1 { animation-delay: 0ms; }
-.brand-reveal-2 { animation-delay: 80ms; }
-.brand-reveal-3 { animation-delay: 160ms; }
-
-/* --- Brand Logo Glow (Dark Mode) --- */
-@keyframes logo-breathe {
-  0%, 100% {
-    filter: drop-shadow(0 0 0px color-mix(in oklab, var(--primary) 0%, transparent));
-  }
-  50% {
-    filter: drop-shadow(0 0 8px color-mix(in oklab, var(--primary) 35%, transparent));
-  }
-}
-
-.dark .brand-logo-glow {
-  animation: logo-breathe 4s ease-in-out infinite;
-}
-
-/* --- Live Pulse Dot --- */
-@keyframes live-pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.6);
-    opacity: 0.4;
-  }
-}
-
-.live-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 9999px;
-  background: var(--primary);
-  margin-left: 6px;
-  vertical-align: middle;
-  position: relative;
-}
-
-.live-dot::after {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  border-radius: 9999px;
-  background: var(--primary);
-  animation: live-pulse 2s ease-in-out infinite;
-  opacity: 0.3;
-}
-
-/* --- Search Premium Focus --- */
-.search-field {
-  transition:
-    border-color 0.35s ease,
-    box-shadow 0.35s ease,
-    background 0.35s ease;
-}
-
-.search-field:focus-within {
-  border-color: var(--primary) !important;
-  box-shadow:
-    0 0 0 3px color-mix(in oklab, var(--primary) 12%, transparent),
-    0 4px 16px -4px color-mix(in oklab, var(--primary) 10%, transparent);
-}
-
-.search-shine {
-  position: relative;
-  overflow: hidden;
-}
-
-.search-shine::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: linear-gradient(
-    105deg,
-    transparent 40%,
-    color-mix(in oklab, var(--primary) 12%, transparent) 50%,
-    transparent 60%
-  );
-  transform: translateX(-150%) skewX(-12deg);
-  pointer-events: none;
-  transition: transform 0s;
-}
-
-.search-shine:focus-within::after {
-  transform: translateX(150%) skewX(-12deg);
-  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* --- Kbd Badge --- */
-.kbd-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 2px 6px;
-  font-size: 0.625rem;
-  font-family: var(--font-public-sans);
-  font-weight: 600;
-  line-height: 1;
-  color: var(--muted-foreground);
-  background: color-mix(in oklab, var(--foreground) 6%, transparent);
-  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
-  border-radius: 4px;
-  letter-spacing: 0.02em;
-  transition: opacity 0.3s ease;
-}
-
-/* --- Mobile Nav Stagger --- */
-@keyframes mobile-nav-item {
-  from {
-    opacity: 0;
-    transform: translateX(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.mobile-nav-item {
-  animation: mobile-nav-item 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: calc(var(--stagger, 0) * 50ms + 100ms);
-}
-
-/* --- Mobile Backdrop Blur Transition --- */
-@keyframes backdrop-in {
-  from {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
-  }
-  to {
-    opacity: 1;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-}
-
-.mobile-backdrop {
-  animation: backdrop-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* --- Mobile Panel Slide --- */
-@keyframes mobile-panel-in {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.mobile-panel {
-  animation: mobile-panel-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: 60ms;
-}
-
-/* --- Header Divider Glow --- */
-.header-divider {
-  position: relative;
-}
-
-.header-divider::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 0;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in oklab, var(--primary) 45%, transparent),
-    transparent
-  );
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-
-.site-header[data-scrolled="true"] .header-divider::after {
-  opacity: 1;
-}
-
-/* --- Nav Link Magnetic Shift --- */
-@media (hover: hover) {
-  .nav-link:hover {
-    transform: translateY(-1px);
-  }
-
-  .nav-link:active {
-    transform: translateY(0) scale(0.98);
-  }
+  border-bottom: 1px solid var(--border);
 }
 
 /* ==========================================================================

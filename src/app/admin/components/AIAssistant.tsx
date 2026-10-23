@@ -64,57 +64,59 @@ export function AIAssistant({ review, setReview }: AIAssistantProps) {
 
   return (
     <div className="space-y-6 pb-8">
-      <div className="p-5 rounded-2xl border-2 border-primary/10 bg-primary/5 space-y-4 shadow-sm">
-        <h4 className="text-[10px] font-bold uppercase tracking-widest flex items-center text-primary">
-            <Zap className="h-3 w-3 mr-2 fill-primary" />
-            Smart Actions
-        </h4>
+      <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
+        <p className="flex items-center text-sm font-medium text-primary">
+          <Zap className="mr-2 h-3.5 w-3.5" />
+          Schnellaktionen
+        </p>
         <div className="grid grid-cols-1 gap-2">
-            <Button variant="secondary" size="sm" className="justify-start text-[11px] h-9 rounded-xl hover:bg-primary/10 transition-colors border-none shadow-none" onClick={() => handleAction("Verbessere die Einleitung")}>
-                <Wand2 className="h-3.5 w-3.5 mr-2 text-primary" />
-                Einleitung optimieren
-            </Button>
-            <Button variant="secondary" size="sm" className="justify-start text-[11px] h-9 rounded-xl hover:bg-primary/10 transition-colors border-none shadow-none" onClick={() => handleAction("Erweitere den Testbericht um ausführliche Details und Unterüberschriften")}>
-                <Sparkles className="h-3.5 w-3.5 mr-2 text-primary" />
-                Ausführlich erweitern
-            </Button>
-            <Button variant="secondary" size="sm" className="justify-start text-[11px] h-9 rounded-xl hover:bg-primary/10 transition-colors border-none shadow-none" onClick={() => handleAction("Erweitere den Testbericht um einen technischen Deep-Dive mit Benchmarks und detaillierten Analysen")}>
-                <Zap className="h-3.5 w-3.5 mr-2 text-primary" />
-                Technischer Deep-Dive
-            </Button>
-            <Button variant="secondary" size="sm" className="justify-start text-[11px] h-9 rounded-xl hover:bg-primary/10 transition-colors border-none shadow-none" onClick={() => handleAction("Schreibe ein prägnantes Fazit mit Kaufempfehlung")}>
-                <CheckCircle className="h-3.5 w-3.5 mr-2 text-primary" />
-                Fazit & Empfehlung
-            </Button>
+          <Button variant="secondary" size="sm" className="h-9 justify-start text-sm" onClick={() => handleAction("Verbessere die Einleitung")}>
+            <Wand2 className="mr-2 h-3.5 w-3.5 text-primary" />
+            Einleitung optimieren
+          </Button>
+          <Button variant="secondary" size="sm" className="h-9 justify-start text-sm" onClick={() => handleAction("Erweitere den Testbericht um ausführliche Details und Unterüberschriften")}>
+            <Sparkles className="mr-2 h-3.5 w-3.5 text-primary" />
+            Ausführlich erweitern
+          </Button>
+          <Button variant="secondary" size="sm" className="h-9 justify-start text-sm" onClick={() => handleAction("Erweitere den Testbericht um einen technischen Deep-Dive mit Benchmarks und detaillierten Analysen")}>
+            <Zap className="mr-2 h-3.5 w-3.5 text-primary" />
+            Technischer Deep-Dive
+          </Button>
+          <Button variant="secondary" size="sm" className="h-9 justify-start text-sm" onClick={() => handleAction("Schreibe ein prägnantes Fazit mit Kaufempfehlung")}>
+            <CheckCircle className="mr-2 h-3.5 w-3.5 text-primary" />
+            Fazit & Empfehlung
+          </Button>
         </div>
       </div>
 
-      <div className="space-y-4">
-        <h4 className="text-[10px] font-bold uppercase tracking-widest flex items-center text-muted-foreground">
-            <MessageSquare className="h-3 w-3 mr-2" />
-            Assistent Chat
-        </h4>
-        <div className="space-y-4">
-            <div className="p-4 bg-muted/50 rounded-2xl text-[11px] leading-relaxed text-muted-foreground border border-border/50">
-                Frag mich alles: "Mach den Text kürzer", "Übersetze in Jugendsprache" oder "Füge technische Details hinzu".
-            </div>
-            <div className="flex space-x-2">
-                <Input 
-                    placeholder="Anweisung eingeben..." 
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    className="text-[12px] rounded-2xl h-11 bg-background shadow-sm border-border/50"
-                    onKeyDown={(e) => e.key === "Enter" && handleChat()}
-                />
-                <Button 
-                    size="icon" 
-                    className="rounded-2xl h-11 w-11 shrink-0 shadow-lg active:scale-95 transition-all" 
-                    disabled={loading || !prompt}
-                    onClick={handleChat}
-                >
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                </Button>
-            </div>
+      <div className="space-y-3">
+        <p className="flex items-center text-sm font-medium text-muted-foreground">
+          <MessageSquare className="mr-2 h-3.5 w-3.5" />
+          Chat
+        </p>
+        <div className="space-y-3">
+          <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm leading-relaxed text-muted-foreground">
+            Frag mich alles: „Mach den Text kürzer“, „Übersetze in Jugendsprache“ oder „Füge technische Details hinzu“.
+          </div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Anweisung eingeben"
+              aria-label="Anweisung an den Assistenten"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              className="h-9 text-sm"
+              onKeyDown={(e) => e.key === "Enter" && handleChat()}
+            />
+            <Button
+              size="icon"
+              className="shrink-0"
+              aria-label="Anweisung senden"
+              disabled={loading || !prompt}
+              onClick={handleChat}
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

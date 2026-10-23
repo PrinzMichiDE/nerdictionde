@@ -25,6 +25,7 @@ interface ApiResponse {
   reviews: Review[];
   pagination: PaginationData;
   categoryCounts?: Record<string, number>;
+  scoreDistribution?: number[];
 }
 
 const SORTS = [
@@ -40,6 +41,7 @@ export function ReviewsList() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [pagination, setPagination] = useState<PaginationData | null>(null);
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+  const [distribution, setDistribution] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -61,6 +63,7 @@ export function ReviewsList() {
       setReviews(data.reviews);
       setPagination(data.pagination);
       setCategoryCounts(data.categoryCounts ?? {});
+      setDistribution(data.scoreDistribution ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten");
       setReviews([]);
@@ -115,12 +118,8 @@ export function ReviewsList() {
     .sort((a, b) => (b.score || 0) - (a.score || 0))
     .slice(0, 3);
 
-  // Distribution data for ScoreDistribution component
-  const distribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  filteredReviews.forEach((r) => {
-    const band = Math.min(9, Math.floor((r.score || 0) / 10));
-    distribution[band]++;
-  });
+  // Distribution always spans all published reviews (computed server-side)
+  const distributionTotal = distribution.reduce((a, b) => a + b, 0);
 
   if (isLoading) {
     return (
@@ -233,7 +232,7 @@ export function ReviewsList() {
       </div>
 
       {/* Score Distribution */}
-      <ScoreDistribution data={distribution} total={filteredReviews.length} />
+      <ScoreDistribution data={distribution} total={distributionTotal} />
 
       {/* Top bewertet */}
       {topReviews.length >= 2 && (

@@ -521,6 +521,7 @@ export default async function ReviewDetailPage({
                 reviewId={review.id}
                 isLoggedIn={!!session}
                 initialBookmarked={!!isBookmarked}
+                lang={isEn ? "en" : "de"}
               />
             </div>
           </div>

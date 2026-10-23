@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Review } from "@/types/review";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Edit, Eye, Search, Filter, Loader2, X, Trash2, Gamepad2, Film, Tv, ArrowUpDown, CheckCircle2, Circle } from "lucide-react";
+import { Edit, Eye, Search, Filter, Loader2, X, Trash2, Gamepad2, Film, Tv, ArrowUpDown, CheckCircle2, Circle, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { ScoreBadge } from "@/components/reviews/ScoreBadge";
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminReviews } from "../reviews-store";
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   game: <Gamepad2 className="h-3.5 w-3.5" />,
@@ -34,7 +35,7 @@ type SortKey = "date-desc" | "date-asc" | "score-desc" | "score-asc" | "title-as
 function ReviewSkeleton() {
   return (
     <Card className="overflow-hidden">
-      <div className="flex flex-col sm:flex-row animate-pulse">
+      <div className="flex flex-col sm:flex-row motion-safe:animate-pulse">
         <div className="w-full sm:w-48 h-48 sm:h-auto aspect-video sm:aspect-square bg-muted" />
         <div className="flex-1 p-6 space-y-3">
           <div className="h-4 bg-muted rounded w-1/3" />
@@ -55,8 +56,7 @@ export function ReviewList() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { reviews, loading, error, reload, updateReview, removeReview } = useAdminReviews();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [statusFilter, setStatusFilter] = useState<string>(searchParams.get("status") || "all");
   const [categoryFilter, setCategoryFilter] = useState<string>(searchParams.get("category") || "all");
@@ -92,10 +92,6 @@ export function ReviewList() {
     setCurrentPage(1);
   }, [searchQuery, statusFilter, categoryFilter, sortBy]);
 
-  useEffect(() => {
-    fetchReviews();
-  }, []);
-
   const handleDeleteClick = (review: Review) => {
     setReviewToDelete(review);
     setDeleteDialogOpen(true);
@@ -108,13 +104,13 @@ export function ReviewList() {
       setDeleting(true);
       await axios.delete(`/api/reviews/${reviewToDelete.id}`);
       
-      // Remove from local state
-      setReviews(reviews.filter((r) => r.id !== reviewToDelete.id));
+      // Remove from shared store
+      removeReview(reviewToDelete.id);
       setDeleteDialogOpen(false);
       setReviewToDelete(null);
       toast({
         title: "Gelöscht",
-        description: `"${reviewToDelete.title}" wurde entfernt.`,
+        description: `„${reviewToDelete.title}“ wurde entfernt.`,
       });
     } catch (error: any) {
       console.error("Error deleting review:", error);
@@ -133,10 +129,10 @@ export function ReviewList() {
     const nextStatus = review.status === "published" ? "draft" : "published";
     try {
       await axios.put(`/api/reviews/${review.id}`, { ...review, status: nextStatus });
-      setReviews(reviews.map((r) => (r.id === review.id ? { ...r, status: nextStatus } : r)));
+      updateReview({ ...review, status: nextStatus });
       toast({
         title: nextStatus === "published" ? "Veröffentlicht" : "Zurück in Entwurf",
-        description: `"${review.title}" ist jetzt ${nextStatus === "published" ? "online" : "ein Entwurf"}.`,
+        description: `„${review.title}“ ist jetzt ${nextStatus === "published" ? "online" : "ein Entwurf"}.`,
       });
     } catch (error: any) {
       console.error("Error toggling status:", error);
@@ -147,24 +143,6 @@ export function ReviewList() {
       });
     } finally {
       setTogglingStatusId(null);
-    }
-  };
-
-  const fetchReviews = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/reviews?all=true");
-      if (response.ok) {
-        const data = await response.json();
-        // API returns array when all=true, otherwise { reviews: [...], pagination: {...} }
-        setReviews(Array.isArray(data) ? data : (data.reviews || []));
-      } else {
-        console.error("Failed to fetch reviews:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error fetching reviews:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -233,11 +211,26 @@ export function ReviewList() {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <div className="h-24 bg-muted rounded-xl animate-pulse" />
+      <div className="space-y-4" aria-busy="true" aria-label="Beiträge werden geladen">
+        <div className="h-24 bg-muted rounded-lg motion-safe:animate-pulse" />
         {[1, 2, 3].map((i) => (
           <ReviewSkeleton key={i} />
         ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-6 text-sm">
+        <p className="flex items-center gap-2 font-medium text-destructive">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          Beiträge konnten nicht geladen werden.
+        </p>
+        <p className="text-muted-foreground">{error}</p>
+        <Button variant="outline" size="sm" onClick={reload}>
+          Erneut laden
+        </Button>
       </div>
     );
   }
@@ -251,10 +244,11 @@ export function ReviewList() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
-              placeholder="Nach Titel, Slug, Inhalt oder Kategorie suchen..."
+              aria-label="Beiträge suchen"
+              placeholder="Nach Titel, Slug, Inhalt oder Kategorie suchen"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-10 rounded-lg h-11 text-base"
+              className="h-10 pl-10 pr-10 text-base"
               autoFocus
             />
             {searchQuery && (
@@ -316,7 +310,7 @@ export function ReviewList() {
         <span>
           {filteredReviews.length} {filteredReviews.length === 1 ? "Beitrag" : "Beiträge"} gefunden
           {filteredReviews.length > itemsPerPage && (
-            <> — Seite {currentPage} von {totalPages}</>
+            <>, Seite {currentPage} von {totalPages}</>
           )}
         </span>
         <div className="flex items-center gap-3">
@@ -338,7 +332,8 @@ export function ReviewList() {
               setItemsPerPage(Number(e.target.value));
               setCurrentPage(1);
             }}
-            className="text-xs border rounded px-2 py-1 bg-background"
+            aria-label="Beiträge pro Seite"
+            className="h-8 rounded-md border border-border bg-background px-2 text-xs text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value={10}>10 pro Seite</option>
             <option value={25}>25 pro Seite</option>
@@ -354,74 +349,70 @@ export function ReviewList() {
           {paginatedReviews.map((review) => (
             <Card
               key={review.id}
-              className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/20"
+              className="group overflow-hidden"
             >
               <div className="flex flex-col sm:flex-row">
                 {/* Thumbnail */}
-                <div className="relative w-full sm:w-48 h-48 sm:h-auto aspect-video sm:aspect-square overflow-hidden bg-muted shrink-0">
+                <div className="relative w-full sm:w-40 h-40 sm:h-auto aspect-video sm:aspect-square overflow-hidden bg-muted shrink-0">
                   {review.images?.[0] ? (
                     <Image
                       src={review.images[0]}
                       alt={review.title}
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      className="object-cover"
                       unoptimized
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-muted/50">
-                      <span className="text-muted-foreground text-xs font-medium">Kein Bild</span>
+                    <div className="flex h-full w-full items-center justify-center bg-muted">
+                      <span className="text-muted-foreground text-xs">Kein Bild</span>
                     </div>
                   )}
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 flex flex-col p-6">
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <Badge
-                          variant="outline"
-                          className="capitalize text-xs font-semibold border-primary/30 bg-primary/5"
-                        >
-                          <span className="inline-flex items-center gap-1">
-                            {CATEGORY_ICONS[review.category] || null}
-                            {review.category}
-                          </span>
-                        </Badge>
-                        <Badge
-                          variant={review.status === "published" ? "default" : "secondary"}
-                          className="text-xs"
-                        >
-                          {review.status === "published" ? "Veröffentlicht" : "Entwurf"}
-                        </Badge>
-                        <ScoreBadge score={review.score} className="scale-90" />
-                      </div>
-                      <CardTitle className="text-xl mb-1 line-clamp-2 group-hover:text-primary transition-colors">
-                        {review.title}
-                      </CardTitle>
-                      {review.title_en && (
-                        <p className="text-sm text-muted-foreground line-clamp-1">{review.title_en}</p>
-                      )}
+                <div className="flex-1 flex flex-col p-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="capitalize text-xs font-medium border-primary/30 bg-primary/5"
+                      >
+                        <span className="inline-flex items-center gap-1">
+                          {CATEGORY_ICONS[review.category] || null}
+                          {review.category}
+                        </span>
+                      </Badge>
+                      <Badge
+                        variant={review.status === "published" ? "default" : "secondary"}
+                        className="text-xs"
+                      >
+                        {review.status === "published" ? "Veröffentlicht" : "Entwurf"}
+                      </Badge>
+                      <ScoreBadge score={review.score} className="scale-90" />
                     </div>
+                    <CardTitle className="mb-1 line-clamp-2 text-lg">{review.title}</CardTitle>
+                    {review.title_en && (
+                      <p className="mb-2 line-clamp-1 text-sm text-muted-foreground">{review.title_en}</p>
+                    )}
                   </div>
 
                   <CardContent className="p-0 flex-1">
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                      {review.content.replace(/[#*`]/g, "").substring(0, 200)}...
+                    <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
+                      {review.content.replace(/[#*`]/g, "").substring(0, 200)}…
                     </p>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <div className="flex items-center gap-4">
-                        <span>Erstellt: {formatDate(review.createdAt)}</span>
+                    <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                        <span className="tabular-nums">Erstellt: {formatDate(review.createdAt)}</span>
                         {review.updatedAt && review.updatedAt !== review.createdAt && (
-                          <span>Bearbeitet: {formatDate(review.updatedAt)}</span>
+                          <span className="tabular-nums">Bearbeitet: {formatDate(review.updatedAt)}</span>
                         )}
                       </div>
-                      <span className="font-mono text-xs">/{review.slug}</span>
+                      <span className="hidden font-mono text-xs sm:inline">/{review.slug}</span>
                     </div>
                   </CardContent>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                  <div className="mt-3 flex items-center gap-2 border-t pt-3">
                     <Link href={`/admin/reviews/${review.id}/edit`} className="flex-1">
                       <Button variant="default" size="sm" className="w-full">
                         <Edit className="mr-2 h-4 w-4" />
@@ -434,6 +425,7 @@ export function ReviewList() {
                       onClick={() => toggleStatus(review)}
                       disabled={togglingStatusId === review.id}
                       title={review.status === "published" ? "In Entwurf verschieben" : "Veröffentlichen"}
+                      aria-label={review.status === "published" ? "In Entwurf verschieben" : "Veröffentlichen"}
                       className="shrink-0"
                     >
                       {togglingStatusId === review.id ? (
@@ -441,12 +433,12 @@ export function ReviewList() {
                       ) : review.status === "published" ? (
                         <Circle className="h-4 w-4" />
                       ) : (
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <CheckCircle2 className="h-4 w-4 text-success" />
                       )}
                     </Button>
                     {review.status === "published" && (
                       <Link href={`/reviews/${review.slug}`} target="_blank">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" aria-label="Beitrag öffnen">
                           <Eye className="h-4 w-4" />
                         </Button>
                       </Link>
@@ -455,6 +447,7 @@ export function ReviewList() {
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDeleteClick(review)}
+                      aria-label="Beitrag löschen"
                       className="shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -466,7 +459,7 @@ export function ReviewList() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 border-2 border-dashed rounded-xl bg-muted/30">
+        <div className="rounded-lg border border-dashed bg-muted/30 px-6 py-16 text-center">
           <p className="text-muted-foreground text-lg font-medium">
             {searchQuery || statusFilter !== "all" || categoryFilter !== "all"
               ? "Keine Beiträge gefunden."
@@ -560,7 +553,7 @@ export function ReviewList() {
               {deleting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Wird gelöscht...
+                  Wird gelöscht
                 </>
               ) : (
                 <>

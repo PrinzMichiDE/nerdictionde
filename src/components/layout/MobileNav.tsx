@@ -1,29 +1,30 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "@/components/shared/GlobalSearch";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { ProfileLink } from "@/components/shared/ProfileLink";
 import { cn } from "@/lib/utils";
-
-const links = [
-  { href: "/", label: "Home", icon: "01" },
-  { href: "/reviews", label: "Reviews", icon: "02" },
-  { href: "/releases", label: "Releases", icon: "03" },
-  { href: "/tools", label: "Tools", icon: "04" },
-];
+import { navLinks } from "@/lib/navigation";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
-  const [animateIn, setAnimateIn] = useState(false);
   const pathname = usePathname();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const handleOpen = useCallback(() => {
+    setOpen(true);
+    document.body.style.overflow = "hidden";
+  }, []);
 
   const handleClose = useCallback(() => {
-    setAnimateIn(false);
-    setTimeout(() => setOpen(false), 300);
+    setOpen(false);
+    document.body.style.overflow = "";
+    triggerRef.current?.focus();
   }, []);
 
   useEffect(() => {
@@ -35,44 +36,26 @@ export function MobileNav() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, handleClose]);
 
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => setAnimateIn(true));
-      });
-    } else {
-      document.body.style.overflow = "";
-      setAnimateIn(false);
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
   return (
-    <div className="md:hidden">
+    <>
       <Button
+        ref={triggerRef}
         variant="ghost"
         size="icon"
         className="size-10"
-        onClick={() => (open ? handleClose() : setOpen(true))}
         aria-label={open ? "Menü schließen" : "Menü öffnen"}
         aria-expanded={open}
-        aria-controls="mobile-navigation"
+        aria-controls="mobile-menu-overlay"
+        onClick={open ? handleClose : handleOpen}
       >
-        <span className="relative size-5">
+        <span className="relative size-5 overflow-hidden">
           <Menu
-            className={cn(
-              "absolute inset-0 size-5 transition-all duration-300",
-              open ? "rotate-90 opacity-0 scale-75" : "rotate-0 opacity-100 scale-100"
-            )}
+            className="absolute inset-0 size-5 transition-opacity duration-200"
+            style={{ opacity: open ? 0 : 1 }}
           />
           <X
-            className={cn(
-              "absolute inset-0 size-5 transition-all duration-300",
-              open ? "rotate-0 opacity-100 scale-100" : "-rotate-90 opacity-0 scale-75"
-            )}
+            className="absolute inset-0 size-5 transition-opacity duration-200"
+            style={{ opacity: open ? 1 : 0 }}
           />
         </span>
       </Button>
@@ -81,32 +64,42 @@ export function MobileNav() {
         <>
           {/* Backdrop */}
           <div
-            className={cn(
-              "fixed inset-0 bg-background/60 z-40 md:hidden mobile-backdrop",
-              !animateIn && "opacity-0"
-            )}
+            id="mobile-menu-overlay"
+            className="fixed inset-0 z-40 bg-background/60 md:hidden"
             onClick={handleClose}
             aria-hidden="true"
           />
 
-          {/* Panel */}
+          {/* Drawer */}
           <nav
-            id="mobile-navigation"
-            className={cn(
-              "fixed top-16 left-0 right-0 z-50 border-b border-border bg-background md:hidden max-h-[calc(100vh-4rem)] overflow-y-auto mobile-panel",
-              !animateIn && "opacity-0 translate-y-[-8px]"
-            )}
-            aria-label="Mobile navigation"
+            id="mobile-menu-drawer"
+            className="fixed top-0 right-0 z-50 h-full w-[280px] border-l border-border bg-background shadow-xl md:hidden"
+            role="dialog"
+            aria-label="Mobile Navigation"
+            aria-modal="true"
           >
-            <div className="container px-4 py-5 space-y-5">
+            <div className="flex h-14 items-center justify-between px-4 border-b border-border">
+              <span className="text-sm font-medium text-muted-foreground">Menü</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-9"
+                aria-label="Menü schließen"
+                onClick={handleClose}
+              >
+                <X className="size-4" />
+              </Button>
+            </div>
+
+            <div className="px-4 py-5 space-y-4 overflow-y-auto h-[calc(100%-3.5rem)]">
               {/* Search */}
-              <div className="pb-4 border-b border-border mobile-nav-item" style={{ ["--stagger" as string]: 0 }}>
+              <div className="pb-3 border-b border-border">
                 <GlobalSearch />
               </div>
 
               {/* Links */}
               <div className="space-y-1">
-                {links.map((link, i) => {
+                {navLinks.map((link) => {
                   const isActive =
                     pathname === link.href ||
                     (link.href !== "/" && pathname.startsWith(link.href));
@@ -117,37 +110,33 @@ export function MobileNav() {
                       href={link.href}
                       onClick={handleClose}
                       className={cn(
-                        "mobile-nav-item flex items-center gap-3 px-3 py-3.5 rounded-md text-base font-medium transition-all duration-200",
+                        "flex items-center gap-3 px-3 py-3 rounded-md text-base font-medium transition-colors",
                         "hover:bg-accent hover:text-accent-foreground",
                         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         isActive
                           ? "bg-accent text-accent-foreground"
                           : "text-foreground"
                       )}
-                      style={{ ["--stagger" as string]: i + 1 }}
                       aria-current={isActive ? "page" : undefined}
                     >
-                      <span className="text-xs font-bold text-muted-foreground/50 tabular-nums w-6">
-                        {link.icon}
-                      </span>
                       <span>{link.label}</span>
-                      {isActive && (
-                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                      )}
                     </Link>
                   );
                 })}
               </div>
 
-              {/* Mobile Theme Toggle */}
-              <div className="pt-3 border-t border-border mobile-nav-item flex items-center justify-between" style={{ ["--stagger" as string]: 5 }}>
+              {/* Theme & Account */}
+              <div className="pt-3 border-t border-border flex items-center justify-between">
                 <span className="text-sm text-muted-foreground font-medium">Erscheinungsbild</span>
                 <ThemeToggle />
+              </div>
+              <div className="pt-2">
+                <ProfileLink />
               </div>
             </div>
           </nav>
         </>
       )}
-    </div>
+    </>
   );
 }

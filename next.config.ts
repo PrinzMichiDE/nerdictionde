@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "blob.vercel-storage.com" },
       { protocol: "https", hostname: "*.vercel-storage.com" },
       { protocol: "https", hostname: "img.youtube.com" },
+      { protocol: "https", hostname: "image.tmdb.org" },
     ],
   },
   experimental: {

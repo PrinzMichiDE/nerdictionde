@@ -4,13 +4,13 @@ import { syncNewsFromRss } from "@/lib/news-generation";
 export const maxDuration = 300;
 
 /**
- * Cron Job: Prüft stündlich den konfigurierten RSS-Feed (NEWS_RSS_FEED) auf
+ * Cron Job: Prüft die konfigurierten News-Feeds (src/lib/news-sources.ts) auf
  * neue Einträge und erstellt daraus KI-generierte News-Beiträge.
  *
- * Schedule: Stündlich (0 * * * *)
+ * Schedule: Täglich (0 9 * * *), zusätzlich on-demand via /api/news/refresh.
  * Umgebungsvariablen:
- *   - NEWS_RSS_FEED: RSS-URL (Standard: Google-News-Topic DE)
- *   - NEWS_MAX_PER_RUN: max. neue Beiträge pro Lauf (Standard: 5)
+ *   - NEWS_RSS_FEED: optionaler zusätzlicher RSS-Feed
+ *   - NEWS_MAX_PER_RUN: max. neue Beiträge pro Lauf (Standard: 8)
  */
 export async function GET(req: NextRequest) {
   try {

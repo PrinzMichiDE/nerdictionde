@@ -3,18 +3,9 @@ import { Public_Sans, Libre_Bodoni } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
-import { Header } from "@/components/layout/Header";
-import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
-import { Footer } from "@/components/layout/Footer";
+import { SiteFrame } from "@/components/layout/SiteFrame";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
-import { CursorGlow } from "@/components/shared/CursorGlow";
-import { BackToTop } from "@/components/shared/BackToTop";
-import { SupportTopBanner } from "@/components/shared/SupportTopBanner";
-import { SupportBanner } from "@/components/shared/SupportBanner";
-import { ReadingProgressBar } from "@/components/shared/ScrollFeatures";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
-import { InstallPrompt } from "@/components/pwa/InstallPrompt";
-import { Toaster } from "@/components/ui/toaster";
 import {
   generateOrganizationSchema,
   generateWebsiteSchema,
@@ -113,6 +104,12 @@ export default function RootLayout({
         className={`${publicSans.variable} ${libreBodoni.variable} antialiased min-h-screen flex flex-col`}
         suppressHydrationWarning
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus:text-sm focus:font-medium"
+        >
+          Zum Inhalt springen
+        </a>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(generateOrganizationSchema()) }}
@@ -122,29 +119,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(generateWebsiteSchema()) }}
         />
         <ThemeProvider>
-          <ReadingProgressBar />
-          <SupportTopBanner />
-          <Header />
-          <CursorGlow />
-          <div className="page-noise noise" aria-hidden="true" />
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus:text-sm focus:font-medium"
-          >
-            Zum Inhalt springen
-          </a>
-          <main
-            id="main-content"
-            className="flex-1 container mx-auto py-8 md:py-12 lg:py-16 px-4 md:px-6 lg:px-8 xl:px-12 max-w-7xl scroll-mt-24 pb-20 md:pb-8"
-          >
-            {children}
-          </main>
-          <Footer />
-          <BackToTop />
-          <SupportBanner />
-          <InstallPrompt />
-          <MobileBottomNav />
-          <Toaster />
+          <SiteFrame>{children}</SiteFrame>
         </ThemeProvider>
         <ServiceWorkerRegister />
         <Analytics />

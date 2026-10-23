@@ -3,7 +3,6 @@
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
@@ -12,20 +11,14 @@ export function ThemeToggle() {
   useEffect(() => {
     setMounted(true);
     const root = document.documentElement;
-    const currentTheme = root.classList.contains("dark") ? "dark" : "light";
-    setTheme(currentTheme);
+    setTheme(root.classList.contains("dark") ? "dark" : "light");
   }, []);
 
   const toggleTheme = () => {
     const root = document.documentElement;
     const newTheme = theme === "dark" ? "light" : "dark";
-    
-    if (newTheme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    
+
+    root.classList.toggle("dark", newTheme === "dark");
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
   };
@@ -53,11 +46,10 @@ export function ThemeToggle() {
       aria-label={`Zu ${theme === "dark" ? "hellem" : "dunklem"} Modus wechseln`}
     >
       {theme === "dark" ? (
-        <Sun className="size-4 motion-safe:transition-transform motion-safe:hover:rotate-90" />
+        <Sun className="size-4 transition-transform duration-200 hover:rotate-90" />
       ) : (
-        <Moon className="size-4 motion-safe:transition-transform motion-safe:hover:-rotate-12" />
+        <Moon className="size-4 transition-transform duration-200 hover:-rotate-12" />
       )}
     </Button>
   );
 }
-

@@ -114,8 +114,9 @@ export async function GET(req: NextRequest) {
     const total = await prisma.review.count({ where });
     const totalPages = shouldPaginate ? Math.ceil(total / limit) : 1;
 
-    // Aggregates for the index UI (ignore the category filter itself, but
-    // respect search/date/score so the numbers reflect the active result set)
+    // Aggregates for the index UI. Category chips ignore the category filter
+    // itself; the score distribution always spans all published reviews,
+    // independent of category/search/date/score filters and pagination.
     let categoryCounts: Record<string, number> | undefined;
     let scoreDistribution: number[] | undefined;
     if (shouldPaginate) {
@@ -129,7 +130,7 @@ export async function GET(req: NextRequest) {
         }),
         prisma.review.groupBy({
           by: ["score"],
-          where: countWhere,
+          where: { status: "published" },
           _count: { _all: true },
         }),
         prisma.review.count({ where: countWhere }),

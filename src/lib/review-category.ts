@@ -52,9 +52,9 @@ export function getVerdict(score: number): string {
 
 export function getScoreColor(score: number): string {
   if (score >= 90) return "var(--chart-3)";
-  if (score >= 75) return "oklch(0.65 0.16 130)";
-  if (score >= 50) return "oklch(0.72 0.17 70)";
-  if (score >= 25) return "oklch(0.68 0.16 45)";
+  if (score >= 75) return "var(--chart-2)";
+  if (score >= 50) return "var(--chart-4)";
+  if (score >= 25) return "var(--chart-1)";
   return "var(--destructive)";
 }
 

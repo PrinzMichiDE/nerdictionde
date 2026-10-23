@@ -294,7 +294,7 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
                   </div>
                   <p className="text-sm font-medium text-foreground">Keine Ergebnisse</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Versuche andere Suchbegriffe oder Filter
+                    Versuche andere Suchbegriffe oder Filter…
                   </p>
                 </div>
               ) : (

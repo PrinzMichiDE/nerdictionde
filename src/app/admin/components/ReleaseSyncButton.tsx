@@ -28,13 +28,24 @@ export function ReleaseSyncButton() {
     }
   };
 
+  const statsEntries = result?.stats
+    ? [
+        { label: "Gefunden", value: result.stats.totalFound },
+        { label: "Neu", value: result.stats.created },
+        { label: "Aktualisiert", value: result.stats.updated },
+        { label: "Übersprungen", value: result.stats.skipped },
+        { label: "Fehler", value: result.stats.errors },
+        { label: "Dauer", value: result.duration ?? "" },
+      ]
+    : null;
+
   return (
-    <div className="rounded-xl border p-4 space-y-3">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" />
+    <div className="rounded-lg border border-border bg-card p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
           <div>
-            <p className="text-sm font-semibold">Release-Kalender</p>
+            <p className="text-sm font-medium">Release-Kalender</p>
             <p className="text-xs text-muted-foreground">
               Kommende Spiele-Releases aus IGDB abrufen und aktualisieren
             </p>
@@ -47,29 +58,32 @@ export function ReleaseSyncButton() {
           size="sm"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          {loading ? "Aktualisiere..." : "Jetzt aktualisieren"}
+          {loading ? "Aktualisiere" : "Jetzt aktualisieren"}
         </Button>
       </div>
 
       {result && (
-        <div className="text-xs space-y-1">
+        <div className="mt-3 space-y-2">
           {result.success ? (
-            <p className="flex items-center gap-1.5 text-green-600">
-              <CheckCircle2 className="h-3.5 w-3.5" />
+            <p className="flex items-center gap-1.5 text-sm text-success">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
               {result.message}
             </p>
           ) : (
-            <p className="flex items-center gap-1.5 text-red-600">
-              <XCircle className="h-3.5 w-3.5" />
+            <p className="flex items-center gap-1.5 text-sm text-destructive">
+              <XCircle className="h-4 w-4 shrink-0" />
               {result.error || "Aktualisierung fehlgeschlagen"}
             </p>
           )}
-          {result.stats && (
-            <p className="text-muted-foreground">
-              Gefunden: {result.stats.totalFound} · Neu: {result.stats.created} ·
-              Aktualisiert: {result.stats.updated} · Übersprungen: {result.stats.skipped} ·
-              Fehler: {result.stats.errors} · Dauer: {result.duration}
-            </p>
+          {statsEntries && (
+            <dl className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+              {statsEntries.map((entry) => (
+                <div key={entry.label} className="rounded-md bg-muted/60 px-2.5 py-1.5">
+                  <dt className="text-xs text-muted-foreground">{entry.label}</dt>
+                  <dd className="text-sm font-medium tabular-nums">{entry.value}</dd>
+                </div>
+              ))}
+            </dl>
           )}
         </div>
       )}

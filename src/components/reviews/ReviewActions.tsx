@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ShareButtons } from "./ShareButtons";
 import { BookmarkButton } from "@/components/shared/BookmarkButton";
 import { CompareButton } from "./CompareButton";
+import { ReviewPdfDownload } from "./ReviewPdfDownload";
 
 interface ReviewActionsProps {
   title: string;
@@ -13,6 +14,7 @@ interface ReviewActionsProps {
   reviewId: string;
   isLoggedIn: boolean;
   initialBookmarked?: boolean;
+  lang?: string;
 }
 
 export function ReviewActions({
@@ -22,10 +24,13 @@ export function ReviewActions({
   reviewId,
   isLoggedIn,
   initialBookmarked,
+  lang = "de",
 }: ReviewActionsProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <ShareButtons title={title} url={url} />
+
+      <ReviewPdfDownload slug={slug} lang={lang} />
 
       <Button
         variant="outline"

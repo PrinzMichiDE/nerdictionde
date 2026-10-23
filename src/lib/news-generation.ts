@@ -2,23 +2,25 @@ import prisma from "@/lib/prisma";
 import Parser from "rss-parser";
 import { generateContent, generateSlug } from "@/lib/review-generation";
 import { getTavilyClient, type TavilySearchResponse } from "@/lib/tavily";
+import {
+  NEWS_CATEGORIES,
+  NEWS_FEEDS,
+  type NewsCategory,
+  type NewsFeed,
+} from "@/lib/news-sources";
 
-const NEWS_RSS_FEED =
-  process.env.NEWS_RSS_FEED ||
-  "https://news.google.com/rss/topics/CAAqIQgKIhtDQkFTRGdvSUwyMHZNREZ0ZHpFU0FtUmxLQUFQAQ?hl=de&gl=DE&ceid=DE:de";
+const NEWS_MAX_PER_RUN = parseInt(process.env.NEWS_MAX_PER_RUN || "8", 10) || 8;
 
-const NEWS_MAX_PER_RUN = parseInt(process.env.NEWS_MAX_PER_RUN || "5", 10) || 5;
+// Meldungen älter als das werden übersprungen (Search-Feeds enthalten gern Altlasten).
+const MAX_ITEM_AGE_HOURS = 48;
+// Zeitspanne, in der Titel-Kollisionen (gleiche Story über zwei Feeds) gegen die DB geprüft werden.
+const TITLE_DEDUP_WINDOW_DAYS = 14;
 
-const VALID_CATEGORIES = [
-  "Gaming",
-  "Filme & Serien",
-  "Hardware",
-  "Technik",
-  "Unterhaltung",
-  "Wirtschaft",
-] as const;
-
-type NewsCategory = (typeof VALID_CATEGORIES)[number];
+// NEWS_RSS_FEED bleibt als manueller Zusatz-Feed neben NEWS_FEEDS gültig.
+const EXTRA_FEED_URL = process.env.NEWS_RSS_FEED?.trim();
+const FEEDS: NewsFeed[] = EXTRA_FEED_URL
+  ? [...NEWS_FEEDS, { url: EXTRA_FEED_URL, category: "Gaming", maxItems: 3 }]
+  : NEWS_FEEDS;
 
 interface RssFeedItem {
   title?: string;
@@ -37,6 +39,30 @@ interface RssNewsItem {
   pubDate?: string;
   snippet?: string;
   source?: string;
+  /** Kategorie-Hinweis des Feeds (siehe NEWS_FEEDS), wird im Sync gesetzt. */
+  category?: NewsCategory;
+}
+
+function byPubDateDesc(a: RssNewsItem, b: RssNewsItem): number {
+  const ta = a.pubDate ? new Date(a.pubDate).getTime() : 0;
+  const tb = b.pubDate ? new Date(b.pubDate).getTime() : 0;
+  return tb - ta;
+}
+
+/**
+ * Grober "gleiche Story"-Marker: die ersten 6 normalisierten Wörter des
+ * Titels. Fängt nah identische Headlines über Feed-Grenzen hinweg ab, ohne
+ * dass eine semantische Analyse nötig ist.
+ */
+function titleKey(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9äöüß]+/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .slice(0, 6)
+    .join(" ");
 }
 
 function buildNewsPrompt(
@@ -60,7 +86,7 @@ QUALITÄT & STRUKTUR:
 4. Einleitung: Packende Lead mit dem Kern der Meldung (1 Absatz).
 5. Hauptteil: Mindestens 3 ausführliche Absätze mit Hintergrund, Kontext, Einordnung und ggf. Vergleichen.
 6. Fazit/Ausblick: 1 Absatz mit Bedeutung für die Nerd-Community.
-7. Kategorie: Wähle GENAU eine aus: ${VALID_CATEGORIES.join(", ")}.
+7. Kategorie: Wähle GENAU eine aus: ${NEWS_CATEGORIES.join(", ")}.
 8. Tags: 3-5 prägnante Schlagwörter (DE).
 9. Tonfall: Begeistert, kompetent, objektiv – wie von einem erfahrenen Redakteur. Erwähne NIEMALS, dass der Text von einer KI oder automatisch generiert wurde.
 10. FAKTENTREUE: Stütze dich auf die bereitgestellten Fakten. Erfinde keine konkreten Zahlen, Namen oder Zitate, die nicht belegt sind. Fehlen Details, formuliere bewusst allgemein.
@@ -111,12 +137,12 @@ async function researchTopic(query: string): Promise<string[]> {
 }
 
 /**
- * Parse the Google News RSS feed and return normalized items.
+ * Parse an RSS/Atom feed and return normalized items.
  */
-export async function fetchNewsRss(): Promise<RssNewsItem[]> {
+export async function fetchNewsRss(feedUrl: string): Promise<RssNewsItem[]> {
   const parser = new Parser({ timeout: 15000 });
 
-  const feed = await parser.parseURL(NEWS_RSS_FEED);
+  const feed = await parser.parseURL(feedUrl);
   const items: RssNewsItem[] = [];
 
   for (const entry of feed.items as RssFeedItem[]) {
@@ -165,6 +191,7 @@ export async function generateNewsArticle(
     item.snippet ? `Meldung (Auszug): ${item.snippet}` : "",
     item.source ? `Quelle: ${item.source}` : "",
     item.pubDate ? `Veröffentlicht: ${item.pubDate}` : "",
+    item.category ? `Kategorie (Vorschlag): ${item.category}` : "",
   ].filter(Boolean);
 
   // Best-effort factual research (non-blocking)
@@ -177,10 +204,11 @@ export async function generateNewsArticle(
 
   const result = await generateContent(buildNewsPrompt(item, contextLines, isRetry), item.title, retryCount);
 
-  const categoryInput: string = (result.category as string) || "Gaming";
-  const category: NewsCategory = (VALID_CATEGORIES as readonly string[]).includes(categoryInput)
+  // Fallback: Kategorie des Feeds statt hartkodiertem "Gaming".
+  const categoryInput: string = (result.category as string) || item.category || "Gaming";
+  const category: NewsCategory = (NEWS_CATEGORIES as readonly string[]).includes(categoryInput)
     ? (categoryInput as NewsCategory)
-    : "Gaming";
+    : (item.category || "Gaming");
 
   const tags: string[] = Array.isArray(result.tags)
     ? result.tags.slice(0, 6).map((t: string) => String(t).trim()).filter(Boolean)
@@ -199,8 +227,9 @@ export async function generateNewsArticle(
 }
 
 /**
- * Sync the RSS feed into the database: fetch, dedupe by rssGuid, generate new
- * articles (up to NEWS_MAX_PER_RUN per run) and store them as "published".
+ * Sync all configured feeds into the database: fetch, dedupe by rssGuid and
+ * by similar titles across feeds, generate new articles (up to
+ * NEWS_MAX_PER_RUN per run) and store them as "published".
  */
 export async function syncNewsFromRss(): Promise<{
   success: boolean;
@@ -212,29 +241,86 @@ export async function syncNewsFromRss(): Promise<{
   const errors: string[] = [];
   let checked = 0;
   let created = 0;
-  let skipped = 0;
 
   try {
-    const items = await fetchNewsRss();
-    checked = items.length;
+    const now = Date.now();
 
-    // Newest first
-    const sorted = [...items].sort((a, b) => {
-      const ta = a.pubDate ? new Date(a.pubDate).getTime() : 0;
-      const tb = b.pubDate ? new Date(b.pubDate).getTime() : 0;
-      return tb - ta;
+    // Alle Feeds sequenziell abrufen (rate-limit-freundlich). Ein kaputter
+    // Feed stoppt den Rest nicht.
+    const perFeed: RssNewsItem[][] = [];
+    for (const feed of FEEDS) {
+      let items: RssNewsItem[];
+      try {
+        items = await fetchNewsRss(feed.url);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unbekannter Fehler";
+        errors.push(`Feed ${feed.category} (${feed.url}): ${message}`);
+        continue;
+      }
+      checked += items.length;
+
+      const fresh = [...items]
+        .sort(byPubDateDesc)
+        .filter((i) => {
+          if (!i.pubDate) return true;
+          return now - new Date(i.pubDate).getTime() <= MAX_ITEM_AGE_HOURS * 3600 * 1000;
+        })
+        // Golem & Co. mischen Anzeigen in den RSS-Feed; die werden nicht zu
+        // Artikeln. Vor dem Cut, damit eine Anzeige nicht das Feed-Cap frisst.
+        .filter((i) => !/^anzeige(\s|:)/i.test(i.title.trim()))
+        .slice(0, feed.maxItems)
+        .map((i) => ({ ...i, category: feed.category }));
+
+      perFeed.push(fresh);
+    }
+
+    // Dedupe gegen die Datenbank (gleicher rssGuid oder gleiche Story über
+    // einen anderen Feed).
+    const recent = await prisma.newsArticle.findMany({
+      where: {
+        OR: [
+          { rssGuid: { in: perFeed.flat().map((i) => i.guid) } },
+          { createdAt: { gte: new Date(now - TITLE_DEDUP_WINDOW_DAYS * 24 * 3600 * 1000) } },
+        ],
+      },
+      select: { rssGuid: true, rssTitle: true },
+    });
+    const existingGuids = new Set(recent.map((e) => e.rssGuid));
+    const seenKeys = new Set(
+      recent
+        .map((e) => e.rssTitle)
+        .filter((t): t is string => Boolean(t))
+        .map(titleKey)
+    );
+
+    const deduped = perFeed.map((list) => {
+      const out: RssNewsItem[] = [];
+      for (const item of list) {
+        const key = titleKey(item.title);
+        if (existingGuids.has(item.guid) || seenKeys.has(key)) continue;
+        seenKeys.add(key);
+        out.push(item);
+      }
+      return out;
     });
 
-    // Determine which items are new
-    const existing = await prisma.newsArticle.findMany({
-      where: { rssGuid: { in: sorted.map((i) => i.guid) } },
-      select: { rssGuid: true },
-    });
-    const existingGuids = new Set(existing.map((e) => e.rssGuid));
+    // Round-Robin über die Feeds: jeder Beat stellt einen Kandidaten, bevor
+    // ein Feed seinen zweiten einstellt. So verdrängen keine frischen
+    // heise/golem-Meldungen die langsameren Beats.
+    const newItems: RssNewsItem[] = [];
+    for (let round = 0; newItems.length < NEWS_MAX_PER_RUN; round++) {
+      let added = false;
+      for (const list of deduped) {
+        if (newItems.length >= NEWS_MAX_PER_RUN) break;
+        const item = list[round];
+        if (!item) continue;
+        newItems.push(item);
+        added = true;
+      }
+      if (!added) break;
+    }
 
-    const newItems = sorted.filter((i) => !existingGuids.has(i.guid));
-
-    for (const item of newItems.slice(0, NEWS_MAX_PER_RUN)) {
+    for (const item of newItems) {
       try {
         const article = await generateNewsArticle(item, 0);
 
@@ -263,8 +349,7 @@ export async function syncNewsFromRss(): Promise<{
             content_en: article.content_en,
             category: article.category,
             tags: article.tags,
-            sourceUrl: item.link || null,
-            sourceName: item.source || null,
+            rssTitle: item.title,
             rssGuid: item.guid,
             status: "published",
             metaDescription: metaDescription || null,
@@ -282,15 +367,12 @@ export async function syncNewsFromRss(): Promise<{
       }
     }
 
-    skipped = newItems.length - created;
-    if (newItems.length > NEWS_MAX_PER_RUN) {
-      skipped += newItems.length - NEWS_MAX_PER_RUN;
-    }
+    const skipped = newItems.length - created;
 
     return { success: true, checked, created, skipped, errors };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unbekannter Fehler";
     console.error("❌ Fehler beim News-Sync:", error);
-    return { success: false, checked, created, skipped, errors: [message] };
+    return { success: false, checked, created, skipped: 0, errors: [message] };
   }
 }

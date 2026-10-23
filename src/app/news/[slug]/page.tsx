@@ -5,10 +5,8 @@ import { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlugCustomId from "rehype-slug-custom-id";
-import { ArrowLeft, ExternalLink, Tag } from "lucide-react";
+import { ArrowLeft, Tag } from "lucide-react";
 import { getSiteUrl, generateArticleSchema } from "@/lib/seo";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
 import { MetaLine } from "@/components/shared/MetaLine";
 
 export async function generateMetadata({
@@ -153,20 +151,6 @@ export default async function NewsDetailPage({
               #{tag}
             </span>
           ))}
-        </div>
-      )}
-
-      {article.sourceUrl && (
-        <div className="text-sm text-muted-foreground">
-          Quelle:
-          <a
-            href={article.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 ml-1 text-primary hover:underline"
-          >
-            {article.sourceName || "Originalmeldung"} <ExternalLink className="h-3.5 w-3.5" />
-          </a>
         </div>
       )}
     </div>

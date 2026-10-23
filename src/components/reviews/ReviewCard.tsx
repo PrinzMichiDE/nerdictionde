@@ -3,18 +3,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Review } from "@/types/review";
-import { ScoreBlock } from "@/components/shared/ScoreBlock";
-import { getCategoryStyle, getVerdict } from "@/lib/review-category";
+import { getCategoryStyle, getScoreColor, getVerdict } from "@/lib/review-category";
 import { ArrowRight, Clock3 } from "lucide-react";
-import type { CSSProperties } from "react";
 import { CompareButton } from "./CompareButton";
 
 interface ReviewCardProps {
   review: Review;
-  index?: number;
 }
 
-export function ReviewCard({ review, index }: ReviewCardProps) {
+export function ReviewCard({ review }: ReviewCardProps) {
   const formattedDate = new Date(review.createdAt).toLocaleDateString("de-DE", {
     year: "numeric",
     month: "long",
@@ -30,20 +27,8 @@ export function ReviewCard({ review, index }: ReviewCardProps) {
       href={`/reviews/${review.slug}`}
       className="group block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
     >
-      <article
-        className="review-card flex h-full flex-col overflow-hidden rounded-sm border border-border bg-card"
-        style={{ "--cat": style.color } as CSSProperties}
-      >
-        <div className="review-card-image shine relative aspect-[16/9] w-full bg-muted">
-          <span
-            className="cat-bar"
-            aria-hidden="true"
-          />
-          {typeof index === "number" && (
-            <span className="card-index" aria-hidden="true">
-              {String(index + 1).padStart(2, "0")}
-            </span>
-          )}
+      <article className="review-card flex h-full flex-col overflow-hidden rounded-sm border border-border bg-card">
+        <div className="relative aspect-[16/9] w-full bg-muted">
           {review.images?.[0] ? (
             <Image
               src={review.images[0]}
@@ -58,53 +43,27 @@ export function ReviewCard({ review, index }: ReviewCardProps) {
               <span className="text-muted-foreground text-xs font-medium">Kein Bild</span>
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-
-          <div className="absolute top-2.5 right-2.5">
-            <ScoreBlock score={review.score} />
-          </div>
-
-          <div className="absolute bottom-2.5 left-3">
-            <span className="inline-flex items-center rounded-sm bg-black/60 px-2 py-1 text-[0.625rem] font-semibold uppercase tracking-widest text-white backdrop-blur-sm">
-              {getVerdict(review.score)}
-            </span>
-          </div>
-
-          <span className="review-card-cta">
-            Lesen
-            <ArrowRight />
-          </span>
         </div>
 
         <div className="flex flex-1 flex-col gap-2.5 p-4">
-          <div className="flex items-center gap-2 text-[0.6875rem] text-muted-foreground">
-            <span
-              className="size-1.5 rounded-full"
-              style={{ backgroundColor: style.dot }}
-              aria-hidden="true"
-            />
-            <span className="kicker" style={{ color: style.color }}>
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="kicker text-[0.6875rem]" style={{ color: style.color }}>
               {style.label}
             </span>
-            <span aria-hidden="true">·</span>
-            <time
-              dateTime={
-                review.createdAt instanceof Date
-                  ? review.createdAt.toISOString()
-                  : review.createdAt
-              }
-            >
-              {formattedDate}
-            </time>
-            <span className="inline-flex items-center gap-1 ml-auto">
-              <Clock3 className="size-3" />
-              {readingTime} Min.
+            <span className="inline-flex items-baseline gap-1.5">
+              <span
+                className="font-serif text-lg font-semibold tabular-nums"
+                style={{ color: getScoreColor(review.score) }}
+              >
+                {review.score}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {getVerdict(review.score)}
+              </span>
             </span>
           </div>
 
-          <h3
-            className="review-title-underline font-serif text-xl font-semibold leading-snug line-clamp-2 transition-colors group-hover:text-primary"
-          >
+          <h3 className="font-serif text-xl font-semibold leading-snug line-clamp-2 transition-colors group-hover:text-primary">
             {review.title}
           </h3>
 
@@ -113,9 +72,24 @@ export function ReviewCard({ review, index }: ReviewCardProps) {
           </p>
 
           <div className="mt-auto flex flex-col gap-2 border-t border-border pt-3 text-sm">
+            <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+              <time
+                dateTime={
+                  review.createdAt instanceof Date
+                    ? review.createdAt.toISOString()
+                    : review.createdAt
+                }
+              >
+                {formattedDate}
+              </time>
+              <span className="inline-flex items-center gap-1">
+                <Clock3 className="size-3" />
+                {readingTime} Min.
+              </span>
+            </div>
             <div className="flex items-center justify-between">
               <span className="font-semibold text-primary">Weiterlesen</span>
-              <ArrowRight className="review-card-arrow size-4 text-primary" />
+              <ArrowRight className="size-4 text-primary" />
             </div>
             <CompareButton slug={review.slug} />
           </div>
