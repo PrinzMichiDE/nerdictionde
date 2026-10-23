@@ -13,12 +13,12 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] Pre-Commit-Hook (`.husky/pre-commit`): Format + Lint + Secret-Scan
 - [x] `type-check` auf `main` grün
 - [x] `build` auf `main` grün
-- [ ] Lint: 246 vorbestehende `no-explicit-any`-Errors inkrementell bereinigen (nicht blockierend für Verify)
+- [ ] Lint: 254 vorbestehende `no-explicit-any`-Errors inkrementell bereinigen (nicht blockierend für Verify)
 
 ## Typ B — Lücken schließen (Tests, Doku, Fehlerbehandlung)
 
 - [x] `docs/PROGRESS.md`, `docs/ROADMAP.md`, `docs/DECISIONS.md` angelegt
-- [ ] Unit-Tests für vorhandene Logik (z. B. `src/lib/review-category.ts`, `src/lib/date-utils.ts`, `src/lib/related-reviews.ts`)
+- [x] Unit-Tests für vorhandene Logik (review-category, date-utils, tag-generation, seo, newsletter-API)
 - [ ] README erweitern um Datenmodell, Environment-Variablen, Migrationshinweise
 - [x] Changelog (`CHANGELOG.md`) anlegen und pflegen (SemVer)
 
@@ -28,12 +28,15 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Typ D — Neue Features (Review-Plattform für Endnutzer)
 
-- [x] Related Reviews auf Review-Detailseiten (bereits vorhanden: `RelatedReviews.tsx` + `related-reviews.ts`)
-- [x] Benutzer-Bewertungen (bereits vorhanden: `UserRatingSection`, `UserRating` Modell)
-- [x] Lesezeichen/Bookmarks (bereits vorhanden: `ReviewActions`, `Bookmark` Modell)
-- [x] **Newsletter Double-Optin + Bestätigungsseite (`/newsletter/confirm`)** ← erledigt
+- [x] Related Reviews auf Review-Detailseiten (bereits vorhanden)
+- [x] Benutzer-Bewertungen (bereits vorhanden)
+- [x] Lesezeichen/Bookmarks (bereits vorhanden)
+- [x] Newsletter Double-Optin + Bestätigungsseite (`/newsletter/confirm`) ← erledigt
 - [x] Deals / Preisverlauf-Widget auf Review-Detailseiten ← erledigt
-- [ ] Barrierefreiheits-Audit bestehender Seiten (Fokus, Kontrast, ARIA)
+- [x] Barrierefreiheits-Verbesserungen Review-Detailseite (Fokus, ARIA) ← erledigt
+- [ ] **Kommentar-Antworten (verschachtelte Kommentare) auf Reviews** ← nächster Kandidat
+- [ ] Kommentar-Voting (Up/Down auf Kommentare)
+- [ ] Review als PDF exportieren
 
 ## Typ E — Performance, UX, Developer Experience
 
@@ -45,4 +48,4 @@ Keines.
 
 ## Nächster Schritt
 
-Lint-Fixes inkrementell (Typ A, 254 vorbestehende no-explicit-any-Errors) oder weitere Unit-Tests (Typ B).
+`docs/features/comment-replies.md` Spec schreiben (Typ D).
