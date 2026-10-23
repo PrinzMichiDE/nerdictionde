@@ -38,6 +38,8 @@ function plainText(md: string, maxLen = 400): string {
   return plain.length <= maxLen ? plain : plain.substring(0, maxLen - 3) + "...";
 }
 
+export { plainText };
+
 export function generateReviewSchema(review: ReviewSchemaInput) {
   const url = `${getSiteUrl()}/reviews/${review.slug}`;
   const type = reviewTypeMap[review.category || ""] || "Product";
