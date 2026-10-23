@@ -1,7 +1,8 @@
 import pg from "pg";
+import { PrismaClient } from "@prisma/client";
 
 async function applyMigration() {
-  let prisma: any = null;
+  let prisma: PrismaClient | null = null;
   
   try {
     console.log("🔧 Applying TMDB migration...");
@@ -60,10 +61,10 @@ async function applyMigration() {
 
     await pool.end();
     console.log("✅ Migration completed successfully!");
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Don't fail the build if migration fails (might be in CI without DB)
-    const errorMessage = error.message || String(error);
-    const errorCode = error.code || "";
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorCode = error instanceof Error ? (error as unknown as Record<string, unknown>).code ?? "" : "";
     
     if (
       errorCode === "ECONNREFUSED" || 
@@ -90,7 +91,7 @@ async function applyMigration() {
     if (prisma) {
       try {
         await prisma.$disconnect();
-      } catch (e) {
+      } catch {
         // Ignore disconnect errors
       }
     }
