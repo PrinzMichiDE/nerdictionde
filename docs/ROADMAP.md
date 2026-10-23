@@ -31,7 +31,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] Related Reviews auf Review-Detailseiten (bereits vorhanden: `RelatedReviews.tsx` + `related-reviews.ts`)
 - [x] Benutzer-Bewertungen (bereits vorhanden: `UserRatingSection`, `UserRating` Modell)
 - [x] Lesezeichen/Bookmarks (bereits vorhanden: `ReviewActions`, `Bookmark` Modell)
-- [ ] **Newsletter Double-Optin + Bestätigungsseite (`/newsletter/confirm`)** ← in Arbeit
+- [x] **Newsletter Double-Optin + Bestätigungsseite (`/newsletter/confirm`)** ← erledigt
 - [ ] Deals / Preisverlauf-Widget auf Review-Detailseiten (Modelle existieren, keine UI/Daten)
 - [ ] Barrierefreiheits-Audit bestehender Seiten (Fokus, Kontrast, ARIA)
 
@@ -41,8 +41,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-Newsletter Double-Optin (Phase: F2 Spezifikation)
+Keines.
 
 ## Nächster Schritt
 
-`docs/features/newsletter-double-optin.md` Spec schreiben.
+Unit-Tests für bestehende Logik (Typ B), z. B. `src/lib/review-category.ts`, `src/lib/date-utils.ts`, `src/lib/related-reviews.ts`.
