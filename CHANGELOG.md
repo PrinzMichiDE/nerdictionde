@@ -9,6 +9,7 @@ und dieses Projekt hält sich an [Semantische Versionierung](https://semver.org/
 
 ### Hinzugefügt
 
+- Kommentar-Voting (Up/Down) auf Review-Kommentaren: `score` auf `Comment`, Voting-Buttons, Score-Anzeige, eigene Stimme
 - Kommentar-Antworten (verschachtelte Kommentare) auf Reviews: `parentId` auf `Comment`, "Antworten"-Button, Antwortformular, eingerückte Kinder-Kommentare
 - Newsletter Double-Optin mit Bestätigungsseite (`/newsletter/confirm/[token]`) und Abmeldeseite (`/newsletter/unsubscribe/[token]`)
 - Deals- und Preisverlauf-Widget auf Review-Detailseiten (`/api/reviews/[id]/deals`, `/api/reviews/[id]/price-history`, `DealsWidget`)

@@ -35,7 +35,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] Deals / Preisverlauf-Widget auf Review-Detailseiten ← erledigt
 - [x] Barrierefreiheits-Verbesserungen Review-Detailseite (Fokus, ARIA) ← erledigt
 - [x] **Kommentar-Antworten (verschachtelte Kommentare) auf Reviews** ← erledigt
-- [ ] **Kommentar-Voting (Up/Down auf Kommentare)** ← nächster Kandidat
+- [x] **Kommentar-Voting (Up/Down auf Kommentare)** ← erledigt
 - [ ] Review als PDF exportieren
 
 ## Typ E — Performance, UX, Developer Experience

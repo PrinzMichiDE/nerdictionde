@@ -191,4 +191,15 @@ Barrierefreiheit: `aria-label` auf Buttons, `aria-pressed` für aktiven Zustand,
 
 ## 13. Review (nach F6 ausgefüllt)
 
-*(Leer bis Self-Review)*
+**Ergebnis:** Alle Checklisten-Punkte erfüllt.
+
+- Alle 3 User Stories implementiert und getestet (5 Votes-API-Tests, alle grün).
+- Randfälle: nicht eingeloggt → 401; Toggle (gleicher Wert entfernt Stimme); Änderung (hoch → runter aktualisiert); ungültiges targetId → 400.
+- `requireTwitchAuth` schützt das Voting; `@@unique([userId, targetType, targetId])` verhindert doppelte Stimmen.
+- Keine Performance-Fallen: einzelne vote.aggregate für Score, einzelne comment.update.
+- Migration reversibel (score-Spalte droppbar), bestehende Daten intakt (Default 0).
+- Abwärtskompatibel: Votes-API bleibt für thread/forum-comment unverändert.
+- UI: Upvote/Downvote-Buttons, Score-Anzeige, eigener Stimmen-Status (aria-pressed), Lade-/Fehlerzustände.
+- Barrierefreiheit: aria-label, aria-pressed, Fokus-Indikatoren (shadcn Button).
+- Code konsistent mit bestehender Architektur (App Router, Prisma, shadcn/ui, deutsche UI-Texte).
+- Lint auf neuen Dateien sauber (0 Errors).

@@ -3,22 +3,23 @@
 ## Stand (2026-10-23)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: 69/69 grün (vitest, 12 Dateien). `lint`: 254 vorbestehende `no-explicit-any`-Errors (nicht blockierend), neue Dateien lint-sauber.
+- `type-check`: grün. `build`: grün. `tests`: 74/74 grün (vitest, 13 Dateien). `lint`: 254 vorbestehende `no-explicit-any`-Errors (nicht blockierend), neue Dateien lint-sauber.
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
   1. Newsletter Double-Optin + Bestätigungsseite
   2. Deals / Preisverlauf-Widget auf Review-Detailseiten
   3. Barrierefreiheits-Verbesserungen Review-Detailseite
   4. Kommentar-Antworten (verschachtelte Kommentare) auf Reviews
+  5. Kommentar-Voting (Up/Down) auf Review-Kommentaren
 - Abgeschlossene Typ-B-Aufgaben:
   - CHANGELOG.md, README.md erweitert
-  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema
-  - 69 Tests insgesamt
+  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api
+  - 74 Tests insgesamt
 
 ## Nächster Schritt (Hauptschleife)
 
-Typ D: Neues Feature aus Roadmap — Kommentar-Voting (Up/Down auf Kommentare).
-Spec unter `docs/features/comment-voting.md` schreiben.
+Typ D: Neues Feature aus Roadmap — "Review als PDF exportieren" ist der einzige verbleibende Kandidat.
+ODER Typ A/B: Lint-Fixes inkrementell (254 vorbestehende Errors), weitere Unit-Tests.
 
 ## Konventionen (aus AGENTS.md)
 
