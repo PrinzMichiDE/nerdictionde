@@ -20,7 +20,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] `docs/PROGRESS.md`, `docs/ROADMAP.md`, `docs/DECISIONS.md` angelegt
 - [ ] Unit-Tests für vorhandene Logik (z. B. `src/lib/review-category.ts`, `src/lib/date-utils.ts`, `src/lib/related-reviews.ts`)
 - [ ] README erweitern um Datenmodell, Environment-Variablen, Migrationshinweise
-- [ ] Changelog (`CHANGELOG.md`) anlegen und pflegen (SemVer)
+- [x] Changelog (`CHANGELOG.md`) anlegen und pflegen (SemVer)
 
 ## Typ C — Refactoring (wartbarkeitsverbessernd)
 
