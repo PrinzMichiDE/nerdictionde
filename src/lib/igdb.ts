@@ -34,6 +34,29 @@ const IGDB_GAME_DETAIL_FIELDS =
   IGDB_GAME_FIELDS +
   ", storyline, keywords.name, themes.name, similar_games.name, franchise.name, collections.name, game_engines.name, time_to_beat.hastly, time_to_beat.normally, time_to_beat.completely, age_ratings.category, age_ratings.rating, language_supports.language.name, status, category";
 
+export interface IGDBGame {
+  id: number;
+  name: string;
+  cover?: { url: string } | null;
+  screenshots?: Array<{ url: string }>;
+  genres?: Array<{ id: number; name: string }>;
+  first_release_date?: number | null;
+  summary?: string | null;
+  involved_companies?: Array<{
+    company: { name: string };
+    developer: boolean;
+    publisher: boolean;
+  }>;
+  platforms?: Array<{ id: number; name: string }>;
+  game_modes?: Array<{ id: number; name: string }>;
+  player_perspectives?: Array<{ id: number; name: string }>;
+  aggregated_rating?: number | null;
+  rating?: number | null;
+  total_rating_count?: number | null;
+  videos?: Array<{ video_id: string; name: string }>;
+  game_engines?: Array<{ id: number; name: string }>;
+}
+
 export async function searchIGDB(query: string) {
   const token = await getAccessToken();
   const response = await axios.post(
@@ -440,7 +463,7 @@ export async function getIGDBPlatforms() {
  * @param limit Maximum number of games to return (default: 500)
  * @param offset Offset for pagination (default: 0)
  */
-export async function getIGDBUpcomingGames(daysAhead: number = 730, limit: number = 500, offset: number = 0) {
+export async function getIGDBUpcomingGames(daysAhead: number = 730, limit: number = 500, offset: number = 0): Promise<IGDBGame[]> {
   const token = await getAccessToken();
   const now = Math.floor(Date.now() / 1000);
   const futureDate = Math.floor((Date.now() + daysAhead * 24 * 60 * 60 * 1000) / 1000);
@@ -458,18 +481,19 @@ export async function getIGDBUpcomingGames(daysAhead: number = 730, limit: numbe
         },
       }
     );
-    return response.data;
-  } catch (error: any) {
-    const errorMessage = error.response?.data 
-      ? (typeof error.response.data === 'string' 
-          ? error.response.data 
-          : JSON.stringify(error.response.data))
-      : error.message;
+    return response.data as IGDBGame[];
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { data: unknown; status: number; statusText: string }; message?: string } | null;
+    const errorMessage = axiosError?.response?.data
+      ? (typeof axiosError.response.data === 'string'
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response.data))
+      : axiosError?.message ?? "Unknown error";
     
     console.error("IGDB Upcoming Games Query Error:", {
       query,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
+      status: axiosError?.response?.status,
+      statusText: axiosError?.response?.statusText,
       error: errorMessage,
     });
     
