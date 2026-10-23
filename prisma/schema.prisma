@@ -1538,6 +1538,7 @@ model NewsArticle {
   tags            String[]
   sourceUrl       String? // Original-Link aus dem RSS-Feed
   sourceName      String? // Name der ursprünglichen Publikation
+  rssTitle        String? // Original-Headline aus dem Feed (Titel-Dedupe über Feed-Grenzen)
   rssGuid         String?  @unique // Dedupe-Schlüssel aus dem Feed
   status          String   @default("published") // "draft" | "published"
   metaDescription String?
@@ -1563,15 +1564,18 @@ model NewsSyncState {
 // Newsletter (E-Mail-Abonnement für neue Tests)
 
 model NewsletterSubscription {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  source    String?  // z. B. "homepage", "review-detail"
-  subscribedAt DateTime @default(now())
-  unsubscribedAt DateTime?
-  isActive  Boolean  @default(true)
+  id              String   @id @default(cuid())
+  email           String   @unique
+  source          String?  // z. B. "homepage", "review-detail"
+  subscribedAt    DateTime @default(now())
+  unsubscribedAt  DateTime?
+  isActive        Boolean  @default(false) // erst nach Double-Optin-Bestaetigung true
+  confirmationToken String? @unique        // Token fuer Bestaetigungs- und Abmelde-Link
+  confirmedAt     DateTime?              // Zeitpunkt der Bestaetigung
 
   @@index([email])
   @@index([isActive])
+  @@index([confirmationToken])
 }
 
 // Push Notifications
