@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 
 /**
  * GET /api/reviews/search
- * Advanced search: query, category, minScore, maxScore, tags, sort=relevance|date-desc|score-desc, limit
+ * Advanced search: query, category, minScore, maxScore, tags, sort=relevance|date-desc|score-desc|date-asc, limit, page
  */
 export async function GET(req: NextRequest) {
   try {
@@ -15,6 +15,8 @@ export async function GET(req: NextRequest) {
     const tags = searchParams.get("tags")?.split(",").filter(Boolean) ?? [];
     const sort = searchParams.get("sort") || "date-desc";
     const limit = Math.min(parseInt(searchParams.get("limit") || "12"), 50);
+    const page = Math.max(parseInt(searchParams.get("page") || "1"), 1);
+    const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = { status: "published" };
 
@@ -34,6 +36,8 @@ export async function GET(req: NextRequest) {
       };
     }
 
+    let baseWhere = where;
+
     if (query) {
       const term = query;
       const searchOr = [
@@ -42,34 +46,66 @@ export async function GET(req: NextRequest) {
         { content: { contains: term, mode: "insensitive" as const } },
         { content_en: { contains: term, mode: "insensitive" as const } },
       ];
-      (where as { OR: typeof searchOr }).OR = searchOr;
+      baseWhere = { ...baseWhere, OR: searchOr };
     }
 
-    let orderBy: { createdAt?: "desc" | "asc"; score?: "desc" | "asc" } = { createdAt: "desc" };
-    if (sort === "score-desc") orderBy = { score: "desc" };
-    if (sort === "score-asc") orderBy = { score: "asc" };
-    if (sort === "date-asc") orderBy = { createdAt: "asc" };
+    // For relevance sort, we need to fetch more results to score them
+    // For other sorts, we can use database-level ordering with pagination
+    const isRelevanceSort = sort === "relevance" && query.length > 0;
+    const fetchLimit = isRelevanceSort ? Math.min(limit * 5, 100) : limit;
+    const fetchSkip = isRelevanceSort ? 0 : skip;
 
-    const reviews = await prisma.review.findMany({
-      where,
-      orderBy,
-      take: limit,
-      select: {
-        id: true,
-        title: true,
-        title_en: true,
-        slug: true,
-        category: true,
-        score: true,
-        content: true,
-        content_en: true,
-        images: true,
-        createdAt: true,
-        updatedAt: true,
+    let orderBy: { createdAt?: "desc" | "asc"; score?: "desc" | "asc" } = { createdAt: "desc" };
+    if (!isRelevanceSort) {
+      if (sort === "score-desc") orderBy = { score: "desc" };
+      else if (sort === "score-asc") orderBy = { score: "asc" };
+      else if (sort === "date-asc") orderBy = { createdAt: "asc" };
+      // default: date-desc
+    }
+
+    const [reviews, total] = await Promise.all([
+      prisma.review.findMany({
+        where: baseWhere,
+        orderBy: isRelevanceSort ? { createdAt: "desc" } : orderBy,
+        skip: fetchSkip,
+        take: fetchLimit,
+        select: {
+          id: true,
+          title: true,
+          title_en: true,
+          slug: true,
+          category: true,
+          score: true,
+          content: true,
+          content_en: true,
+          images: true,
+          createdAt: true,
+          updatedAt: true,
+          tags: { select: { tag: { select: { name: true, slug: true } } } },
+        },
+      }),
+      prisma.review.count({ where: baseWhere }),
+    ]);
+
+    // Apply relevance scoring if requested
+    let scoredReviews = reviews;
+    if (isRelevanceSort && query.length > 0) {
+      scoredReviews = scoreRelevance(reviews, query).slice(skip, skip + limit);
+    }
+
+    const totalPages = Math.ceil(total / limit);
+
+    return NextResponse.json({
+      reviews: scoredReviews,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
       },
     });
-
-    return NextResponse.json({ reviews });
   } catch (error) {
     console.error("GET /api/reviews/search error:", error);
     return NextResponse.json(
@@ -77,4 +113,65 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+interface ReviewWithTags {
+  id: string;
+  title: string;
+  title_en: string | null;
+  slug: string;
+  category: string;
+  score: number;
+  content: string;
+  content_en: string | null;
+  images: string[];
+  createdAt: Date;
+  updatedAt: Date;
+  tags: Array<{ tag: { name: string; slug: string } }>;
+}
+
+function scoreRelevance(reviews: ReviewWithTags[], query: string): ReviewWithTags[] {
+  const terms = query.toLowerCase().split(/\s+/).filter((t) => t.length > 1);
+  if (terms.length === 0) return reviews;
+
+  const scored = reviews.map((review) => {
+    let score = 0;
+    const title = (review.title || "").toLowerCase();
+    const titleEn = (review.title_en || "").toLowerCase();
+    const content = (review.content || "").toLowerCase();
+    const contentEn = (review.content_en || "").toLowerCase();
+    const tagNames = review.tags.map((t) => t.tag.name.toLowerCase());
+    const tagSlugs = review.tags.map((t) => t.tag.slug.toLowerCase());
+
+    for (const term of terms) {
+      // Title exact match (highest weight)
+      if (title === term || titleEn === term) score += 100;
+      // Title starts with term
+      else if (title.startsWith(term) || titleEn.startsWith(term)) score += 50;
+      // Title contains term
+      else if (title.includes(term) || titleEn.includes(term)) score += 25;
+
+      // Tag exact match (high weight)
+      if (tagNames.includes(term) || tagSlugs.includes(term)) score += 30;
+      // Tag partial match
+      else if (tagNames.some((t) => t.includes(term)) || tagSlugs.some((t) => t.includes(term))) score += 15;
+
+      // Content match (lower weight)
+      if (content.includes(term) || contentEn.includes(term)) score += 5;
+
+      // Word boundary matches in content (bonus)
+      const wordBoundaryRegex = new RegExp(`\\b${term}\\b`, "i");
+      if (wordBoundaryRegex.test(content) || wordBoundaryRegex.test(contentEn)) score += 3;
+    }
+
+    // Tiebreaker: higher editorial score wins
+    score += review.score / 100;
+
+    return { review, relevanceScore: score };
+  });
+
+  // Sort by relevance score descending
+  scored.sort((a, b) => b.relevanceScore - a.relevanceScore);
+
+  return scored.map((s) => s.review);
 }
