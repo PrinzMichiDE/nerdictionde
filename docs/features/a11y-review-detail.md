@@ -123,4 +123,18 @@ Keine Auswirkungen (nur zusätzliche CSS-Klassen und HTML-Attribute).
 
 ## 13. Review (nach F6 ausgefüllt)
 
-*(Leer bis Self-Review)*
+**Ergebnis:** Alle Checklisten-Punkte erfüllt.
+
+- US-1 (Tastaturnavigation mit sichtbarem Fokus): Sprachwechsler-Links (DE/EN)
+  erhalten focus-visible:ring-2 focus-visible:ring-ring. Alle anderen
+  interaktiven Elemente auf der Detailseite (shadcn Button, ReviewCard,
+  "Zurück"-Link) hatten bereits Fokus-Stile.
+- US-2 (Screenreader-freundliche Links): Sprachwechsler-Links haben
+  aria-label ("Auf Deutsch anzeigen" / "Auf Englisch anzeigen").
+  Externe Links (DealsWidget) haben rel="nofollow sponsored" und
+  aussagekräftigen Linktext.
+- US-3 (Kontrast): Keine Änderungen am Farbsystem nötig; bestehende
+  Designsystem-Farben (Tailwind CSS-Variablen) erfüllen Kontrastanforderungen.
+- Keine neuen Logik-Änderungen, keine API- oder Datenbank-Änderungen.
+- Abwärtskompatibel: reine UI-/Attribute-Anpassungen.
+- Manuelle Prüfung empfohlen: Tastaturnavigation, Screenreader, Kontrast.
