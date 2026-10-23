@@ -18,10 +18,6 @@ echo "=== 3. Lint (eslint) ==="
 npm run lint || true
 
 echo "=== 4. Tests ==="
-if [ -f package.json ] && node -e "const p=require('./package.json'); process.exit(p.scripts.test ? 0 : 1)"; then
-  npm test
-else
-  echo "Kein 'test'-Skript definiert. E2E-Tests unter tests/ werden vom Dev-Server aus ausgeführt."
-fi
+npm test
 
-echo "=== VERIFY ABGESCHLOSSEN (Build + Type-Check grün) ==="
+echo "=== VERIFY ABGESCHLOSSEN (Build + Type-Check + Tests grün) ==="
