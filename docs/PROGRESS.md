@@ -20,4 +20,16 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** Full-Text Search mit Relevanz-Ranking (Typ D)
-**Phase:** F1–F3 (Idee, Spec, Design) abgeschlossen. Nächster Schritt: F4 Implementierung (PK1: API Relevanz-Sortierung).
+**Phase:** F3 Design & Plan — Arbeitspakete definiert. Nächster Schritt: F4 PK1 (API Relevanz-Sortierung).
+
+### Arbeitspakete (F4 Implementierung)
+| PK | Beschreibung | Status |
+|----|--------------|--------|
+| PK1 | API: Relevanz-Sortierung in `/api/reviews/search` (ts_rank / Applikation-Scoring) | offen |
+| PK2 | Suchseite `/suche` (Server Component) — Grundgerüst, Query-Handling, Metadata | offen |
+| PK3 | `SearchResults` Component (Client) — Grid, Highlights, Pagination, Empty/Error States | offen |
+| PK4 | `SearchFilters` Component — Kategorie, Score, Tags, Sortierung, URL-Sync | offen |
+| PK5 | Navigation/Header Integration — Such-Input, Shortcut `/`, Mobile | offen |
+| PK6 | Tests — Unit (Scoring), Integration (API), E2E (Flow) | offen |
+| PK7 | Self-Review & Verify — Build, Lint, Typecheck, Tests grün | offen |
+| PK8 | Doku/Changelog — README, ROADMAP, DECISIONS | offen |
