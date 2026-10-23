@@ -4,23 +4,23 @@
 
 - Branch: `auto/dev` (auf Remote gepusht), uncommitete Änderungen aus vorheriger Session (Redesign-UI, News-Seite, Admin-Komponenten) bleiben unangetastet im Arbeitsbaum.
 - `docs/` angelegt: PROGRESS.md, ROADMAP.md, DECISIONS.md.
-- `type-check`: grün. `build`: grün. `tests`: 8/8 grün (vitest). `lint`: 254 vorbestehende `no-explicit-any`-Errors (nicht blockierend für Verify), neue Dateien lint-sauber.
-- `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify` und `npm test` angelegt.
-- Aktuelles Feature: **Newsletter Double-Optin + Bestätigungsseite** (abgeschlossen: F1-F9 durchlaufen, Review dokumentiert, Spec unter `docs/features/newsletter-double-optin.md`).
+- `type-check`: grün. `build`: grün. `tests`: 21/21 grün (vitest, 7 Dateien). `lint`: 254 vorbestehende `no-explicit-any`-Errors (nicht blockierend für Verify), alle neuen Dateien lint-sauber.
+- `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify` und `npm test` angelegt und gepusht.
+- Abgeschlossene Features:
+  1. Newsletter Double-Optin + Bestätigungsseite (F1-F9 durchlaufen)
+  2. Deals / Preisverlauf-Widget auf Review-Detailseiten (F1-F9 durchlaufen)
 
-## Abgeschlossene Work-Pakete (Newsletter Double-Optin)
+## Aktuelle Work-Pakete
 
-1. `docs(feature): spec newsletter-double-optin` — Spec + Projekt-Dokumentation
-2. `chore(infra): verify-Skript, CI-Workflow, Pre-Commit-Hook` — Qualitätsschranken
-3. `feat(newsletter-double-optin): prisma migration bestaetigungstoken` — confirmationToken, confirmedAt, isDefault=false
-4. `feat(newsletter-double-optin): bestaetigungs- und abmeldeseiten, subscribe-api, ui` — API + Seiten + UI
-5. `test(newsletter-double-optin): unit tests fuer subscribe, bestaetigung, abmeldung` — Vitest + 8 Tests
+Keine (letztes Feature abgeschlossen).
 
 ## Nächster Schritt (Hauptschleife)
 
-- ROADMAP.md: Newsletter Double-Optin als erledigt markieren
-- F9 Abschluss-Commit und Push
-- Dann: nächste Iteration (A: Lint-Fixes inkrementell, B: Unit-Tests für weitere Libs, oder D: neues Feature aus Roadmap)
+Typ A oder B wählen (Ratio: nach einem Feature folgt A/B/C):
+- Lint-Fixes inkrementell (254 vorbestehende no-explicit-any-Errors)
+- Weitere Unit-Tests für bestehende Logik
+- Changelog (CHANGELOG.md) anlegen
+- README erweitern
 
 ## Konventionen (aus AGENTS.md)
 
