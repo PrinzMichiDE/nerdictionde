@@ -9,6 +9,7 @@ und dieses Projekt hält sich an [Semantische Versionierung](https://semver.org/
 
 ### Hinzugefügt
 
+- Review als PDF exportieren: `/api/reviews/[slug]/pdf` Endpoint, `ReviewPdfDownload` Button, `ReviewPdfLayout` mit Deckblatt, Inhaltsverzeichnis, Metadaten, Markdown-Rendering, Hardwarespecs, `markdown-to-pdf` Konverter
 - Kommentar-Voting (Up/Down) auf Review-Kommentaren: `score` auf `Comment`, Voting-Buttons, Score-Anzeige, eigene Stimme
 - Kommentar-Antworten (verschachtelte Kommentare) auf Reviews: `parentId` auf `Comment`, "Antworten"-Button, Antwortformular, eingerückte Kinder-Kommentare
 - Newsletter Double-Optin mit Bestätigungsseite (`/newsletter/confirm/[token]`) und Abmeldeseite (`/newsletter/unsubscribe/[token]`)

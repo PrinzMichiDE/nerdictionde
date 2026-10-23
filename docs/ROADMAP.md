@@ -36,7 +36,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] Barrierefreiheits-Verbesserungen Review-Detailseite (Fokus, ARIA) ← erledigt
 - [x] **Kommentar-Antworten (verschachtelte Kommentare) auf Reviews** ← erledigt
 - [x] **Kommentar-Voting (Up/Down auf Kommentare)** ← erledigt
-- [ ] Review als PDF exportieren
+- [x] Review als PDF exportieren (`/api/reviews/[slug]/pdf`, `ReviewPdfDownload`, `ReviewPdfLayout`, `markdown-to-pdf`) ← erledigt
 
 ## Typ E — Performance, UX, Developer Experience
 
@@ -48,4 +48,4 @@ Keines.
 
 ## Nächster Schritt
 
-`docs/features/comment-replies.md` Spec schreiben (Typ D).
+Neues Feature aus Roadmap evaluieren. Aktuelle Kandidaten: keine offenen Typ-D-Features mehr. Nächste Iteration: Typ A (Lint-Bereinigung) oder Typ B (weitere Unit-Tests / Doku).
