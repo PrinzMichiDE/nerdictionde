@@ -6,21 +6,19 @@
 - `type-check`: grün. `build`: grün. `tests`: 48/48 grün (vitest, 10 Dateien). `lint`: 254 vorbestehende `no-explicit-any`-Errors (nicht blockierend), neue Dateien lint-sauber.
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
-  1. Newsletter Double-Optin + Bestätigungsseite (F1-F9 erledigt)
-  2. Deals / Preisverlauf-Widget auf Review-Detailseiten (F1-F9 erledigt)
-  3. Barrierefreiheits-Verbesserungen Review-Detailseite (F1-F9 erledigt)
-  4. Kommentar-Antworten (verschachtelte Kommentare) auf Reviews (F1-F9 erledigt)
+  1. Newsletter Double-Optin + Bestätigungsseite
+  2. Deals / Preisverlauf-Widget auf Review-Detailseiten
+  3. Barrierefreiheits-Verbesserungen Review-Detailseite
+  4. Kommentar-Antworten (verschachtelte Kommentare) auf Reviews
 - Abgeschlossene Typ-B-Aufgaben:
-  - CHANGELOG.md angelegt
-  - Unit-Tests: review-category, date-utils, tag-generation, seo (Schema-Generierung), newsletter (3 API-Routen), comments (7 API-Tests für parentId)
+  - CHANGELOG.md, README.md erweitert
+  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments
   - 48 Tests insgesamt
 
 ## Nächster Schritt (Hauptschleife)
 
-Alle geplanten Roadmap-Features sind erledigt. Optionen:
-- Typ B: README erweitern, weitere Unit-Tests (z. B. verbleibende Lib-Funktionen)
-- Typ A: Lint-Fixes inkrementell (254 vorbestehende no-explicit-any-Errors)
-- Typ D: Neue Roadmap-Features (Kommentar-Voting, PDF-Export, Benutzer-Profile)
+Typ B: Unit-Tests für `src/lib/comment-schema.ts` und `src/lib/rating-schema.ts` (Zod-Validierung, rein logisch).
+Danach: Typ D-Feature aus Roadmap (Kommentar-Voting, PDF-Export, oder neuer Kandidat).
 
 ## Konventionen (aus AGENTS.md)
 
