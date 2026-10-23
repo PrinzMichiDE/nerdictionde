@@ -19,4 +19,5 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-Keine offenen Typ-D-Features in Roadmap. Nächste Iteration: Typ A (Lint-Bereinigung inkrementell, 260 Errors) oder Typ B (weitere Unit-Tests, Doku).
+**Aktuelles Feature:** Full-Text Search mit Relevanz-Ranking (Typ D)
+**Phase:** F1–F3 (Idee, Spec, Design) abgeschlossen. Nächster Schritt: F4 Implementierung (PK1: API Relevanz-Sortierung).

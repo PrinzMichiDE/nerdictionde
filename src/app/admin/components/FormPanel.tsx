@@ -21,7 +21,7 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
   const [uploading, setUploading] = useState(false);
   const [newVideoUrl, setNewVideoUrl] = useState("");
 
-  const handleChange = (field: keyof Review, value: any) => {
+  const handleChange = <K extends keyof Review>(field: K, value: Review[K]) => {
     setReview({ ...review, [field]: value });
   };
 
@@ -182,7 +182,7 @@ export function FormPanel({ review, setReview }: FormPanelProps) {
             <Label htmlFor="category">Kategorie</Label>
             <Select 
                 value={review.category} 
-                onValueChange={(v) => handleChange("category", v)}
+                onValueChange={(v) => handleChange("category", v as ReviewCategory)}
             >
                 <SelectTrigger>
                     <SelectValue placeholder="Kategorie" />

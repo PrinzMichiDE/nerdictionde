@@ -37,6 +37,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] **Kommentar-Antworten (verschachtelte Kommentare) auf Reviews** ← erledigt
 - [x] **Kommentar-Voting (Up/Down auf Kommentare)** ← erledigt
 - [x] Review als PDF exportieren (`/api/reviews/[slug]/pdf`, `ReviewPdfDownload`, `ReviewPdfLayout`, `markdown-to-pdf`) ← erledigt
+- [ ] **Full-Text Search mit Relevanz-Ranking** (`/suche`, Highlights, Filter, Pagination) — Spec: `docs/features/search-relevance.md`
 
 ## Typ E — Performance, UX, Developer Experience
 
