@@ -32,7 +32,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] Benutzer-Bewertungen (bereits vorhanden: `UserRatingSection`, `UserRating` Modell)
 - [x] Lesezeichen/Bookmarks (bereits vorhanden: `ReviewActions`, `Bookmark` Modell)
 - [x] **Newsletter Double-Optin + Bestätigungsseite (`/newsletter/confirm`)** ← erledigt
-- [ ] Deals / Preisverlauf-Widget auf Review-Detailseiten (Modelle existieren, keine UI/Daten)
+- [x] Deals / Preisverlauf-Widget auf Review-Detailseiten ← erledigt
 - [ ] Barrierefreiheits-Audit bestehender Seiten (Fokus, Kontrast, ARIA)
 
 ## Typ E — Performance, UX, Developer Experience
@@ -45,4 +45,4 @@ Keines.
 
 ## Nächster Schritt
 
-Unit-Tests für bestehende Logik (Typ B), z. B. `src/lib/review-category.ts`, `src/lib/date-utils.ts`, `src/lib/related-reviews.ts`.
+Lint-Fixes inkrementell (Typ A, 254 vorbestehende no-explicit-any-Errors) oder weitere Unit-Tests (Typ B).

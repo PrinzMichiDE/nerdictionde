@@ -167,4 +167,13 @@ Barrierefreiheit: Überschriftenhierarchie, `aria-label` auf Links, Fokus-Styles
 
 ## 13. Review (nach F6 ausgefüllt)
 
-*(Leer bis Self-Review)*
+**Ergebnis:** Alle Checklisten-Punkte erfüllt.
+
+- Alle 3 User Stories und Akzeptanzkriterien implementiert und getestet (4 Unit-Tests für die API-Routen, alle grün).
+- Randfälle: keine Deals → leeres Array / Widget nicht gerendert; API-Fehler → 500; Preis=0 wird angezeigt.
+- Keine Eingaben zu validieren (GET mit ID), keine Autorisierung nötig (öffentlich), keine Secrets im Code.
+- Keine Performance-Fallen: einzelne findMany mit Index auf reviewId, limitiert (10 Deals / 30 PriceHistory), keine N+1.
+- Keine Migration nötig (Modelle Deal/PriceHistory existieren bereits).
+- Abwärtskompatibilität gewahrt: rein additiv, bestehende Endpunkte unverändert.
+- UI: Empty-State (Widget liefert null bei fehlenden Daten), ARIA-Label auf externen Links, deutsche UI-Texte.
+- Code konsistent mit bestehender Architektur (App Router, Prisma, shadcn/ui Card/Badge).
