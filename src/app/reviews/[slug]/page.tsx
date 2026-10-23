@@ -22,6 +22,7 @@ import { SpoilerSection } from "@/components/reviews/SpoilerSection";
 import { getCategoryStyle } from "@/lib/review-category";
 import { getServerSession } from "@/lib/session";
 import { UserRatingSection } from "@/components/reviews/UserRatingSection";
+import { DealsWidget } from "@/components/reviews/DealsWidget";
 import { CommentSection } from "@/components/community/CommentSection";
 import { ScoreBlock } from "@/components/shared/ScoreBlock";
 import { ProsCons } from "@/components/shared/ProsCons";
@@ -191,6 +192,19 @@ export default async function ReviewDetailPage({
   });
 
   if (!review) notFound();
+
+  const [deals, priceHistory] = await Promise.all([
+    prisma.deal.findMany({
+      where: { reviewId: review.id, status: "active" },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+    prisma.priceHistory.findMany({
+      where: { reviewId: review.id },
+      orderBy: { recordedAt: "asc" },
+      take: 30,
+    }),
+  ]);
 
   const session = await getServerSession();
 
@@ -924,6 +938,9 @@ export default async function ReviewDetailPage({
               </div>
             </div>
           )}
+
+          {/* Preis & Angebote */}
+          <DealsWidget deals={deals} priceHistory={priceHistory} />
 
           <UserRatingSection
             reviewId={review.id}
