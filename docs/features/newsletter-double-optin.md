@@ -221,4 +221,14 @@ Nutzer klickt Abmeldelink → `/newsletter/unsubscribe/[token]` → Seite zeigt 
 
 ## 13. Review (nach F6 ausgefüllt)
 
-*(Leer bis Self-Review)*
+**Ergebnis:** Alle Checklisten-Punkte erfüllt.
+
+- Alle 4 User Stories und ihre Akzeptanzkriterien sind implementiert und getestet (8 Unit-Tests, alle grün).
+- Randfälle: ungültiger Token → notFound(), bereits bestätigt → kein Fehler, Race-Condition bei Anmeldung → idempotter upsert, ungültige E-Mail → Zod-Validierung 400.
+- Eingaben via Zod validiert, keine Secrets im Code, keine Autorisierung nötig (öffentlicher Newsletter).
+- Keine Performance-Fallen: einzelne DB-Abfrage pro Operation, Index auf confirmationToken, keine N+1.
+- Migration reversibel (Rückwärts-SQL dokumentiert), bestehende Daten bleiben intakt (nullable Spalten, Default-Änderung betrifft nur neue Zeilen).
+- Abwärtskompatibilität gewahrt: bestehende aktive Abonnements unverändert, API-Struktur gleich.
+- UI: Lade-, Erfolgs- und Fehlerzustand vorhanden, ARIA-Label, Überschriften-Hierarchie, Fokus-Styles.
+- Code konsistent mit bestehender Architektur (Server Components, Prisma, Zod, Next.js App Router, deutsche UI-Texte).
+- Lint auf neuen Dateien sauber (0 Errors); vorbestehende no-explicit-any-Errors im Rest des Projekts unangetastet.

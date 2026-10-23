@@ -24,7 +24,7 @@ describe("POST /api/newsletter/subscribe", () => {
       email: "test@example.com",
       isActive: false,
       confirmationToken: "token-123",
-    } as any);
+    });
 
     const req = new NextRequest(
       "http://localhost/api/newsletter/subscribe",
@@ -67,7 +67,7 @@ describe("POST /api/newsletter/subscribe", () => {
       id: "sub_1",
       email: "test@example.com",
       isActive: false,
-    } as any);
+    });
 
     const req = new NextRequest(
       "http://localhost/api/newsletter/subscribe",

@@ -40,7 +40,7 @@ describe("GET /newsletter/unsubscribe/[token]", () => {
       id: "sub_1",
       email: "test@example.com",
       isActive: true,
-    } as any);
+    });
     mockUpdate.mockResolvedValue({});
 
     const params = Promise.resolve({ token: "gültiger-token" });

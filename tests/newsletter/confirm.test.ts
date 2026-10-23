@@ -41,7 +41,7 @@ describe("GET /newsletter/confirm/[token]", () => {
       email: "test@example.com",
       isActive: false,
       confirmedAt: null,
-    } as any);
+    });
     mockUpdate.mockResolvedValue({});
 
     const params = Promise.resolve({ token: "gültiger-token" });
@@ -61,7 +61,7 @@ describe("GET /newsletter/confirm/[token]", () => {
       email: "test@example.com",
       isActive: true,
       confirmedAt: new Date(),
-    } as any);
+    });
 
     const params = Promise.resolve({ token: "bereits-bestaetigt" });
 
