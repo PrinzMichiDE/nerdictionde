@@ -37,7 +37,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] **Kommentar-Antworten (verschachtelte Kommentare) auf Reviews** ← erledigt
 - [x] **Kommentar-Voting (Up/Down auf Kommentare)** ← erledigt
 - [x] Review als PDF exportieren (`/api/reviews/[slug]/pdf`, `ReviewPdfDownload`, `ReviewPdfLayout`, `markdown-to-pdf`) ← erledigt
-- [ ] **Full-Text Search mit Relevanz-Ranking** (`/suche`, Highlights, Filter, Pagination) — Spec: `docs/features/search-relevance.md`
+- [x] **Full-Text Search mit Relevanz-Ranking** (`/suche`, Highlights, Filter, Pagination) — Spec: `docs/features/search-relevance.md` ← erledigt
 
 ## Typ E — Performance, UX, Developer Experience
 
@@ -45,8 +45,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-Keines.
+Keines. Full-Text Search abgeschlossen.
 
 ## Nächster Schritt
 
-Neues Feature aus Roadmap evaluieren. Aktuelle Kandidaten: keine offenen Typ-D-Features mehr. Nächste Iteration: Typ A (Lint-Bereinigung) oder Typ B (weitere Unit-Tests / Doku).
+Neues Feature aus Roadmap evaluieren. Aktuelle Kandidaten: keine offenen Typ-D-Features mehr. Nächste Iteration: Typ A (Lint-Bereinigung: 254 `no-explicit-any` Errors) oder Typ B (weitere Unit-Tests / Doku).

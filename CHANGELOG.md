@@ -9,6 +9,7 @@ und dieses Projekt hält sich an [Semantische Versionierung](https://semver.org/
 
 ### Hinzugefügt
 
+- Full-Text Search mit Relevanz-Ranking: Dedizierte Suchseite `/suche`, API `/api/reviews/search` mit Relevanz-Sortierung (Titel > Tags > Inhalt), Highlighting von Suchbegriffen, Filter (Kategorie, Score, Tags), Pagination, URL-shareable Parameter, Empty-State mit Vorschlägen
 - Review als PDF exportieren: `/api/reviews/[slug]/pdf` Endpoint, `ReviewPdfDownload` Button, `ReviewPdfLayout` mit Deckblatt, Inhaltsverzeichnis, Metadaten, Markdown-Rendering, Hardwarespecs, `markdown-to-pdf` Konverter
 - Kommentar-Voting (Up/Down) auf Review-Kommentaren: `score` auf `Comment`, Voting-Buttons, Score-Anzeige, eigene Stimme
 - Kommentar-Antworten (verschachtelte Kommentare) auf Reviews: `parentId` auf `Comment`, "Antworten"-Button, Antwortformular, eingerückte Kinder-Kommentare
