@@ -67,9 +67,13 @@ model Comment {
   review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   reviewId  String
   author    String
+  parentId   String?                                             // neu: Antwort auf einen Kommentar
+  parent     Comment?   @relation("CommentParent", fields: [parentId], references: [id], onDelete: SetNull)  // neu
+  children   Comment[]  @relation("CommentParent")              // neu: Antworten auf diesen Kommentar
   createdAt DateTime @default(now())
 
   @@index([reviewId])
+  @@index([parentId])                                           // neu
 }
 
 model UserRating {
