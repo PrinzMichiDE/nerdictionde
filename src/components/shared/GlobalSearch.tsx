@@ -139,6 +139,15 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
     setActiveIndex(-1);
   };
 
+  const handleSearchSubmit = () => {
+    if (query.trim()) {
+      router.push(`/suche?q=${encodeURIComponent(query.trim())}`);
+      setIsOpen(false);
+      setQuery("");
+      setActiveIndex(-1);
+    }
+  };
+
   return (
     <div ref={searchRef} className="relative w-full max-w-2xl lg:max-w-3xl">
       {/* Search Input */}
@@ -160,7 +169,13 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsOpen(true)}
-          onKeyDown={handleInputKeyDown}
+          onKeyDown={(e) => {
+            handleInputKeyDown(e);
+            if (e.key === "Enter" && !results[activeIndex]) {
+              e.preventDefault();
+              handleSearchSubmit();
+            }
+          }}
           className="pl-11 pr-20 h-11 text-sm border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
         />
         {/* Kbd badge */}
@@ -330,6 +345,17 @@ export function GlobalSearch({ reviews: initialReviews = [] }: GlobalSearchProps
                     Top Bewertete
                   </Link>
                 </div>
+              </div>
+            )}
+
+            {query && results.length > 0 && (
+              <div className="p-3 border-t border-border bg-muted/30 text-center">
+                <Link
+                  href={`/suche?q=${encodeURIComponent(query.trim())}`}
+                  className="text-sm font-medium text-primary hover:underline transition-colors"
+                >
+                  Alle {results.length} Ergebnisse anzeigen →
+                </Link>
               </div>
             )}
           </CardContent>

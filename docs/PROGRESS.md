@@ -25,8 +25,8 @@
 ### Arbeitspakete (F4 Implementierung)
 | PK | Beschreibung | Status |
 |----|--------------|--------|
-| PK1 | API: Relevanz-Sortierung in `/api/reviews/search` (ts_rank / Applikation-Scoring) | offen |
-| PK2 | Suchseite `/suche` (Server Component) — Grundgerüst, Query-Handling, Metadata | offen |
+| PK1 | API: Relevanz-Sortierung in `/api/reviews/search` (ts_rank / Applikation-Scoring) | **erledigt** |
+| PK2 | Suchseite `/suche` (Server Component) — Grundgerüst, Query-Handling, Metadata | **in Arbeit** |
 | PK3 | `SearchResults` Component (Client) — Grid, Highlights, Pagination, Empty/Error States | offen |
 | PK4 | `SearchFilters` Component — Kategorie, Score, Tags, Sortierung, URL-Sync | offen |
 | PK5 | Navigation/Header Integration — Such-Input, Shortcut `/`, Mobile | offen |
