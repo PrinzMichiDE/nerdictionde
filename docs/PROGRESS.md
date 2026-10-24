@@ -169,6 +169,8 @@
 
 ### Nächstes Feature (ROADMAP)
 
-**Gewählt: Review Collections Follow** (F1 ✅ — 2026-10-24)
+**Gewählt: Review Collections Follow** (F1 ✅, F2 ✅, F3 ✅ — 2026-10-24)
 - Auswahl dokumentiert in DECISIONS.md
-- Nächste Phase: F2 Spezifikation → `docs/features/collections-follow.md`
+- Spec: `docs/features/collections-follow.md` erstellt
+- Design: `docs/features/collections-follow-design.md` erstellt (13 Arbeitspakete, ~9h)
+- Nächste Phase: F4 Implementierung → PKG-1: DB Migration & Prisma Schema
