@@ -5,15 +5,18 @@ import { X, Heart, Coffee } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+const isClient = typeof window !== "undefined";
+
 export function SupportTopBanner() {
   const [visible, setVisible] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
+    if (!isClient) return false;
     const dismissed = localStorage.getItem("support-top-banner-dismissed");
     return !dismissed;
   });
-  const [hydrated, setHydrated] = useState(false);
+  const [hydrated, setHydrated] = useState<boolean>(() => isClient);
 
   useEffect(() => {
+    if (!isClient) return;
     setHydrated(true);
   }, []);
 

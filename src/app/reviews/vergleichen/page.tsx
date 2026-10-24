@@ -94,7 +94,7 @@ export default async function ComparePage({
       {isSingle && (
         <div className="rounded-lg border border-border bg-card p-8 text-center">
           <p className="text-muted-foreground">
-            Nur ein Test im Vergleich. Füge über "Zum Vergleich hinzufügen" auf
+            Nur ein Test im Vergleich. Füge über &ldquo;Zum Vergleich hinzufügen&rdquo; auf
             einer Review-Seite einen zweiten Test hinzu.
           </p>
         </div>

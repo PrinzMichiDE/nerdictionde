@@ -14,16 +14,20 @@ interface TableOfContentsProps {
   isEn: boolean;
 }
 
+// Check if we're on the client side (not during SSR)
+const isClient = typeof window !== "undefined";
+
 export function TableOfContents({ headings, isEn }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string>("");
-  const [mounted, setMounted] = useState(false);
+  // Use lazy initializer to avoid setState in effect - SSR renders false, client renders true
+  const [mounted, setMounted] = useState<boolean>(() => isClient);
 
+  // Hydration-safe: set mounted to true after client-side hydration
+  // This useEffect only runs on the client (since isClient is true there)
   useEffect(() => {
+    if (!isClient) return;
     setMounted(true);
   }, []);
-
-  // Hydration-safe: only set mounted after client-side render
-  // Using lazy initializer would be better but SSR needs false initially
 
   useEffect(() => {
     if (!mounted || typeof window === "undefined") return;

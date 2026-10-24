@@ -5,9 +5,18 @@ import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 
+function generateParticles() {
+  return [...Array(20)].map(() => ({
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+    delay: `${Math.random() * 5}s`,
+    duration: `${3 + Math.random() * 4}s`,
+  }));
+}
+
 export function HeroSection() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [particles, setParticles] = useState<Array<{ left: string; top: string; delay: string; duration: string }>>([]);
+  const [particles] = useState<Array<{ left: string; top: string; delay: string; duration: string }>>(generateParticles);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -19,17 +28,6 @@ export function HeroSection() {
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
-  // Generate random particle positions once on mount
-  useEffect(() => {
-    const newParticles = [...Array(20)].map(() => ({
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      delay: `${Math.random() * 5}s`,
-      duration: `${3 + Math.random() * 4}s`,
-    }));
-    setParticles(newParticles);
   }, []);
 
   return (

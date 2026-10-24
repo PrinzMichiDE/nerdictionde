@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3, TrendingUp, Calendar, Target } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 
 interface StatData {
   label: string;
@@ -75,30 +75,63 @@ interface StatsDashboardProps {
   };
 }
 
+function StatBar({ stat, isVisible, index }: { stat: StatData; isVisible: boolean; index: number }) {
+  const barRef = useRef<HTMLDivElement>(null);
+  const animatedValue = useCountUp(stat.value, 2000, 0, barRef);
+  const percentage = stat.max > 0 ? (stat.value / stat.max) * 100 : 0;
+
+  return (
+    <div
+      ref={barRef}
+      className={`space-y-2 ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"}`}
+      style={{ transitionDelay: `${index * 0.1}s` }}
+    >
+      <div className="flex items-center justify-between text-sm">
+        <span className="font-medium">{stat.label}</span>
+        <span className="text-muted-foreground tabular-nums">
+          {animatedValue} ({percentage.toFixed(1)}%)
+        </span>
+      </div>
+      <div className="h-3 bg-muted rounded-full overflow-hidden">
+        <div
+          className={`h-full ${stat.color} transition-all duration-1000 ease-out rounded-full`}
+          style={{
+            width: isVisible ? `${percentage}%` : "0%",
+            transitionDelay: `${index * 0.1}s`,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function StatsDashboard({ statistics }: StatsDashboardProps) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const stats: StatData[] = [
-    {
-      label: "Games",
-      value: statistics.gameReviews,
-      max: statistics.totalReviews,
-      color: "bg-blue-500",
-    },
-    {
-      label: "Filme",
-      value: statistics.movieReviews,
-      max: statistics.totalReviews,
-      color: "bg-red-500",
-    },
-    {
-      label: "Serien",
-      value: statistics.seriesReviews,
-      max: statistics.totalReviews,
-      color: "bg-green-500",
-    },
-  ];
+  const stats = useMemo<StatData[]>(
+    () => [
+      {
+        label: "Games",
+        value: statistics.gameReviews,
+        max: statistics.totalReviews,
+        color: "bg-blue-500",
+      },
+      {
+        label: "Filme",
+        value: statistics.movieReviews,
+        max: statistics.totalReviews,
+        color: "bg-red-500",
+      },
+      {
+        label: "Serien",
+        value: statistics.seriesReviews,
+        max: statistics.totalReviews,
+        color: "bg-green-500",
+      },
+    ],
+    [statistics]
+  );
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -154,38 +187,9 @@ export function StatsDashboard({ statistics }: StatsDashboardProps) {
             </div>
 
             <div className="space-y-4">
-              {stats.map((stat, index) => {
-                const percentage = stat.max > 0 ? (stat.value / stat.max) * 100 : 0;
-                const barRef = useRef<HTMLDivElement>(null);
-                const animatedValue = useCountUp(stat.value, 2000, 0, barRef);
-
-                return (
-                  <div
-                    key={stat.label}
-                    ref={barRef}
-                    className={`space-y-2 ${
-                      isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
-                    }`}
-                    style={{ transitionDelay: `${index * 0.1}s` }}
-                  >
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium">{stat.label}</span>
-                      <span className="text-muted-foreground tabular-nums">
-                        {animatedValue} ({percentage.toFixed(1)}%)
-                      </span>
-                    </div>
-                    <div className="h-3 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className={`h-full ${stat.color} transition-all duration-1000 ease-out rounded-full`}
-                        style={{
-                          width: isVisible ? `${percentage}%` : "0%",
-                          transitionDelay: `${index * 0.1}s`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+              {stats.map((stat, index) => (
+                <StatBar key={stat.label} stat={stat} isVisible={isVisible} index={index} />
+              ))}
             </div>
           </CardContent>
         </Card>

@@ -10,6 +10,12 @@ interface ChartData {
   color: string;
 }
 
+interface ChartSegment extends ChartData {
+  percentage: number;
+  angle: number;
+  startAngle: number;
+}
+
 interface ScoreDistributionProps {
   scores: number[];
 }
@@ -127,22 +133,21 @@ export function CategoryPieChart({ data }: PieChartProps) {
 
   const total = data.reduce((sum, item) => sum + item.value, 0);
   
-  // Calculate segments without mutating external variable
+  // Calculate segments without mutating external variable - use reduce to accumulate
   const segments = useMemo(() => {
-    let currentAngle = -90; // Start at top
-    return data.map((item) => {
+    return data.reduce<ChartSegment[]>((acc, item) => {
+      const previousAngle = acc.length > 0 ? acc[acc.length - 1].startAngle + acc[acc.length - 1].angle : -90;
       const percentage = (item.value / total) * 100;
       const angle = (item.value / total) * 360;
-      const startAngle = currentAngle;
-      currentAngle += angle;
-
-      return {
+      const startAngle = previousAngle;
+      
+      return [...acc, {
         ...item,
         percentage,
         angle,
         startAngle,
-      };
-    });
+      }];
+    }, []);
   }, [data, total]);
 
   return (

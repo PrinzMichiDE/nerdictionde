@@ -222,7 +222,7 @@ export async function SearchPageContent({ searchParams }: SearchPageContentProps
         ) : query && data && data.reviews.length === 0 ? (
           <section className="text-center py-20">
             <h2 className="font-serif text-3xl font-semibold tracking-tight text-foreground">
-              Keine Treffer für „{query}"
+              Keine Treffer f&uuml;r &ldquo;{query}&rdquo;
             </h2>
             <div className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto space-y-6">
               <p className="mb-4">Versuche es mit anderen Begriffen oder Filtern.</p>
