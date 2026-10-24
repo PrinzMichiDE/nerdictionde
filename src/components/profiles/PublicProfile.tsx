@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Star, Bookmark, Users, UserPlus, ExternalLink, Loader2 } from "lucide-react";
+import { Star, Bookmark, Users, UserPlus, ExternalLink, Loader2, Gamepad2, Monitor, Film, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,7 +12,29 @@ import { FollowButton } from "./FollowButton";
 import { ProfileRatingsList } from "./ProfileRatingsList";
 import { ProfileBookmarksList } from "./ProfileBookmarksList";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { getCategoryColor } from "@/lib/utils";
+
+const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  GAMES: Gamepad2,
+  HARDWARE: Monitor,
+  MOVIES: Film,
+  SERIES: Tv,
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  GAMES: 'Games',
+  HARDWARE: 'Hardware',
+  MOVIES: 'Movies',
+  SERIES: 'Series',
+};
+
+const CATEGORY_HREFS: Record<string, string> = {
+  GAMES: '/suche?category=GAMES',
+  HARDWARE: '/suche?category=HARDWARE',
+  MOVIES: '/suche?category=MOVIES',
+  SERIES: '/suche?category=SERIES',
+};
 
 interface PublicProfileProps {
   profile: {
@@ -33,9 +55,10 @@ interface PublicProfileProps {
     };
   };
   username: string;
+  subscribedCategories?: string[];
 }
 
-export function PublicProfile({ profile, username }: PublicProfileProps) {
+export function PublicProfile({ profile, username, subscribedCategories }: PublicProfileProps) {
   const { user } = profile;
   const userProfile = user.userProfile;
 
@@ -102,6 +125,27 @@ export function PublicProfile({ profile, username }: PublicProfileProps) {
                   </>
                 )}
               </div>
+
+              {/* Subscribed Categories */}
+              {subscribedCategories && subscribedCategories.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2" aria-label="Interessen">
+                  {subscribedCategories.map(cat => {
+                    const Icon = CATEGORY_ICONS[cat];
+                    return (
+                      <Link
+                        key={cat}
+                        href={CATEGORY_HREFS[cat]}
+                        className="inline-flex items-center gap-1.5"
+                      >
+                        <Badge variant="outline" className="gap-1.5 px-2 py-1 h-auto">
+                          <Icon className="h-3 w-3" aria-hidden="true" />
+                          <span>{CATEGORY_LABELS[cat]}</span>
+                        </Badge>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>

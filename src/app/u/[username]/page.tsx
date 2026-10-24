@@ -1,8 +1,10 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getUserProfile } from "@/lib/user-profiles";
+import { getSubscribedCategories } from "@/lib/category-subscriptions";
 import { PublicProfile } from "@/components/profiles/PublicProfile";
 import { getSiteUrl } from "@/lib/seo";
+import { FEATURE_CATEGORY_SUBSCRIPTIONS } from "@/lib/feature-flags";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -52,5 +54,11 @@ export default async function PublicProfilePage({ params }: Props) {
     notFound();
   }
 
-  return <PublicProfile profile={profile} username={username} />;
+  // Fetch subscribed categories if feature is enabled
+  let subscribedCategories: string[] = [];
+  if (FEATURE_CATEGORY_SUBSCRIPTIONS && profile.user.userProfile?.isPublic) {
+    subscribedCategories = await getSubscribedCategories(profile.user.id);
+  }
+
+  return <PublicProfile profile={profile} username={username} subscribedCategories={subscribedCategories} />;
 }

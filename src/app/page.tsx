@@ -3,6 +3,7 @@ import type { Review } from "@/types/review";
 import { Hero } from "@/components/home/Hero";
 import { EditorialPicks } from "@/components/home/EditorialPicks";
 import { HomeReviews } from "@/components/home/HomeReviews";
+import { HomeSubscribedCategoryChips } from "@/components/home/HomeSubscribedCategoryChips";
 import { ScoreScale } from "@/components/home/ScoreScale";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -122,6 +123,7 @@ export default async function HomePage() {
       />
 
       <Hero latest={reviews[0] ?? null} stats={stats} />
+      <HomeSubscribedCategoryChips />
 
       <div className="mt-16 space-y-20 md:mt-20 md:space-y-28">
         {reviews.length > 0 && <EditorialPicks reviews={reviews} />}
