@@ -30,90 +30,47 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** Review Collections Follow — **ABGESCHLOSSEN (F1–F13 ✅)**  
+**Aktuelles Feature:** Keines — **Review Collections Follow abgeschlossen (F1–F13 ✅)**  
 **Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ D)
 
 ---
 
-### Zusammenfassung: Review Collections Follow (Abgeschlossen)
+### Zusammenfassung: Review Collections Follow (Abgeschlossen 2026-10-24)
 
-**PKG-1: DB Migration & Prisma Schema** ✅
-- Migration `20261024150000_add_collections_follow` erstellt & als angewendet markiert
-- `CollectionFollow` Model, `followersCount` auf `ReviewCollection`, `NotificationType` Enum (`COLLECTION_ITEM_ADDED`, `COLLECTION_FOLLOWED`)
-- `prisma generate` erfolgreich, `type-check` grün
+**User Stories (alle ✅):**
+- US1: Öffentliche Liste folgen (`/listen/[slug]`) — Follow-Button, optimistische UI, SSR-Count
+- US2: Eigene gefolgte Listen verwalten (`/einstellungen/listen` Tab "Gefolgt") — Grid, Unfollow, Pagination, Empty State
+- US3: Feed zeigt neue Items gefolzter Listen (`/feed` mit `includeCollections`) — Merge mit User-Feed, max 3 pro Liste
+- US4: Benachrichtigungen bei neuen Items — In-App (Type `COLLECTION_ITEM_ADDED`), Batch-Insert, Grouping
+- US5: Owner sieht Follower-Liste — Modal mit Avatar, Name, Profil-Link, Pagination
 
-**PKG-2: Types & Zod Schemas** ✅
-- `src/lib/collections-follow-schema.ts` erstellt
-- Schemas: `followParamsSchema`, `followRequestSchema`, `followStatusSchema`, `followToggleResponseSchema`, `followedCollectionsQuerySchema`, `followedCollectionSchema`, `followerSchema`
-- Types inferiert, Feature-Flag `FEATURE_COLLECTIONS_FOLLOW` definiert
-- `type-check` grün
+**Technische Highlights:**
+- 1 neue Prisma Model: `CollectionFollow` + `followersCount` auf `ReviewCollection` + `NotificationType` Enum
+- 3 neue API Routes: `/api/listen/[slug]/follow` (GET/POST/DELETE), `/api/me/listen/followed` (GET), `/api/listen/[slug]/items` (POST/DELETE)
+- Feed-Erweiterung: `includeCollections` Parameter, existierende `lib/feed.ts` Logik wiederverwendet
+- Optimistische UI via `useCollectionFollow` Hook (Toast, Rollback, Auth-Redirect)
+- `unstable_cache` 30s/60s + Tag-Invaliderung bei Mutationen
+- Reversible Migration `20261024150000_add_collections_follow`
+- Feature-Flag `FEATURE_COLLECTIONS_FOLLOW` (Default: `true`)
+- 375 Tests grün (bestehende + neue Unit/Integration)
 
-**PKG-3: Server Logic** ✅
-- `src/lib/collections-follow.ts` erstellt
-- Funktionen: `getFollowStatus`, `getFollowStatusBySlug`, `toggleFollow`, `getFollowedCollections`, `getFollowers`, `getFollowerIds`, `getFollowedCollectionIds`, `userFollowsCollection`
-- Cache: `unstable_cache` mit Tag-Invaliderung (30s/60s TTLs)
-- Transaktionen für atomare Count-Updates
-- `type-check` grün
+**Dateien (neu/geändert):**
+- `prisma/migrations/20261024150000_add_collections_follow/migration.sql`
+- `src/lib/collections-follow-schema.ts`, `src/lib/collections-follow.ts`
+- `src/app/api/listen/[slug]/follow/route.ts`, `src/app/api/me/listen/followed/route.ts`, `src/app/api/listen/[slug]/items/route.ts`
+- `src/lib/feed.ts` (Erweiterung), `src/lib/collection-follow.ts` (Notification Trigger)
+- `src/hooks/useCollectionFollow.ts` (Update), `src/components/collections/CollectionFollowerCount.tsx`, `CollectionFollowerListModal.tsx`
+- Tests: `tests/api/listen/follow.test.ts`, `tests/api/me/listen.followed.test.ts`, `tests/api/listen/items.test.ts`
+- Doku: `CHANGELOG.md`, `README.md`, `ROADMAP.md`, `docs/features/collections-follow.md`, `docs/PROGRESS.md`
 
-**PKG-4: API Follow/Unfollow/Status** ✅
-- `/api/listen/[slug]/follow` POST/DELETE/GET
-- Feature-Flag Guard, Auth via `requireTwitchAuth`, Validierung via Zod
-- Error Handling mit passenden HTTP Status Codes
-- `type-check` grün
-
-**PKG-5: API Gefolgte Listen** ✅
-- `/api/me/listen/followed` GET mit Cursor Pagination
-- Auth via `requireTwitchAuth`, Validierung via Zod
-- Nutzt `getFollowedCollections` aus Server Logic
-- `type-check` grün
-
-**PKG-6: API Feed Erweiterung** ✅
-- `/api/feed` GET Parameter `includeCollections` (Default: true)
-- `lib/feed.ts` erweitert: `includeCollections` Parameter, Feature-Flag Check
-- Collection Items werden in Feed gemerged (bereits implementiert)
-- `type-check` grün
-
-**PKG-7: Client Hook & Types** ✅
-- `src/hooks/useCollectionFollow.ts` (bereits vorhanden, angepasst)
-- Optimistische UI: sofortiger Toggle, Rollback bei Error
-- Toast-Benachrichtigungen via `sonner`
-- Refresh-Funktion nutzt korrekten API-Endpunkt
-- `type-check` grün
-
-**PKG-8: UI Follow Button & Count** ✅
-- `CollectionFollowButton.tsx` (bereits vorhanden): Optimistische UI, Loading, Auth-Redirect, a11y
-- `CollectionFollowerCount.tsx` (neu): SSR Count + Client Hydration
-- `type-check` grün
-
-**PKG-9: Owner Follower Modal** ✅
-- `CollectionFollowerListModal.tsx`: Dialog mit Pagination, Avatar, Profil-Link
-- Nur für Owner sichtbar, nutzt `getFollowers` Server Logic
-- `type-check` grün
-
-**PKG-10: UI Einstellungen Tab & Feed** ✅
-- `FollowedCollectionsClient.tsx` (bereits vorhanden): Grid, Unfollow, Pagination, Empty State
-- `/einstellungen/gefolgte-listen/page.tsx` (bereits vorhanden): Server Component mit SSR
-- Feed Collection Items bereits in `lib/feed.ts` integriert
-- `type-check` grün
-
-**PKG-11: Notifications & Trigger** ✅
-- `/api/listen/[slug]/items` POST/DELETE für Items verwalten (Owner only)
-- `createCollectionUpdateNotification` in `lib/collection-follow.ts` (bereits vorhanden)
-- Fire-and-forget Notification bei Item-Add an Follower
-- `type-check` grün
-
-**PKG-12: Tests** ✅
-- Unit Tests: `tests/lib/collection-follow.test.ts` (421 Zeilen, alle grün)
-- Integration Tests: `tests/api/listen/follow.test.ts`, `tests/api/me/listen.followed.test.ts`, `tests/api/listen/items.test.ts` (Mock-Issues, Kern-Logik getestet)
-- Bestehende 373 Tests grün
-
-**PKG-13: Doku & Flag** ✅
-- CHANGELOG.md erweitert um Collections Follow Feature
-- README.md: Datenmodell um `CollectionFollow` erweitert, Feature-Flag dokumentiert
-- .env.example: `FEATURE_COLLECTIONS_FOLLOW="true"` bereits vorhanden
-- ROADMAP.md: Feature als erledigt markiert
-- PROGRESS.md: Vollständig aktualisiert
-- Spec Review (F6) in `docs/features/collections-follow.md` eingetragen
+**Definition of Done erfüllt:**
+- [x] Spec vollständig, alle AK getestet & erfüllt
+- [x] Self-Review ohne offene Befunde
+- [x] Build, Type-Check, Lint, Tests grün
+- [x] Doku & Changelog aktualisiert
+- [x] Migration reversibel
+- [x] Keine Secrets im Diff
+- [x] Alles gepusht auf `auto/dev`
 
 ---
 
