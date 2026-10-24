@@ -41,7 +41,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] **Kommentar-Voting (Up/Down auf Kommentare)** ← erledigt
 - [x] Review als PDF exportieren (`/api/reviews/[slug]/pdf`, `ReviewPdfDownload`, `ReviewPdfLayout`, `markdown-to-pdf`) ← erledigt
 - [x] **Full-Text Search mit Relevanz-Ranking** (`/suche`, Highlights, Filter, Pagination) — Spec: `docs/features/search-relevance.md` ← erledigt
-- [ ] **Öffentliche Nutzerprofile & Follow-System** (`/u/[username]`, Follow, Feed, Notifications) — Spec: `docs/features/public-user-profiles.md` ← **in Arbeit**
+- [x] **Öffentliche Nutzerprofile & Follow-System** (`/u/[username]`, Follow, Feed, Notifications) — Spec: `docs/features/public-user-profiles.md` ← **erledigt**
 
 ## Typ E — Performance, UX, Developer Experience
 
@@ -49,9 +49,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Öffentliche Nutzerprofile & Follow-System** (Spec: `docs/features/public-user-profiles.md`)
-Phase: F2 Spec erledigt → F3 Design & Plan
+Keines. **Public User Profiles & Follow-System abgeschlossen.**
 
 ## Nächster Schritt
 
-F3 Design & Plan: Technische Lösung entwerfen, Arbeitspakete in PROGRESS.md verfeinern, bestehende Wiederverwendbarkeit prüfen (Session, Prisma, UI-Komponenten). Dann F4 Implementierung starten mit PK1 (Datenmodell + Migration).
+Neues Feature aus Roadmap evaluieren. Aktuelle Kandidaten: keine offenen Typ-D-Features mehr. Nächste Iteration: Typ A (Lint-Bereinigung: verbleibende `no-explicit-any` Warnings) oder Typ B (weitere Unit-Tests / Doku) oder neue Feature-Ideen generieren.

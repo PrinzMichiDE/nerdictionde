@@ -25,8 +25,33 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Public User Profiles & Follow-System** (Spec: `docs/features/public-user-profiles.md`)
-**Phase:** F4 Implementierung — PK21 erledigt → PK22: Doku/Changelog
+**Aktuelles Feature:** **Public User Profiles & Follow-System** — **ABGESCHLOSSEN** ✅
+**Phase:** F9 Done → Hauptschleife → Neues Feature evaluieren (Roadmap leer → neue Features generieren)
+
+---
+
+### Zusammenfassung: Public User Profiles & Follow-System
+
+**Implementierte User Stories (alle ✅):**
+- US1: Öffentliche Profile `/u/[username]` mit Bio, Avatar, Stats, Tabs (Bewertungen/Bookmarks), Pagination
+- US2: Profil-Einstellungen `/einstellungen/profil` (Bio 500 Zeichen, 3 Sichtbarkeits-Toggles)
+- US3: Follow/Unfollow mit optimistischer UI, Follower/Following-Listen, Counts
+- US4: Aktivitäts-Feed `/feed` (Bewertungen + Bookmarks gefolgter Nutzer, Infinite Scroll, Cache 30s)
+- US5: Benachrichtigungs-System (Header-Glocke mit Badge, Dropdown, `/benachrichtigungen` Seite, Filter, Als-gelesen)
+
+**Technische Highlights:**
+- 3 neue Prisma Models: `UserProfile`, `Follow`, `Notification` + Relations zu `TwitchUser`
+- Denormalisierte Counts (`followerCount`, `followingCount`) für schnelle Anzeige
+- `unstable_cache` für Profil (60s) und Feed (30s)
+- Cursor-basierte Pagination für alle Listen
+- Optimistische UI bei Follow/Unfollow mit sofortigem Rollback auf Fehler
+- 158 Tests (Unit + Integration) alle grün
+- 0 Lint Errors, 0 TypeScript Errors, Build grün
+
+**Dokumentation:**
+- CHANGELOG.md, README.md aktualisiert
+- Feature Spec Review-Sektion (F6) komplett ✅
+- ROADMAP.md: Feature als erledigt markiert
 
 ### Arbeitspakete (F4 Implementierung)
 | PK | Beschreibung | Status |
@@ -52,4 +77,4 @@
 | PK19 | UI: `/benachrichtigungen` Seite (alle Notifications, Filter ungelesen) | **erledigt** |
 | PK20 | Tests: Unit (Follow, Feed, Notifications), Integration (APIs), E2E (Flows) | **erledigt** |
 | PK21 | Self-Review & Verify — Build, Lint, Typecheck, Tests grün | **erledigt** |
-| PK22 | Doku/Changelog — README, ROADMAP, DECISIONS, Feature-Spec Review-Sektion | **offen** |
+| PK22 | Doku/Changelog — README, ROADMAP, DECISIONS, Feature-Spec Review-Sektion | **erledigt** |
