@@ -128,11 +128,11 @@ describe("getSpecsUnion", () => {
 describe("formatPriceHistoryForDisplay", () => {
   it("sortiert nach Datum absteigend und limitiert auf 5", () => {
     const history = [
-      { id: "1", price: 50, currency: "EUR", source: "Steam", url: null, recordedAt: "2024-01-01T00:00:00Z" },
-      { id: "2", price: 40, currency: "EUR", source: "Steam", url: null, recordedAt: "2024-01-03T00:00:00Z" },
-      { id: "3", price: 45, currency: "EUR", source: "Steam", url: null, recordedAt: "2024-01-02T00:00:00Z" },
+      { id: "1", price: 50, currency: "EUR", source: "Steam", url: null, recordedAt: new Date("2024-01-01T00:00:00Z") },
+      { id: "2", price: 40, currency: "EUR", source: "Steam", url: null, recordedAt: new Date("2024-01-03T00:00:00Z") },
+      { id: "3", price: 45, currency: "EUR", source: "Steam", url: null, recordedAt: new Date("2024-01-02T00:00:00Z") },
     ];
-    const result = formatPriceHistoryForDisplay(history as any);
+    const result = formatPriceHistoryForDisplay(history);
     expect(result.length).toBe(3);
     expect(result[0].price).toBe(40);
     expect(result[1].price).toBe(45);

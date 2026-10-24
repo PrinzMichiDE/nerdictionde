@@ -1,4 +1,6 @@
-import type { JsonValue } from "@/lib/json";
+import type { JsonValue as PrismaJsonValue } from "@prisma/client/runtime/library";
+
+type JsonValue = PrismaJsonValue;
 
 export interface ReviewShape {
   id: string;
