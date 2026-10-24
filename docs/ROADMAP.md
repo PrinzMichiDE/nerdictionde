@@ -14,7 +14,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] `type-check` auf `main` grün
 - [x] `build` auf `main` grün
 - [x] Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
-- [ ] Lint: 216 vorbestehende `no-explicit-any`-Errors inkrementell bereinigen (nicht blockierend für Verify)
+- [x] `no-explicit-any` Bereinigung: 66/216 behoben (hardware-catalog, types/review, markdown-to-pdf, streaming, job-status, bulk-create routes, auto-generate, releases, review-detail, IGDBGame types)
+- [ ] Lint: 150 vorbestehende `no-explicit-any`-Errors inkrementell bereinigen (nicht blockierend für Verify)
 
 ## Typ B — Lücken schließen (Tests, Doku, Fehlerbehandlung)
 
