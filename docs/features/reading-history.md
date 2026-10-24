@@ -244,15 +244,15 @@ model TwitchUser {
 
 ## 13. Review-Checkliste (F6)
 
-- [ ] Alle User Stories (US1-US7) implementiert und getestet
-- [ ] Randfälle: nicht eingeloggt, gelöschte Reviews, gleichzeitige Tabs, Rate-Limit
-- [ ] Eingaben validiert (Zod), Autorisierung geprüft (Session), keine Secrets
-- [ ] Performance: Indizes gesetzt, Cache 30s, Cursor-Pagination, Debounce 10s
-- [ ] Migration reversibel, bestehende Daten intakt
-- [ ] Abwärtskompatibilität: keine Breaking Changes
-- [ ] Code-Stil: TypeScript strict, ESLint grün, Prettier
-- [ ] UI: Alle Zustände (Loading, Empty, Error), a11y (Focus, ARIA, Contrast, Reduced Motion)
-- [ ] Feature-Flag schaltet Feature komplett ab (API 404, UI hidden)
+- [x] Alle User Stories (US1-US7) implementiert und getestet
+- [x] Randfälle: nicht eingeloggt, gelöschte Reviews, gleichzeitige Tabs, Rate-Limit
+- [x] Eingaben validiert (Zod), Autorisierung geprüft (Session), keine Secrets
+- [x] Performance: Indizes gesetzt, Cache 30s, Cursor-Pagination, Debounce 10s
+- [x] Migration reversibel, bestehende Daten intakt
+- [x] Abwärtskompatibilität: keine Breaking Changes
+- [x] Code-Stil: TypeScript strict, ESLint grün, Prettier
+- [x] UI: Alle Zustände (Loading, Empty, Error), a11y (Focus, ARIA, Contrast, Reduced Motion)
+- [x] Feature-Flag schaltet Feature komplett ab (API 404, UI hidden)
 
 ---
 
