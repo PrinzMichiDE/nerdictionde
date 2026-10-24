@@ -107,6 +107,36 @@
 
 ---
 
+### Zusammenfassung: Erweiterte Suchfilter
+
+**Implementierte User Stories (alle ✅):**
+- US1: Release-Datum-Range filtern (Von/Bis via nativer Date-Picker)
+- US2: Preis-Range filtern (Min/Max EUR, nutzt PriceHistory/Deals/Hardware MSRP)
+- US3: Plattform-Multi-Select (PC, PS5, PS4, Xbox Series, Xbox One, Switch) via Metadata/JSON & Hardware-Type
+- US4: "Nur mit Video" Checkbox (prüft `youtubeVideos.length > 0`)
+- US5: "Nur mit Deal" Checkbox (prüft aktive Deals)
+- US6: Developer/Publisher Text-Suche (ILIKE auf JSON Metadata)
+- US7: Alle Filter kombinierbar, URL-sharebar, "Alle Filter zurücksetzen"
+- US8: Leere Zustände mit aktiven Filtern + Vorschläge zum Lockern
+
+**Technische Highlights:**
+- Keine neuen Prisma Models, keine Migration – nutzt bestehende Felder/Relationen
+- Preis-Filter via Raw SQL Batch-Query (`LEFT JOIN LATERAL` auf PriceHistory + Deals + Hardware)
+- Plattform-Filter via JSON `array_contains` + Hardware-Type Mapping
+- Feature-Flag `FEATURE_ADVANCED_SEARCH_FILTERS` (Default true)
+- Progressive Disclosure UI: "Weitere Filter" einklappbar (Row 1 immer sichtbar, Row 2+3 collapsible)
+- `unstable_cache` 60s mit automatischer Cache-Key-Invaliderung via Query-Parameter
+- Barrierefreiheit: native `<input type="date">`, Checkboxen mit `role="switch"`, ARIA-Labels, Fokus-Management, Reduced Motion
+- 18 neue Unit-Tests + 20 Integration-Tests = 38 Tests — alle grün
+- 0 neue Lint Errors, 0 TypeScript Errors, Build grün
+
+**Dokumentation:**
+- CHANGELOG.md, README.md, ROADMAP.md, .env.example aktualisiert
+- Feature Spec Review-Sektion (F6) komplett ✅
+- PROGRESS.md aktualisiert
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
-Aus ROADMAP.md Typ D auswählen. Keine festen Kandidaten mehr — neue Features aus Nutzersicht, Verbesserungen, Security-Audit, Performance, Doku, Tests generieren.
+Aus ROADMAP.md Typ D auswählen. Kandidaten: Leseverlauf, Kategorie-Abos, Review-Vergleich, Community Q&A, Collections Follow, Personalisierte Empfehlungen, Hardware-Kompatibilität, Review-Serien.
