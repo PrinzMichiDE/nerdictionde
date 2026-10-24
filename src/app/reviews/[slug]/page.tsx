@@ -14,6 +14,7 @@ import { RelatedReviews } from "@/components/reviews/RelatedReviews";
 import { HardwareMetadata } from "@/components/reviews/HardwareMetadata";
 import { ReviewProgress } from "@/components/reviews/ReviewProgress";
 import { ReviewActions } from "@/components/reviews/ReviewActions";
+import { ReviewReactions } from "@/components/reviews/ReviewReactions";
 import { YouTubeEmbed } from "@/components/reviews/YouTubeEmbed";
 import { EpisodeList } from "@/components/reviews/EpisodeList";
 import { GameProgressTracker } from "@/components/reviews/GameProgressTracker";
@@ -34,6 +35,7 @@ import { RatingBreakdown } from "@/components/shared/RatingBreakdown";
 import { ScoreCompare } from "@/components/shared/ScoreCompare";
 import { ReadingProgressBar } from "@/components/shared/ReadingProgressBar";
 import { ScrollToTop } from "@/components/shared/ScrollToTop";
+import { getCachedReviewReactions } from "@/lib/review-reactions";
 import { generateBreadcrumbSchema, generateFAQSchema, generateReviewSchema, getSiteUrl } from "@/lib/seo";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
@@ -207,6 +209,8 @@ export default async function ReviewDetailPage({
   ]);
 
   const session = await getServerSession();
+
+  const reactions = await getCachedReviewReactions(review.id, session?.userId ?? null);
 
   const [userRating, isBookmarked, categoryAvg] = await Promise.all([
     session
@@ -522,6 +526,14 @@ export default async function ReviewDetailPage({
                 isLoggedIn={!!session}
                 initialBookmarked={!!isBookmarked}
                 lang={isEn ? "en" : "de"}
+              />
+            </div>
+
+            {/* Review Reactions */}
+            <div className="pt-4">
+              <ReviewReactions
+                reviewId={review.id}
+                initialData={reactions}
               />
             </div>
           </div>
