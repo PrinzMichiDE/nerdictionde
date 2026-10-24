@@ -141,6 +141,8 @@ Kernmodelle in `prisma/schema.prisma`:
 - **CollectionFollow** – Follow-Beziehungen zwischen Nutzern und Listen (Unique-Constraint pro User+Collection, Cascading Delete)
 - **ReviewReaction** – Emoji-Reaktionen auf Reviews (THUMBS_UP, HEART, PARTY, THINKING, CRY, ANGRY) mit Zählern pro Emoji, Unique-Constraint pro User+Review
 - **ReadingHistory** – Leseverlauf pro Nutzer (Review-Referenz, Progress 0–100%, Scroll-Tiefe, Verweildauer, letztes Lesedatum), Opt-in via `readingHistoryEnabled` auf TwitchUser
+- **ReviewSeries** – Kuratierte Review-Serien für Franchises/DLCs/Staffeln (Titel, Beschreibung, Cover, Teil-Count, Durchschnitts-Score, Version für optimistisches Locking, Soft-Delete)
+- **ReviewSeriesItem** – Einträge in einer Serie (Review-Referenz, Reihenfolge 1..N)
 
 ## Entwicklung
 
@@ -216,6 +218,7 @@ Wichtige Variablen (aus `.env`):
 - `FEATURE_ADVANCED_SEARCH_FILTERS` – Erweiterte Suchfilter (Release-Datum, Preis, Plattform, Video, Deal, Developer/Publisher) aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
 - `FEATURE_READING_HISTORY` – Leseverlauf aktivieren (Default: `false`, Opt-in via Einstellungen; auf `true` setzen für globale Aktivierung)
 - `FEATURE_REVIEW_COMPARE_ENHANCED` – Erweiterter Review-Vergleich (bis 3 Reviews, Specs, Preise, Medien, ScoreCompare, Share) aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
+- `FEATURE_REVIEW_SERIES` – Review-Serien / Multi-Part Reviews aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
 
 Alle weiteren Variablen (API-Keys für IGDB, TMDB, Steam, OpenAI, Tavily usw.) werden zur Laufzeit gelesen.
 
