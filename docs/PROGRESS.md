@@ -31,8 +31,8 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** Review Collections Follow  
-**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅**  
-**Nächstes Paket:** PKG-3: Server Logic (`lib/collections-follow.ts`)
+**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅, PKG-3 ✅**  
+**Nächstes Paket:** PKG-4: API Routes Follow/Unfollow/Status (`/api/listen/[slug]/follow`)
 
 ---
 
@@ -47,6 +47,13 @@
 - `src/lib/collections-follow-schema.ts` erstellt
 - Schemas: `followParamsSchema`, `followRequestSchema`, `followStatusSchema`, `followToggleResponseSchema`, `followedCollectionsQuerySchema`, `followedCollectionSchema`, `followerSchema`
 - Types inferiert, Feature-Flag `FEATURE_COLLECTIONS_FOLLOW` definiert
+- `type-check` grün
+
+**PKG-3: Server Logic** ✅
+- `src/lib/collections-follow.ts` erstellt
+- Funktionen: `getFollowStatus`, `getFollowStatusBySlug`, `toggleFollow`, `getFollowedCollections`, `getFollowers`, `getFollowerIds`, `getFollowedCollectionIds`, `userFollowsCollection`
+- Cache: `unstable_cache` mit Tag-Invaliderung (30s/60s TTLs)
+- Transaktionen für atomare Count-Updates
 - `type-check` grün
 
 ---
