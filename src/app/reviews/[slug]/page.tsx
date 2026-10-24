@@ -15,6 +15,8 @@ import { HardwareMetadata } from "@/components/reviews/HardwareMetadata";
 import { ReviewProgress } from "@/components/reviews/ReviewProgress";
 import { ReviewActions } from "@/components/reviews/ReviewActions";
 import { ReviewReactions } from "@/components/reviews/ReviewReactions";
+import { ReadingHistoryBadge } from "@/components/reading-history/ReadingHistoryBadge";
+import { getReadingHistoryForReview } from "@/lib/reading-history";
 import { YouTubeEmbed } from "@/components/reviews/YouTubeEmbed";
 import { EpisodeList } from "@/components/reviews/EpisodeList";
 import { GameProgressTracker } from "@/components/reviews/GameProgressTracker";
@@ -211,6 +213,9 @@ export default async function ReviewDetailPage({
   const session = await getServerSession();
 
   const reactions = await getCachedReviewReactions(review.id, session?.userId ?? null);
+  const readingHistory = session?.userId
+    ? await getReadingHistoryForReview(session.userId, review.id)
+    : null;
 
   const [userRating, isBookmarked, categoryAvg] = await Promise.all([
     session
@@ -536,6 +541,17 @@ export default async function ReviewDetailPage({
                 initialData={reactions}
               />
             </div>
+
+            {/* Reading History Badge */}
+            {readingHistory && (
+              <div className="pt-2">
+                <ReadingHistoryBadge
+                  initialData={readingHistory}
+                  reviewId={review.id}
+                  isEn={isEn}
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex items-center self-start lg:self-end gap-1 bg-muted rounded-md p-1 text-xs font-semibold uppercase tracking-widest border border-border shrink-0">
