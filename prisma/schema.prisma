@@ -53,6 +53,10 @@ model Review {
   collectionItems CollectionItem[]
   reactions       ReviewReaction[]
   readingHistory  ReadingHistory[]
+  seriesId        String?
+  seriesOrder     Int?
+  series          ReviewSeries?   @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  seriesItems     ReviewSeriesItem[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -62,6 +66,7 @@ model Review {
   @@index([tmdbId])
   @@index([releaseDate])
   @@index([category, releaseDate])
+  @@index([seriesId])
 }
 
 model Comment {
@@ -1802,4 +1807,39 @@ model ReadingHistory {
   @@index([userId, lastReadAt])
   @@index([reviewId])
   @@map("reading_history")
+}
+
+// Review Series / Multi-Part Reviews
+model ReviewSeries {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  description    String?  @db.Text
+  coverImage     String?
+  partCount      Int      @default(0)
+  aggregateScore Float?
+  version        Int      @default(1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  items          ReviewSeriesItem[]
+  reviews        Review[] // Inverse relation for Review.series
+
+  @@index([deletedAt])
+  @@map("review_series")
+}
+
+model ReviewSeriesItem {
+  id           String   @id @default(cuid())
+  seriesId     String
+  series       ReviewSeries @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  reviewId     String   @unique
+  review       Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  seriesOrder  Int
+  createdAt    DateTime @default(now())
+
+  @@unique([seriesId, seriesOrder])
+  @@index([seriesId])
+  @@map("review_series_items")
 }
