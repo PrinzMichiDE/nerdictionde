@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { processHardware } from "@/lib/review-generation";
 import { HARDWARE_CATALOG, type HardwareCatalogItem } from "@/lib/hardware-catalog";
 import { notifySubscribers } from "@/lib/webpush";
@@ -52,7 +53,7 @@ export async function GET(req: NextRequest) {
             type: item.type,
             manufacturer: item.manufacturer,
             model: item.model || null,
-            specs: item.specs,
+            specs: item.specs as Prisma.InputJsonValue,
             msrp: item.msrp ?? null,
             releaseDate: item.releaseDate ? new Date(item.releaseDate) : null,
           },

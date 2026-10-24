@@ -24,7 +24,7 @@ export interface GameMetadata {
   aggregatedRating?: number;
   ratingCount?: number;
   firstReleaseDate?: Date | string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface MovieSeriesMetadata {
@@ -49,7 +49,7 @@ export interface MovieSeriesMetadata {
   posters?: string[];
   videos?: string[];
   keywords?: string[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface HardwareMetadata {
@@ -61,10 +61,10 @@ export interface HardwareMetadata {
   currency?: string;
   specs?: Record<string, string | number | boolean | undefined>;
   images?: string[];
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
-export type ReviewMetadata = GameMetadata | MovieSeriesMetadata | HardwareMetadata | Record<string, any>;
+export type ReviewMetadata = GameMetadata | MovieSeriesMetadata | HardwareMetadata | Record<string, unknown>;
 
 export interface Review {
   id: string;

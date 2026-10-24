@@ -25,7 +25,7 @@ export interface JobStatus {
   estimatedTimeRemaining?: number; // in seconds
   errors: Array<{ item: string; igdbId?: number; tmdbId?: number; error: string }>;
   reviews: Array<{ id: string; title: string; slug: string; igdbId?: number; tmdbId?: number }>;
-  config?: any;
+  config?: unknown;
 }
 
 export async function createJob(
@@ -33,7 +33,7 @@ export async function createJob(
   total: number, 
   totalBatches: number, 
   category: string = "game",
-  config?: any
+  config?: unknown
 ): Promise<JobStatus> {
   const job = await prisma.bulkJob.create({
     data: {
@@ -158,7 +158,7 @@ export async function updateJob(
   const currentJob = await prisma.bulkJob.findUnique({ where: { jobId } });
   if (!currentJob) return undefined;
 
-  const prismaUpdates: any = { ...updates };
+  const prismaUpdates: Record<string, unknown> = { ...updates };
   
   // Convert startTime if present
   if (updates.startTime) {
@@ -237,7 +237,7 @@ export async function updateQueueItem(
   if (item) {
     await prisma.bulkJobItem.update({
       where: { id: item.id },
-      data: updates as any,
+      data: updates as Record<string, unknown>,
     });
   }
 }

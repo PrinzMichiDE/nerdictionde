@@ -11,7 +11,7 @@ export interface HardwareCatalogItem {
   type: string;
   msrp?: number;
   releaseDate?: string;
-  specs?: Record<string, any>;
+  specs?: Record<string, unknown>;
 }
 
 export const HARDWARE_CATALOG: HardwareCatalogItem[] = [

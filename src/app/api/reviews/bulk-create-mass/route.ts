@@ -13,7 +13,8 @@ import { resumeRunningJobs } from "@/lib/job-resume";
 import { randomUUID } from "crypto";
 import { BulkQueryOptions as TMDBBulkQueryOptions } from "@/lib/tmdb";
 import { getTMDBMoviesBulkLarge, getTMDBSeriesBulkLarge } from "@/lib/tmdb-large";
-import { HARDWARE_CATALOG } from "@/lib/hardware-catalog";
+import { HARDWARE_CATALOG, type HardwareCatalogItem } from "@/lib/hardware-catalog";
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 
 type ReviewCategory = "game" | "movie" | "series" | "hardware";
@@ -125,7 +126,7 @@ export async function POST(req: NextRequest) {
                 type: item.type,
                 manufacturer: item.manufacturer,
                 model: item.model || null,
-                specs: item.specs || {},
+                specs: (item.specs || {}) as Prisma.InputJsonValue,
                 msrp: item.msrp ?? null,
                 releaseDate: item.releaseDate ? new Date(item.releaseDate) : null,
               },

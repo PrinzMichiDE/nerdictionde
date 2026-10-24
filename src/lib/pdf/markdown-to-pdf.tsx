@@ -17,7 +17,19 @@ const pdfTextBaseStyle = {
   fontFamily: "Helvetica",
 } as const;
 
-const headingStyles: Record<number, any> = {
+type HeadingStyle = {
+  fontFamily: string;
+  fontSize: number;
+  fontWeight: string;
+  marginTop: number;
+  marginBottom: number;
+  color: string;
+  borderBottomWidth?: number;
+  borderBottomColor?: string;
+  paddingBottom?: number;
+};
+
+const headingStyles: Record<number, HeadingStyle> = {
   1: { fontFamily: "Times-Roman", fontSize: 22, fontWeight: "bold", marginTop: 24, marginBottom: 12, color: "#1a1a2e", borderBottomWidth: 1, borderBottomColor: "#e0e0e0", paddingBottom: 4 },
   2: { fontFamily: "Times-Roman", fontSize: 18, fontWeight: "bold", marginTop: 20, marginBottom: 10, color: "#1f2937" },
   3: { fontFamily: "Times-Roman", fontSize: 15, fontWeight: "bold", marginTop: 16, marginBottom: 8, color: "#374151" },
