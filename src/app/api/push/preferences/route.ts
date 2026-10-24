@@ -19,6 +19,8 @@ export async function GET() {
 
   const result: Record<string, boolean> = {};
   for (const c of CHANNELS) result[c] = prefs?.[c as Channel] ?? true;
+  // Include categoryNewReviewEmail (default false)
+  result.categoryNewReviewEmail = prefs?.categoryNewReviewEmail ?? false;
 
   return NextResponse.json({ preferences: result });
 }
@@ -37,6 +39,10 @@ export async function POST(req: NextRequest) {
   const data: Record<string, boolean> = {};
   for (const c of CHANNELS) {
     if (typeof body[c] === "boolean") data[c] = body[c];
+  }
+  // Include categoryNewReviewEmail
+  if (typeof body.categoryNewReviewEmail === "boolean") {
+    data.categoryNewReviewEmail = body.categoryNewReviewEmail;
   }
 
   if (Object.keys(data).length === 0) {
