@@ -54,7 +54,7 @@ describe("POST/DELETE/GET /api/listen/[slug]/follow", () => {
       options.body = JSON.stringify(body);
       options.headers = { 'Content-Type': 'application/json' };
     }
-    return new NextRequest(url, options);
+    return new NextRequest(url, options as any);
   };
 
   describe("POST /api/listen/[slug]/follow", () => {

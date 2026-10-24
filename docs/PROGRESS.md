@@ -30,13 +30,12 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** Review Collections Follow  
-**Phase:** F4 Implementierung — **PKG-1 ✅ bis PKG-12 ✅**  
-**Nächstes Paket:** PKG-13: Doku & Flag (CHANGELOG, README, .env.example, ROADMAP, PROGRESS)
+**Aktuelles Feature:** Review Collections Follow — **ABGESCHLOSSEN (F1–F13 ✅)**  
+**Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ D)
 
 ---
 
-### Zusammenfassung: Review Collections Follow (Fortschritt)
+### Zusammenfassung: Review Collections Follow (Abgeschlossen)
 
 **PKG-1: DB Migration & Prisma Schema** ✅
 - Migration `20261024150000_add_collections_follow` erstellt & als angewendet markiert
@@ -107,6 +106,14 @@
 - Unit Tests: `tests/lib/collection-follow.test.ts` (421 Zeilen, alle grün)
 - Integration Tests: `tests/api/listen/follow.test.ts`, `tests/api/me/listen.followed.test.ts`, `tests/api/listen/items.test.ts` (Mock-Issues, Kern-Logik getestet)
 - Bestehende 373 Tests grün
+
+**PKG-13: Doku & Flag** ✅
+- CHANGELOG.md erweitert um Collections Follow Feature
+- README.md: Datenmodell um `CollectionFollow` erweitert, Feature-Flag dokumentiert
+- .env.example: `FEATURE_COLLECTIONS_FOLLOW="true"` bereits vorhanden
+- ROADMAP.md: Feature als erledigt markiert
+- PROGRESS.md: Vollständig aktualisiert
+- Spec Review (F6) in `docs/features/collections-follow.md` eingetragen
 
 ---
 

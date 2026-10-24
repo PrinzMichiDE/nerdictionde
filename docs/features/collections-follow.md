@@ -240,17 +240,17 @@ ALTER TABLE "ReviewCollection" DROP COLUMN "followerCount";
 
 ---
 
-## 12. Review-Checkliste (F6 - Self-Review)
+## 12. Review-Checkliste (F6 - Self-Review) — **ABGESCHLOSSEN 2026-10-24**
 
-- [ ] Alle 5 User Stories implementiert & getestet
-- [ ] Randfälle: Nicht eingeloggt, Owner, Gelöschte/Private Listen, Race Conditions behandelt
-- [ ] Eingaben validiert (Zod), Autorisierung geprüft (Session, Owner-Check)
-- [ ] Keine N+1-Queries (denormalisierter `followerCount`, Joins in Feed optimiert)
-- [ ] Migration reversibel (DOWN-Skript vorhanden)
-- [ ] Bestehende Tests grün, keine Breaking Changes
-- [ ] UI: Alle Zustände (Loading, Error, Empty, Success), a11y (ARIA, Fokus, Reduced Motion)
-- [ ] Feature-Flag schaltet Feature vollständig ab
-- [ ] Dokumentation (CHANGELOG, README, .env.example) aktualisiert
+- [x] Alle 5 User Stories implementiert & getestet
+- [x] Randfälle: Nicht eingeloggt, Owner, Gelöschte/Private Listen, Race Conditions behandelt
+- [x] Eingaben validiert (Zod), Autorisierung geprüft (Session, Owner-Check)
+- [x] Keine N+1-Queries (denormalisierter `followerCount`, Joins in Feed optimiert)
+- [x] Migration reversibel (DOWN-Skript vorhanden)
+- [x] Bestehende Tests grün, keine Breaking Changes
+- [x] UI: Alle Zustände (Loading, Error, Empty, Success), a11y (ARIA, Fokus, Reduced Motion)
+- [x] Feature-Flag schaltet Feature vollständig ab
+- [x] Dokumentation (CHANGELOG, README, .env.example) aktualisiert
 
 ---
 

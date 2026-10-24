@@ -136,8 +136,9 @@ Kernmodelle in `prisma/schema.prisma`:
 - **UserProfile** – Öffentliche Nutzerprofile (Bio, Avatar, Sichtbarkeit, Follower/Following-Counts)
 - **Follow** – Follow-Beziehungen zwischen Nutzern
 - **Notification** – Benachrichtigungen (Follows, später Kommentare, Reviews, Mentions)
-- **ReviewCollection** – Kuratierte Listen von Reviews (Titel, Beschreibung, Sichtbarkeit, Owner, Item-Count, Version für optimistisches Locking, Soft-Delete)
+- **ReviewCollection** – Kuratierte Listen von Reviews (Titel, Beschreibung, Sichtbarkeit, Owner, Item-Count, Version für optimistisches Locking, Soft-Delete, Follower-Count)
 - **CollectionItem** – Einträge in einer Liste (Review-Referenz, Position, Hinzugefügt-Am)
+- **CollectionFollow** – Follow-Beziehungen zwischen Nutzern und Listen (Unique-Constraint pro User+Collection, Cascading Delete)
 - **ReviewReaction** – Emoji-Reaktionen auf Reviews (THUMBS_UP, HEART, PARTY, THINKING, CRY, ANGRY) mit Zählern pro Emoji, Unique-Constraint pro User+Review
 - **ReadingHistory** – Leseverlauf pro Nutzer (Review-Referenz, Progress 0–100%, Scroll-Tiefe, Verweildauer, letztes Lesedatum), Opt-in via `readingHistoryEnabled` auf TwitchUser
 
@@ -211,6 +212,7 @@ Wichtige Variablen (aus `.env`):
 - `NEXT_PUBLIC_VAPID_PUBLIC_KEY` – VAPID-Schlüssel für Push-Benachrichtigungen
 - `FEATURE_REVIEW_REACTIONS` – Emoji-Reaktionen auf Reviews aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
 - `FEATURE_REVIEW_COLLECTIONS` – Review Collections aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
+- `FEATURE_COLLECTIONS_FOLLOW` – Collections Follow (Listen folgen, Feed-Integration, Benachrichtigungen) aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
 - `FEATURE_ADVANCED_SEARCH_FILTERS` – Erweiterte Suchfilter (Release-Datum, Preis, Plattform, Video, Deal, Developer/Publisher) aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
 - `FEATURE_READING_HISTORY` – Leseverlauf aktivieren (Default: `false`, Opt-in via Einstellungen; auf `true` setzen für globale Aktivierung)
 

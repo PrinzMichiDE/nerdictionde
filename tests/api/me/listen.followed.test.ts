@@ -98,8 +98,10 @@ describe("GET /api/me/listen/followed", () => {
     mockRequireTwitchAuth.mockResolvedValue({ userId: 'user_1' });
     mockFollowedCollectionsQuerySchema.safeParse.mockReturnValueOnce({
       success: false,
-      error: { flatten: () => ({ formErrors: [], fieldErrors: { limit: ['Too large'] } }) }
-    });
+      error: {
+        flatten: () => ({ formErrors: [], fieldErrors: { limit: ['Too large'] } })
+      }
+    } as any);
 
     const req = new NextRequest("http://localhost/api/me/listen/followed?limit=100");
     const res = await GET(req);
