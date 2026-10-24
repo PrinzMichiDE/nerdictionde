@@ -5,6 +5,7 @@ export const updateProfileSchema = z.object({
   isPublic: z.boolean().optional(),
   showRatings: z.boolean().optional(),
   showBookmarks: z.boolean().optional(),
+  showCollections: z.boolean().optional(),
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

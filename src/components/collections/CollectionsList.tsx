@@ -161,15 +161,15 @@ export function CollectionsList({
           </Button>
           {showSortMenu && (
             <div className="absolute right-0 top-full mt-1 z-10 w-48 rounded-md border bg-popover p-1 shadow-lg">
-              {[
+              {([
                 { value: "updated", label: "Neueste zuerst" },
                 { value: "created", label: "Älteste zuerst" },
                 { value: "itemCount", label: "Meiste Reviews" },
                 { value: "popularity", label: "Beliebteste" },
-              ].map((option) => (
+              ] as const).map((option) => (
                 <button
                   key={option.value}
-                  onClick={() => handleSortChange(option.value as any)}
+                  onClick={() => handleSortChange(option.value)}
                   className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
                     sortBy === option.value
                       ? "bg-primary text-primary-foreground"
