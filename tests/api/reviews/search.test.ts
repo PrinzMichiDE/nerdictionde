@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 
 const mockFindMany = vi.hoisted(() => vi.fn());
 const mockCount = vi.hoisted(() => vi.fn());
+const mockQueryRawUnsafe = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/prisma", () => ({
   default: {
@@ -10,6 +11,7 @@ vi.mock("@/lib/prisma", () => ({
       findMany: mockFindMany,
       count: mockCount,
     },
+    $queryRawUnsafe: mockQueryRawUnsafe,
   },
 }));
 
@@ -28,12 +30,17 @@ const createMockReview = (overrides: Record<string, unknown> = {}) => ({
   createdAt: new Date("2024-01-01T00:00:00Z"),
   updatedAt: new Date("2024-01-01T00:00:00Z"),
   tags: [{ tag: { name: "RPG", slug: "rpg" } }],
+  // Neue Felder für Preis-Filter
+  priceHistory: [],
+  deals: [],
+  hardware: null,
   ...overrides,
 });
 
 describe("GET /api/reviews/search", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockQueryRawUnsafe.mockResolvedValue([]);
   });
 
   it("gibt Suchergebnisse für eine Query zurück", async () => {
@@ -155,6 +162,7 @@ describe("GET /api/reviews/search", () => {
     );
     await GET(req);
 
+    // Default sort ist relevance, aber ohne Query wird date-desc verwendet
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
         orderBy: { createdAt: "desc" },
@@ -178,12 +186,12 @@ describe("GET /api/reviews/search", () => {
     );
   });
 
-  it("paginiert korrekt mit page und limit", async () => {
+  it("paginiert korrekt mit page und limit (non-relevance)", async () => {
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(25);
 
     const req = new NextRequest(
-      "http://localhost/api/reviews/search?query=test&page=2&limit=10"
+      "http://localhost/api/reviews/search?query=test&page=2&limit=10&sort=score-desc"
     );
     await GET(req);
 
@@ -195,18 +203,36 @@ describe("GET /api/reviews/search", () => {
     );
   });
 
-  it("begrenzt limit auf max 50", async () => {
+  it("begrenzt limit auf max 50 (non-relevance)", async () => {
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
 
     const req = new NextRequest(
-      "http://localhost/api/reviews/search?query=test&limit=100"
+      "http://localhost/api/reviews/search?query=test&limit=100&sort=score-desc"
     );
     await GET(req);
 
+    // Zod schema begrenzt limit auf 50
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
         take: 50,
+      })
+    );
+  });
+
+  it("begrenzt limit auf max 50 bei relevance sort (Zod limit max=50)", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+
+    const req = new NextRequest(
+      "http://localhost/api/reviews/search?query=Cyberpunk&limit=100&sort=relevance"
+    );
+    await GET(req);
+
+    // Zod schema begrenzt limit auf 50, dann fetchLimit = min(50*5, 100) = 100
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        take: 100,
       })
     );
   });
@@ -261,20 +287,115 @@ describe("GET /api/reviews/search", () => {
     expect(data.reviews).toHaveLength(2);
   });
 
-  it("behandelt nicht-numerische minScore/maxScore (NaN wird gesetzt)", async () => {
+  it("validiert ungültige Parameter (Zod)", async () => {
+    const req = new NextRequest(
+      "http://localhost/api/reviews/search?minPrice=-10"
+    );
+    const res = await GET(req);
+    const data = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(data.error).toBe("Ungültige Suchparameter");
+  });
+
+  it("filtert nach releaseDateFrom", async () => {
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
 
     const req = new NextRequest(
-      "http://localhost/api/reviews/search?query=test&minScore=abc&maxScore=xyz"
+      "http://localhost/api/reviews/search?releaseDateFrom=2024-01-01"
     );
     await GET(req);
 
-    // parseInt returns NaN for non-numeric strings, which gets set in the where clause
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          score: { gte: NaN, lte: NaN },
+          releaseDate: expect.objectContaining({
+            gte: expect.any(Date),
+          }),
+        }),
+      })
+    );
+  });
+
+  it("filtert nach releaseDateTo", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+
+    const req = new NextRequest(
+      "http://localhost/api/reviews/search?releaseDateTo=2024-12-31"
+    );
+    await GET(req);
+
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          releaseDate: expect.objectContaining({
+            lte: expect.any(Date),
+          }),
+        }),
+      })
+    );
+  });
+
+  it("filtert nach hasVideo=true", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+
+    const req = new NextRequest(
+      "http://localhost/api/reviews/search?hasVideo=true"
+    );
+    await GET(req);
+
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          youtubeVideos: { isEmpty: false },
+        }),
+      })
+    );
+  });
+
+  it("filtert nach hasDeal=true", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+
+    const req = new NextRequest(
+      "http://localhost/api/reviews/search?hasDeal=true"
+    );
+    await GET(req);
+
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          deals: {
+            some: {
+              status: "active",
+              expiresAt: { gt: expect.any(Date) },
+            },
+          },
+        }),
+      })
+    );
+  });
+
+  it("filtert nach developer (ILIKE auf metadata)", async () => {
+    mockFindMany.mockResolvedValue([]);
+    mockCount.mockResolvedValue(0);
+
+    const req = new NextRequest(
+      "http://localhost/api/reviews/search?developer=CD%20Projekt"
+    );
+    await GET(req);
+
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          metadata: expect.objectContaining({
+            path: "developer",
+            string_contains: "CD Projekt",
+            mode: "insensitive",
+          }),
         }),
       })
     );

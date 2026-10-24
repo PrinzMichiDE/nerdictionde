@@ -46,6 +46,16 @@ interface SearchResultsProps {
     maxScore?: string;
     tags?: string[];
     sort?: string;
+    // NEU: Erweiterte Filter für Pagination
+    releaseDateFrom?: string;
+    releaseDateTo?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    platforms?: string[];
+    hasVideo?: boolean;
+    hasDeal?: boolean;
+    developer?: string;
+    publisher?: string;
   };
 }
 
@@ -65,7 +75,9 @@ export function SearchResults({
       Object.entries(baseParams).forEach(([key, value]) => {
         if (value !== undefined) {
           if (Array.isArray(value)) {
-            params.set(key, value.join(","));
+            if (value.length > 0) params.set(key, value.join(","));
+          } else if (typeof value === "boolean") {
+            if (value) params.set(key, "true");
           } else {
             params.set(key, value);
           }

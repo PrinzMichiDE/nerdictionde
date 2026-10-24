@@ -15,6 +15,16 @@ interface SearchPageContentProps {
     tags?: string;
     sort?: string;
     page?: string;
+    // NEU: Erweiterte Filter
+    releaseDateFrom?: string;
+    releaseDateTo?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    platforms?: string;
+    hasVideo?: string;
+    hasDeal?: string;
+    developer?: string;
+    publisher?: string;
   }>;
 }
 
@@ -45,6 +55,17 @@ export async function SearchPageContent({ searchParams }: SearchPageContentProps
   const page = Math.max(parseInt(params.page || "1"), 1);
   const limit = 12;
 
+  // NEU: Erweiterte Filter Parameter extrahieren
+  const releaseDateFrom = params.releaseDateFrom ?? "";
+  const releaseDateTo = params.releaseDateTo ?? "";
+  const minPrice = params.minPrice ?? "";
+  const maxPrice = params.maxPrice ?? "";
+  const platforms = params.platforms?.split(",").filter(Boolean) ?? [];
+  const hasVideo = params.hasVideo === "true";
+  const hasDeal = params.hasDeal === "true";
+  const developer = params.developer ?? "";
+  const publisher = params.publisher ?? "";
+
   // Build API URL for server-side fetch
   const apiParams = new URLSearchParams();
   if (query) apiParams.set("query", query);
@@ -52,6 +73,16 @@ export async function SearchPageContent({ searchParams }: SearchPageContentProps
   if (minScore) apiParams.set("minScore", minScore);
   if (maxScore) apiParams.set("maxScore", maxScore);
   if (tags.length > 0) apiParams.set("tags", tags.join(","));
+  // NEU: Erweiterte Filter an API übergeben
+  if (releaseDateFrom) apiParams.set("releaseDateFrom", releaseDateFrom);
+  if (releaseDateTo) apiParams.set("releaseDateTo", releaseDateTo);
+  if (minPrice) apiParams.set("minPrice", minPrice);
+  if (maxPrice) apiParams.set("maxPrice", maxPrice);
+  if (platforms.length > 0) apiParams.set("platforms", platforms.join(","));
+  if (hasVideo) apiParams.set("hasVideo", "true");
+  if (hasDeal) apiParams.set("hasDeal", "true");
+  if (developer) apiParams.set("developer", developer);
+  if (publisher) apiParams.set("publisher", publisher);
   apiParams.set("sort", sort);
   apiParams.set("limit", String(limit));
   apiParams.set("page", String(page));
@@ -180,6 +211,16 @@ export async function SearchPageContent({ searchParams }: SearchPageContentProps
             maxScore={maxScore}
             tags={tags}
             sort={sort}
+            // NEU: Erweiterte Filter an SearchFilters übergeben
+            releaseDateFrom={releaseDateFrom}
+            releaseDateTo={releaseDateTo}
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+            platforms={platforms}
+            hasVideo={hasVideo}
+            hasDeal={hasDeal}
+            developer={developer}
+            publisher={publisher}
             initialCategories={CATEGORIES}
             initialSortOptions={SORT_OPTIONS}
           />
@@ -275,6 +316,16 @@ export async function SearchPageContent({ searchParams }: SearchPageContentProps
                 maxScore: maxScore || undefined,
                 tags: tags.length > 0 ? tags : undefined,
                 sort: sort !== "relevance" ? sort : undefined,
+                // NEU: Erweiterte Filter für Pagination-Links in SearchResults
+                releaseDateFrom: releaseDateFrom || undefined,
+                releaseDateTo: releaseDateTo || undefined,
+                minPrice: minPrice || undefined,
+                maxPrice: maxPrice || undefined,
+                platforms: platforms.length > 0 ? platforms : undefined,
+                hasVideo: hasVideo || undefined,
+                hasDeal: hasDeal || undefined,
+                developer: developer || undefined,
+                publisher: publisher || undefined,
               }}
             />
           </Suspense>
