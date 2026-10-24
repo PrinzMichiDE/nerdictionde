@@ -35,8 +35,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** Keines — **Review-Serien / Multi-Part Reviews abgeschlossen (F1–F9 ✅), Type A/B Fixes abgeschlossen**  
-**Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ D: **Community Q&A**, Personalisierte Empfehlungen, Hardware-Kompatibilität)
+**Aktuelles Feature:** **Community Q&A auf Reviews** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 (DB Migration) ✅**  
+**Phase:** F4 Implementierung → **PKG-2: Types & Zod-Schemas** (`src/lib/qa-schema.ts`, `src/types/qa.ts`)
 
 ---
 
