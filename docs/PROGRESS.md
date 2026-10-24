@@ -26,7 +26,7 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** **Public User Profiles & Follow-System** (Spec: `docs/features/public-user-profiles.md`)
-**Phase:** F4 Implementierung — PK3-PK7 erledigt → PK8: API `/api/users/[username]` GET
+**Phase:** F4 Implementierung — PK8-PK13 erledigt → PK14: UI Öffentliche Profilseite `/u/[username]`
 
 ### Arbeitspakete (F4 Implementierung)
 | PK | Beschreibung | Status |
@@ -38,12 +38,12 @@
 | PK5 | Lib: Feed Logic (`src/lib/feed.ts`) | **erledigt** |
 | PK6 | Lib: Notifications (`src/lib/notifications.ts`) | **erledigt** |
 | PK7 | Zod Schema: `src/lib/schemas/profile-schema.ts` | **erledigt** |
-| PK8 | API: `/api/users/[username]` GET (öffentliches Profil) | **offen** |
-| PK9 | API: `/api/users/me/profile` GET/PATCH (Einstellungen) | **offen** |
-| PK10 | API: `/api/follow` POST (Follow/Unfollow) | **offen** |
-| PK11 | API: `/api/users/[username]/followers` & `/following` GET (Listen) | **offen** |
-| PK12 | API: `/api/feed` GET (Aktivitäts-Feed, paginiert, gecacht) | **offen** |
-| PK13 | API: `/api/notifications` GET/PATCH (Liste, als gelesen markieren) | **offen** |
+| PK8 | API: `/api/users/[username]` GET (öffentliches Profil) | **erledigt** |
+| PK9 | API: `/api/users/me/profile` GET/PATCH (Einstellungen) | **erledigt** |
+| PK10 | API: `/api/follow` POST (Follow/Unfollow) | **erledigt** |
+| PK11 | API: `/api/users/[username]/followers` & `/following` GET (Listen) | **erledigt** |
+| PK12 | API: `/api/feed` GET (Aktivitäts-Feed, paginiert, gecacht) | **erledigt** |
+| PK13 | API: `/api/notifications` GET/PATCH (Liste, als gelesen markieren) | **erledigt** |
 | PK14 | UI: Öffentliche Profilseite `/u/[username]` (Server Component, Tabs, Pagination) | **offen** |
 | PK15 | UI: Profil-Einstellungen (`/einstellungen/profil` oder Tab) — Bio, Sichtbarkeit | **offen** |
 | PK16 | UI: Follow-Button Component (optimistic, Loading, Tooltip) | **offen** |
