@@ -5,10 +5,11 @@ import { Metadata } from "next";
 import { getSiteUrl } from "@/lib/seo";
 import { ArrowLeft, Settings as SettingsIcon } from "lucide-react";
 import { PushNotificationManager } from "@/components/pwa/PushNotificationManager";
+import { ReadingHistoryPrivacyToggle } from "@/components/reading-history/ReadingHistoryPrivacyToggle";
 
 export const metadata: Metadata = {
   title: "Einstellungen - Nerdiction",
-  description: "Push-Benachrichtigungen und App-Einstellungen verwalten.",
+  description: "Push-Benachrichtigungen, Datenschutz und App-Einstellungen verwalten.",
   robots: { index: false, follow: false },
   alternates: { canonical: `${getSiteUrl()}/einstellungen` },
 };
@@ -33,13 +34,18 @@ export default async function SettingsPage() {
           Einstellungen
         </h1>
         <p className="text-sm text-muted-foreground">
-          Verwalte deine Push-Benachrichtigungen für die Nerdiction-App.
+          Verwalte deine Push-Benachrichtigungen, Datenschutz-Einstellungen und App-Präferenzen.
         </p>
       </div>
 
       <section className="rounded-lg border border-border bg-card p-6">
         <h2 className="mb-4 font-serif text-xl font-semibold">Push-Benachrichtigungen</h2>
         <PushNotificationManager />
+      </section>
+
+      <section className="rounded-lg border border-border bg-card p-6">
+        <h2 className="mb-4 font-serif text-xl font-semibold">Datenschutz</h2>
+        <ReadingHistoryPrivacyToggle />
       </section>
     </div>
   );

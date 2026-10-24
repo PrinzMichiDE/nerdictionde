@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useReadingHistoryPreference } from '@/hooks/useReadingHistoryPreference';
 
 interface UseReadingHistoryTrackerOptions {
   reviewId: string;
-  enabled: boolean;
+  featureEnabled: boolean; // Feature-Flag
   onTrack?: (data: { progress: number; scrollDepth: number; dwellTime: number }) => void;
 }
 
@@ -20,9 +21,11 @@ const DWELL_THRESHOLD_MS = 30_000; // 30 Sekunden Verweildauer
 
 export function useReadingHistoryTracker({
   reviewId,
-  enabled,
+  featureEnabled,
   onTrack,
 }: UseReadingHistoryTrackerOptions) {
+  const { enabled: preferenceEnabled, loading: preferenceLoading } = useReadingHistoryPreference();
+  const enabled = featureEnabled && preferenceEnabled && !preferenceLoading;
   const [lastSentAt, setLastSentAt] = useState<number>(0);
   const [progress, setProgress] = useState<ReadingProgress>({
     progress: 0,

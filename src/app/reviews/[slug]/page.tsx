@@ -16,7 +16,9 @@ import { ReviewProgress } from "@/components/reviews/ReviewProgress";
 import { ReviewActions } from "@/components/reviews/ReviewActions";
 import { ReviewReactions } from "@/components/reviews/ReviewReactions";
 import { ReadingHistoryBadge } from "@/components/reading-history/ReadingHistoryBadge";
+import { ReadingHistoryTrackerWrapper } from "@/components/reading-history/ReadingHistoryTrackerWrapper";
 import { getReadingHistoryForReview } from "@/lib/reading-history";
+import { FEATURE_READING_HISTORY } from "@/lib/feature-flags";
 import { YouTubeEmbed } from "@/components/reviews/YouTubeEmbed";
 import { EpisodeList } from "@/components/reviews/EpisodeList";
 import { GameProgressTracker } from "@/components/reviews/GameProgressTracker";
@@ -789,15 +791,21 @@ export default async function ReviewDetailPage({
             />
           )}
 
-          <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed prose-headings:scroll-mt-24 prose-headings:font-serif prose-headings:tracking-tight prose-headings:font-semibold">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm, spoilerPlugin]}
-              rehypePlugins={[[rehypeSlugCustomId, { enableCustomId: true }]]}
-              components={MarkdownComponents as Record<string, React.ComponentType<Record<string, unknown>>>}
-            >
-              {content || ""}
-            </ReactMarkdown>
-          </div>
+          {/* Reading History Tracker - wraps main content for scroll/dwell tracking */}
+          <ReadingHistoryTrackerWrapper
+            reviewId={review.id}
+            featureEnabled={FEATURE_READING_HISTORY}
+          >
+            <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed prose-headings:scroll-mt-24 prose-headings:font-serif prose-headings:tracking-tight prose-headings:font-semibold" data-reading-content>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm, spoilerPlugin]}
+                rehypePlugins={[[rehypeSlugCustomId, { enableCustomId: true }]]}
+                components={MarkdownComponents as Record<string, React.ComponentType<Record<string, unknown>>>}
+              >
+                {content || ""}
+              </ReactMarkdown>
+            </div>
+          </ReadingHistoryTrackerWrapper>
 
           {/* Hardware Requirements */}
           {review.category === "game" && specs && (

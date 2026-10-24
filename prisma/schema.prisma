@@ -345,18 +345,19 @@ model VideoChapter {
 // Twitch Streaming Tools Models
 
 model TwitchUser {
-  id              String    @id @default(cuid())
-  twitchId        String    @unique
-  username        String    @unique
-  displayName     String
-  email           String?
-  profileImageUrl String?
-  accessToken     String
-  refreshToken    String?
-  tokenExpiresAt  DateTime?
-  broadcasterType String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                    String    @id @default(cuid())
+  twitchId              String    @unique
+  username              String    @unique
+  displayName           String
+  email                 String?
+  profileImageUrl       String?
+  accessToken           String
+  refreshToken          String?
+  tokenExpiresAt        DateTime?
+  broadcasterType       String?
+  readingHistoryEnabled Boolean   @default(false) @map("reading_history_enabled")
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   schedules           StreamSchedule[]
   chatCommands        ChatCommand[]

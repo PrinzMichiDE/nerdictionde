@@ -29,8 +29,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Leseverlauf / Reading History** — F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅, PKG-6 ✅  
-**Phase:** F4 – Implementierung (PKG-7: ReadingHistoryList & /verlauf page)
+**Aktuelles Feature:** **Leseverlauf / Reading History** — F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅, PKG-6 ✅, PKG-7 ✅  
+**Phase:** F4 – Implementierung (PKG-10: Einstellungen Datenschutz Toggle)
 
 ---
 
