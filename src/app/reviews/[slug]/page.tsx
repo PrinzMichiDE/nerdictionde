@@ -32,6 +32,9 @@ import { getServerSession } from "@/lib/session";
 import { UserRatingSection } from "@/components/reviews/UserRatingSection";
 import { DealsWidget } from "@/components/reviews/DealsWidget";
 import { CommentSection } from "@/components/community/CommentSection";
+import { QAList } from "@/components/qa/QAList";
+import { getQAList } from "@/lib/qa";
+import { FEATURE_COMMUNITY_QA } from "@/lib/qa-schema";
 import { ScoreBlock } from "@/components/shared/ScoreBlock";
 import { ProsCons } from "@/components/shared/ProsCons";
 import { MetaLine } from "@/components/shared/MetaLine";
@@ -221,6 +224,21 @@ export default async function ReviewDetailPage({
   const readingHistory = session?.userId
     ? await getReadingHistoryForReview(session.userId, review.id)
     : null;
+
+  // QA List für SSR
+  let qaInitialData = null;
+  if (FEATURE_COMMUNITY_QA) {
+    try {
+      const qaList = await getQAList(review.id, undefined, 10, 'relevance', undefined, session?.userId ?? undefined);
+      qaInitialData = {
+        questions: qaList.questions,
+        nextCursor: qaList.nextCursor,
+        totalCount: qaList.totalCount,
+      };
+    } catch (error) {
+      console.warn('[Review Detail] Failed to fetch QA list:', error);
+    }
+  }
 
   const seriesInfo = FEATURE_REVIEW_SERIES && review.seriesId
     ? await getReviewSeriesInfo(review.id)
@@ -901,6 +919,13 @@ export default async function ReviewDetailPage({
                 })}
               />
             </section>
+          )}
+
+          {/* Community Q&A */}
+          {FEATURE_COMMUNITY_QA && qaInitialData && (
+            <div className="pt-10 border-t border-border">
+              <QAList reviewSlug={review.slug} initialData={qaInitialData} />
+            </div>
           )}
 
           {/* Comment Section */}

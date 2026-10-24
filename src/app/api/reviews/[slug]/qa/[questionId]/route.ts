@@ -1,161 +1,213 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { requireTwitchAuth } from '@/lib/auth-twitch';
-import { isCommunityQAEnabled } from '@/lib/qa-schema';
-import { qaReviewParamsSchema, qaQuestionIdParamsSchema, updateQuestionSchema, qaQuestionListItemSchema } from '@/lib/qa-schema';
 import { getReviewIdBySlug, getQAById, updateQuestion, deleteQuestion } from '@/lib/qa';
+import { qaQuestionIdParamsSchema, updateQuestionSchema, qaQuestionDetailSchema } from '@/lib/qa-schema';
+import { isCommunityQAEnabled } from '@/lib/qa-schema';
 
-/**
- * API Route: Einzelne Frage zu einem Review
- * GET    /api/reviews/[slug]/qa/[questionId]   - Frage mit Antworten abrufen
- * PATCH  /api/reviews/[slug]/qa/[questionId]   - Frage aktualisieren (Owner)
- * DELETE /api/reviews/[slug]/qa/[questionId]   - Frage löschen (Owner)
- */
-function checkFeatureFlag() {
+async function checkFeatureFlag(): Promise<NextResponse | null> {
   if (!isCommunityQAEnabled()) {
     return NextResponse.json({ error: 'Feature nicht verfügbar' }, { status: 404 });
   }
   return null;
 }
 
+async function getSessionUserId(request: NextRequest): Promise<string | null> {
+  const auth = await requireTwitchAuth(request);
+  if (auth instanceof NextResponse) return null;
+  return auth.userId;
+}
+
+async function validateReviewAccess(slug: string): Promise<{ reviewId: string } | NextResponse> {
+  const reviewId = await getReviewIdBySlug(slug);
+  if (!reviewId) {
+    return NextResponse.json({ error: 'Review nicht gefunden' }, { status: 404 });
+  }
+  return { reviewId };
+}
+
+async function validateQuestionId(questionId: string): Promise<NextResponse | null> {
+  const parsed = qaQuestionIdParamsSchema.safeParse({ questionId });
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Ungültige Question ID' }, { status: 400 });
+  }
+  return null;
+}
+
+/**
+ * GET /api/reviews/[slug]/qa/[questionId]
+ * Einzelne Frage mit Antworten laden
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string; questionId: string }> }
-) {
-  const featureCheck = checkFeatureFlag();
+): Promise<NextResponse> {
+  const featureCheck = await checkFeatureFlag();
   if (featureCheck) return featureCheck;
 
-  // Params validieren
-  const { slug, questionId } = await params;
-  const paramsResult = qaQuestionIdParamsSchema.safeParse({ slug, questionId });
-  if (!paramsResult.success) {
-    return NextResponse.json({ error: 'Ungültige Parameter' }, { status: 400 });
-  }
-
-  // Review ID aus Slug holen (nur für Validierung)
-  const reviewId = await getReviewIdBySlug(slug);
-  if (!reviewId) {
-    return NextResponse.json({ error: 'Review nicht gefunden' }, { status: 404 });
-  }
-
-  // Optional: User Session für User-Vote
-  const auth = await requireTwitchAuth(request);
-  const userId = auth instanceof NextResponse ? undefined : auth.userId;
-
   try {
-    const question = await getQAById(questionId, userId);
+    const { slug, questionId } = await params;
+
+    // Review ID aus Slug ermitteln (Validierung)
+    const accessCheck = await validateReviewAccess(slug);
+    if (accessCheck instanceof NextResponse) return accessCheck;
+    const reviewId = accessCheck.reviewId;
+
+    // Question ID validieren
+    const idCheck = await validateQuestionId(questionId);
+    if (idCheck) return idCheck;
+
+    // Session User für userVote (optional)
+    const userId = await getSessionUserId(request);
+
+    // Frage laden (gecacht)
+    const question = await getQAById(questionId, userId || undefined);
+
     if (!question) {
       return NextResponse.json({ error: 'Frage nicht gefunden' }, { status: 404 });
     }
 
     // Prüfen ob Frage zum Review gehört
     if (question.reviewId !== reviewId) {
-      return NextResponse.json({ error: 'Frage nicht gefunden' }, { status: 404 });
+      return NextResponse.json({ error: 'Frage gehört nicht zu diesem Review' }, { status: 404 });
     }
 
-    return NextResponse.json(question);
+    // Response validieren
+    const response = qaQuestionDetailSchema.parse(question);
+
+    return NextResponse.json({ question: response }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+      },
+    });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Interner Fehler';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error('[QA API] GET detail error:', error);
+    return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });
   }
 }
 
+/**
+ * PATCH /api/reviews/[slug]/qa/[questionId]
+ * Frage bearbeiten (nur Owner)
+ */
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string; questionId: string }> }
-) {
-  const featureCheck = checkFeatureFlag();
+): Promise<NextResponse> {
+  const featureCheck = await checkFeatureFlag();
   if (featureCheck) return featureCheck;
 
-  // Auth
-  const auth = await requireTwitchAuth(request);
-  if (auth instanceof NextResponse) return auth;
-
-  // Params validieren
-  const { slug, questionId } = await params;
-  const paramsResult = qaQuestionIdParamsSchema.safeParse({ slug, questionId });
-  if (!paramsResult.success) {
-    return NextResponse.json({ error: 'Ungültige Parameter' }, { status: 400 });
-  }
-
-  // Review ID aus Slug holen (nur für Validierung)
-  const reviewId = await getReviewIdBySlug(slug);
-  if (!reviewId) {
-    return NextResponse.json({ error: 'Review nicht gefunden' }, { status: 404 });
-  }
-
-  // Body validieren
-  let body: unknown;
   try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Ungültige Anfrage' }, { status: 400 });
-  }
+    const { slug, questionId } = await params;
 
-  const bodyResult = updateQuestionSchema.safeParse(body);
-  if (!bodyResult.success) {
-    return NextResponse.json(
-      { error: 'Ungültige Daten', details: bodyResult.error.flatten() },
-      { status: 400 }
-    );
-  }
+    // Authentifizierung erforderlich
+    const userId = await getSessionUserId(request);
+    if (!userId) {
+      return NextResponse.json({ error: 'Nicht authentifiziert' }, { status: 401 });
+    }
 
-  try {
-    const question = await updateQuestion(questionId, auth.userId, bodyResult.data);
-    if (!question) {
+    // Review ID aus Slug ermitteln (Validierung)
+    const accessCheck = await validateReviewAccess(slug);
+    if (accessCheck instanceof NextResponse) return accessCheck;
+    const reviewId = accessCheck.reviewId;
+
+    // Question ID validieren
+    const idCheck = await validateQuestionId(questionId);
+    if (idCheck) return idCheck;
+
+    // Request Body parsen und validieren
+    const body = await request.json();
+    const parsed = updateQuestionSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Ungültige Eingabe', details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    // Frage aktualisieren (Owner-Check in updateQuestion)
+    const updatedQuestion = await updateQuestion(questionId, userId, parsed.data);
+
+    if (!updatedQuestion) {
       return NextResponse.json({ error: 'Frage nicht gefunden' }, { status: 404 });
     }
 
-    // Prüfen ob Frage zum Review gehört
-    if (question.reviewId !== reviewId) {
-      return NextResponse.json({ error: 'Frage nicht gefunden' }, { status: 404 });
-    }
+    // Cache invalidieren
+    (revalidateTag as (tag: string) => void)(`review:${reviewId}:qa`);
+    (revalidateTag as (tag: string) => void)(`qa:question:${questionId}`);
 
-    return NextResponse.json({ success: true, question });
+    return NextResponse.json({ question: updatedQuestion });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Interner Fehler';
-    const status = message.includes('nicht gefunden') ? 404 :
-                   message.includes('Nicht autorisiert') ? 403 : 500;
-    return NextResponse.json({ error: message }, { status });
+    console.error('[QA API] PATCH error:', error);
+
+    if (error instanceof Error) {
+      if (error.message.includes('nicht autorisiert')) {
+        return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 403 });
+      }
+      if (error.message.includes('nicht gefunden')) {
+        return NextResponse.json({ error: error.message }, { status: 404 });
+      }
+      if (error.message.includes('deaktiviert')) {
+        return NextResponse.json({ error: error.message }, { status: 404 });
+      }
+    }
+
+    return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });
   }
 }
 
+/**
+ * DELETE /api/reviews/[slug]/qa/[questionId]
+ * Frage löschen (Soft-Delete, nur Owner)
+ */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string; questionId: string }> }
-) {
-  const featureCheck = checkFeatureFlag();
+): Promise<NextResponse> {
+  const featureCheck = await checkFeatureFlag();
   if (featureCheck) return featureCheck;
 
-  // Auth
-  const auth = await requireTwitchAuth(request);
-  if (auth instanceof NextResponse) return auth;
-
-  // Params validieren
-  const { slug, questionId } = await params;
-  const paramsResult = qaQuestionIdParamsSchema.safeParse({ slug, questionId });
-  if (!paramsResult.success) {
-    return NextResponse.json({ error: 'Ungültige Parameter' }, { status: 400 });
-  }
-
-  // Review ID aus Slug holen (nur für Validierung)
-  const reviewId = await getReviewIdBySlug(slug);
-  if (!reviewId) {
-    return NextResponse.json({ error: 'Review nicht gefunden' }, { status: 404 });
-  }
-
   try {
-    // Erst prüfen ob Frage existiert und zum Review gehört
-    const question = await getQAById(questionId);
-    if (!question || question.reviewId !== reviewId) {
-      return NextResponse.json({ error: 'Frage nicht gefunden' }, { status: 404 });
+    const { slug, questionId } = await params;
+
+    // Authentifizierung erforderlich
+    const userId = await getSessionUserId(request);
+    if (!userId) {
+      return NextResponse.json({ error: 'Nicht authentifiziert' }, { status: 401 });
     }
 
-    await deleteQuestion(questionId, auth.userId);
+    // Review ID aus Slug ermitteln (Validierung)
+    const accessCheck = await validateReviewAccess(slug);
+    if (accessCheck instanceof NextResponse) return accessCheck;
+    const reviewId = accessCheck.reviewId;
+
+    // Question ID validieren
+    const idCheck = await validateQuestionId(questionId);
+    if (idCheck) return idCheck;
+
+    // Frage löschen (Owner-Check in deleteQuestion)
+    await deleteQuestion(questionId, userId);
+
+    // Cache invalidieren
+    (revalidateTag as (tag: string) => void)(`review:${reviewId}:qa`);
+    (revalidateTag as (tag: string) => void)(`qa:question:${questionId}`);
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Interner Fehler';
-    const status = message.includes('nicht gefunden') ? 404 :
-                   message.includes('Nicht autorisiert') ? 403 : 500;
-    return NextResponse.json({ error: message }, { status });
+    console.error('[QA API] DELETE error:', error);
+
+    if (error instanceof Error) {
+      if (error.message.includes('nicht autorisiert')) {
+        return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 403 });
+      }
+      if (error.message.includes('nicht gefunden')) {
+        return NextResponse.json({ error: error.message }, { status: 404 });
+      }
+      if (error.message.includes('deaktiviert')) {
+        return NextResponse.json({ error: error.message }, { status: 404 });
+      }
+    }
+
+    return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });
   }
 }
