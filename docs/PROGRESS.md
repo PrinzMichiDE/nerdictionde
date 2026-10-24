@@ -26,25 +26,30 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** **Public User Profiles & Follow-System** (Spec: `docs/features/public-user-profiles.md`)
-**Phase:** F2 Spec erledigt → F3 Design & Plan
+**Phase:** F3 Design & Plan erledigt → F4 Implementierung (PK3: Lib Profile Utilities)
 
 ### Arbeitspakete (F4 Implementierung)
 | PK | Beschreibung | Status |
 |----|--------------|--------|
-| PK1 | Datenmodell: Prisma Schema + Migration (`UserProfile`, `Follow`, `Notification`) | **offen** |
-| PK2 | Seed-Script: `UserProfile` für alle existierenden `TwitchUser` anlegen | **offen** |
-| PK3 | API: `/api/users/[username]` GET (öffentliches Profil) | **offen** |
-| PK4 | API: `/api/users/me/profile` GET/PATCH (Einstellungen) | **offen** |
-| PK5 | API: `/api/follow` POST (Follow/Unfollow) | **offen** |
-| PK6 | API: `/api/users/[username]/followers` & `/following` GET (Listen) | **offen** |
-| PK7 | API: `/api/feed` GET (Aktivitäts-Feed, paginiert, gecacht) | **offen** |
-| PK8 | API: `/api/notifications` GET/PATCH (Liste, als gelesen markieren) | **offen** |
-| PK9 | UI: Öffentliche Profilseite `/u/[username]` (Server Component, Tabs, Pagination) | **offen** |
-| PK10 | UI: Profil-Einstellungen (`/einstellungen/profil` oder Tab) — Bio, Sichtbarkeit | **offen** |
-| PK11 | UI: Follow-Button Component (optimistic, Loading, Tooltip) | **offen** |
-| PK12 | UI: Feed-Seite `/feed` (Server Component, Infinite Scroll/Pagination) | **offen** |
-| PK13 | UI: Header Notification-Glocke + Dropdown | **offen** |
-| PK14 | UI: `/benachrichtigungen` Seite (alle Notifications, Filter ungelesen) | **offen** |
-| PK15 | Tests: Unit (Follow, Feed, Notifications), Integration (APIs), E2E (Flows) | **offen** |
-| PK16 | Self-Review & Verify — Build, Lint, Typecheck, Tests grün | **offen** |
-| PK17 | Doku/Changelog — README, ROADMAP, DECISIONS, Feature-Spec Review-Sektion | **offen** |
+| PK1 | Datenmodell: Prisma Schema + Migration (`UserProfile`, `Follow`, `Notification`) | **erledigt** |
+| PK2 | Seed-Script: `UserProfile` für alle existierenden `TwitchUser` anlegen | **erledigt** (keine exist. User) |
+| PK3 | Lib: Profile Utilities (`src/lib/user-profiles.ts`) | **offen** |
+| PK4 | Lib: Follow Logic (`src/lib/follow.ts`) | **offen** |
+| PK5 | Lib: Feed Logic (`src/lib/feed.ts`) | **offen** |
+| PK6 | Lib: Notifications (`src/lib/notifications.ts`) | **offen** |
+| PK7 | Zod Schema: `src/lib/schemas/profile-schema.ts` | **offen** |
+| PK8 | API: `/api/users/[username]` GET (öffentliches Profil) | **offen** |
+| PK9 | API: `/api/users/me/profile` GET/PATCH (Einstellungen) | **offen** |
+| PK10 | API: `/api/follow` POST (Follow/Unfollow) | **offen** |
+| PK11 | API: `/api/users/[username]/followers` & `/following` GET (Listen) | **offen** |
+| PK12 | API: `/api/feed` GET (Aktivitäts-Feed, paginiert, gecacht) | **offen** |
+| PK13 | API: `/api/notifications` GET/PATCH (Liste, als gelesen markieren) | **offen** |
+| PK14 | UI: Öffentliche Profilseite `/u/[username]` (Server Component, Tabs, Pagination) | **offen** |
+| PK15 | UI: Profil-Einstellungen (`/einstellungen/profil` oder Tab) — Bio, Sichtbarkeit | **offen** |
+| PK16 | UI: Follow-Button Component (optimistic, Loading, Tooltip) | **offen** |
+| PK17 | UI: Feed-Seite `/feed` (Server Component, Infinite Scroll/Pagination) | **offen** |
+| PK18 | UI: Header Notification-Glocke + Dropdown | **offen** |
+| PK19 | UI: `/benachrichtigungen` Seite (alle Notifications, Filter ungelesen) | **offen** |
+| PK20 | Tests: Unit (Follow, Feed, Notifications), Integration (APIs), E2E (Flows) | **offen** |
+| PK21 | Self-Review & Verify — Build, Lint, Typecheck, Tests grün | **offen** |
+| PK22 | Doku/Changelog — README, ROADMAP, DECISIONS, Feature-Spec Review-Sektion | **offen** |
