@@ -26,7 +26,7 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** **Public User Profiles & Follow-System** (Spec: `docs/features/public-user-profiles.md`)
-**Phase:** F4 Implementierung — PK8-PK13 erledigt → PK14: UI Öffentliche Profilseite `/u/[username]`
+**Phase:** F4 Implementierung — PK14-PK15 erledigt → PK16: UI Profil-Einstellungen
 
 ### Arbeitspakete (F4 Implementierung)
 | PK | Beschreibung | Status |
@@ -44,9 +44,9 @@
 | PK11 | API: `/api/users/[username]/followers` & `/following` GET (Listen) | **erledigt** |
 | PK12 | API: `/api/feed` GET (Aktivitäts-Feed, paginiert, gecacht) | **erledigt** |
 | PK13 | API: `/api/notifications` GET/PATCH (Liste, als gelesen markieren) | **erledigt** |
-| PK14 | UI: Öffentliche Profilseite `/u/[username]` (Server Component, Tabs, Pagination) | **offen** |
-| PK15 | UI: Profil-Einstellungen (`/einstellungen/profil` oder Tab) — Bio, Sichtbarkeit | **offen** |
-| PK16 | UI: Follow-Button Component (optimistic, Loading, Tooltip) | **offen** |
+| PK14 | UI: Öffentliche Profilseite `/u/[username]` (Server Component, Tabs, Pagination) | **erledigt** |
+| PK15 | UI: Follow-Button Component (optimistic, Loading, Tooltip) | **erledigt** |
+| PK16 | UI: Profil-Einstellungen (`/einstellungen/profil` oder Tab) — Bio, Sichtbarkeit | **offen** |
 | PK17 | UI: Feed-Seite `/feed` (Server Component, Infinite Scroll/Pagination) | **offen** |
 | PK18 | UI: Header Notification-Glocke + Dropdown | **offen** |
 | PK19 | UI: `/benachrichtigungen` Seite (alle Notifications, Filter ungelesen) | **offen** |
