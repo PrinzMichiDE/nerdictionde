@@ -708,7 +708,7 @@ export default async function ReviewDetailPage({
       {/* Game Metadata Section */}
       {review.category === "game" && review.metadata && (
         <GameMetadata
-          metadata={review.metadata as any}
+          metadata={review.metadata as Record<string, unknown>}
           nerdictionScore={review.score}
           steamAppId={review.steamAppId}
           epicId={review.epicId}
@@ -720,7 +720,7 @@ export default async function ReviewDetailPage({
       {/* Movie Metadata Section */}
       {review.category === "movie" && review.metadata && (
         <MovieSeriesMetadata
-          metadata={review.metadata as any}
+          metadata={review.metadata as Record<string, unknown>}
           category="movie"
           isEn={isEn}
         />
@@ -729,7 +729,7 @@ export default async function ReviewDetailPage({
       {/* Series Metadata Section */}
       {review.category === "series" && review.metadata && (
         <MovieSeriesMetadata
-          metadata={review.metadata as any}
+          metadata={review.metadata as Record<string, unknown>}
           category="series"
           isEn={isEn}
         />
@@ -738,8 +738,8 @@ export default async function ReviewDetailPage({
       {/* Hardware Metadata Section */}
       {review.category === "hardware" && (
         <HardwareMetadata
-          metadata={review.metadata as any}
-          specs={review.specs as Record<string, any> | null}
+          metadata={review.metadata as Record<string, unknown> | null}
+          specs={review.specs as Record<string, unknown> | null}
           isEn={isEn}
         />
       )}
@@ -765,7 +765,7 @@ export default async function ReviewDetailPage({
             <ReactMarkdown
               remarkPlugins={[remarkGfm, spoilerPlugin]}
               rehypePlugins={[[rehypeSlugCustomId, { enableCustomId: true }]]}
-              components={MarkdownComponents as any}
+              components={MarkdownComponents as Record<string, React.ComponentType<Record<string, unknown>>>}
             >
               {content || ""}
             </ReactMarkdown>

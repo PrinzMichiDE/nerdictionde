@@ -16,8 +16,8 @@ export async function GET(
       return NextResponse.json({ error: "Review not found" }, { status: 404 });
     }
     return NextResponse.json(review);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unbekannter Fehler" }, { status: 500 });
   }
 }
 
@@ -37,8 +37,8 @@ export async function PUT(
       data: body,
     });
     return NextResponse.json(review);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unbekannter Fehler" }, { status: 500 });
   }
 }
 
@@ -56,8 +56,8 @@ export async function DELETE(
       where: { id },
     });
     return NextResponse.json({ message: "Review deleted" });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unbekannter Fehler" }, { status: 500 });
   }
 }
 

@@ -38,10 +38,10 @@ export async function POST(req: NextRequest) {
     let series;
     try {
       series = await getTMDBSeriesBulk(queryOptions);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching series from TMDB:", error);
       return NextResponse.json(
-        { error: `Failed to fetch series from TMDB: ${error.message}` },
+        { error: `Failed to fetch series from TMDB: ${error instanceof Error ? error.message : "Unknown error"}` },
         { status: 400 }
       );
     }
@@ -111,8 +111,8 @@ export async function POST(req: NextRequest) {
       message: `Bulk creation completed: ${results.successful} successful, ${results.failed} failed, ${results.skipped} skipped`,
       results,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Bulk create series error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal server error" }, { status: 500 });
   }
 }

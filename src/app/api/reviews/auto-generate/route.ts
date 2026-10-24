@@ -7,6 +7,24 @@ import { requireAdminAuth } from "@/lib/auth";
 import { generateReviewContent } from "@/lib/review-generation";
 import { extractYouTubeVideoIdsFromIGDB } from "@/lib/youtube-extraction";
 
+interface IGDBGame {
+  id: number;
+  name: string;
+  first_release_date?: number;
+  cover?: { url: string };
+  screenshots?: Array<{ url: string }>;
+  videos?: Array<{ video_id?: string }>;
+  involved_companies?: Array<{ developer: boolean; publisher: boolean; company: { name: string } }>;
+  platforms?: Array<{ name: string }>;
+  genres?: Array<{ name: string }>;
+  game_modes?: Array<{ name: string }>;
+  player_perspectives?: Array<{ name: string }>;
+  game_engines?: Array<{ name: string }>;
+  rating?: number;
+  aggregated_rating?: number;
+  specs?: Record<string, unknown>;
+}
+
 interface GeneratedReviewPayload {
   title: string;
   title_en: string;
@@ -48,22 +66,22 @@ async function runGeneration(
   // Phase: game search
   emit({ type: "phase", phase: "search", message: "Spiel in Datenbank suchen..." });
 
-  let data: any = null;
+  let data: IGDBGame | null = null;
 
   // Search logic
   const igdbId = parseIGDBId(input);
   if (igdbId) {
-    data = await getIGDBGameById(igdbId);
+    data = (await getIGDBGameById(igdbId)) as IGDBGame | null;
   } else {
     // Check for Steam URL
     const steamId = parseSteamUrl(input);
     if (steamId) {
-      data = await getIGDBGameBySteamId(steamId);
+      data = (await getIGDBGameBySteamId(steamId)) as IGDBGame | null;
     } else {
       // Fallback to IGDB search by name
       const results = await searchIGDB(input);
       if (results && results.length > 0) {
-        data = results[0];
+        data = results[0] as IGDBGame;
       }
     }
   }
@@ -120,13 +138,13 @@ async function runGeneration(
 
   // Process metadata for games
   const gameMetadata = {
-      developers: data.involved_companies?.filter((c: any) => c.developer).map((c: any) => c.company.name) || [],
-      publishers: data.involved_companies?.filter((c: any) => c.publisher).map((c: any) => c.company.name) || [],
-      platforms: data.platforms?.map((p: any) => p.name) || [],
-      genres: data.genres?.map((g: any) => g.name) || [],
-      gameModes: data.game_modes?.map((m: any) => m.name) || [],
-      perspectives: data.player_perspectives?.map((p: any) => p.name) || [],
-      engines: data.game_engines?.map((e: any) => e.name) || [],
+      developers: data.involved_companies?.filter((c: Record<string, unknown>) => c.developer).map((c: Record<string, unknown>) => (c.company as Record<string, unknown>)?.name) || [],
+      publishers: data.involved_companies?.filter((c: Record<string, unknown>) => c.publisher).map((c: Record<string, unknown>) => (c.company as Record<string, unknown>)?.name) || [],
+      platforms: data.platforms?.map((p: Record<string, unknown>) => p.name) || [],
+      genres: data.genres?.map((g: Record<string, unknown>) => g.name) || [],
+      gameModes: data.game_modes?.map((m: Record<string, unknown>) => m.name) || [],
+      perspectives: data.player_perspectives?.map((p: Record<string, unknown>) => p.name) || [],
+      engines: data.game_engines?.map((e: Record<string, unknown>) => e.name) || [],
       releaseDate: data.first_release_date,
       igdbScore: data.rating,
       criticScore: data.aggregated_rating ?? steamData?.metacriticScore ?? undefined,
@@ -241,12 +259,12 @@ export async function POST(req: NextRequest) {
     try {
       const data = await runGeneration(input, () => {});
       return NextResponse.json(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof GameNotFoundError) {
         return NextResponse.json({ error: "Game not found" }, { status: 404 });
       }
       console.error("Auto-generate error:", error);
-      return NextResponse.json({ error: error?.message || "Unbekannter Fehler" }, { status: 500 });
+      return NextResponse.json({ error: error instanceof Error ? error.message : "Unbekannter Fehler" }, { status: 500 });
     }
   }
 
@@ -265,9 +283,9 @@ export async function POST(req: NextRequest) {
         const data = await runGeneration(input, (payload) => sendEvent(controller, payload));
         sendEvent(controller, { type: "done", data });
         controller.close();
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Auto-generate error:", error);
-        sendEvent(controller, { type: "error", error: error?.message || "Unbekannter Fehler" });
+        sendEvent(controller, { type: "error", error: error instanceof Error ? error.message : "Unbekannter Fehler" });
         controller.close();
       }
     },

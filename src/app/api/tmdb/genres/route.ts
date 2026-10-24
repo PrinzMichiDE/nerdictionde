@@ -19,9 +19,9 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(response.data.genres || []);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("TMDB Genres Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal server error" }, { status: 500 });
   }
 }
 

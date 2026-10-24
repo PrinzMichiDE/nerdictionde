@@ -53,10 +53,10 @@ export async function POST(req: NextRequest) {
           limit: totalLimit || queryOptions.limit || 50,
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching games from IGDB:", error);
       return NextResponse.json(
-        { error: `Failed to fetch games from IGDB: ${error.message}` },
+        { error: `Failed to fetch games from IGDB: ${error instanceof Error ? error.message : "Unknown error"}` },
         { status: 400 }
       );
     }
@@ -88,11 +88,12 @@ export async function POST(req: NextRequest) {
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
           return await fn();
-        } catch (error: any) {
-          lastError = error;
+        } catch (error: unknown) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          lastError = err;
           
           // Don't retry on "Already exists" errors
-          if (error.message?.includes("Already exists")) {
+          if (err.message.includes("Already exists")) {
             return { success: false, error: "Already exists" };
           }
 
@@ -166,8 +167,8 @@ export async function POST(req: NextRequest) {
       message: `Bulk creation completed: ${results.successful} successful, ${results.failed} failed, ${results.skipped} skipped`,
       results,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Bulk create error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal server error" }, { status: 500 });
   }
 }

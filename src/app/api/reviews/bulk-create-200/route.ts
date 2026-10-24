@@ -6,6 +6,11 @@ import { createJob, updateJob, addToQueue, updateQueueItem, getJob } from "@/lib
 import { resumeRunningJobs } from "@/lib/job-resume";
 import { randomUUID } from "crypto";
 
+interface IGDBGame {
+  id: number;
+  name: string;
+}
+
 interface BulkCreate200Options {
   queryOptions?: BulkQueryOptions;
   status?: "draft" | "published";
@@ -51,15 +56,15 @@ export async function POST(req: NextRequest) {
     console.log(`⚙️  Settings: Batch size=${batchSize}, Delay batches=${delayBetweenBatches}ms, Delay games=${delayBetweenGames}ms`);
 
     // Fetch games from IGDB using bulk large function
-    let games;
+    let games: IGDBGame[];
     try {
       console.log("📥 Fetching games from IGDB...");
       games = await getIGDBGamesBulkLarge(TARGET_COUNT, queryOptions);
       console.log(`✅ Fetched ${games.length} games from IGDB`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching games from IGDB:", error);
       return NextResponse.json(
-        { error: `Failed to fetch games from IGDB: ${error.message}` },
+        { error: `Failed to fetch games from IGDB: ${error instanceof Error ? error.message : "Unknown error"}` },
         { status: 400 }
       );
     }
@@ -128,17 +133,18 @@ export async function POST(req: NextRequest) {
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
           return await fn();
-        } catch (error: any) {
-          lastError = error;
+        } catch (error: unknown) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          lastError = err;
           
           // Don't retry on "Already exists" errors
-          if (error.message?.includes("Already exists")) {
+          if (err.message.includes("Already exists")) {
             return { success: false, error: "Already exists" };
           }
 
           // Don't retry on certain validation errors
-          if (error.message?.includes("validation") || error.message?.includes("invalid")) {
-            return { success: false, error: error.message };
+          if (err.message.includes("validation") || err.message.includes("invalid")) {
+            return { success: false, error: err.message };
           }
 
           if (attempt < maxRetries - 1) {
@@ -158,7 +164,7 @@ export async function POST(req: NextRequest) {
 // Async processing function
 async function processGamesAsync(
   jobId: string,
-  games: any[],
+  games: IGDBGame[],
   options: {
     batchSize: number;
     delayBetweenBatches: number;
@@ -196,17 +202,18 @@ async function processGamesAsync(
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         return await fn();
-      } catch (error: any) {
-        lastError = error;
+      } catch (error: unknown) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        lastError = err;
         
         // Don't retry on "Already exists" errors
-        if (error.message?.includes("Already exists")) {
+        if (err.message.includes("Already exists")) {
           return { success: false, error: "Already exists" };
         }
 
         // Don't retry on certain validation errors
-        if (error.message?.includes("validation") || error.message?.includes("invalid")) {
-          return { success: false, error: error.message };
+        if (err.message.includes("validation") || err.message.includes("invalid")) {
+          return { success: false, error: err.message };
         }
 
         if (attempt < maxRetries - 1) {
@@ -298,18 +305,18 @@ async function processGamesAsync(
           });
           console.log(`   ❌ ${game.name}: ${result.error}`);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         results.failed++;
-          results.errors.push({
-            item: game.name,
-            igdbId: game.id,
-            error: error.message || "Processing failed",
-          });
+        results.errors.push({
+          item: game.name,
+          igdbId: game.id,
+          error: error instanceof Error ? error.message : "Processing failed",
+        });
         await updateQueueItem(jobId, game.name, {
           status: "failed",
-          error: error.message || "Processing failed",
+          error: error instanceof Error ? error.message : "Processing failed",
         });
-        console.log(`   ❌ ${game.name}: ${error.message}`);
+        console.log(`   ❌ ${game.name}: ${error instanceof Error ? error.message : "Processing failed"}`);
       }
 
       // Update job progress
@@ -337,10 +344,10 @@ async function processGamesAsync(
 
   console.log(`\n✅ Job ${jobId} completed: ${results.successful} successful, ${results.failed} failed, ${results.skipped} skipped`);
 }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Bulk create 200 error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 }
     );
   }

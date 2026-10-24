@@ -27,10 +27,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       jobs,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Get all jobs error:", error);
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 }
     );
   }
