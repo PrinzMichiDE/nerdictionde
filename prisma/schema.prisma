@@ -36,9 +36,9 @@ model Review {
   metaDescription String? // SEO meta description (150-160 chars)
   metaKeywords    String? // SEO meta keywords (comma-separated)
   releaseDate     DateTime? // Release date for games, movies, series, hardware
-  userRatingCount Int           @default(0)
-  userRatingAvg   Float         @default(0)
-  hardware        Hardware?     @relation(fields: [hardwareId], references: [id], onDelete: SetNull)
+  userRatingCount Int             @default(0)
+  userRatingAvg   Float           @default(0)
+  hardware        Hardware?       @relation(fields: [hardwareId], references: [id], onDelete: SetNull)
   comments        Comment[]
   userRatings     UserRating[]
   bookmarks       Bookmark[]
@@ -50,8 +50,8 @@ model Review {
   gameProgress    GameProgress[]
   videoChapters   VideoChapter[]
   forumThreads    ForumThread[]
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   @@index([slug])
   @@index([category, status])
@@ -62,31 +62,31 @@ model Review {
 }
 
 model Comment {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   text      String
-  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  review    Review    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   reviewId  String
   author    String
-  parentId   String?
-  parent     Comment?   @relation("CommentParent", fields: [parentId], references: [id], onDelete: SetNull)
-  children   Comment[]  @relation("CommentParent")
-  score     Int        @default(0)  // neu: Kommentar-Score durch Voting
-  createdAt DateTime @default(now())
+  parentId  String?
+  parent    Comment?  @relation("CommentParent", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Comment[] @relation("CommentParent")
+  score     Int       @default(0) // neu: Kommentar-Score durch Voting
+  createdAt DateTime  @default(now())
 
   @@index([reviewId])
   @@index([parentId])
 }
 
 model UserRating {
-  id        String      @id @default(cuid())
+  id        String     @id @default(cuid())
   userId    String
-  user      TwitchUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
   score     Int // 0-10
-  text      String?     @db.Text
-  review    Review      @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  text      String?    @db.Text
+  review    Review     @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   reviewId  String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   @@unique([userId, reviewId])
   @@index([reviewId])
@@ -374,7 +374,7 @@ model TwitchUser {
   introOutros         StreamIntroOutro[]
   checklists          StreamChecklist[]
   goals               StreamGoal[]
-  streaks             StreamStreak?          @relation("StreamStreakUser")
+  streaks             StreamStreak?           @relation("StreamStreakUser")
   raidsHosts          StreamRaidHost[]
   polls               StreamPoll[]
   giveaways           StreamGiveaway[]
@@ -392,19 +392,19 @@ model TwitchUser {
   dataUsages          DataUsage[]
   contentIdeas        IRLContentIdea[]
   socialPosts         SocialMediaPost[]
-  bioLink             BioLink?               @relation("BioLinkUser")
+  bioLink             BioLink?                @relation("BioLinkUser")
   affiliateLinks      AffiliateLink[]
   sponsorPitches      SponsorPitch[]
-  mediaKit            MediaKit?              @relation("MediaKitUser")
+  mediaKit            MediaKit?               @relation("MediaKitUser")
   revenueEntries      RevenueEntry[]
   invoices            Invoice[]
   communityEvents     CommunityEvent[]
   viewerProfiles      ViewerProfile[]
   communityChallenges CommunityChallenge[]
-  brandingProfile     BrandingProfile?       @relation("BrandingProfileUser")
+  brandingProfile     BrandingProfile?        @relation("BrandingProfileUser")
   soundEffects        SoundEffect[]
   gameVotings         GameVoting[]
-  subathonConfig      SubathonConfig?        @relation("SubathonConfigUser")
+  subathonConfig      SubathonConfig?         @relation("SubathonConfigUser")
   challengeWheelItems ChallengeWheelItem[]
   bingoCards          BingoCard[]
   healthReminders     HealthReminder[]
@@ -419,7 +419,7 @@ model TwitchUser {
   retentionData       ViewerRetentionData[]
   competitorTracks    CompetitorTrack[]
   contentCalendar     ContentCalendarEntry[]
-  multiStreamConfig   MultiStreamConfig?     @relation("MultiStreamConfigUser")
+  multiStreamConfig   MultiStreamConfig?      @relation("MultiStreamConfigUser")
   youtubeVodQueue     YouTubeVODQueue[]
   forumComments       ForumComment[]
   userRatings         UserRating[]
@@ -427,6 +427,10 @@ model TwitchUser {
   bookmarks           Bookmark[]
   pushSubscriptions   PushSubscription[]
   notificationPrefs   NotificationPreference? @relation("NotificationPreferenceUser")
+  userProfile         UserProfile?
+  followers           Follow[]                @relation("Followers")
+  following           Follow[]                @relation("Following")
+  notifications       Notification[]
 
   @@index([twitchId])
   @@index([username])
@@ -1435,23 +1439,23 @@ model YouTubeVODQueue {
 }
 
 model ForumThread {
-  id              String          @id @default(cuid())
-  title           String
-  slug            String          @unique
-  category        String          // "gaming" | "movies" | "series"
-  content         String          // Markdown
-  excerpt         String          // Kurzbeschreibung
-  author          String          // Display-Name
-  reviewId        String?         // Optional: Review-bezogener Thread
-  review          Review?         @relation(fields: [reviewId], references: [id], onDelete: SetNull)
-  commentCount    Int             @default(0)
-  viewCount       Int             @default(0)
-  score           Int             @default(0)
-  lastActivityAt  DateTime        @default(now())
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  category       String // "gaming" | "movies" | "series"
+  content        String // Markdown
+  excerpt        String // Kurzbeschreibung
+  author         String // Display-Name
+  reviewId       String? // Optional: Review-bezogener Thread
+  review         Review?  @relation(fields: [reviewId], references: [id], onDelete: SetNull)
+  commentCount   Int      @default(0)
+  viewCount      Int      @default(0)
+  score          Int      @default(0)
+  lastActivityAt DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  comments        ForumComment[]
+  comments ForumComment[]
 
   @@index([slug])
   @@index([category])
@@ -1460,18 +1464,18 @@ model ForumThread {
 }
 
 model ForumComment {
-  id                  String      @id @default(cuid())
-  text                String
-  author              String      // Display-Name
-  thread              ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
-  threadId            String
-  userId              String?     // TwitchUser ID (null = Gast/AI)
-  user                TwitchUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
-  isAiGenerated       Boolean     @default(false)
-  status              String      @default("approved") // "pending" | "approved" | "rejected"
-  aiModerationNote    String?
-  score               Int         @default(0)
-  createdAt           DateTime    @default(now())
+  id               String      @id @default(cuid())
+  text             String
+  author           String // Display-Name
+  thread           ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  threadId         String
+  userId           String? // TwitchUser ID (null = Gast/AI)
+  user             TwitchUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  isAiGenerated    Boolean     @default(false)
+  status           String      @default("approved") // "pending" | "approved" | "rejected"
+  aiModerationNote String?
+  score            Int         @default(0)
+  createdAt        DateTime    @default(now())
 
   @@index([threadId])
   @@index([threadId, status])
@@ -1481,25 +1485,25 @@ model ForumComment {
 // Community Models
 
 model Vote {
-  id         String      @id @default(cuid())
+  id         String     @id @default(cuid())
   userId     String
-  user       TwitchUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  targetType String      // "thread" | "comment" | "review"
+  user       TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetType String // "thread" | "comment" | "review"
   targetId   String
-  value      Int         // -1 oder 1
-  createdAt  DateTime    @default(now())
+  value      Int // -1 oder 1
+  createdAt  DateTime   @default(now())
 
   @@unique([userId, targetType, targetId])
   @@index([targetType, targetId])
 }
 
 model Bookmark {
-  id        String      @id @default(cuid())
+  id        String     @id @default(cuid())
   userId    String
-  user      TwitchUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
   reviewId  String
-  review    Review      @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-  createdAt DateTime    @default(now())
+  review    Review     @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
 
   @@unique([userId, reviewId])
   @@index([userId])
@@ -1511,12 +1515,12 @@ model GameOverlay {
   id           String   @id @default(cuid())
   name         String
   slug         String   @unique
-  category     String   // "minigame" | "animated" | "chat-game" | "alert"
+  category     String // "minigame" | "animated" | "chat-game" | "alert"
   description  String?
   htmlCode     String   @db.Text
   config       Json?
   previewImage String?
-  license      String   // "MIT" | "CC0" | "CC-BY"
+  license      String // "MIT" | "CC0" | "CC-BY"
   author       String?
   sourceUrl    String?
   isPublic     Boolean  @default(true)
@@ -1569,14 +1573,14 @@ model NewsSyncState {
 // Newsletter (E-Mail-Abonnement für neue Tests)
 
 model NewsletterSubscription {
-  id              String   @id @default(cuid())
-  email           String   @unique
-  source          String?  // z. B. "homepage", "review-detail"
-  subscribedAt    DateTime @default(now())
-  unsubscribedAt  DateTime?
-  isActive        Boolean  @default(false) // erst nach Double-Optin-Bestaetigung true
-  confirmationToken String? @unique        // Token fuer Bestaetigungs- und Abmelde-Link
-  confirmedAt     DateTime?              // Zeitpunkt der Bestaetigung
+  id                String    @id @default(cuid())
+  email             String    @unique
+  source            String? // z. B. "homepage", "review-detail"
+  subscribedAt      DateTime  @default(now())
+  unsubscribedAt    DateTime?
+  isActive          Boolean   @default(false) // erst nach Double-Optin-Bestaetigung true
+  confirmationToken String?   @unique // Token fuer Bestaetigungs- und Abmelde-Link
+  confirmedAt       DateTime? // Zeitpunkt der Bestaetigung
 
   @@index([email])
   @@index([isActive])
@@ -1586,26 +1590,80 @@ model NewsletterSubscription {
 // Push Notifications
 
 model PushSubscription {
-  id        String      @id @default(cuid())
+  id        String     @id @default(cuid())
   userId    String
-  user      TwitchUser  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
   endpoint  String
   p256dh    String
   auth      String
-  createdAt DateTime    @default(now())
+  createdAt DateTime   @default(now())
 
-  @@index([userId])
   @@unique([endpoint])
+  @@index([userId])
 }
 
 model NotificationPreference {
-  id       String      @id @default(cuid())
-  userId   String      @unique
-  user     TwitchUser  @relation("NotificationPreferenceUser", fields: [userId], references: [id], onDelete: Cascade)
-  games    Boolean     @default(true)
-  movies   Boolean     @default(true)
-  series   Boolean     @default(true)
-  hardware Boolean     @default(true)
-  deals    Boolean     @default(true)
-  forum    Boolean     @default(true)
+  id       String     @id @default(cuid())
+  userId   String     @unique
+  user     TwitchUser @relation("NotificationPreferenceUser", fields: [userId], references: [id], onDelete: Cascade)
+  games    Boolean    @default(true)
+  movies   Boolean    @default(true)
+  series   Boolean    @default(true)
+  hardware Boolean    @default(true)
+  deals    Boolean    @default(true)
+  forum    Boolean    @default(true)
+}
+
+// Community: User Profiles, Follows, Notifications
+model UserProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique @map("user_id")
+  bio            String?  @db.Text
+  isPublic       Boolean  @default(true) @map("is_public")
+  showRatings    Boolean  @default(true) @map("show_ratings")
+  showBookmarks  Boolean  @default(true) @map("show_bookmarks")
+  followerCount  Int      @default(0) @map("follower_count")
+  followingCount Int      @default(0) @map("following_count")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String   @map("follower_id")
+  followingId String   @map("following_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  follower  TwitchUser @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following TwitchUser @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+  @@map("follows")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  data      Json?
+  readAt    DateTime?        @map("read_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  follow
+  // later: comment_reply, review_published, mention, etc.
 }
