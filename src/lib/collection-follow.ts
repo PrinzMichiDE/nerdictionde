@@ -69,9 +69,9 @@ export async function followCollection(
   }
 
   // Transaktion: Follow erstellen, Counter inkrementieren, Notification für Owner
-  const [follow] = await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx) => {
     // Upsert Follow (idempotent - falls schon gefolgt, updatedAt aktualisieren)
-    const follow = await tx.collectionFollow.upsert({
+    await tx.collectionFollow.upsert({
       where: {
         userId_collectionId: {
           userId,
@@ -109,8 +109,6 @@ export async function followCollection(
         },
       });
     }
-
-    return [follow];
   });
 
   // Aktuellen Counter lesen
@@ -312,8 +310,8 @@ export const getFollowedCollections = unstable_cache(
     const validFollows = follows.filter((f) => f.collection !== null);
 
     const hasMore = validFollows.length > limit;
-    const items = hasMore ? validFollows.slice(0, -1) : validFollows;
-    const nextCursor = hasMore ? items[items.length - 1].id : null;
+    const items = hasMore ? validFollows.slice(0, limit) : validFollows;
+    const nextCursor = hasMore ? validFollows[limit].id : null;
 
     const collections: FollowedCollectionItem[] = items.map((f) => ({
       id: f.collection!.id,
@@ -337,7 +335,7 @@ export const getFollowedCollections = unstable_cache(
 /**
  * Cache-Invaliderung nach Follow/Unfollow
  */
-export function invalidateCollectionFollowCache(userId: string, collectionId: string) {
+export function invalidateCollectionFollowCache(_userId: string, _collectionId: string) {
   // Note: Next.js unstable_cache doesn't have direct invalidation
   // Would need to use revalidateTag if using Next.js 15+ cache tags
   // For now, cache expires after 60 seconds

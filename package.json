@@ -95,6 +95,7 @@
     "eslint-config-next": "^16.1.1",
     "eslint-plugin-prettier": "^5.5.4",
     "husky": "^9.1.7",
+    "node-mocks-http": "^1.18.1",
     "prettier": "^3.7.4",
     "prisma": "^6.19.1",
     "tailwindcss": "^4",

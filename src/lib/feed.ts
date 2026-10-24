@@ -227,7 +227,7 @@ export const getFeed = unstable_cache(
 /**
  * Invalidate feed cache for a user (call after new activity)
  */
-export function invalidateFeedCache(userId: string) {
+export function invalidateFeedCache(_userId: string) {
   // Note: Next.js unstable_cache doesn't have direct invalidation
   // Would need to use revalidateTag if using Next.js 15+ cache tags
   // For now, cache expires after 30 seconds

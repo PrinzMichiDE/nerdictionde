@@ -23,22 +23,31 @@ export function CollectionFollowButton({
   className = '',
 }: CollectionFollowButtonProps) {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Initialize isAuthenticated from cookie immediately (lazy init)
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return document.cookie.includes('twitch_session');
+    }
+    return false;
+  });
   const [mounted, setMounted] = useState(false);
 
   const {
     isFollowing,
     followersCount,
     isLoading,
-    follow,
-    unfollow,
     toggle,
   } = useCollectionFollow(collectionId, slug, initialFollowing, initialCount);
 
-  // Client-seitige Auth-Prüfung über Cookie
+  // Set mounted after initial render
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Required for hydration-safe initialization
     setMounted(true);
-    setIsAuthenticated(document.cookie.includes('twitch_session'));
+    // Update auth state on mount
+    if (typeof window !== 'undefined') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Required for hydration-safe initialization
+      setIsAuthenticated(document.cookie.includes('twitch_session'));
+    }
   }, []);
 
   // onChange Callback für Parent-Komponenten

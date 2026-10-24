@@ -29,8 +29,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Erweiterte Suchfilter** — F1–F9 ✅ abgeschlossen.  
-**Phase:** Hauptschleife — nächstes Feature aus ROADMAP wählen (Typ D).
+**Aktuelles Feature:** **Leseverlauf / Reading History** — F1 Auswahl ✅  
+**Phase:** F2 – Spezifikation schreiben (`docs/features/reading-history.md`)
 
 ---
 
