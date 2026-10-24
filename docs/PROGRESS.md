@@ -1,9 +1,9 @@
 # PROGRESS.md — laufendes Gedächtnis der autonomen Entwicklung
 
-## Stand (2026-10-24)
+## Stand (2026-10-25)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: 427/433 grün (vitest, 6 pre-existing failures in Collections Follow), `lint`: 21 Errors (pre-existing: 13 no-explicit-any, 8 react-hooks/set-state-in-effect), 236 Warnings — keine neuen Errors durch Review-Serien
+- `type-check`: grün. `build`: grün. `tests`: **481/481 grün** (vitest), `lint`: **0 Errors** (nur Warnings in externen Skills/Admin), 236 Warnings — keine neuen Errors
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
   1. Newsletter Double-Optin + Bestätigungsseite
@@ -25,17 +25,18 @@
   - Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
   - `no-explicit-any` Bereinigung gestartet: 150+/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
   - **Letzte 3 React-Hooks-Errors behoben**: `TableOfContents.tsx`, `YouTubeEmbed.tsx`, `SupportTopBanner.tsx` — redundante `setState` in `useEffect` durch Lazy Initializer ersetzt
-  - **Category Subscriptions Fixes**: `useLayoutEffect` statt `useEffect` für Mount-Detection, `params: Promise<{category: string}>` statt `Promise<any>`
+  - **Category Subscriptions Fixes**: `useEffect` statt `useLayoutEffect` für Mount-Detection, `initialUserId` Prop entfernt (unused)
+  - **Collections Follow Tests repariert**: Mock für `createCollectionUpdateNotification`, `prisma.reviewCollection.findUnique`, `followedCollectionsResponseSchema` ergänzt
 - Abgeschlossene Typ-B-Aufgaben:
   - CHANGELOG.md, README.md, ROADMAP.md, .env.example, PROGRESS.md aktualisiert
-  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api, pdf-export, pdf-layout, search-relevance, highlighter-logic, **collections (95), collection-schema (44), review-reactions (12), advanced-search-filters (18), category-subscriptions (8), category-mapping (19), review-compare (28)**
-  - Integration-Tests: search-api, deals, price-history, pdf-export, votes, comments, **listen (10), me/listen (5), reactions-api (10), search-advanced-filters (20), category-subscriptions-api (9), review-compare (16)**
-  - 427 Tests insgesamt (16 neue für Review-Vergleich)
+  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api, pdf-export, pdf-layout, search-relevance, highlighter-logic, **collections (95), collection-schema (44), review-reactions (12), advanced-search-filters (18), category-subscriptions (8), category-mapping (19), review-compare (28), review-series (20)**
+  - Integration-Tests: search-api, deals, price-history, pdf-export, votes, comments, **listen (10), me/listen (5), reactions-api (10), search-advanced-filters (20), category-subscriptions-api (9), review-compare (16), review-series (10)**
+  - 481 Tests insgesamt (alle grün)
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** Keines — **Review-Serien / Multi-Part Reviews abgeschlossen (F1–F9 ✅)**  
-**Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ D: Community Q&A, Personalisierte Empfehlungen, Hardware-Kompatibilität)
+**Aktuelles Feature:** Keines — **Review-Serien / Multi-Part Reviews abgeschlossen (F1–F9 ✅), Type A/B Fixes abgeschlossen**  
+**Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ D: **Community Q&A**, Personalisierte Empfehlungen, Hardware-Kompatibilität)
 
 ---
 

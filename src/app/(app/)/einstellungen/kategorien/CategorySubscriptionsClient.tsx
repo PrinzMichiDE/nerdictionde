@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ReviewCategory } from '@prisma/client';
 import { CategorySubscriptionCard } from '@/components/settings/CategorySubscriptionCard';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8,14 +8,11 @@ import { Card, CardContent } from '@/components/ui/card';
 
 const ALL_CATEGORIES: ReviewCategory[] = ['GAMES', 'HARDWARE', 'MOVIES', 'SERIES'];
 
-interface CategorySubscriptionsClientProps {
-  initialUserId: string;
-}
-
-export function CategorySubscriptionsClient({ initialUserId }: CategorySubscriptionsClientProps) {
+export function CategorySubscriptionsClient() {
   const [mounted, setMounted] = useState(false);
 
-  useLayoutEffect(() => { setMounted(true); }, []);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setMounted(true); }, []);
 
   if (!mounted) {
     return (

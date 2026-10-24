@@ -10,6 +10,9 @@ const mockFollowedCollectionsQuerySchema = vi.hoisted(() => ({
     data: { cursor: data?.cursor, limit: data?.limit ?? 20 }
   }))
 }));
+const mockFollowedCollectionsResponseSchema = vi.hoisted(() => ({
+  parse: vi.fn((data) => data)
+}));
 
 vi.mock("@/lib/auth-twitch", () => ({
   requireTwitchAuth: mockRequireTwitchAuth,
@@ -22,6 +25,7 @@ vi.mock("@/lib/collections-follow", () => ({
 vi.mock("@/lib/collections-follow-schema", () => ({
   isCollectionsFollowEnabled: mockIsEnabled,
   followedCollectionsQuerySchema: mockFollowedCollectionsQuerySchema,
+  followedCollectionsResponseSchema: mockFollowedCollectionsResponseSchema,
 }));
 
 import { GET } from "@/app/api/me/listen/followed/route";

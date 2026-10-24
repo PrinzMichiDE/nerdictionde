@@ -21,7 +21,7 @@ export default async function CategorySubscriptionsPage() {
           Erhalte Benachrichtigungen, sobald ein neues Review in deinen Interessensbereichen erscheint.
         </p>
       </header>
-      <CategorySubscriptionsClient initialUserId={session.userId} />
+      <CategorySubscriptionsClient />
     </div>
   );
 }

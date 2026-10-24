@@ -17,6 +17,11 @@ const mockFollowToggleResponseSchema = vi.hoisted(() => ({
 const mockFollowStatusSchema = vi.hoisted(() => ({
   parse: vi.fn((data) => data)
 }));
+const mockPrisma = vi.hoisted(() => ({
+  reviewCollection: {
+    findUnique: vi.fn(),
+  },
+}));
 
 vi.mock("@/lib/auth-twitch", () => ({
   requireTwitchAuth: mockRequireTwitchAuth,
@@ -35,6 +40,10 @@ vi.mock("@/lib/collections-follow-schema", () => ({
   followStatusSchema: mockFollowStatusSchema,
 }));
 
+vi.mock("@/lib/prisma", () => ({
+  default: mockPrisma,
+}));
+
 import { POST as postFollow, DELETE as deleteFollow, GET as getFollow } from "@/app/api/listen/[slug]/follow/route";
 
 describe("POST/DELETE/GET /api/listen/[slug]/follow", () => {
@@ -45,6 +54,12 @@ describe("POST/DELETE/GET /api/listen/[slug]/follow", () => {
     mockFollowRequestSchema.safeParse.mockReturnValue({ success: true, data: {} });
     mockFollowToggleResponseSchema.parse.mockImplementation((d) => d);
     mockFollowStatusSchema.parse.mockImplementation((d) => d);
+    mockPrisma.reviewCollection.findUnique.mockResolvedValue({
+      id: 'coll_1',
+      followersCount: 10,
+      isPublic: true,
+      deletedAt: null,
+    });
   });
 
   const createRequest = (method: string, slug: string, body?: unknown) => {
@@ -199,7 +214,7 @@ describe("POST/DELETE/GET /api/listen/[slug]/follow", () => {
 
     it("gibt 404 bei nicht existierender Collection", async () => {
       mockRequireTwitchAuth.mockResolvedValue({ userId: 'user_1' });
-      mockGetFollowStatusBySlug.mockResolvedValue(null);
+      mockPrisma.reviewCollection.findUnique.mockResolvedValue(null);
 
       const req = new NextRequest(`http://localhost/api/listen/non-existent/follow`);
       const res = await getFollow(req, { params: Promise.resolve({ slug: 'non-existent' }) });

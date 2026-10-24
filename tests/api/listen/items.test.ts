@@ -27,7 +27,7 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 vi.mock("@/lib/collection-follow", () => ({
-  createCollectionUpdateNotification: vi.fn(),
+  createCollectionUpdateNotification: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("@/lib/collections-follow-schema", () => ({
