@@ -113,14 +113,14 @@ export function useCollectionFollow(
 
   const refresh = useCallback(async () => {
     try {
-      const res = await fetch(`/api/listen/${slug}/follow-status`, {
+      const res = await fetch(`/api/listen/${slug}/follow`, {
         headers: { 'Content-Type': 'application/json' },
       });
 
       if (res.ok) {
         const data = await res.json();
-        setIsFollowing(data.isFollowing);
-        setFollowersCount(data.followersCount);
+        setIsFollowing(data.followed);
+        setFollowersCount(data.followerCount);
       }
     } catch {
       // Ignore refresh errors

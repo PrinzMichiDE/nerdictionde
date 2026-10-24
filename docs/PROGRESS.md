@@ -31,8 +31,8 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** Review Collections Follow  
-**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅, PKG-6 ✅**  
-**Nächstes Paket:** PKG-7: Client Hook & Types (`useCollectionFollow`)
+**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅, PKG-6 ✅, PKG-7 ✅**  
+**Nächstes Paket:** PKG-8: UI Follow Button & Count (`CollectionFollowButton`, `CollectionFollowerCount`)
 
 ---
 
@@ -72,6 +72,13 @@
 - `/api/feed` GET Parameter `includeCollections` (Default: true)
 - `lib/feed.ts` erweitert: `includeCollections` Parameter, Feature-Flag Check
 - Collection Items werden in Feed gemerged (bereits implementiert)
+- `type-check` grün
+
+**PKG-7: Client Hook & Types** ✅
+- `src/hooks/useCollectionFollow.ts` (bereits vorhanden, angepasst)
+- Optimistische UI: sofortiger Toggle, Rollback bei Error
+- Toast-Benachrichtigungen via `sonner`
+- Refresh-Funktion nutzt korrekten API-Endpunkt
 - `type-check` grün
 
 ---
