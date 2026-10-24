@@ -136,6 +136,8 @@ Kernmodelle in `prisma/schema.prisma`:
 - **UserProfile** – Öffentliche Nutzerprofile (Bio, Avatar, Sichtbarkeit, Follower/Following-Counts)
 - **Follow** – Follow-Beziehungen zwischen Nutzern
 - **Notification** – Benachrichtigungen (Follows, später Kommentare, Reviews, Mentions)
+- **ReviewCollection** – Kuratierte Listen von Reviews (Titel, Beschreibung, Sichtbarkeit, Owner, Item-Count, Version für optimistisches Locking, Soft-Delete)
+- **CollectionItem** – Einträge in einer Liste (Review-Referenz, Position, Hinzugefügt-Am)
 
 ## Entwicklung
 

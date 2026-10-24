@@ -42,7 +42,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] Review als PDF exportieren (`/api/reviews/[slug]/pdf`, `ReviewPdfDownload`, `ReviewPdfLayout`, `markdown-to-pdf`) ← erledigt
 - [x] **Full-Text Search mit Relevanz-Ranking** (`/suche`, Highlights, Filter, Pagination) — Spec: `docs/features/search-relevance.md` ← erledigt
 - [x] **Öffentliche Nutzerprofile & Follow-System** (`/u/[username]`, Follow, Feed, Notifications) — Spec: `docs/features/public-user-profiles.md` ← **erledigt**
-- [ ] **Review Collections / Kuratierte Listen** (`/listen`, `/listen/[slug]`, Erstellung, Drag-and-Drop, Teilen, Profil-Tab) — Spec: `docs/features/review-collections.md` ← **in Arbeit (F3)**
+- [x] **Review Collections / Kuratierte Listen** (`/listen`, `/listen/[slug]`, Erstellung, Drag-and-Drop, Teilen, Profil-Tab) — Spec: `docs/features/review-collections.md` ← **erledigt**
 
 ## Typ E — Performance, UX, Developer Experience
 
@@ -50,10 +50,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Review Collections / Kuratierte Listen** — **F3 Design & Plan** 🔄
-Spec: `docs/features/review-collections.md`
-Work Packages: 26 Pakete (PK1-PK26) in PROGRESS.md definiert
+Keines — Review Collections abgeschlossen. Nächstes Feature aus ROADMAP wählen.
 
 ## Nächster Schritt
 
-F4 Implementierung beginnen: PK1 Prisma Schema + Migration → PK2 Zod Schemas → PK3 Lib Utilities → PK4-12 APIs → PK13-21 UI → PK22-24 Tests → PK25 Verify → PK26 Doku.
+Hauptschleife: Nächstes Feature aus ROADMAP (Typ D) auswählen → F1 Auswahl → F2 Spec → F3 Design → F4 Implementierung.
