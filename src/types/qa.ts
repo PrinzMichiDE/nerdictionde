@@ -50,9 +50,10 @@ export interface QAAnswerBase {
 // UI Types (mit User-spezifischen Daten)
 // ============================================
 
-/** Frage in der Liste (ohne Antworten, mit User-Vote) */
+/** Frage in der Liste (mit Antworten, mit User-Vote) */
 export interface QAQuestionListItem extends QAQuestionBase {
   userVote: 1 | -1 | null;
+  answers: QAAnswerWithUserVote[];
 }
 
 /** Frage im Detail (mit Antworten, mit User-Vote) */

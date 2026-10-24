@@ -35,8 +35,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Community Q&A auf Reviews** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 (DB Migration) ✅, PKG-2 (Types/Schemas) ✅, PKG-3 (Server Logic) ✅, PKG-4 (API Questions) ✅, PKG-5 (API Answers) ✅, PKG-6 (API Votes/Accept) ✅**  
-**Phase:** F4 Implementierung → **PKG-7: Client Types & Hooks** (`src/hooks/useQA.ts`, `src/hooks/useQAVote.ts`)
+**Aktuelles Feature:** **Community Q&A auf Reviews** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 (DB Migration) ✅, PKG-2 (Types/Schemas) ✅, PKG-3 (Server Logic) ✅, PKG-4 (API Questions) ✅, PKG-5 (API Answers) ✅, PKG-6 (API Votes/Accept) ✅, PKG-7 (Client Hooks) ✅**  
+**Phase:** F4 Implementierung → **PKG-8: UI Components — Frage-Liste & Frage-Card** (`src/components/qa/QAList.tsx`, `src/components/qa/QAQuestion.tsx`, `src/components/qa/QAQuestionSkeleton.tsx`, `src/components/qa/QAEmptyState.tsx`)
 
 ---
 
