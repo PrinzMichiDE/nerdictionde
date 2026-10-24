@@ -109,7 +109,7 @@
 | PK | Beschreibung | Status |
 |----|--------------|--------|
 | PK1 | Prisma Schema: `ReviewCollection`, `CollectionItem` + Migration | **erledigt** |
-| PK2 | Zod Schemas: `collection-schema.ts` (Create, Update, AddItem, Reorder) | ☐ |
+| PK2 | Zod Schemas: `collection-schema.ts` (Create, Update, AddItem, Reorder) | **erledigt** |
 | PK3 | Lib: `src/lib/collections.ts` (Utilities: Slug-Generierung, Reorder-Validierung, Count-Sync) | ☐ |
 | PK4 | API: `GET /api/listen` (Public Lists mit Filter/Sort/Pagination) | ☐ |
 | PK5 | API: `POST /api/listen` (Create) | ☐ |
