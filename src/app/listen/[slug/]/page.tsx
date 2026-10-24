@@ -1,8 +1,11 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCollectionWithItems, getCollectionBySlug } from "@/lib/collections";
+import { getFollowStatus } from "@/lib/collection-follow";
+import { isCollectionFollowEnabled } from "@/lib/schemas/collection-follow-schema";
 import { CollectionItems } from "@/components/collections/CollectionItems";
 import { ShareButton } from "@/components/collections/ShareButton";
+import { CollectionFollowButton } from "@/components/collections/CollectionFollowButton";
 import { getCategoryColor } from "@/lib/utils";
 
 interface Props {
@@ -62,6 +65,12 @@ export default async function ListenDetailPage({ params, searchParams }: Props) 
     notFound();
   }
 
+  // Follow-Status für SSR laden (falls Feature aktiviert)
+  let followStatus = { isFollowing: false, followersCount: 0 };
+  if (isCollectionFollowEnabled()) {
+    followStatus = await getFollowStatus(undefined, collection.id);
+  }
+
   const isOwner = false; // Will be determined by client component via session
 
   return (
@@ -83,6 +92,11 @@ export default async function ListenDetailPage({ params, searchParams }: Props) 
                 <span className="flex items-center gap-1">
                   {collection.itemCount} Review{collection.itemCount !== 1 ? "s" : ""}
                 </span>
+                {isCollectionFollowEnabled() && (
+                  <span className="flex items-center gap-1 text-muted-foreground">
+                    {followStatus.followersCount} Follower
+                  </span>
+                )}
                 <span className="px-2 py-0.5 rounded-full text-xs font-medium border"
                   style={{ borderColor: collection.isPublic ? "var(--primary)" : "var(--muted-foreground)" }}>
                   {collection.isPublic ? "Öffentlich" : "Privat"}
@@ -94,6 +108,14 @@ export default async function ListenDetailPage({ params, searchParams }: Props) 
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <ShareButton url={typeof window !== "undefined" ? window.location.href : ""} title={collection.title} />
+              {isCollectionFollowEnabled() && (
+                <CollectionFollowButton
+                  collectionId={collection.id}
+                  slug={collection.slug}
+                  initialFollowing={followStatus.isFollowing}
+                  initialCount={followStatus.followersCount}
+                />
+              )}
             </div>
           </div>
 
