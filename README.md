@@ -139,6 +139,7 @@ Kernmodelle in `prisma/schema.prisma`:
 - **ReviewCollection** – Kuratierte Listen von Reviews (Titel, Beschreibung, Sichtbarkeit, Owner, Item-Count, Version für optimistisches Locking, Soft-Delete)
 - **CollectionItem** – Einträge in einer Liste (Review-Referenz, Position, Hinzugefügt-Am)
 - **ReviewReaction** – Emoji-Reaktionen auf Reviews (THUMBS_UP, HEART, PARTY, THINKING, CRY, ANGRY) mit Zählern pro Emoji, Unique-Constraint pro User+Review
+- **ReadingHistory** – Leseverlauf pro Nutzer (Review-Referenz, Progress 0–100%, Scroll-Tiefe, Verweildauer, letztes Lesedatum), Opt-in via `readingHistoryEnabled` auf TwitchUser
 
 ## Entwicklung
 
@@ -211,6 +212,7 @@ Wichtige Variablen (aus `.env`):
 - `FEATURE_REVIEW_REACTIONS` – Emoji-Reaktionen auf Reviews aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
 - `FEATURE_REVIEW_COLLECTIONS` – Review Collections aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
 - `FEATURE_ADVANCED_SEARCH_FILTERS` – Erweiterte Suchfilter (Release-Datum, Preis, Plattform, Video, Deal, Developer/Publisher) aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
+- `FEATURE_READING_HISTORY` – Leseverlauf aktivieren (Default: `false`, Opt-in via Einstellungen; auf `true` setzen für globale Aktivierung)
 
 Alle weiteren Variablen (API-Keys für IGDB, TMDB, Steam, OpenAI, Tavily usw.) werden zur Laufzeit gelesen.
 

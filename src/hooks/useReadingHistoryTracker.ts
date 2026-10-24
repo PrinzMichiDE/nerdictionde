@@ -33,8 +33,8 @@ export function useReadingHistoryTracker({
     dwellTime: 0,
   });
 
-  const startTimeRef = useRef<number>(() => Date.now());
-  const lastVisibleStartRef = useRef<number>(() => Date.now());
+  const startTimeRef = useRef<number>(0);
+  const lastVisibleStartRef = useRef<number>(0);
   const isVisibleRef = useRef<boolean>(true);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const pendingDwellTimeRef = useRef<number>(0);
@@ -44,16 +44,12 @@ export function useReadingHistoryTracker({
   const progressRef = useRef(progress);
   const reviewIdRef = useRef(reviewId);
 
-  // Keep refs in sync
+  // Initialize refs on mount
   useEffect(() => {
-    enabledRef.current = enabled;
-  }, [enabled]);
-  useEffect(() => {
-    progressRef.current = progress;
-  }, [progress]);
-  useEffect(() => {
-    reviewIdRef.current = reviewId;
-  }, [reviewId]);
+    const now = Date.now();
+    startTimeRef.current = now;
+    lastVisibleStartRef.current = now;
+  }, []);
 
   // Dwell-Time aktualisieren bei Visibility-Change
   const handleVisibilityChange = useCallback(() => {

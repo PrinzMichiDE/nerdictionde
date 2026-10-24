@@ -17,6 +17,7 @@
   9. **Review Collections / Kuratierte Listen** (`/listen`, `/listen/[slug]`, Erstellung, Drag-and-Drop, Teilen, Profil-Tab)
   10. **Review Reactions (Emoji-Reaktionen)** (`/reviews/[slug]`, 6 Emojis, optimistische UI, SSR-Counts, Review-Card Badge)
   11. **Erweiterte Suchfilter** (`/suche`, Release-Datum, Preis, Plattform, Video, Deal, Developer/Publisher, Feature-Flag)
+  12. **Leseverlauf / Reading History** (`/verlauf`, automatisches Tracking, Badge, Datenschutz-Toggle, Retention)
 - Abgeschlossene Typ-A-Aufgaben (diese Iteration):
   - Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
   - `no-explicit-any` Bereinigung gestartet: 150+/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
@@ -29,8 +30,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Leseverlauf / Reading History** — F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅, PKG-6 ✅, PKG-7 ✅, PKG-10 ✅  
-**Phase:** F4 – Implementierung (PKG-11: Tests & Doku)
+**Aktuelles Feature:** Keines — **Leseverlauf / Reading History abgeschlossen (F1–F11 ✅)**  
+**Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ D)
 
 ---
 
@@ -137,6 +138,35 @@
 
 ---
 
+### Zusammenfassung: Leseverlauf / Reading History
+
+**Implementierte User Stories (alle ✅):**
+- US1: Leseverlauf ansehen (`/verlauf`) mit SSR, Pagination, Empty-State, Delete/Leeren-Funktionen
+- US2: Automatisches Tracking gelesener Reviews (Scroll ≥50% ODER Verweildauer ≥30s) via IntersectionObserver + Visibility API
+- US3: Lesefortschritts-Badge auf Review-Detailseiten (SSR + Client-Hydration) mit Progress-Ring
+- US4: Einzelne Einträge löschen (optimistische UI, Toast-Bestätigung)
+- US5: Gesamten Verlauf leeren (Confirm-Dialog, optimistische UI)
+- US6: Datenschutz-Toggle in `/einstellungen` (Opt-in, Default aus, DSGVO-konform)
+- US7: Automatische Retention (180 Tage) via Cron-Job
+
+**Technische Highlights:**
+- 1 neues Prisma Model: `ReadingHistory` + Relation `readingHistoryEnabled` auf `TwitchUser` (Default `false`)
+- `unstable_cache` 30s für `/verlauf` und Review-Detail Badge + Tag-Invaliderung bei Mutationen
+- Cursor-basierte Pagination (max 50 Einträge, Default 20)
+- Debounced Client-Tracking (10s) mit `sendBeacon` für Unload-Flush
+- Progress = max(Scroll-Depth, Dwell-Time-basiert: 10 Min = 100%)
+- Feature-Flag `FEATURE_READING_HISTORY` (Default `false` für Opt-in)
+- 17 neue Tests (Schema, Tracker-Logic, API Integration) — alle grün
+- 0 neue Lint Errors, 0 TypeScript Errors, Build grün
+
+**Dokumentation:**
+- CHANGELOG.md, README.md, ROADMAP.md, .env.example, DECISIONS.md aktualisiert
+- Feature Spec (`docs/features/reading-history.md`), Design (`docs/features/reading-history-design.md`)
+- Feature Spec Review-Sektion (F6) komplett ✅
+- PROGRESS.md aktualisiert
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
-Aus ROADMAP.md Typ D auswählen. Kandidaten: Leseverlauf, Kategorie-Abos, Review-Vergleich, Community Q&A, Collections Follow, Personalisierte Empfehlungen, Hardware-Kompatibilität, Review-Serien.
+Aus ROADMAP.md Typ D auswählen. Kandidaten: Kategorie-Abos, Review-Vergleich, Community Q&A, Collections Follow, Personalisierte Empfehlungen, Hardware-Kompatibilität, Review-Serien.

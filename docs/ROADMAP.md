@@ -69,7 +69,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-Keines — Leseverlauf / Reading History abgeschlossen (F1–F11 ✅). Nächstes Feature aus ROADMAP wählen.
+Keines — Leseverlauf / Reading History abgeschlossen (F1–F11 ✅). Nächstes Feature aus ROADMAP wählen (Typ D: Kategorie-Abos, Review-Vergleich, Community Q&A, Collections Follow, Personalisierte Empfehlungen, Hardware-Kompatibilität, Review-Serien).
 
 ## Nächster Schritt
 
