@@ -27,8 +27,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** Keines — Review Collections abgeschlossen (F1–F9 ✅).  
-**Phase:** Hauptschleife — nächstes Feature aus ROADMAP wählen (Typ D).
+**Aktuelles Feature:** **Review Reactions (Emoji-Reaktionen)** — F1 Auswahl abgeschlossen.  
+**Phase:** F2 — Spezifikation schreiben (`docs/features/review-reactions.md`).
 
 ---
 
@@ -63,6 +63,10 @@
 
 ---
 
-### Nächstes Feature (ROADMAP)
+### Nächstes Feature: Review Reactions (Emoji-Reaktionen)
 
-Aus ROADMAP.md Typ D auswählen. Keine festen Kandidaten mehr — neue Features aus Nutzersicht, Verbesserungen, Security-Audit, Performance, Doku, Tests generieren.
+**Auswahl (F1) — 2026-10-24:**
+- **Gewählt:** Review Reactions (Emoji-Reaktionen: 👍 ❤️ 🎉 🤔 😢 😡)
+- **Verworfen:** Leseverlauf (höherer Aufwand, Datenschutz), Kategorie-Abos (Cron nötig), Review-Vergleich (UI-lastig), Community Q&A (Moderation, hoher Aufwand), Collections Follow (niedrigerer Nutzen), Personalisierte Empfehlungen (hoher Aufwand), Hardware-Kompatibilität (sehr hoher Aufwand), Erweiterte Suchfilter (niedrigerer Nutzen), Review-Serien (nischenhaft)
+- **Begründung:** Bestes Nutzen-Aufwand-Verhältnis. Bewährtes Muster (GitHub, Discord, Slack), treibt Engagement & schnelles Feedback, minimaler Backend-Aufwand (1 Model `ReviewReaction`, 1 API `POST/DELETE /api/reviews/[id]/reactions`, 1 UI-Komponente `ReviewReactions`), keine Breaking Changes, sofort sichtbarer Nutzen für Leser & Autoren, erweiterbar für Kommentare später.
+- **Commit:** `docs(feature): select review-reactions` → push

@@ -44,14 +44,32 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] **Öffentliche Nutzerprofile & Follow-System** (`/u/[username]`, Follow, Feed, Notifications) — Spec: `docs/features/public-user-profiles.md` ← **erledigt**
 - [x] **Review Collections / Kuratierte Listen** (`/listen`, `/listen/[slug]`, Erstellung, Drag-and-Drop, Teilen, Profil-Tab) — Spec: `docs/features/review-collections.md` ← **erledigt**
 
+### Neue Kandidaten (auto-generiert 2026-10-24)
+
+- [x] **Review Reactions (Emoji-Reaktionen)** — GitHub-Style Reaktionen (👍 ❤️ 🎉 🤔 😢 😡) auf Reviews; Anzeige der Zähler, eigene Reaktion togglebar; Persistenz pro User (TwitchUser), Aggregation auf Review. Hoher Nutzen (Engagement, schnelles Feedback), niedriger Aufwand (1 Model, 1 API, UI-Komponente), kein Schema-Breaking. **← in Arbeit (F2 Spec fertig)**
+- [ ] **Leseverlauf / Reading History** — Automatisches Tracking gelesener Reviews (Scroll-Tiefe > 50% + Verweildauer > 30s), `/verlauf` Seite, Basis für Personalisierung. Hoher Nutzen (Rückkehr, Personalisierung), mittlerer Aufwand (Model, Middleware/Client-Tracking, API, UI), Datenschutz beachten (Opt-out).
+- [ ] **Kategorie-Abos / Category Subscriptions** — User abonniert Kategorien (Games, Hardware, Movies, Series), Benachrichtigung bei neuen Reviews (Push + E-Mail via Newsletter-Prefs). Hoher Nutzen (Retention, Traffic), mittlerer Aufwand (Model, Cron/Trigger, Notification-Prefs erweitern, UI in Einstellungen).
+- [ ] **Review-Vergleich erweitern** — `/reviews/vergleichen` existiert; Side-by-Side: Specs, Pros/Cons, Score, Preisverlauf, Screenshots; URL-teilarbeit (`?ids=slug1,slug2,slug3`). Mittlerer Nutzen (Kaufentscheidung), mittlerer Aufwand (UI, State, Sharing).
+- [ ] **Community Q&A auf Reviews** — Fragen & Antworten pro Review (StackOverflow-light), Upvote/Downvote, Akzeptierte Antwort, Benachrichtigung Autor. Hoher Nutzen (Community, SEO durch UGC), höherer Aufwand (Models, Threading, Moderation, UI).
+- [ ] **Review Collections Follow** — Nicht nur User folgen, sondern Listen folgen; Feed zeigt neue Items gefolzter Listen; Benachrichtigung bei Änderungen. Mittlerer Nutzen (Entdeckung), niedriger Aufwand (bestehende Follow/Notification-Infrastruktur wiederverwenden).
+- [ ] **Personalisierte Empfehlungen** — "Für dich empfohlen" auf Startseite/Reviews basierend auf Ratings, Bookmarks, Follows, Leseverlauf, Kategorien. Sehr hoher Nutzen (Retention, Entdeckung), hoher Aufwand (ML/Heuristik, Caching, A/B-Testbarkeit).
+- [ ] **Hardware-Kompatibilitäts-Check** — User hinterlegt PC-Specs (CPU, GPU, RAM); Review zeigt "Läuft auf deinem System" Badge + geschätzte FPS. Hoher Nutzen (Kaufentscheidung Hardware), hoher Aufwand (Specs-Parsing, Benchmark-DB, User-Profil-Erweiterung).
+- [ ] **Erweiterte Suchfilter** — Preisrange, Release-Datum-Range, Score-Range, Plattform (PC/PS5/Xbox), Genre-Multi-Select, "Nur mit Video", "Nur mit Preisverlauf". Mittlerer Nutzen (Präzision), niedriger Aufwand (UI + API-Parameter, bestehende Search-Relevanz nutzen).
+- [ ] **Review-Serien / Multi-Part Reviews** — Zusammengehörige Reviews (Base Game + DLCs, Staffel-Reviews), Navigation zwischen Teilen, gemeinsamer Score. Mittlerer Nutzen (Struktur), mittlerer Aufwand (Model-Erweiterung, UI).
+
 ## Typ E — Performance, UX, Developer Experience
 
-- (noch keine Kandidaten)
+- [ ] `no-explicit-any` Warnings inkrementell bereinigen (verbleibende ~66)
+- [ ] Bundle-Size-Analyse & Code-Splitting-Optimierung (Dynamic Imports für schwere Komponenten)
+- [ ] Image-Optimierung: AVIF-Support, Blur-Placeholders für alle Review-Bilder
+- [ ] `unstable_cache` TTL-Tuning & Cache-Invaliderung bei Mutations (Revalidation-Strategie)
+- [ ] Accessibility-Audit gesamt (axe-core CI, Fokus-Management, Color-Contrast)
+- [ ] Performance-Budget in CI (Lighthouse CI, Core Web Vitals Schwellenwerte)
 
 ## Aktuelles Feature
 
-Keines — Review Collections abgeschlossen. Nächstes Feature aus ROADMAP wählen.
+**Review Reactions (Emoji-Reaktionen)** — F2 Spec fertiggestellt (`docs/features/review-reactions.md`). Nächste Phase: F3 Design & Plan.
 
 ## Nächster Schritt
 
-Hauptschleife: Nächstes Feature aus ROADMAP (Typ D) auswählen → F1 Auswahl → F2 Spec → F3 Design → F4 Implementierung.
+F3 Design & Plan: Technische Lösung entwerfen, Arbeitspakete in `docs/PROGRESS.md` definieren, dann F4 Implementierung starten.
