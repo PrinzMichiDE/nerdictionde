@@ -31,8 +31,8 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** Review Collections Follow  
-**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅, PKG-6 ✅, PKG-7 ✅, PKG-8 ✅, PKG-9 ✅**  
-**Nächstes Paket:** PKG-10: UI Einstellungen Tab & Feed (`FollowedCollectionsTab`, `FeedCollectionItems`)
+**Phase:** F4 Implementierung — **PKG-1 ✅ bis PKG-11 ✅**  
+**Nächstes Paket:** PKG-12: Tests (Unit, Integration, E2E)
 
 ---
 
@@ -89,6 +89,18 @@
 **PKG-9: Owner Follower Modal** ✅
 - `CollectionFollowerListModal.tsx`: Dialog mit Pagination, Avatar, Profil-Link
 - Nur für Owner sichtbar, nutzt `getFollowers` Server Logic
+- `type-check` grün
+
+**PKG-10: UI Einstellungen Tab & Feed** ✅
+- `FollowedCollectionsClient.tsx` (bereits vorhanden): Grid, Unfollow, Pagination, Empty State
+- `/einstellungen/gefolgte-listen/page.tsx` (bereits vorhanden): Server Component mit SSR
+- Feed Collection Items bereits in `lib/feed.ts` integriert
+- `type-check` grün
+
+**PKG-11: Notifications & Trigger** ✅
+- `/api/listen/[slug]/items` POST/DELETE für Items verwalten (Owner only)
+- `createCollectionUpdateNotification` in `lib/collection-follow.ts` (bereits vorhanden)
+- Fire-and-forget Notification bei Item-Add an Follower
 - `type-check` grün
 
 ---
