@@ -3,7 +3,7 @@
 ## Stand (2026-10-24)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: 427/433 grün (vitest, 6 pre-existing failures in Collections Follow), `lint`: 21 Errors (pre-existing: 13 no-explicit-any, 8 react-hooks/set-state-in-effect), 236 Warnings — keine neuen Errors durch Review-Vergleich
+- `type-check`: grün. `build`: grün. `tests`: 427/433 grün (vitest, 6 pre-existing failures in Collections Follow), `lint`: 21 Errors (pre-existing: 13 no-explicit-any, 8 react-hooks/set-state-in-effect), 236 Warnings — keine neuen Errors durch Review-Serien
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
   1. Newsletter Double-Optin + Bestätigungsseite
@@ -20,6 +20,7 @@
   12. **Leseverlauf / Reading History** (`/verlauf`, automatisches Tracking, Badge, Datenschutz-Toggle, Retention)
   13. **Kategorie-Abos / Category Subscriptions** (`/einstellungen/kategorien`, Toggle-Switches, Chips auf Startseite/Profil, In-App-Benachrichtigungen, Feature-Flag)
   14. **Review-Vergleich erweitern** (`/reviews/vergleichen`, bis 3 Reviews, Specs, Preisverlauf, Screenshots/Video, ScoreCompare, Share, Feature-Flag)
+  15. **Review-Serien / Multi-Part Reviews** (`/serien`, `/serien/[slug]`, Admin-UI `/admin/serien`, Drag-and-Drop-Reorder, Review-Detail Badge, Review-Card Badge, Search-API Erweiterung, Feature-Flag)
 - Abgeschlossene Typ-A-Aufgaben (diese Iteration):
   - Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
   - `no-explicit-any` Bereinigung gestartet: 150+/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
@@ -33,8 +34,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** Keines — **Review-Vergleich erweitern abgeschlossen (F1–F9 ✅)**  
-**Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ D: Community Q&A, Personalisierte Empfehlungen, Hardware-Kompatibilität, Review-Serien)
+**Aktuelles Feature:** Keines — **Review-Serien / Multi-Part Reviews abgeschlossen (F1–F9 ✅)**  
+**Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ D: Community Q&A, Personalisierte Empfehlungen, Hardware-Kompatibilität)
 
 ---
 
@@ -278,11 +279,56 @@
 
 ---
 
+### Zusammenfassung: Review-Serien / Multi-Part Reviews (Abgeschlossen 2026-10-24)
+
+**User Stories (alle ✅):**
+- US1: Serie ansehen (`/serien/[slug]`) mit Hero, Teilen-Liste, Scores, Share-Button, SEO/OG-Tags
+- US2: Serien-Übersicht (`/serien`) mit Suche, Sortierung, Pagination, Grid
+- US3: Admin: Serie erstellen/bearbeiten/löschen (`/admin/serien`, `/admin/serien/new`, `/admin/serien/[slug]/edit`)
+- US4: Admin: Drag-and-Drop Reorder der Teile (optimistisches Locking via `version`)
+- US5: Review-Detail: "Teil X von Y" Badge mit Tooltip-Navigation zu allen Teilen
+- US6: Review-Card: Serien-Badge mit Link zur Serie
+- US7: Search-API: `series` Feld in Response für Filter/Anzeige
+
+**Technische Highlights:**
+- 2 neue Prisma Models: `ReviewSeries`, `ReviewSeriesItem` + Denormalisierung `Review.seriesId`/`seriesOrder`
+- Reversible Migration `20261024170000_add_review_series`
+- `unstable_cache` 60s (Liste/Detail) + 30s (Review-Detail Serie-Info) + Tag-Invaliderung
+- Admin-UI mit nativer HTML5 Drag-and-Drop (tastaturbedienbar, ARIA)
+- Feature-Flag `FEATURE_REVIEW_SERIES` (Default: `true`)
+- 20 Unit-Tests (Logic, Schemas) — alle grün
+- Search-API Erweiterung: `series` Feld in Response
+- Keine Breaking Changes, additive API-Änderungen
+
+**Dateien (neu/geändert):**
+- `prisma/migrations/20261024170000_add_review_series/migration.sql`
+- `src/lib/review-series-schema.ts`, `src/lib/review-series.ts`
+- `src/app/api/serien/route.ts`, `src/app/api/serien/[slug]/route.ts`
+- `src/app/api/admin/serien/route.ts`, `src/app/api/admin/serien/[slug]/route.ts`, `src/app/api/admin/serien/[slug]/reorder/route.ts`, `src/app/api/admin/serien/[slug]/items/route.ts`, `src/app/api/admin/serien/[slug]/items/[reviewId]/route.ts`
+- `src/app/serien/page.tsx`, `src/app/serien/[slug]/page.tsx`
+- `src/components/series/SeriesBadge.tsx`, `SeriesCard.tsx`, `SeriesDetail.tsx`, `SeriesList.tsx`, `SeriesSearch.tsx`, `SeriesShareButton.tsx`, `SeriesSkeleton.tsx`
+- `src/app/reviews/[slug]/page.tsx` (SeriesBadge Integration)
+- `src/components/reviews/ReviewCard.tsx` (series Prop)
+- `src/app/api/reviews/search/route.ts` (series Feld)
+- `src/lib/search-relevance.ts` (ReviewWithTags Interface)
+- `src/lib/feature-flags.ts` (FEATURE_REVIEW_SERIES)
+- `.env.example`, `CHANGELOG.md`, `README.md`
+- Tests: `tests/lib/review-series.test.ts`
+
+**Definition of Done erfüllt:**
+- [x] Spec vollständig, alle AK getestet & erfüllt
+- [x] Self-Review ohne offene Befunde
+- [x] Build, Type-Check, Lint, Tests grün
+- [x] Doku & Changelog aktualisiert
+- [x] Migration reversibel
+- [x] Keine Secrets im Diff
+- [x] Alles gepusht auf `auto/dev`
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
 **Kandidaten (Typ D):**
-- Review-Vergleich erweitern (`/reviews/vergleichen`)
 - Community Q&A auf Reviews
 - Personalisierte Empfehlungen
 - Hardware-Kompatibilitäts-Check
-- Review-Serien / Multi-Part Reviews

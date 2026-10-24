@@ -56,7 +56,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [ ] **Personalisierte Empfehlungen** — "Für dich empfohlen" auf Startseite/Reviews basierend auf Ratings, Bookmarks, Follows, Leseverlauf, Kategorien. Sehr hoher Nutzen (Retention, Entdeckung), hoher Aufwand (ML/Heuristik, Caching, A/B-Testbarkeit).
 - [ ] **Hardware-Kompatibilitäts-Check** — User hinterlegt PC-Specs (CPU, GPU, RAM); Review zeigt "Läuft auf deinem System" Badge + geschätzte FPS. Hoher Nutzen (Kaufentscheidung Hardware), hoher Aufwand (Specs-Parsing, Benchmark-DB, User-Profil-Erweiterung).
 - [ ] **Erweiterte Suchfilter** — Preisrange, Release-Datum-Range, Score-Range, Plattform (PC/PS5/Xbox), Genre-Multi-Select, "Nur mit Video", "Nur mit Preisverlauf". Mittlerer Nutzen (Präzision), niedriger Aufwand (UI + API-Parameter, bestehende Search-Relevanz nutzen).
-- [ ] **Review-Serien / Multi-Part Reviews** — Zusammengehörige Reviews (Base Game + DLCs, Staffel-Reviews), Navigation zwischen Teilen, gemeinsamer Score. Mittlerer Nutzen (Struktur), mittlerer Aufwand (Model-Erweiterung, UI).
+- [x] **Review-Serien / Multi-Part Reviews** — Zusammengehörige Reviews (Base Game + DLCs, Staffel-Reviews), Navigation zwischen Teilen, gemeinsamer Score. Mittlerer Nutzen (Struktur), mittlerer Aufwand (Model-Erweiterung, UI). **← erledigt (F1–F9 ✅)**
 
 ## Typ E — Performance, UX, Developer Experience
 
@@ -69,7 +69,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-Keines — **Review-Vergleich erweitern abgeschlossen (F1–F9 ✅)**. Nächstes Feature aus ROADMAP wählen (Typ D: Community Q&A, Personalisierte Empfehlungen, Hardware-Kompatibilität, Review-Serien).
+Keines — **Review-Serien / Multi-Part Reviews abgeschlossen (F1–F9 ✅)**. Nächstes Feature aus ROADMAP wählen (Typ D: Community Q&A, Personalisierte Empfehlungen, Hardware-Kompatibilität).
 
 ## Nächster Schritt
 
