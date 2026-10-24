@@ -9,6 +9,7 @@ und dieses Projekt hält sich an [Semantische Versionierung](https://semver.org/
 
 ### Hinzugefügt
 
+- **Leseverlauf / Reading History**: Automatisches Tracking gelesener Reviews (Scroll-Tiefe ≥50% ODER Verweildauer ≥30s); persönliche Verlaufsseite `/verlauf` mit SSR, Pagination, Delete/Leeren-Funktionen; Lesefortschritts-Badge auf Review-Detailseiten (SSR + Client-Hydration); Datenschutz-Toggle in `/einstellungen` (Opt-in, Default aus); Feature-Flag `FEATURE_READING_HISTORY`; Retention 180 Tage; `unstable_cache` 30s + Tag-Invaliderung; Debounced Client-Tracking (10s) mit IntersectionObserver + Visibility API
 - **Erweiterte Suchfilter**: Release-Datum-Range (`releaseDateFrom`/`releaseDateTo`), Preis-Range (`minPrice`/`maxPrice` via PriceHistory/Deals/Hardware MSRP), Plattform-Multi-Select (PC, PS5, PS4, Xbox Series, Xbox One, Switch) via Metadata/JSON & Hardware-Type, "Nur mit Video" (`hasVideo`), "Nur mit Deal" (`hasDeal`), Developer/Publisher-Suche (ILIKE auf JSON Metadata); progressive Disclosure UI ("Weitere Filter" einklappbar); Feature-Flag `FEATURE_ADVANCED_SEARCH_FILTERS`; URL-shareable Parameter; kombinierbar mit bestehenden Filtern (Kategorie, Score, Tags, Sortierung)
 - **Review Reactions (Emoji-Reaktionen)**: GitHub-Style Reaktionen (👍 ❤️ 🎉 🤔 😢 😡) auf Reviews; Anzeige der Zähler pro Emoji + Gesamtzahl; eigene Reaktion wird hervorgehoben (Toggle via Klick); optimistische UI mit sofortigem Feedback & Rollback bei Fehler; server-seitige Aggregation via Prisma `groupBy`; `unstable_cache` 60s + Tag-Invaliderung; Feature-Flag `FEATURE_REVIEW_REACTIONS`; Einbindung in Review-Detailseite (SSR für initiale Zähler, Client-Hydration für eigene Reaktion) und Review-Cards (Top-Reaktion als Badge)
 - **Review Collections / Kuratierte Listen**: Öffentliche Listen-Übersicht `/listen` mit Filter (Suche, Sortierung) und Pagination; Listen-Detailseiten `/listen/[slug]` mit SEO-optimiertem SSR, Review-Karten im Grid, Pagination, Owner-Mode (Reviews hinzufügen/entfernen, Drag-and-Drop-Reorder, Metadaten bearbeiten); Eigene Listen-Verwaltung `/einstellungen/listen`; Profil-Tab "Listen" auf `/u/[username]` für öffentliche Listen anderer Nutzer; Share-Button (Web Share API + Clipboard Fallback + Toast); Open Graph & Twitter Card Tags auf Listen-Detailseiten; Soft-Delete mit `deletedAt`; Max 100 Items pro Liste; Cursor-Pagination; `unstable_cache` (Listen-Übersicht 60s, Detail 30s)
@@ -29,10 +30,12 @@ und dieses Projekt hält sich an [Semantische Versionierung](https://semver.org/
 
 - `NewsletterSubscription`: `isActive`-Standard auf `false` (erst nach Double-Optin aktiv), neue Felder `confirmationToken` und `confirmedAt`
 - `POST /api/newsletter/subscribe`: legt inaktives Abonnement mit Bestätigungstoken an
+- `TwitchUser`: neues Feld `readingHistoryEnabled` (Default `false`) für Opt-in-Status
 
 ### Intern
 
 - Prisma-Migration `20261023120000_add_newsletter_double_optin` (rueckaertwaertszugaenglich)
+- Prisma-Migration `20261024_add_reading_history` (reading_history Model + readingHistoryEnabled auf TwitchUser)
 
 ## [0.1.0] - 2026-10-15
 

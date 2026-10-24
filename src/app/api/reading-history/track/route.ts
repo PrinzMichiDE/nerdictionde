@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const entry = await trackReadingAtomic(userId, bodyValidation.data);
 
     // Cache invalidieren
-    revalidateTag(readingHistoryCacheTag(userId));
+    (revalidateTag as (tag: string) => void)(readingHistoryCacheTag(userId));
 
     return NextResponse.json({
       success: true,

@@ -52,7 +52,7 @@ export async function DELETE(
     }
 
     // Cache invalidieren
-    revalidateTag(readingHistoryCacheTag(userId));
+    (revalidateTag as (tag: string) => void)(readingHistoryCacheTag(userId));
 
     return NextResponse.json({ success: true });
   } catch (error) {

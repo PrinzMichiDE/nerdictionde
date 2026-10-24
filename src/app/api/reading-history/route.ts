@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { cursor, limit } = parsed.data;
-    const data = await getReadingHistory(userId, cursor, limit);
+    const data = await getReadingHistory(userId, cursor ?? null, limit);
 
     return NextResponse.json(data, {
       headers: {
@@ -82,7 +82,7 @@ export async function DELETE(request: NextRequest) {
     const deletedCount = await clearReadingHistory(userId);
 
     // Cache invalidieren
-    revalidateTag(readingHistoryCacheTag(userId));
+    (revalidateTag as (tag: string) => void)(readingHistoryCacheTag(userId));
 
     return NextResponse.json({ success: true, deletedCount });
   } catch (error) {

@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useReadingHistory } from '@/hooks/useReadingHistory';
 import { ReadingHistoryCard, ReadingHistoryCardSkeleton } from '@/components/reading-history/ReadingHistoryCard';
@@ -73,7 +75,7 @@ export function ReadingHistoryList({ initialData, isEn = false }: ReadingHistory
             ? 'Browse reviews to see them appear here. Your reading progress is tracked automatically when you spend time reading.'
             : 'Stöbere durch Reviews, um sie hier zu sehen. Dein Lesefortschritt wird automatisch erfasst, wenn du Zeit mit Lesen verbringst.'}
         </p>
-        <a
+        <Link
           href="/reviews"
           className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
@@ -82,7 +84,7 @@ export function ReadingHistoryList({ initialData, isEn = false }: ReadingHistory
             <path d="M9 22V12h6v10" />
           </svg>
           {isEn ? 'Browse Reviews' : 'Reviews entdecken'}
-        </a>
+        </Link>
       </div>
     );
   }

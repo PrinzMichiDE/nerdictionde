@@ -33,12 +33,27 @@ export function useReadingHistoryTracker({
     dwellTime: 0,
   });
 
-  const startTimeRef = useRef<number>(Date.now());
-  const lastVisibleStartRef = useRef<number>(Date.now());
+  const startTimeRef = useRef<number>(() => Date.now());
+  const lastVisibleStartRef = useRef<number>(() => Date.now());
   const isVisibleRef = useRef<boolean>(true);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const pendingDwellTimeRef = useRef<number>(0);
   const sentProgressRef = useRef<ReadingProgress>({ progress: 0, scrollDepth: 0, dwellTime: 0 });
+  // Refs for cleanup effect to avoid dependency issues
+  const enabledRef = useRef(enabled);
+  const progressRef = useRef(progress);
+  const reviewIdRef = useRef(reviewId);
+
+  // Keep refs in sync
+  useEffect(() => {
+    enabledRef.current = enabled;
+  }, [enabled]);
+  useEffect(() => {
+    progressRef.current = progress;
+  }, [progress]);
+  useEffect(() => {
+    reviewIdRef.current = reviewId;
+  }, [reviewId]);
 
   // Dwell-Time aktualisieren bei Visibility-Change
   const handleVisibilityChange = useCallback(() => {
@@ -175,23 +190,23 @@ export function useReadingHistoryTracker({
       }
       // Finalen Dwell-Time flush beim Verlassen der Seite
       const now = Date.now();
-      let finalDwellTime = progress.dwellTime;
+      let finalDwellTime = progressRef.current.dwellTime;
       if (isVisibleRef.current) {
         finalDwellTime += now - lastVisibleStartRef.current;
       }
       finalDwellTime += pendingDwellTimeRef.current;
 
       if (
-        enabled &&
-        (progress.scrollDepth >= SCROLL_THRESHOLD || finalDwellTime >= DWELL_THRESHOLD_MS)
+        enabledRef.current &&
+        (progressRef.current.scrollDepth >= SCROLL_THRESHOLD || finalDwellTime >= DWELL_THRESHOLD_MS)
       ) {
         // sendBeacon für zuverlässiges Senden beim Unload
         navigator.sendBeacon(
           '/api/reading-history/track',
           JSON.stringify({
-            reviewId,
-            progress: progress.progress,
-            scrollDepth: progress.scrollDepth,
+            reviewId: reviewIdRef.current,
+            progress: progressRef.current.progress,
+            scrollDepth: progressRef.current.scrollDepth,
             dwellTime: Math.round(finalDwellTime / 1000),
           })
         );
