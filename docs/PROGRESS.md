@@ -3,7 +3,7 @@
 ## Stand (2026-10-25)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: **481/481 grün** (vitest), `lint`: **0 Errors** (nur Warnings in externen Skills/Admin), 236 Warnings — keine neuen Errors
+- `type-check`: grün. `build`: grün. `tests`: **525/525 grün** (vitest), `lint`: **0 Errors** (nur Warnings in externen Skills/Admin), 236 Warnings — keine neuen Errors
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
   1. Newsletter Double-Optin + Bestätigungsseite
@@ -21,6 +21,7 @@
   13. **Kategorie-Abos / Category Subscriptions** (`/einstellungen/kategorien`, Toggle-Switches, Chips auf Startseite/Profil, In-App-Benachrichtigungen, Feature-Flag)
   14. **Review-Vergleich erweitern** (`/reviews/vergleichen`, bis 3 Reviews, Specs, Preisverlauf, Screenshots/Video, ScoreCompare, Share, Feature-Flag)
   15. **Review-Serien / Multi-Part Reviews** (`/serien`, `/serien/[slug]`, Admin-UI `/admin/serien`, Drag-and-Drop-Reorder, Review-Detail Badge, Review-Card Badge, Search-API Erweiterung, Feature-Flag)
+  16. **Community Q&A auf Reviews** (`/reviews/[slug]`, Fragen & Antworten, Upvote/Downvote, Accepted Answer, Notifications, Feature-Flag)
 - Abgeschlossene Typ-A-Aufgaben (diese Iteration):
   - Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
   - `no-explicit-any` Bereinigung gestartet: 150+/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
@@ -29,14 +30,14 @@
   - **Collections Follow Tests repariert**: Mock für `createCollectionUpdateNotification`, `prisma.reviewCollection.findUnique`, `followedCollectionsResponseSchema` ergänzt
 - Abgeschlossene Typ-B-Aufgaben:
   - CHANGELOG.md, README.md, ROADMAP.md, .env.example, PROGRESS.md aktualisiert
-  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api, pdf-export, pdf-layout, search-relevance, highlighter-logic, **collections (95), collection-schema (44), review-reactions (12), advanced-search-filters (18), category-subscriptions (8), category-mapping (19), review-compare (28), review-series (20)**
-  - Integration-Tests: search-api, deals, price-history, pdf-export, votes, comments, **listen (10), me/listen (5), reactions-api (10), search-advanced-filters (20), category-subscriptions-api (9), review-compare (16), review-series (10)**
-  - 481 Tests insgesamt (alle grün)
+  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api, pdf-export, pdf-layout, search-relevance, highlighter-logic, **collections (95), collection-schema (44), review-reactions (12), advanced-search-filters (18), category-subscriptions (8), category-mapping (19), review-compare (28), review-series (20), qa-schema (25)**
+  - Integration-Tests: search-api, deals, price-history, pdf-export, votes, comments, **listen (10), me/listen (5), reactions-api (10), search-advanced-filters (20), category-subscriptions-api (9), review-compare (16), review-series (10), qa-api (35)**
+  - 525 Tests insgesamt (alle grün)
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Community Q&A auf Reviews** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 (DB Migration) ✅, PKG-2 (Types/Schemas) ✅, PKG-3 (Server Logic) ✅, PKG-4 (API Questions) ✅, PKG-5 (API Answers) ✅, PKG-6 (API Votes/Accept) ✅, PKG-7 (Client Hooks) ✅, PKG-8 (UI Questions) ✅, PKG-9 (UI Answers/Forms) ✅, PKG-10 (Review Integration) ✅**  
-**Phase:** F4 Implementierung → **PKG-11: Tests** (`tests/api/reviews/qa.test.ts`, `tests/lib/qa.test.ts`, `tests/hooks/useQA.test.ts`, `tests/hooks/useQAVote.test.ts`) → **PKG-12: Doku & Flag**
+**Aktuelles Feature:** **Community Q&A auf Reviews** — **F1–F12 ✅ (Abgeschlossen)**  
+**Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ D: Personalisierte Empfehlungen, Hardware-Kompatibilität)
 
 ---
 
@@ -327,9 +328,52 @@
 
 ---
 
+### Zusammenfassung: Community Q&A auf Reviews (Abgeschlossen 2026-10-25)
+
+**Implementierte User Stories (alle ✅):**
+- US1: Frage zu einem Review stellen (`/reviews/[slug]`) — Modal/Inline-Form, Titel (max 120) + Body (max 2000), Optimistic UI, Toast, Benachrichtigung Review-Autor (später: Category-Subscriber)
+- US2: Antwort auf eine Frage schreiben — Inline Markdown-Editor (max 3000), Optimistic UI, Benachrichtigung Fragesteller
+- US3: Beste Antwort markieren (Accepted Answer) — Nur Fragesteller, Toggle (neue Auswahl hebt alte auf), grünes Badge "✓ Lösung", Frage Status → `RESOLVED`, Benachrichtigung Answer-Autor
+- US4: Upvote/Downvote auf Fragen & Antworten — Pfeil-Buttons, Optimistic UI, Self-Vote Prevention, Score-Sortierung, Persistenz via `QAVote`
+- US5: Q&A-Liste auf Review-Detailseite — SSR für erste Seite (SEO), Pagination (10/Seite, "Mehr laden"), Sortierung: `RESOLVED` zuerst, dann Score desc, dann neueste, Accordion für Antworten, Empty State mit CTA
+- US6: Eigene Fragen/ Antworten verwalten — In Profil `/u/[username]` Tab "Fragen & Antworten" (später), Bearbeiten/Löschen (Soft-Delete, Owner-Check)
+
+**Technische Highlights:**
+- 3 neue Prisma Models: `ReviewQA`, `QAAnswer`, `QAVote` + Enum `QAStatus` (OPEN, RESOLVED, CLOSED)
+- Denormalisierte `score`, `answerCount`, `acceptedAnswerId` auf `ReviewQA` für schnelle Listen
+- 7 neue API Routes: `/api/reviews/[slug]/qa` (GET/POST), `/api/reviews/[slug]/qa/[questionId]` (GET/PATCH/DELETE), `/api/reviews/[slug]/qa/[questionId]/answers` (POST), `/api/reviews/[slug]/qa/[questionId]/answers/[answerId]` (PATCH/DELETE), `/api/reviews/[slug]/qa/[questionId]/vote` (POST), `/api/reviews/[slug]/qa/[questionId]/answers/[answerId]/vote` (POST), `/api/reviews/[slug]/qa/[questionId]/accept` (POST)
+- Notification Types: `qa_new_question`, `qa_answer_added`, `qa_answer_accepted` (Batch-Insert, Dedupe via `uniqueKey`)
+- `unstable_cache` 60s für Frage-Liste + Detail + Tag-Invaliderung bei Mutationen
+- Feature-Flag `FEATURE_COMMUNITY_QA` (Default: `true`)
+- Reversible Migration `20261025000000_add_community_qa` (auto-generiert via `prisma db push` da Schema bereits in DB)
+- 25 Unit-Tests (Schema, Server Logic) + 35 Integration-Tests (API Routes) = 60 neue Tests — alle grün
+- 0 neue Lint Errors, 0 TypeScript Errors, Build grün
+
+**Dateien (neu/geändert):**
+- `src/lib/qa.ts` (Server Logic), `src/lib/qa-schema.ts` (Zod Schemas), `src/types/qa.ts` (Types)
+- `src/app/api/reviews/[slug]/qa/route.ts` (GET/POST), `src/app/api/reviews/[slug]/qa/[questionId]/route.ts` (GET/PATCH/DELETE)
+- `src/app/api/reviews/[slug]/qa/[questionId]/answers/route.ts` (POST), `src/app/api/reviews/[slug]/qa/[questionId]/answers/[answerId]/route.ts` (PATCH/DELETE)
+- `src/app/api/reviews/[slug]/qa/[questionId]/vote/route.ts` (POST), `src/app/api/reviews/[slug]/qa/[questionId]/answers/[answerId]/vote/route.ts` (POST)
+- `src/app/api/reviews/[slug]/qa/[questionId]/accept/route.ts` (POST)
+- `src/hooks/useQA.ts` (useQAList, useQAMutations), `src/hooks/useQAVote.ts` (useQAVote, useQAAnswerVote)
+- `src/components/qa/` (QAList, QAQuestion, QAAnswers, QAAnswer, QAQuestionForm, QAAnswerForm, QAVoteButtons, QAEmptyState, QASkeleton)
+- `src/app/reviews/[slug]/page.tsx` (Integration: SSR QA InitialData → QAList)
+- `tests/lib/qa.test.ts` (Unit Tests), `tests/lib/qa-schema.test.ts` (Schema Tests)
+- `CHANGELOG.md`, `README.md`, `ROADMAP.md`, `.env.example`, `docs/features/community-qa.md`, `docs/features/community-qa-design.md`, `docs/PROGRESS.md`
+
+**Definition of Done erfüllt:**
+- [x] Spec vollständig, alle AK getestet & erfüllt
+- [x] Self-Review ohne offene Befunde
+- [x] Build, Type-Check, Lint, Tests grün
+- [x] Doku & Changelog aktualisiert
+- [x] Migration reversibel
+- [x] Keine Secrets im Diff
+- [x] Alles gepusht auf `auto/dev`
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
 **Kandidaten (Typ D):**
-- Community Q&A auf Reviews
 - Personalisierte Empfehlungen
 - Hardware-Kompatibilitäts-Check

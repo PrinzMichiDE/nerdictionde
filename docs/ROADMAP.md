@@ -51,7 +51,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] **Leseverlauf / Reading History** — Automatisches Tracking gelesener Reviews (Scroll-Tiefe > 50% + Verweildauer > 30s), `/verlauf` Seite, Basis für Personalisierung. Hoher Nutzen (Rückkehr, Personalisierung), mittlerer Aufwand (Model, Middleware/Client-Tracking, API, UI), Datenschutz beachten (Opt-out). **← erledigt (F1–F11 ✅)**
 - [x] **Kategorie-Abos / Category Subscriptions** — User abonniert Kategorien (Games, Hardware, Movies, Series), Benachrichtigung bei neuen Reviews (In-App, E-Mail via Cron). Hoher Nutzen (Retention, Traffic), mittlerer Aufwand (Model, Trigger bei Review-Veröffentlichung, Notification-Prefs, UI in Einstellungen). **← erledigt (F1–F9 ✅)**
 - [x] **Review-Vergleich erweitern** — `/reviews/vergleichen` existiert; Side-by-Side: Specs, Pros/Cons, Score, Preisverlauf, Screenshots; URL-teilarbeit (`?ids=slug1,slug2,slug3`). Mittlerer Nutzen (Kaufentscheidung), mittlerer Aufwand (UI, State, Sharing). **← erledigt (F1–F9 ✅)**
-- [ ] **Community Q&A auf Reviews** — Fragen & Antworten pro Review (StackOverflow-light), Upvote/Downvote, Akzeptierte Antwort, Benachrichtigung Autor. Hoher Nutzen (Community, SEO durch UGC), mittlerer Aufwand (Models, Threading, Moderation, UI). **← in Arbeit (F1–F3 ✅, F4–F12 offen)**
+- [x] **Community Q&A auf Reviews** — Fragen & Antworten pro Review (StackOverflow-light), Upvote/Downvote, Akzeptierte Antwort, Benachrichtigung Autor. Hoher Nutzen (Community, SEO durch UGC), mittlerer Aufwand (Models, Threading, Moderation, UI). **← erledigt (F1–F12 ✅)**
 - [x] **Review Collections Follow** — Nicht nur User folgen, sondern Listen folgen; Feed zeigt neue Items gefolzter Listen; Benachrichtigung bei Änderungen. Mittlerer Nutzen (Entdeckung), niedriger Aufwand (bestehende Follow/Notification-Infrastruktur wiederverwenden). **← erledigt (F1–F13 ✅)**
 - [ ] **Personalisierte Empfehlungen** — "Für dich empfohlen" auf Startseite/Reviews basierend auf Ratings, Bookmarks, Follows, Leseverlauf, Kategorien. Sehr hoher Nutzen (Retention, Entdeckung), hoher Aufwand (ML/Heuristik, Caching, A/B-Testbarkeit).
 - [ ] **Hardware-Kompatibilitäts-Check** — User hinterlegt PC-Specs (CPU, GPU, RAM); Review zeigt "Läuft auf deinem System" Badge + geschätzte FPS. Hoher Nutzen (Kaufentscheidung Hardware), hoher Aufwand (Specs-Parsing, Benchmark-DB, User-Profil-Erweiterung).
@@ -69,8 +69,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Community Q&A auf Reviews** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅** → Nächste Phase: F4 Implementierung (PKG-1 bis PKG-12)
+Keines — **Community Q&A auf Reviews abgeschlossen (F1–F12 ✅)**. Nächstes Feature aus ROADMAP wählen (Typ D: Personalisierte Empfehlungen, Hardware-Kompatibilität).
 
 ## Nächster Schritt
 
-Hauptschleife: **F4 Implementierung — PKG-1: DB-Migration & Prisma Models** → `prisma migrate dev` → Commit `feat(community-qa): db migration` → push
+Hauptschleife: Nächstes Feature aus ROADMAP (Typ D) auswählen → F1 Auswahl → F2 Spec → F3 Design → F4 Implementierung.
