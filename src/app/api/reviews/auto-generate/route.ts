@@ -1,29 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchIGDB, getIGDBGameBySteamId, getIGDBGameById, parseIGDBId } from "@/lib/igdb";
+import { searchIGDB, getIGDBGameBySteamId, getIGDBGameById, parseIGDBId, type IGDBGame } from "@/lib/igdb";
 import { parseSteamUrl } from "@/lib/steam";
 import { uploadImage } from "@/lib/blob";
 import { calculatePublicationDate } from "@/lib/date-utils";
 import { requireAdminAuth } from "@/lib/auth";
 import { generateReviewContent } from "@/lib/review-generation";
 import { extractYouTubeVideoIdsFromIGDB } from "@/lib/youtube-extraction";
-
-interface IGDBGame {
-  id: number;
-  name: string;
-  first_release_date?: number;
-  cover?: { url: string };
-  screenshots?: Array<{ url: string }>;
-  videos?: Array<{ video_id?: string }>;
-  involved_companies?: Array<{ developer: boolean; publisher: boolean; company: { name: string } }>;
-  platforms?: Array<{ name: string }>;
-  genres?: Array<{ name: string }>;
-  game_modes?: Array<{ name: string }>;
-  player_perspectives?: Array<{ name: string }>;
-  game_engines?: Array<{ name: string }>;
-  rating?: number;
-  aggregated_rating?: number;
-  specs?: Record<string, unknown>;
-}
 
 interface GeneratedReviewPayload {
   title: string;
@@ -134,7 +116,7 @@ async function runGeneration(
 
   const result = await generateReviewContent(data, 0, { steamData });
 
-  const pubDate = calculatePublicationDate(data.first_release_date);
+  const pubDate = calculatePublicationDate(data.first_release_date ?? undefined);
 
   // Process metadata for games
   const gameMetadata = {
@@ -226,7 +208,7 @@ async function runGeneration(
     cons: result.de.cons || [],
     cons_en: result.en.cons || [],
     score: result.score || 0,
-    specs: result.specs || data.specs || null,
+    specs: result.specs || null,
     metadata: gameMetadata,
     category: "game",
     igdbId: data.id,

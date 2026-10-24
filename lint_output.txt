@@ -51,20 +51,11 @@ E:\Projects\nerdictionde\scripts\update-metadata.ts
   50:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 E:\Projects\nerdictionde\src\app\admin\components\BulkCreate.tsx
-   57:18  warning  'setStatus' is assigned a value but never used        @typescript-eslint/no-unused-vars
-   58:24  warning  'setSkipExisting' is assigned a value but never used  @typescript-eslint/no-unused-vars
-  123:27  error    Unexpected any. Specify a different type              @typescript-eslint/no-explicit-any
-  137:26  error    Unexpected any. Specify a different type              @typescript-eslint/no-explicit-any
-  161:21  error    Unexpected any. Specify a different type              @typescript-eslint/no-explicit-any
-  286:81  error    Unexpected any. Specify a different type              @typescript-eslint/no-explicit-any
-  423:81  error    Unexpected any. Specify a different type              @typescript-eslint/no-explicit-any
-  438:79  error    Unexpected any. Specify a different type              @typescript-eslint/no-explicit-any
-  571:81  error    Unexpected any. Specify a different type              @typescript-eslint/no-explicit-any
-  586:79  error    Unexpected any. Specify a different type              @typescript-eslint/no-explicit-any
+  59:18  warning  'setStatus' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  60:24  warning  'setSkipExisting' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
 E:\Projects\nerdictionde\src\app\admin\components\FormPanel.tsx
-   24:53  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  333:26  warning  'err' is defined but never used           @typescript-eslint/no-unused-vars
+  333:26  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
 
 E:\Projects\nerdictionde\src\app\admin\components\MassReviewCreation.tsx
    12:18  warning  'Pause' is defined but never used                            @typescript-eslint/no-unused-vars
@@ -147,8 +138,8 @@ E:\Projects\nerdictionde\src\app\api\cron\generate-category-reviews\route.ts
   158:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 E:\Projects\nerdictionde\src\app\api\cron\generate-product-reviews\route.ts
-  111:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  134:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  135:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 E:\Projects\nerdictionde\src\app\api\cron\regenerate-zero-score-reviews\route.ts
   71:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
@@ -180,87 +171,26 @@ E:\Projects\nerdictionde\src\app\api\releases\route.ts
 E:\Projects\nerdictionde\src\app\api\releases\sync\route.ts
   22:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
-E:\Projects\nerdictionde\src\app\api\reviews\[id]\deals\route.ts
-  18:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\app\api\reviews\[id]\price-history\route.ts
-  18:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\app\api\reviews\[id]\related\route.ts
-  65:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\app\api\reviews\[id]\route.ts
-  19:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  40:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  59:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\app\api\reviews\auto-generate\route.ts
-   51:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  123:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  123:84  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  124:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  124:84  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  125:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  126:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  127:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  128:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  129:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  244:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  268:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\app\api\reviews\bulk-create-200-progress\[jobId]\route.ts
-  28:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
 E:\Projects\nerdictionde\src\app\api\reviews\bulk-create-200\route.ts
-   59:21  error    Unexpected any. Specify a different type               @typescript-eslint/no-explicit-any
-  121:11  warning  'retryWithBackoff' is assigned a value but never used  @typescript-eslint/no-unused-vars
-  131:25  error    Unexpected any. Specify a different type               @typescript-eslint/no-explicit-any
-  161:10  error    Unexpected any. Specify a different type               @typescript-eslint/no-explicit-any
-  176:5   warning  'skipExisting' is assigned a value but never used      @typescript-eslint/no-unused-vars
-  199:23  error    Unexpected any. Specify a different type               @typescript-eslint/no-explicit-any
-  301:23  error    Unexpected any. Specify a different type               @typescript-eslint/no-explicit-any
-  340:19  error    Unexpected any. Specify a different type               @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\app\api\reviews\bulk-create-mass-progress\[jobId]\route.ts
-  28:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  126:11  warning  'retryWithBackoff' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  182:5   warning  'skipExisting' is assigned a value but never used      @typescript-eslint/no-unused-vars
 
 E:\Projects\nerdictionde\src\app\api\reviews\bulk-create-mass\route.ts
-   24:37  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
-   71:16  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
-  140:15  warning  'createdHw' is assigned a value but never used  @typescript-eslint/no-unused-vars
-  160:21  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
-  222:19  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
-  235:10  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
-  272:23  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
-  403:23  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\app\api\reviews\bulk-create-movies\route.ts
-   41:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  114:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\app\api\reviews\bulk-create-series\route.ts
-   41:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  114:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\app\api\reviews\bulk-create\route.ts
-   56:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-   91:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  169:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\app\api\reviews\jobs\route.ts
-  30:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   16:33  warning  'HardwareCatalogItem' is defined but never used  @typescript-eslint/no-unused-vars
+   25:37  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   72:16  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  141:15  warning  'createdHw' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  161:21  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  223:19  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  236:10  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  273:23  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  404:23  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
 
 E:\Projects\nerdictionde\src\app\api\reviews\route.ts
    24:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
    94:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   197:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   262:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\app\api\seed-game-overlays\route.ts
-  46:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\app\api\tmdb\genres\route.ts
-  22:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 E:\Projects\nerdictionde\src\app\api\tools\title-generator\route.ts
   20:13  warning  'userId' is assigned a value but never used  @typescript-eslint/no-unused-vars
@@ -271,41 +201,22 @@ E:\Projects\nerdictionde\src\app\game-overlays\page.tsx
   4:34  warning  'Copy' is defined but never used      @typescript-eslint/no-unused-vars
 
 E:\Projects\nerdictionde\src\app\newsletter\confirm\[token]\page.tsx
-  10:11  warning  'token' is assigned a value but never used                                                                                                             @typescript-eslint/no-unused-vars
-  41:9   error    Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
-  64:7   error    Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+  11:11  warning  'token' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
 E:\Projects\nerdictionde\src\app\newsletter\unsubscribe\[token]\page.tsx
-  10:11  warning  'token' is assigned a value but never used                                                                                                             @typescript-eslint/no-unused-vars
-  46:7   error    Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+  11:11  warning  'token' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
 E:\Projects\nerdictionde\src\app\profil\page.tsx
   16:10  warning  'getInitials' is defined but never used  @typescript-eslint/no-unused-vars
 
-E:\Projects\nerdictionde\src\app\releases\page.tsx
-  48:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\app\reviews\[slug]\page.tsx
-  711:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  723:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  732:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  741:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  742:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  768:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
 E:\Projects\nerdictionde\src\app\reviews\vergleichen\page.tsx
-    8:10  warning  'SpecTable' is defined but never used                            @typescript-eslint/no-unused-vars
-   97:50  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
-   97:75  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
-  195:17  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
-  195:27  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  8:10  warning  'SpecTable' is defined but never used  @typescript-eslint/no-unused-vars
 
 E:\Projects\nerdictionde\src\app\streaming-tools\donation-tracker\page.tsx
   20:10  warning  'userId' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
 E:\Projects\nerdictionde\src\app\streaming-tools\overlay-generator\page.tsx
-  26:9   warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
-  76:17  error    Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+  26:9  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
 E:\Projects\nerdictionde\src\app\tools\page.tsx
    1:16  warning  'CardContent' is defined but never used     @typescript-eslint/no-unused-vars
@@ -378,87 +289,16 @@ E:\Projects\nerdictionde\src\components\home\FAQ.tsx
   66:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
 
 E:\Projects\nerdictionde\src\components\home\HeroSection.tsx
-  46:24  error  Error: Cannot call impure function during render
-
-`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
-
-E:\Projects\nerdictionde\src\components\home\HeroSection.tsx:46:24
-  44 |             className="absolute w-1 h-1 bg-primary/30 rounded-full animate-float"
-  45 |             style={{
-> 46 |               left: `${Math.random() * 100}%`,
-     |                        ^^^^^^^^^^^^^ Cannot call impure function
-  47 |               top: `${Math.random() * 100}%`,
-  48 |               animationDelay: `${Math.random() * 5}s`,
-  49 |               animationDuration: `${3 + Math.random() * 4}s`,  react-hooks/purity
-  47:23  error  Error: Cannot call impure function during render
-
-`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
-
-E:\Projects\nerdictionde\src\components\home\HeroSection.tsx:47:23
-  45 |             style={{
-  46 |               left: `${Math.random() * 100}%`,
-> 47 |               top: `${Math.random() * 100}%`,
-     |                       ^^^^^^^^^^^^^ Cannot call impure function
-  48 |               animationDelay: `${Math.random() * 5}s`,
-  49 |               animationDuration: `${3 + Math.random() * 4}s`,
-  50 |             }}                                                                      react-hooks/purity
-  48:34  error  Error: Cannot call impure function during render
-
-`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
-
-E:\Projects\nerdictionde\src\components\home\HeroSection.tsx:48:34
-  46 |               left: `${Math.random() * 100}%`,
-  47 |               top: `${Math.random() * 100}%`,
-> 48 |               animationDelay: `${Math.random() * 5}s`,
-     |                                  ^^^^^^^^^^^^^ Cannot call impure function
-  49 |               animationDuration: `${3 + Math.random() * 4}s`,
-  50 |             }}
-  51 |           />                                                                   react-hooks/purity
-  49:41  error  Error: Cannot call impure function during render
-
-`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
-
-E:\Projects\nerdictionde\src\components\home\HeroSection.tsx:49:41
-  47 |               top: `${Math.random() * 100}%`,
-  48 |               animationDelay: `${Math.random() * 5}s`,
-> 49 |               animationDuration: `${3 + Math.random() * 4}s`,
-     |                                         ^^^^^^^^^^^^^ Cannot call impure function
-  50 |             }}
-  51 |           />
-  52 |         ))}                                                                                               react-hooks/purity
+  6:31  warning  'useMemo' is defined but never used  @typescript-eslint/no-unused-vars
 
 E:\Projects\nerdictionde\src\components\home\ImageGallery.tsx
-  47:39  warning  The ref value 'galleryRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'galleryRef.current' to a variable inside the effect, and use that variable in the cleanup function                                                                                                                                                                                                                                                    react-hooks/exhaustive-deps
-  54:5   error    Error: This value cannot be modified
-
-Modifying a variable defined outside a component or hook is not allowed. Consider using an effect.
-
-E:\Projects\nerdictionde\src\components\home\ImageGallery.tsx:54:5
-  52 |   const openLightbox = (src: string, title: string, index: number) => {
-  53 |     setSelectedImage({ src, title, index });
-> 54 |     document.body.style.overflow = "hidden";
-     |     ^^^^^^^^^^^^^^^^^^^ value cannot be modified
-  55 |   };
-  56 |
-  57 |   const closeLightbox = () => {  react-hooks/immutability
-  82:6   warning  React Hook useEffect has a missing dependency: 'navigateImage'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/exhaustive-deps
+  47:39  warning  The ref value 'galleryRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'galleryRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  92:6   warning  React Hook useEffect has a missing dependency: 'navigateImage'. Either include it or remove the dependency array                                                                                                                                                     react-hooks/exhaustive-deps
 
 E:\Projects\nerdictionde\src\components\home\InteractiveCharts.tsx
-   37:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function                                                                                                                                                                                                                                                                                                  react-hooks/exhaustive-deps
-  123:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function                                                                                                                                                                                                                                                                                                  react-hooks/exhaustive-deps
-  135:5   error    Error: Cannot reassign variable after render completes
-
-Reassigning `currentAngle` after render has completed can cause inconsistent behavior on subsequent renders. Consider using state instead.
-
-E:\Projects\nerdictionde\src\components\home\InteractiveCharts.tsx:135:5
-  133 |     const angle = (item.value / total) * 360;
-  134 |     const startAngle = currentAngle;
-> 135 |     currentAngle += angle;
-      |     ^^^^^^^^^^^^ Cannot reassign `currentAngle` after render completes
-  136 |
-  137 |     return {
-  138 |       ...item,  react-hooks/immutability
-  242:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function                                                                                                                                                                                                                                                                                                  react-hooks/exhaustive-deps
+   43:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  129:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  250:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
 
 E:\Projects\nerdictionde\src\components\home\ParallaxSection.tsx
   18:15  warning  'rect' is assigned a value but never used                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
@@ -469,8 +309,6 @@ E:\Projects\nerdictionde\src\components\home\Partners.tsx
 
 E:\Projects\nerdictionde\src\components\home\PressMentions.tsx
   52:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
-  95:17  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                        react/no-unescaped-entities
-  95:33  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                        react/no-unescaped-entities
 
 E:\Projects\nerdictionde\src\components\home\ScrollAnimations.tsx
   39:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
@@ -486,34 +324,10 @@ E:\Projects\nerdictionde\src\components\home\Statistics.tsx
 
 E:\Projects\nerdictionde\src\components\home\StatsDashboard.tsx
    34:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
-  119:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
-  159:32  error    React Hook "useRef" cannot be called inside a callback. React Hooks must be called in a React function component or a custom React Hook function                                                                                                       react-hooks/rules-of-hooks
-  160:39  error    React Hook "useCountUp" cannot be called inside a callback. React Hooks must be called in a React function component or a custom React Hook function                                                                                                   react-hooks/rules-of-hooks
-
-E:\Projects\nerdictionde\src\components\home\Testimonials.tsx
-  107:17  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
-  107:39  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  152:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
 
 E:\Projects\nerdictionde\src\components\reviews\CompareButton.tsx
-  37:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-E:\Projects\nerdictionde\src\components\reviews\CompareButton.tsx:37:7
-  35 |     try {
-  36 |       const stored = localStorage.getItem(STORAGE_KEY);
-> 37 |       setCart(stored ? JSON.parse(stored) : []);
-     |       ^^^^^^^ Avoid calling setState() directly within an effect
-  38 |     } catch {
-  39 |       setCart([]);
-  40 |     }  react-hooks/set-state-in-effect
-
-E:\Projects\nerdictionde\src\components\reviews\HardwareMetadata.tsx
-  11:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  3:23  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
 
 E:\Projects\nerdictionde\src\components\reviews\ReviewPdfLayout.tsx
    29:9    warning  'radius' is assigned a value but never used  @typescript-eslint/no-unused-vars
@@ -521,7 +335,7 @@ E:\Projects\nerdictionde\src\components\reviews\ReviewPdfLayout.tsx
   299:103  error    Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
 
 E:\Projects\nerdictionde\src\components\reviews\TableOfContents.tsx
-  22:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+  29:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
 
 Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
 * Update external systems with the latest state from React.
@@ -529,17 +343,18 @@ Effects are intended to synchronize state between React and external systems suc
 
 Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
 
-E:\Projects\nerdictionde\src\components\reviews\TableOfContents.tsx:22:5
-  20 |
-  21 |   useEffect(() => {
-> 22 |     setMounted(true);
+E:\Projects\nerdictionde\src\components\reviews\TableOfContents.tsx:29:5
+  27 |   useEffect(() => {
+  28 |     if (!isClient) return;
+> 29 |     setMounted(true);
      |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
-  23 |   }, []);
-  24 |
-  25 |   useEffect(() => {  react-hooks/set-state-in-effect
+  30 |   }, []);
+  31 |
+  32 |   useEffect(() => {  react-hooks/set-state-in-effect
 
 E:\Projects\nerdictionde\src\components\reviews\YouTubeEmbed.tsx
-  47:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+  43:10  warning  'isClientState' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+  52:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
 
 Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
 * Update external systems with the latest state from React.
@@ -547,14 +362,26 @@ Effects are intended to synchronize state between React and external systems suc
 
 Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
 
-E:\Projects\nerdictionde\src\components\reviews\YouTubeEmbed.tsx:47:5
-  45 |
-  46 |   useEffect(() => {
-> 47 |     setIsClient(true);
+E:\Projects\nerdictionde\src\components\reviews\YouTubeEmbed.tsx:52:5
+  50 |   useEffect(() => {
+  51 |     if (!isClient) return;
+> 52 |     setIsClient(true);
      |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  48 |     const extractedId = extractVideoId(videoId);
-  49 |     setEmbedId(extractedId);
-  50 |   }, [videoId]);  react-hooks/set-state-in-effect
+  53 |     const extractedId = extractVideoId(videoId);
+  54 |     setEmbedId(extractedId);
+  55 |   }, [videoId]);  react-hooks/set-state-in-effect
+  55:6   warning  React Hook useEffect has a missing dependency: 'isClient'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-hooks/exhaustive-deps
+
+E:\Projects\nerdictionde\src\components\search\Highlighter.tsx
+  16:3   warning  'tagName' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  32:29  warning  'index' is defined but never used             @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\search\SearchFilters.tsx
+  5:37  warning  'Calendar' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\search\SearchResults.tsx
+   3:10  warning  'useState' is defined but never used  @typescript-eslint/no-unused-vars
+  10:10  warning  'Skeleton' is defined but never used  @typescript-eslint/no-unused-vars
 
 E:\Projects\nerdictionde\src\components\shared\MicroInteractions.tsx
   3:39  warning  'CSSProperties' is defined but never used  @typescript-eslint/no-unused-vars
@@ -562,29 +389,11 @@ E:\Projects\nerdictionde\src\components\shared\MicroInteractions.tsx
 E:\Projects\nerdictionde\src\components\shared\ProfileLink.tsx
   39:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
 
-E:\Projects\nerdictionde\src\components\shared\Skeleton.tsx
-  3:11  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
-
 E:\Projects\nerdictionde\src\components\shared\SupportBanner.tsx
-  25:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-E:\Projects\nerdictionde\src\components\shared\SupportBanner.tsx:25:5
-  23 |       }
-  24 |     }
-> 25 |     setIsVisible(true);
-     |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  26 |   }, []);
-  27 |
-  28 |   const handleDismiss = () => {  react-hooks/set-state-in-effect
+  3:20  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
 
 E:\Projects\nerdictionde\src\components\shared\SupportTopBanner.tsx
-  14:21  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+  20:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
 
 Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
 * Update external systems with the latest state from React.
@@ -592,66 +401,21 @@ Effects are intended to synchronize state between React and external systems suc
 
 Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
 
-E:\Projects\nerdictionde\src\components\shared\SupportTopBanner.tsx:14:21
-  12 |   useEffect(() => {
-  13 |     const dismissed = localStorage.getItem("support-top-banner-dismissed");
-> 14 |     if (!dismissed) setVisible(true);
-     |                     ^^^^^^^^^^ Avoid calling setState() directly within an effect
-  15 |     setHydrated(true);
-  16 |   }, []);
-  17 |  react-hooks/set-state-in-effect
-
-E:\Projects\nerdictionde\src\components\shared\ThemeProvider.tsx
-  9:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-E:\Projects\nerdictionde\src\components\shared\ThemeProvider.tsx:9:5
-   7 |
-   8 |   useEffect(() => {
->  9 |     setMounted(true);
-     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
-  10 |     const root = document.documentElement;
-  11 |     const theme = localStorage.getItem("theme") || "dark";
-  12 |       react-hooks/set-state-in-effect
-
-E:\Projects\nerdictionde\src\components\shared\ThemeToggle.tsx
-  12:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-E:\Projects\nerdictionde\src\components\shared\ThemeToggle.tsx:12:5
-  10 |
-  11 |   useEffect(() => {
-> 12 |     setMounted(true);
-     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
-  13 |     const root = document.documentElement;
-  14 |     setTheme(root.classList.contains("dark") ? "dark" : "light");
-  15 |   }, []);  react-hooks/set-state-in-effect
-
-E:\Projects\nerdictionde\src\components\streaming\SimpleOverlayTool.tsx
-  75:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+E:\Projects\nerdictionde\src\components\shared\SupportTopBanner.tsx:20:5
+  18 |   useEffect(() => {
+  19 |     if (!isClient) return;
+> 20 |     setHydrated(true);
+     |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  21 |   }, []);
+  22 |
+  23 |   if (!hydrated || !visible) return null;  react-hooks/set-state-in-effect
 
 E:\Projects\nerdictionde\src\components\tools\UserProfile.tsx
   6:18  warning  'User' is defined but never used  @typescript-eslint/no-unused-vars
 
-E:\Projects\nerdictionde\src\components\ui\scroll-area.tsx
-  6:11  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
-
 E:\Projects\nerdictionde\src\lib\auth-twitch.ts
    89:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
   138:3   warning  'state' is defined but never used  @typescript-eslint/no-unused-vars
-
-E:\Projects\nerdictionde\src\lib\hardware-catalog.ts
-  14:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 E:\Projects\nerdictionde\src\lib\igdb.ts
   217:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
@@ -670,8 +434,6 @@ E:\Projects\nerdictionde\src\lib\job-resume.ts
   233:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 E:\Projects\nerdictionde\src\lib\job-status.ts
-   28:12  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-   36:12  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
    59:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
    71:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
    72:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
@@ -683,19 +445,14 @@ E:\Projects\nerdictionde\src\lib\job-status.ts
   140:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   148:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   149:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  161:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   198:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   209:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   217:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   218:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  240:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   339:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   350:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   358:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   359:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-E:\Projects\nerdictionde\src\lib\pdf\markdown-to-pdf.tsx
-  20:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
 E:\Projects\nerdictionde\src\lib\review-generation.ts
     15:3   warning  'extractTavilyImages' is defined but never used  @typescript-eslint/no-unused-vars
@@ -747,11 +504,5 @@ E:\Projects\nerdictionde\src\lib\tmdb.ts
   375:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
   396:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
-E:\Projects\nerdictionde\src\types\review.ts
-  27:18   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  52:18   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  64:18   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  67:101  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-✖ 371 problems (243 errors, 128 warnings)
+✖ 292 problems (153 errors, 139 warnings)
 

@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     const futureDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
 
     // Build where clause
-    const where: any = {
+    const where: Record<string, unknown> = {
       category: "game",
       releaseDate: {
         gte: now,
@@ -96,12 +96,13 @@ export async function GET(req: NextRequest) {
         },
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching releases:", error);
+    const err = error as Error;
     return NextResponse.json(
       {
         success: false,
-        error: error.message || "Unknown error",
+        error: err.message || "Unknown error",
       },
       { status: 500 }
     );

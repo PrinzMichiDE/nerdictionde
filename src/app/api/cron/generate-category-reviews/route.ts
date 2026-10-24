@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getIGDBGamesBulk } from "@/lib/igdb";
-import { getTMDBMoviesBulk, getTMDBSeriesBulk } from "@/lib/tmdb";
+import { getIGDBGamesBulk, IGDBGame } from "@/lib/igdb";
+import { getTMDBMoviesBulk, getTMDBSeriesBulk, TMDBMovie, TMDBSeries } from "@/lib/tmdb";
 import { processGame, processMovie, processSeries } from "@/lib/review-generation";
 import prisma from "@/lib/prisma";
 
@@ -37,12 +37,12 @@ export async function GET(req: NextRequest) {
 
       if (games && games.length > 0) {
         const existingIgdbIds = await prisma.review.findMany({
-          where: { igdbId: { in: games.map((g: any) => g.id) }, category: "game" },
+          where: { igdbId: { in: games.map((g: IGDBGame) => g.id) }, category: "game" },
           select: { igdbId: true },
         });
 
-        const existingIdsSet = new Set(existingIgdbIds.map((r: { igdbId: number | null }) => r.igdbId));
-        const newGames = games.filter((g: any) => !existingIdsSet.has(g.id));
+        const existingIdsSet = new Set(existingIgdbIds.map((r) => r.igdbId).filter(Boolean));
+        const newGames = games.filter((g: IGDBGame) => !existingIdsSet.has(g.id));
 
         if (newGames.length > 0) {
           const game = newGames[0];
@@ -61,8 +61,9 @@ export async function GET(req: NextRequest) {
       } else {
         results.game.error = "No games found";
       }
-    } catch (error: any) {
-      results.game.error = error.message;
+    } catch (error: unknown) {
+      const err = error as Error;
+      results.game.error = err.message;
       console.error("Error generating game review:", error);
     }
 
@@ -76,12 +77,12 @@ export async function GET(req: NextRequest) {
 
       if (movies && movies.length > 0) {
         const existingTmdbIds = await prisma.review.findMany({
-          where: { tmdbId: { in: movies.map((m: any) => m.id) }, category: "movie" },
+          where: { tmdbId: { in: movies.map((m: TMDBMovie) => m.id) }, category: "movie" },
           select: { tmdbId: true },
         });
 
-        const existingIdsSet = new Set(existingTmdbIds.map((r: any) => r.tmdbId).filter(Boolean));
-        const newMovies = movies.filter((m: any) => !existingIdsSet.has(m.id));
+        const existingIdsSet = new Set(existingTmdbIds.map((r) => r.tmdbId).filter(Boolean));
+        const newMovies = movies.filter((m: TMDBMovie) => !existingIdsSet.has(m.id));
 
         if (newMovies.length > 0) {
           const movie = newMovies[0];
@@ -100,8 +101,9 @@ export async function GET(req: NextRequest) {
       } else {
         results.movie.error = "No movies found";
       }
-    } catch (error: any) {
-      results.movie.error = error.message;
+    } catch (error: unknown) {
+      const err = error as Error;
+      results.movie.error = err.message;
       console.error("Error generating movie review:", error);
     }
 
@@ -114,12 +116,12 @@ export async function GET(req: NextRequest) {
 
       if (series && series.length > 0) {
         const existingTmdbIds = await prisma.review.findMany({
-          where: { tmdbId: { in: series.map((s: any) => s.id) }, category: "series" },
+          where: { tmdbId: { in: series.map((s: TMDBSeries) => s.id) }, category: "series" },
           select: { tmdbId: true },
         });
 
-        const existingIdsSet = new Set(existingTmdbIds.map((r: any) => r.tmdbId).filter(Boolean));
-        const newSeries = series.filter((s: any) => !existingIdsSet.has(s.id));
+        const existingIdsSet = new Set(existingTmdbIds.map((r) => r.tmdbId).filter(Boolean));
+        const newSeries = series.filter((s: TMDBSeries) => !existingIdsSet.has(s.id));
 
         if (newSeries.length > 0) {
           const serie = newSeries[0];
@@ -138,8 +140,9 @@ export async function GET(req: NextRequest) {
       } else {
         results.series.error = "No series found";
       }
-    } catch (error: any) {
-      results.series.error = error.message;
+    } catch (error: unknown) {
+      const err = error as Error;
+      results.series.error = err.message;
       console.error("Error generating series review:", error);
     }
 
@@ -155,12 +158,13 @@ export async function GET(req: NextRequest) {
       timestamp: new Date().toISOString(),
     }, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Cron category review generation error:", error);
+    const err = error as Error;
     return NextResponse.json({
       success: false,
       status: 500,
-      error: error.message,
+      error: err.message,
     }, { status: 500 });
   }
 }

@@ -125,15 +125,32 @@ export function MassReviewCreation() {
     setLoading(true);
 
     try {
-      const requestBody: any = {
-        category,
-        count: parseInt(count) || 200,
-        batchSize: parseInt(batchSize) || 5,
-        delayBetweenBatches: parseInt(delayBetweenBatches) || 3000,
-        delayBetweenItems: parseInt(delayBetweenItems) || 2000,
-        status,
-        skipExisting,
+      interface BulkCreateMassRequestBody {
+      category: string;
+      count: number;
+      batchSize: number;
+      delayBetweenBatches: number;
+      delayBetweenItems: number;
+      status: string;
+      skipExisting: boolean;
+      queryOptions?: {
+        sortBy?: string;
+        order?: string;
+        minRating?: number;
+        genreId?: number;
+        platformId?: number;
       };
+    }
+
+    const requestBody: BulkCreateMassRequestBody = {
+      category,
+      count: parseInt(count) || 200,
+      batchSize: parseInt(batchSize) || 5,
+      delayBetweenBatches: parseInt(delayBetweenBatches) || 3000,
+      delayBetweenItems: parseInt(delayBetweenItems) || 2000,
+      status,
+      skipExisting,
+    };
 
       if (category === "game") {
         requestBody.queryOptions = {
@@ -162,9 +179,10 @@ export function MassReviewCreation() {
       
       setJobId(newJobId);
       fetchJobs(); // Refresh the list to include the new job
-    } catch (error: any) {
-      console.error("Error starting job:", error);
-      alert("Fehler beim Starten des Jobs: " + (error.response?.data?.error || error.message));
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } }; message?: string };
+      console.error("Error starting job:", err);
+      alert("Fehler beim Starten des Jobs: " + (err.response?.data?.error || err.message));
     } finally {
       setLoading(false);
     }

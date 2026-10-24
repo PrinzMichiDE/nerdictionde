@@ -29,12 +29,13 @@ export async function GET(req: NextRequest) {
 
     const result = await syncUpcomingReleases();
     return NextResponse.json(result, { status: result.success ? 200 : 500 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("❌ Error in upcoming releases cron:", error);
+    const err = error as Error;
     return NextResponse.json(
       {
         success: false,
-        error: error.message || "Unknown error",
+        error: err.message || "Unknown error",
         timestamp: new Date().toISOString(),
       },
       { status: 500 }

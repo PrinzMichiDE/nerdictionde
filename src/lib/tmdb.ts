@@ -206,14 +206,16 @@ export async function getTMDBMoviesBulk(options: BulkQueryOptions = {}): Promise
     );
 
     return detailedMovies;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { data: unknown; status: number; statusText: string }; message?: string } | null;
     console.error("TMDB Movies Query Error:", {
       options,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      error: error.response?.data || error.message,
+      status: axiosError?.response?.status,
+      statusText: axiosError?.response?.statusText,
+      error: axiosError?.response?.data || axiosError?.message,
     });
-    throw new Error(`TMDB API error: ${error.response?.data?.status_message || error.message}`);
+    const responseData = axiosError?.response?.data as { status_message?: string } | undefined;
+    throw new Error(`TMDB API error: ${responseData?.status_message || axiosError?.message}`);
   }
 }
 
@@ -302,14 +304,16 @@ export async function getTMDBSeriesBulk(options: BulkQueryOptions = {}): Promise
     );
 
     return detailedSeries;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { data: unknown; status: number; statusText: string }; message?: string } | null;
     console.error("TMDB Series Query Error:", {
       options,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      error: error.response?.data || error.message,
+      status: axiosError?.response?.status,
+      statusText: axiosError?.response?.statusText,
+      error: axiosError?.response?.data || axiosError?.message,
     });
-    throw new Error(`TMDB API error: ${error.response?.data?.status_message || error.message}`);
+    const responseData = axiosError?.response?.data as { status_message?: string } | undefined;
+    throw new Error(`TMDB API error: ${responseData?.status_message || axiosError?.message}`);
   }
 }
 
@@ -327,8 +331,9 @@ export async function getTMDBMovieById(id: number): Promise<TMDBMovie | null> {
       },
     });
     return response.data;
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { status: number }; message?: string };
+    if (axiosError?.response?.status === 404) {
       return null;
     }
     throw error;
@@ -349,8 +354,9 @@ export async function getTMDBSeriesById(id: number): Promise<TMDBSeries | null> 
       },
     });
     return response.data;
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { status: number }; message?: string };
+    if (axiosError?.response?.status === 404) {
       return null;
     }
     throw error;
@@ -372,9 +378,11 @@ export async function searchTMDBMovies(query: string, limit = 10): Promise<TMDBM
       },
     });
     return (response.data.results || []).slice(0, limit);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { data: { status_message?: string } }; message?: string };
     console.error("TMDB Movie Search Error:", error);
-    throw new Error(`TMDB API error: ${error.response?.data?.status_message || error.message}`);
+    const responseData = axiosError?.response?.data as { status_message?: string } | undefined;
+    throw new Error(`TMDB API error: ${responseData?.status_message || axiosError?.message}`);
   }
 }
 
@@ -393,9 +401,11 @@ export async function searchTMDBSeries(query: string, limit = 10): Promise<TMDBS
       },
     });
     return (response.data.results || []).slice(0, limit);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { data: { status_message?: string } }; message?: string };
     console.error("TMDB Series Search Error:", error);
-    throw new Error(`TMDB API error: ${error.response?.data?.status_message || error.message}`);
+    const responseData = axiosError?.response?.data as { status_message?: string } | undefined;
+    throw new Error(`TMDB API error: ${responseData?.status_message || axiosError?.message}`);
   }
 }
 

@@ -202,7 +202,7 @@ export async function generateNewsArticle(
     // Non-blocking
   }
 
-  const result = await generateContent(buildNewsPrompt(item, contextLines, isRetry), item.title, retryCount);
+  const result = await generateContent(buildNewsPrompt(item, contextLines, isRetry), item.title, retryCount) as { category?: string; de: { title: string; excerpt?: string; content: string }; en?: { title: string; excerpt?: string; content?: string }; tags?: string[] };
 
   // Fallback: Kategorie des Feeds statt hartkodiertem "Gaming".
   const categoryInput: string = (result.category as string) || item.category || "Gaming";

@@ -66,12 +66,13 @@ async function retryWithBackoff<T>(
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await fn();
-    } catch (error: any) {
-      lastError = error;
+    } catch (error: unknown) {
+      const err = error as Error;
+      lastError = err;
       
       // Don't retry on certain errors
-      if (error.message?.includes("Already exists")) {
-        throw error;
+      if (err.message?.includes("Already exists")) {
+        throw err;
       }
 
       if (attempt < maxRetries - 1) {
@@ -98,7 +99,7 @@ async function main() {
 
   // Check for existing progress
   const existingProgress = loadProgress();
-  let games: any[] = [];
+  let games: Array<{ id: number; name: string }> = [];
   let progress: ProgressState;
 
   if (

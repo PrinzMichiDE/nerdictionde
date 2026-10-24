@@ -1,5 +1,7 @@
 import { getRunningJobs, getJob, updateJob, updateQueueItem } from "@/lib/job-status";
 import { processGame, processMovie, processSeries, generateSlug } from "@/lib/review-generation";
+import type { IGDBGame } from "@/lib/igdb";
+import type { TMDBMovie, TMDBSeries } from "@/lib/tmdb";
 
 type ReviewCategory = "game" | "movie" | "series";
 
@@ -27,18 +29,28 @@ export async function resumeRunningJobs() {
 
     console.log(`🔄 Found ${runningJobs.length} running job(s) to resume`);
 
-    for (const job of runningJobs) {
+    interface JobConfig {
+  items: Array<{ id: number | string; name?: string; title?: string; title_en?: string; igdbId?: number; tmdbId?: number }>;
+  batchSize?: number;
+  delayBetweenBatches?: number;
+  delayBetweenItems?: number;
+  status?: "draft" | "published";
+  skipExisting?: boolean;
+  maxRetries?: number;
+}
+
+  for (const job of runningJobs) {
       console.log(`📋 Resuming job ${job.jobId} (${job.category}, ${job.processed}/${job.total} processed)`);
       
       // Get items from config (stored when job was created)
-      const config = job.config as any;
+      const config = job.config as JobConfig | null;
       if (!config || !config.items) {
         console.error(`⚠️  Job ${job.jobId} has no items in config, cannot resume`);
         await updateJob(job.jobId, { status: "failed" });
         continue;
       }
 
-      const items = config.items as any[];
+      const items = config.items;
       const category = job.category as ReviewCategory;
 
       // Resume processing
@@ -64,7 +76,7 @@ export async function resumeRunningJobs() {
 // Async processing function (same as in bulk-create-mass route)
 async function processItemsAsync(
   jobId: string,
-  items: any[],
+  items: Array<{ id: number | string; name?: string; title?: string; title_en?: string; igdbId?: number; tmdbId?: number }>,
   category: ReviewCategory,
   options: {
     batchSize: number;
@@ -108,20 +120,21 @@ async function processItemsAsync(
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         return await fn();
-      } catch (error: any) {
-        lastError = error;
+      } catch (error: unknown) {
+        const err = error as { message?: string; code?: string };
+        lastError = new Error(err.message || String(error));
         
         // Handle specific error types that shouldn't be retried
-        if (error.message?.includes("Already exists")) {
+        if (err.message?.includes("Already exists")) {
           return { success: false, error: "Already exists" };
         }
 
-        if (error.message?.includes("validation") || error.message?.includes("invalid")) {
-          return { success: false, error: error.message };
+        if (err.message?.includes("validation") || err.message?.includes("invalid")) {
+          return { success: false, error: err.message };
         }
 
         // Handle unique constraint errors (like duplicate slugs)
-        if (error.message?.includes("Unique constraint") || error.message?.includes("duplicate") || error.code === "P2002") {
+        if (err.message?.includes("Unique constraint") || err.message?.includes("duplicate") || err.code === "P2002") {
           return { success: false, error: "Duplicate entry (unique constraint)" };
         }
 
@@ -180,19 +193,19 @@ async function processItemsAsync(
         switch (category) {
           case "game":
             result = await retryWithBackoff(
-              () => processGame(item, { status, skipExisting: true })
+              () => processGame(item as IGDBGame, { status, skipExisting: true })
             );
             break;
           
           case "movie":
             result = await retryWithBackoff(
-              () => processMovie(item, { status, skipExisting: true })
+              () => processMovie(item as TMDBMovie, { status, skipExisting: true })
             );
             break;
           
           case "series":
             result = await retryWithBackoff(
-              () => processSeries(item, { status, skipExisting: true })
+              () => processSeries(item as TMDBSeries, { status, skipExisting: true })
             );
             break;
           
@@ -202,13 +215,17 @@ async function processItemsAsync(
 
         if (result.success && result.reviewId) {
           results.successful++;
-          results.reviews.push({
+          const reviewData: { id: string; title: string; slug: string; igdbId?: number; tmdbId?: number } = {
             id: result.reviewId,
             title: itemName,
             slug: generateSlug(itemName),
-            igdbId: item.id || item.igdbId,
-            tmdbId: item.id || item.tmdbId,
-          });
+          };
+          if (category === "game") {
+            reviewData.igdbId = (item.id as number) || item.igdbId;
+          } else if (category === "movie" || category === "series") {
+            reviewData.tmdbId = (item.id as number) || item.tmdbId;
+          }
+          results.reviews.push(reviewData);
           await updateQueueItem(jobId, itemName, {
             status: "completed",
             reviewId: result.reviewId,
@@ -230,17 +247,18 @@ async function processItemsAsync(
           });
           console.log(`   ❌ ${itemName}: ${result.error}`);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const err = error as Error;
         results.failed++;
         results.errors.push({
           item: itemName,
-          error: error.message || "Processing failed",
+          error: err.message || "Processing failed",
         });
         await updateQueueItem(jobId, itemName, {
           status: "failed",
-          error: error.message || "Processing failed",
+          error: err.message || "Processing failed",
         });
-        console.log(`   ❌ ${itemName}: ${error.message}`);
+        console.log(`   ❌ ${itemName}: ${err.message}`);
       }
 
       // Update job progress

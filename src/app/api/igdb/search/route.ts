@@ -10,9 +10,10 @@ export async function POST(req: NextRequest) {
 
     const results = await searchIGDB(query);
     return NextResponse.json(results);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("IGDB Search error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const err = error as Error;
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 

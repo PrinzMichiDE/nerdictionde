@@ -21,8 +21,9 @@ export function ReleaseSyncButton() {
       const res = await fetch("/api/admin/fetch-upcoming-releases");
       const data = await res.json();
       setResult(data);
-    } catch (e: any) {
-      setResult({ success: false, error: e.message || "Fehler beim Abrufen" });
+    } catch (e: unknown) {
+      const err = e as Error;
+      setResult({ success: false, error: err.message || "Fehler beim Abrufen" });
     } finally {
       setLoading(false);
     }

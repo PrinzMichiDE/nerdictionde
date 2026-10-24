@@ -296,7 +296,20 @@ export function ReviewPdfDocument({ review, isEn, siteUrl }: ReviewPdfLayoutProp
 
 // Helper to render PDF to buffer (for API route)
 export async function renderReviewPdfToBuffer(review: ReviewPdfLayoutProps["review"], isEn: boolean, siteUrl: string): Promise<Buffer> {
-  const doc = React.createElement(ReviewPdfDocument, { review, isEn, siteUrl }) as React.ReactElement<any>;
+  const doc = (
+    <Document>
+      <Page size="A4" style={pdfStyles.page}>
+        <ReviewPdfContent review={review} isEn={isEn} siteUrl={siteUrl} />
+        <Footer
+          pageNumber={1}
+          totalPages={1}
+          review={review}
+          isEn={isEn}
+          siteUrl={siteUrl}
+        />
+      </Page>
+    </Document>
+  );
   const buffer = await renderToBuffer(doc);
   return buffer;
 }

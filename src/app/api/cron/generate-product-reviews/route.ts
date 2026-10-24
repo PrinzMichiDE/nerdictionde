@@ -109,8 +109,9 @@ export async function GET(req: NextRequest) {
         } else {
           results.push({ name: item.name, success: false, error: result.error || "Unknown error" });
         }
-      } catch (error: any) {
-        results.push({ name: item.name, success: false, error: error.message });
+      } catch (error: unknown) {
+        const err = error as Error;
+        results.push({ name: item.name, success: false, error: err.message });
         console.error(`Error generating hardware review for ${item.name}:`, error);
       }
 
@@ -132,13 +133,14 @@ export async function GET(req: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Cron product review generation error:", error);
+    const err = error as Error;
     return NextResponse.json(
       {
         success: false,
         status: 500,
-        error: error.message,
+        error: err.message,
       },
       { status: 500 }
     );

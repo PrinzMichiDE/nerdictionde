@@ -113,11 +113,12 @@ export function ReviewEditor({ review: initialReview }: ReviewEditorProps) {
         title: "Veröffentlicht",
         description: `„${review.title}“ ist jetzt online.`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Publish failed:", error);
+      const err = error as { response?: { data?: { error?: string } } };
       toast({
         title: "Veröffentlichung fehlgeschlagen",
-        description: error.response?.data?.error || "Fehler beim Veröffentlichen.",
+        description: err.response?.data?.error || "Fehler beim Veröffentlichen.",
         variant: "destructive",
       });
     } finally {

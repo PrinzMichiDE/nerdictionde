@@ -3,6 +3,8 @@ import prisma from "@/lib/prisma";
 import { requireAdminAuth, checkAdminAuth } from "@/lib/auth";
 import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
 
+import { Prisma } from "@prisma/client";
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -21,7 +23,7 @@ export async function GET(req: NextRequest) {
     const isAdmin = checkAdminAuth(req);
     const canSeeAll = isAdmin && (all || status === "all");
 
-    const where: any = {
+    const where: Prisma.ReviewWhereInput = {
       // Non-admins can only see published reviews
       ...(canSeeAll ? {} : isAdmin && status ? { status } : { status: "published" }),
     };
@@ -70,7 +72,8 @@ export async function GET(req: NextRequest) {
     // Add search query filter
     if (query && query.trim()) {
       const searchTerm = query.trim();
-      const searchOR = [
+
+const searchOR: Prisma.ReviewWhereInput[] = [
         { title: { contains: searchTerm, mode: "insensitive" } },
         { title_en: { contains: searchTerm, mode: "insensitive" } },
         { content: { contains: searchTerm, mode: "insensitive" } },
@@ -78,7 +81,7 @@ export async function GET(req: NextRequest) {
       ];
 
       if (where.AND) {
-        where.AND.push({ OR: searchOR });
+        (where.AND as Prisma.ReviewWhereInput[]).push({ OR: searchOR });
       } else if (where.OR) {
         // If we already have an OR (rare but possible with how we build it), 
         // we might want to wrap existing where in AND
@@ -91,7 +94,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Determine orderBy
-    let orderBy: any = { createdAt: "desc" };
+    let orderBy: Record<string, string | { order: string }> = { createdAt: "desc" };
     switch (sort) {
       case "date-asc":
         orderBy = { createdAt: "asc" };
@@ -194,8 +197,9 @@ export async function GET(req: NextRequest) {
       ...(scoreDistribution ? { scoreDistribution } : {}),
       ...(topPicks ? { topPicks } : {}),
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
@@ -259,9 +263,10 @@ export async function POST(req: NextRequest) {
     }).catch((e) => console.warn("Comment generation for review failed:", e));
 
     return NextResponse.json(review);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Create review error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const err = error as Error;
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 

@@ -68,15 +68,16 @@ export async function GET(req: NextRequest) {
         } else {
           console.error(`❌ ${candidate.title}: ${result.error}`);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const err = error as Error;
         results.push({
           id: candidate.id,
           title: candidate.title,
           category: candidate.category,
           success: false,
-          error: error.message,
+          error: err.message,
         });
-        console.error(`❌ ${candidate.title}: ${error.message}`);
+        console.error(`❌ ${candidate.title}: ${err.message}`);
       }
 
       // Delay between items to respect API rate limits

@@ -1,5 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getIGDBGamesBulkLarge, BulkQueryOptions } from "@/lib/igdb";
+import { getIGDBGamesBulkLarge, BulkQueryOptions, type IGDBGame } from "@/lib/igdb";
+import type { TMDBMovie, TMDBSeries } from "@/lib/tmdb";
+
+interface HardwareData {
+  id?: string | number;
+  name?: string;
+  manufacturer?: string | null;
+  model?: string | null;
+  type?: string;
+  releaseDate?: Date | string | null;
+  msrp?: number | null;
+  specs?: Prisma.JsonValue;
+  images?: string[];
+}
+
 import {
   processGame,
   processMovie,
@@ -22,7 +36,7 @@ type ReviewCategory = "game" | "movie" | "series" | "hardware";
 interface BulkCreateMassOptions {
   category: ReviewCategory;
   count: number;
-  queryOptions?: BulkQueryOptions | any;
+  queryOptions?: BulkQueryOptions | TMDBBulkQueryOptions | Record<string, unknown>;
   status?: "draft" | "published";
   skipExisting?: boolean;
   batchSize?: number;
@@ -69,16 +83,22 @@ export async function POST(req: NextRequest) {
     console.log(`⚙️  Settings: Batch size=${batchSize}, Delay batches=${delayBetweenBatches}ms, Delay items=${delayBetweenItems}ms`);
 
     // Fetch items based on category
-    let items: any[] = [];
+    let items: Array<{ id: number | string; name?: string; title?: string; title_en?: string; igdbId?: number; tmdbId?: number }> = [];
     
     try {
       switch (category) {
         case "game":
           const gameQueryOptions: BulkQueryOptions = {
             sortBy: "popularity",
-            order: "desc",
-            minRating: 50,
-            ...queryOptions,
+            // Only spread compatible properties from queryOptions
+            genreId: (queryOptions as Record<string, unknown>).genreId as number | undefined,
+            platformId: (queryOptions as Record<string, unknown>).platformId as number | undefined,
+            releaseYear: (queryOptions as Record<string, unknown>).releaseYear as number | undefined,
+            minRating: (queryOptions as Record<string, unknown>).minRating as number | undefined,
+            releasedOnly: (queryOptions as Record<string, unknown>).releasedOnly as boolean | undefined,
+            limit: (queryOptions as Record<string, unknown>).limit as number | undefined,
+            offset: (queryOptions as Record<string, unknown>).offset as number | undefined,
+            order: (queryOptions as Record<string, unknown>).order as "asc" | "desc" | undefined,
           };
           items = await getIGDBGamesBulkLarge(count, gameQueryOptions);
           break;
@@ -86,7 +106,14 @@ export async function POST(req: NextRequest) {
         case "movie":
           // Fetch movies with proper pagination using bulk large function
           const movieQueryOptions: TMDBBulkQueryOptions = {
-            ...queryOptions,
+            // Only spread compatible properties from queryOptions
+            genreId: (queryOptions as Record<string, unknown>).genreId as number | undefined,
+            releaseYear: (queryOptions as Record<string, unknown>).releaseYear as number | undefined,
+            minRating: (queryOptions as Record<string, unknown>).minRating as number | undefined,
+            sortBy: (queryOptions as Record<string, unknown>).sortBy as "popularity" | "rating" | "release_date" | "title" | undefined,
+            order: (queryOptions as Record<string, unknown>).order as "asc" | "desc" | undefined,
+            limit: (queryOptions as Record<string, unknown>).limit as number | undefined,
+            offset: (queryOptions as Record<string, unknown>).offset as number | undefined,
           };
           items = await getTMDBMoviesBulkLarge(count, movieQueryOptions);
           console.log(`✅ Fetched ${items.length} movies from TMDB (requested: ${count})`);
@@ -95,7 +122,14 @@ export async function POST(req: NextRequest) {
         case "series":
           // Fetch series with proper pagination using bulk large function
           const seriesQueryOptions: TMDBBulkQueryOptions = {
-            ...queryOptions,
+            // Only spread compatible properties from queryOptions
+            genreId: (queryOptions as Record<string, unknown>).genreId as number | undefined,
+            releaseYear: (queryOptions as Record<string, unknown>).releaseYear as number | undefined,
+            minRating: (queryOptions as Record<string, unknown>).minRating as number | undefined,
+            sortBy: (queryOptions as Record<string, unknown>).sortBy as "popularity" | "rating" | "release_date" | "title" | undefined,
+            order: (queryOptions as Record<string, unknown>).order as "asc" | "desc" | undefined,
+            limit: (queryOptions as Record<string, unknown>).limit as number | undefined,
+            offset: (queryOptions as Record<string, unknown>).offset as number | undefined,
           };
           items = await getTMDBSeriesBulkLarge(count, seriesQueryOptions);
           console.log(`✅ Fetched ${items.length} series from TMDB (requested: ${count})`);
@@ -158,10 +192,11 @@ export async function POST(req: NextRequest) {
             { status: 400 }
           );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`Error fetching ${category} items:`, error);
+      const err = error as Error;
       return NextResponse.json(
-        { error: `Failed to fetch ${category} items: ${error.message}` },
+        { error: `Failed to fetch ${category} items: ${err.message}` },
         { status: 400 }
       );
     }
@@ -187,12 +222,20 @@ export async function POST(req: NextRequest) {
     });
     
     // Initialize queue with all items
-    const queueItems = items.map((item) => ({
-      name: item.name || item.title || item.title_en || "Unknown",
-      igdbId: item.id || item.igdbId,
-      tmdbId: item.id || item.tmdbId,
-      status: "pending" as const,
-    }));
+    const queueItems = items.map((item) => {
+      const baseItem = {
+        name: item.name || item.title || item.title_en || "Unknown",
+        status: "pending" as const,
+      };
+      
+      if (category === "game") {
+        return { ...baseItem, igdbId: item.id as number | undefined };
+      } else if (category === "movie" || category === "series") {
+        return { ...baseItem, tmdbId: item.id as number | undefined };
+      } else {
+        return baseItem;
+      }
+    });
     await addToQueue(jobId, queueItems);
     
     // Update job status to running
@@ -220,10 +263,11 @@ export async function POST(req: NextRequest) {
       total: items.length,
       category,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Bulk create mass error:", error);
+    const err = error as Error;
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { error: err.message || "Internal server error" },
       { status: 500 }
     );
   }
@@ -233,7 +277,7 @@ export async function POST(req: NextRequest) {
 // This runs independently in the background, even if no client is connected
 async function processItemsAsync(
   jobId: string,
-  items: any[],
+  items: Array<{ id: number | string; name?: string; title?: string; title_en?: string; igdbId?: number; tmdbId?: number }>,
   category: ReviewCategory,
   options: {
     batchSize: number;
@@ -270,20 +314,21 @@ async function processItemsAsync(
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         return await fn();
-      } catch (error: any) {
-        lastError = error;
+      } catch (error: unknown) {
+        const err = error as { message?: string; code?: string };
+        lastError = new Error(err.message || String(error));
         
         // Handle specific error types that shouldn't be retried
-        if (error.message?.includes("Already exists")) {
+        if (err.message?.includes("Already exists")) {
           return { success: false, error: "Already exists" };
         }
 
-        if (error.message?.includes("validation") || error.message?.includes("invalid")) {
-          return { success: false, error: error.message };
+        if (err.message?.includes("validation") || err.message?.includes("invalid")) {
+          return { success: false, error: err.message };
         }
 
         // Handle unique constraint errors (like duplicate slugs)
-        if (error.message?.includes("Unique constraint") || error.message?.includes("duplicate") || error.code === "P2002") {
+        if (err.message?.includes("Unique constraint") || err.message?.includes("duplicate") || err.code === "P2002") {
           return { success: false, error: "Duplicate entry (unique constraint)" };
         }
 
@@ -343,27 +388,27 @@ async function processItemsAsync(
           case "game":
             // Always skip existing for games to prevent duplicates
             result = await retryWithBackoff(
-              () => processGame(item, { status, skipExisting: true })
+              () => processGame(item as IGDBGame, { status, skipExisting: true })
             );
             break;
           
           case "movie":
             // Always skip existing for movies to prevent duplicates
             result = await retryWithBackoff(
-              () => processMovie(item, { status, skipExisting: true })
+              () => processMovie(item as TMDBMovie, { status, skipExisting: true })
             );
             break;
           
           case "series":
             // Always skip existing for series to prevent duplicates
             result = await retryWithBackoff(
-              () => processSeries(item, { status, skipExisting: true })
+              () => processSeries(item as TMDBSeries, { status, skipExisting: true })
             );
             break;
 
           case "hardware":
             result = await retryWithBackoff(
-              () => processHardware(item, { status, skipExisting: true })
+              () => processHardware(item as HardwareData, { status, skipExisting: true })
             );
             break;
 
@@ -373,13 +418,17 @@ async function processItemsAsync(
 
         if (result.success && result.reviewId) {
           results.successful++;
-          results.reviews.push({
+          const reviewData: { id: string; title: string; slug: string; igdbId?: number; tmdbId?: number } = {
             id: result.reviewId,
             title: itemName,
             slug: generateSlug(itemName),
-            igdbId: item.id || item.igdbId,
-            tmdbId: item.id || item.tmdbId,
-          });
+          };
+          if (category === "game") {
+            reviewData.igdbId = (item.id as number) || item.igdbId;
+          } else if (category === "movie" || category === "series") {
+            reviewData.tmdbId = (item.id as number) || item.tmdbId;
+          }
+          results.reviews.push(reviewData);
           await updateQueueItem(jobId, itemName, {
             status: "completed",
             reviewId: result.reviewId,
@@ -401,17 +450,18 @@ async function processItemsAsync(
           });
           console.log(`   ❌ ${itemName}: ${result.error}`);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const err = error as Error;
         results.failed++;
         results.errors.push({
           item: itemName,
-          error: error.message || "Processing failed",
+          error: err.message || "Processing failed",
         });
         await updateQueueItem(jobId, itemName, {
           status: "failed",
-          error: error.message || "Processing failed",
+          error: err.message || "Processing failed",
         });
-        console.log(`   ❌ ${itemName}: ${error.message}`);
+        console.log(`   ❌ ${itemName}: ${err.message}`);
       }
 
       // Update job progress

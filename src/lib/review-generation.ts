@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import openai, { OPENAI_MODEL } from "@/lib/openai";
 import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
 import { uploadImage } from "@/lib/blob";
@@ -17,7 +18,7 @@ import {
 import { generateReviewImages } from "@/lib/image-generation";
 import type { TavilySearchResponse } from "@/lib/tavily";
 import type { SteamGameInfo } from "@/lib/steam";
-import { getIGDBGameById } from "@/lib/igdb";
+import { getIGDBGameById, type IGDBGame } from "@/lib/igdb";
 import {
   extractYouTubeVideoIdsFromIGDB,
   extractYouTubeVideoIdsFromTMDB,
@@ -37,7 +38,7 @@ export function generateSlug(title: string): string {
 }
 
 // Helper function to repair common JSON issues from AI responses
-export function repairJson(contentRaw: string, parseError: any, itemName: string): any {
+export function repairJson(contentRaw: string, parseError: Error, itemName: string): unknown {
   console.error(`JSON parsing error for ${itemName}:`, parseError.message);
   console.error(`Raw content length: ${contentRaw.length}`);
   
@@ -168,12 +169,13 @@ export function repairJson(contentRaw: string, parseError: any, itemName: string
     } else {
       throw new Error("Missing required fields after repair");
     }
-  } catch (repairError: any) {
+  } catch (repairError: unknown) {
     // Repair failed, try one more aggressive repair attempt
+    const err = repairError as Error;
     console.error(`JSON repair failed for ${itemName}, attempting aggressive repair`);
     
     // Try aggressive repair: truncate at the last known good position
-    const errorPosMatch = (repairError.message || parseError.message).match(/position (\d+)/);
+    const errorPosMatch = (err.message || parseError.message).match(/position (\d+)/);
     const errorPos = errorPosMatch ? parseInt(errorPosMatch[1]) : repaired.length;
     
     let lastGoodPos = 0;
@@ -242,7 +244,7 @@ export async function generateContent(
   prompt: string, 
   itemName: string,
   retryCount = 0
-): Promise<any> {
+): Promise<{ de: { title: string; content: string; pros: string[]; cons: string[] }; en: { title: string; content: string; pros: string[]; cons: string[] }; score: number; specs?: Record<string, unknown> }> {
   try {
     const aiResponse = await openai.chat.completions.create({
       model: OPENAI_MODEL,
@@ -271,9 +273,10 @@ export async function generateContent(
         throw new Error("Missing essential content fields");
       }
       return parsed;
-    } catch (parseError: any) {
+    } catch (parseError: unknown) {
       // The model occasionally answers with a trivial empty object (e.g. "{}"),
       // so there is nothing to repair. Skip straight to a retry with a hint.
+      const err = parseError as Error;
       const isTrivial =
         /^\s*(?:null|true|false|\[\]|\{\}|0|-?\d+(?:\.\d+)?)\s*$/.test(contentRaw) ||
         contentRaw.trim().length < 10;
@@ -282,7 +285,7 @@ export async function generateContent(
         throw new Error(`Empty or trivial AI response for ${itemName}`);
       }
 
-      const repaired = repairJson(contentRaw, parseError, itemName);
+      const repaired = repairJson(contentRaw, parseError as Error, itemName) as { de: { title: string; content: string; pros: string[]; cons: string[] }; en: { title: string; content: string; pros: string[]; cons: string[] }; score: number };
       
       if ((!repaired.en || !repaired.en.content || typeof repaired.score !== "number") && retryCount < 1) {
         console.log(`Repaired JSON for ${itemName} is still missing content. Retrying...`);
@@ -501,7 +504,7 @@ function formatAgeRating(ratings?: Array<{ category?: number; rating?: number }>
 
 // Helper function to generate review content using OpenAI with built-in auto-repair
 export async function generateReviewContent(
-  gameData: any,
+  gameData: IGDBGame,
   retryCount = 0,
   options?: {
     steamData?: SteamGameInfo | null;
@@ -511,7 +514,7 @@ export async function generateReviewContent(
   de: { title: string; content: string; pros: string[]; cons: string[] };
   en: { title: string; content: string; pros: string[]; cons: string[] };
   score: number;
-  specs?: any;
+  specs?: Record<string, unknown>;
 }> {
   const isRetry = retryCount > 0;
 
@@ -706,15 +709,15 @@ export async function generateReviewContent(
   });
 
   try {
-    const result = await generateContent(prompt, gameData.name, retryCount);
+    const result = await generateContent(prompt, gameData.name, retryCount) as { specs?: { minimum?: Record<string, string>; recommended?: Record<string, string> }; de: { title: string; content: string; pros: string[]; cons: string[] }; en: { title: string; content: string; pros: string[]; cons: string[] }; score: number };
 
     // Override system requirements with the real Steam values when available
     if (steam?.pcRequirements) {
-      const toSpecStrings = (req: { os?: string; cpu?: string; ram?: string; gpu?: string; dx?: string; storage?: string }) =>
-        Object.fromEntries(
-          Object.entries({ os: req.os, cpu: req.cpu, ram: req.ram, gpu: req.gpu, dx: req.dx, storage: req.storage })
-            .filter(([, v]) => !!v && v !== "N/A")
-        );
+      const toSpecStrings = (req: { os?: string; cpu?: string; ram?: string; gpu?: string; dx?: string; storage?: string }) => {
+        const entries = Object.entries({ os: req.os, cpu: req.cpu, ram: req.ram, gpu: req.gpu, dx: req.dx, storage: req.storage })
+          .filter(([, value]) => !!value && value !== "N/A");
+        return Object.fromEntries(entries) as Record<string, string>;
+      };
       result.specs = {
         ...(result.specs || {}),
         minimum: { ...(result.specs?.minimum || {}), ...toSpecStrings(steam.pcRequirements.minimum) },
@@ -745,7 +748,7 @@ export async function generateReviewContent(
 
 // Helper function to process a single game
 export async function processGame(
-  gameData: any,
+  gameData: IGDBGame,
   options: { status: "draft" | "published"; skipExisting: boolean }
 ): Promise<{ success: boolean; reviewId?: string; error?: string }> {
   try {
@@ -829,7 +832,7 @@ export async function processGame(
 
     // Add screenshots
     if (gameData.screenshots && gameData.screenshots.length > 0) {
-      const screenshotUrls = gameData.screenshots.slice(0, 5).map((s: any) =>
+      const screenshotUrls = gameData.screenshots.slice(0, 5).map((s) =>
         s.url.startsWith("//") ? "https:" + s.url.replace("t_thumb", "t_1080p") : s.url.replace("t_thumb", "t_1080p")
       );
       
@@ -845,10 +848,10 @@ export async function processGame(
 
     // Process metadata and create review
     const gameMetadata = {
-        developers: gameData.involved_companies?.filter((c: any) => c.developer).map((c: any) => c.company.name) || [],
-        publishers: gameData.involved_companies?.filter((c: any) => c.publisher).map((c: any) => c.company.name) || [],
-        platforms: gameData.platforms?.map((p: any) => p.name) || [],
-        genres: gameData.genres?.map((g: any) => g.name) || [],
+        developers: gameData.involved_companies?.filter((c) => c.developer).map((c) => c.company.name) || [],
+        publishers: gameData.involved_companies?.filter((c) => c.publisher).map((c) => c.company.name) || [],
+        platforms: gameData.platforms?.map((p) => p.name) || [],
+        genres: gameData.genres?.map((g) => g.name) || [],
         gameModes: ((gameData.game_modes || []) as Array<{ name: string }>).map((m) => m.name) || [],
         perspectives: ((gameData.player_perspectives || []) as Array<{ name: string }>).map((p) => p.name) || [],
         engines: ((gameData.game_engines || []) as Array<{ name: string }>).map((e) => e.name) || [],
@@ -920,12 +923,12 @@ export async function processGame(
         steamAppId: storeIds.steamAppId || null,
         epicId: storeIds.epicId || null,
         gogId: storeIds.gogId || null,
-        specs: reviewContent.specs || null,
+        specs: reviewContent.specs as Prisma.InputJsonValue | undefined,
         metadata: gameMetadata,
         metaDescription: seoMeta?.metaDescription ?? null,
         metaKeywords: seoMeta?.metaKeywords ?? null,
         releaseDate: releaseDate || null,
-        createdAt: calculatePublicationDate(gameData.first_release_date),
+        createdAt: calculatePublicationDate(gameData.first_release_date ?? undefined),
       },
     });
 
@@ -946,9 +949,10 @@ export async function processGame(
     }).catch((e) => console.warn("Tag generation for game review failed:", e));
 
     return { success: true, reviewId: review.id };
-  } catch (error: any) {
-    console.error(`Error processing game ${gameData.name}:`, error);
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error(`Error processing game ${gameData.name}:`, err);
+    return { success: false, error: err.message };
   }
 }
 
@@ -1019,8 +1023,20 @@ const HARDWARE_TYPE_LABELS: Record<string, string> = {
 /**
  * Generate hardware review content using OpenAI with Tavily research + specs extraction.
  */
+interface HardwareData {
+  id?: string | number;
+  name?: string;
+  manufacturer?: string | null;
+  model?: string | null;
+  type?: string;
+  releaseDate?: Date | string | null;
+  msrp?: number | null;
+  specs?: Prisma.JsonValue;
+  images?: string[];
+}
+
 export async function generateHardwareReviewContent(
-  hardwareData: any,
+  hardwareData: HardwareData,
   retryCount = 0,
   options?: {
     tavilySearchResults?: TavilySearchResponse;
@@ -1029,7 +1045,7 @@ export async function generateHardwareReviewContent(
   de: { title: string; content: string; pros: string[]; cons: string[] };
   en: { title: string; content: string; pros: string[]; cons: string[] };
   score: number;
-  specs?: any;
+  specs?: Record<string, unknown>;
 }> {
   const isRetry = retryCount > 0;
 
@@ -1164,14 +1180,14 @@ export async function generateHardwareReviewContent(
  * Process a single hardware product: generate AI review, images, comments and tags.
  */
 export async function processHardware(
-  hardwareData: any,
+  hardwareData: HardwareData,
   options: { status: "draft" | "published"; skipExisting: boolean }
 ): Promise<{ success: boolean; reviewId?: string; error?: string }> {
   try {
     // Prevent duplicates by hardwareId when available
     if (hardwareData.id) {
       const existingByHardware = await prisma.review.findFirst({
-        where: { hardwareId: hardwareData.id },
+        where: { hardwareId: String(hardwareData.id) },
       });
       if (existingByHardware) {
         return { success: false, error: "Already exists" };
@@ -1180,7 +1196,7 @@ export async function processHardware(
 
     const reviewContent = await generateHardwareReviewContent(hardwareData, 0);
 
-    const baseName = reviewContent.de.title || hardwareData.name;
+    const baseName = reviewContent.de.title || hardwareData.name || "Unbenanntes Hardware";
     let slug = generateSlug(baseName);
     let slugAttempts = 0;
     while (await prisma.review.findUnique({ where: { slug } })) {
@@ -1196,16 +1212,16 @@ export async function processHardware(
     let imageUrls: string[] = [];
     let tavilyResults: TavilySearchResponse | null = null;
     try {
-      tavilyResults = await searchHardwareProduct(hardwareData.name, hardwareData.manufacturer);
+      tavilyResults = await searchHardwareProduct(hardwareData.name || "Unbekanntes Produkt", hardwareData.manufacturer || "");
     } catch {
       // non-blocking
     }
 
     try {
       imageUrls = await generateReviewImages({
-        productName: hardwareData.name,
-        productType: HARDWARE_TYPE_LABELS[hardwareData.type] || "Hardware",
-        manufacturer: hardwareData.manufacturer,
+        productName: hardwareData.name || "Unbekanntes Produkt",
+        productType: HARDWARE_TYPE_LABELS[hardwareData.type || "hardware"] || "Hardware",
+        manufacturer: hardwareData.manufacturer || "",
         style: "professional",
         count: 4,
         tavilySearchResults: tavilyResults || undefined,
@@ -1230,7 +1246,7 @@ export async function processHardware(
     }
 
     const manufacturer = hardwareData.manufacturer || "";
-    const specs = reviewContent.specs || hardwareData.specs || null;
+    const specs = (reviewContent.specs || hardwareData.specs) as Prisma.InputJsonValue | undefined;
     const releaseDate = hardwareData.releaseDate ? new Date(hardwareData.releaseDate) : null;
 
     const review = await prisma.review.create({
@@ -1248,7 +1264,7 @@ export async function processHardware(
         cons_en: reviewContent.en.cons,
         images: imageUrls,
         status: options.status,
-        hardwareId: hardwareData.id || null,
+        hardwareId: hardwareData.id ? String(hardwareData.id) : null,
         specs,
         metadata: {
           manufacturer,
@@ -1276,14 +1292,15 @@ export async function processHardware(
       reviewTitle: reviewContent.de.title,
       category: "hardware",
       score: reviewContent.score,
-      metadata: { genres: [manufacturer, HARDWARE_TYPE_LABELS[hardwareData.type] || "Hardware"].filter(Boolean) },
+      metadata: { genres: [manufacturer, HARDWARE_TYPE_LABELS[hardwareData.type || "hardware"] || "Hardware"].filter(Boolean) },
       contentExcerpt: reviewContent.de.content?.substring(0, 500),
     }).catch((e) => console.warn("Tag generation for hardware review failed:", e));
 
     return { success: true, reviewId: review.id };
-  } catch (error: any) {
-    console.error(`Error processing hardware ${hardwareData.name}:`, error);
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error(`Error processing hardware ${hardwareData.name}:`, err);
+    return { success: false, error: err.message };
   }
 }
 
@@ -1364,7 +1381,7 @@ export async function enrichAndPublishDraftGameReview(
       }
     }
     if (gameData.screenshots && gameData.screenshots.length > 0) {
-      const screenshotUrls = gameData.screenshots.slice(0, 5).map((s: any) =>
+      const screenshotUrls = gameData.screenshots.slice(0, 5).map((s: { url: string }) =>
         s.url.startsWith("//") ? "https:" + s.url.replace("t_thumb", "t_1080p") : s.url.replace("t_thumb", "t_1080p")
       );
       for (let i = 0; i < screenshotUrls.length; i++) {
@@ -1378,10 +1395,10 @@ export async function enrichAndPublishDraftGameReview(
     }
 
     const gameMetadata = {
-      developers: gameData.involved_companies?.filter((c: any) => c.developer).map((c: any) => c.company.name) || [],
-      publishers: gameData.involved_companies?.filter((c: any) => c.publisher).map((c: any) => c.company.name) || [],
-      platforms: gameData.platforms?.map((p: any) => p.name) || [],
-      genres: gameData.genres?.map((g: any) => g.name) || [],
+      developers: gameData.involved_companies?.filter((c: { developer: boolean; company: { name: string } }) => c.developer).map((c: { developer: boolean; company: { name: string } }) => c.company.name) || [],
+      publishers: gameData.involved_companies?.filter((c: { publisher: boolean; company: { name: string } }) => c.publisher).map((c: { publisher: boolean; company: { name: string } }) => c.company.name) || [],
+      platforms: gameData.platforms?.map((p: { name: string }) => p.name) || [],
+      genres: gameData.genres?.map((g: { name: string }) => g.name) || [],
       gameModes: ((gameData.game_modes || []) as Array<{ name: string }>).map((m) => m.name) || [],
       perspectives: ((gameData.player_perspectives || []) as Array<{ name: string }>).map((p) => p.name) || [],
       engines: ((gameData.game_engines || []) as Array<{ name: string }>).map((e) => e.name) || [],
@@ -1433,7 +1450,7 @@ export async function enrichAndPublishDraftGameReview(
         steamAppId: storeIds.steamAppId || null,
         epicId: storeIds.epicId || null,
         gogId: storeIds.gogId || null,
-        specs: reviewContent.specs || null,
+        specs: reviewContent.specs as Prisma.InputJsonValue | undefined,
         metadata: gameMetadata,
         metaDescription: seoMeta?.metaDescription ?? null,
         metaKeywords: seoMeta?.metaKeywords ?? null,
@@ -1458,9 +1475,10 @@ export async function enrichAndPublishDraftGameReview(
     }).catch((e) => console.warn("Tag generation for draft publish failed:", e));
 
     return { success: true, reviewId };
-  } catch (error: any) {
-    console.error(`Error enriching draft game review ${reviewId}:`, error);
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error(`Error enriching draft game review ${reviewId}:`, err);
+    return { success: false, error: err.message };
   }
 }
 
@@ -1771,9 +1789,10 @@ export async function processMovie(
     }).catch((e) => console.warn("Tag generation for movie review failed:", e));
 
     return { success: true, reviewId: review.id };
-  } catch (error: any) {
-    console.error(`Error processing movie ${movieData.title}:`, error);
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error(`Error processing movie ${movieData.title}:`, err);
+    return { success: false, error: err.message };
   }
 }
 
@@ -1898,8 +1917,9 @@ export async function processSeries(
     }).catch((e) => console.warn("Tag generation for series review failed:", e));
 
     return { success: true, reviewId: review.id };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const err = error as Error;
+    return { success: false, error: err.message };
   }
 }
 
@@ -2176,7 +2196,7 @@ export async function regenerateZeroScoreReview(
       }
     }
     if (gameData.screenshots && gameData.screenshots.length > 0) {
-      const screenshotUrls = gameData.screenshots.slice(0, 5).map((s: any) =>
+      const screenshotUrls = gameData.screenshots.slice(0, 5).map((s: { url: string }) =>
         s.url.startsWith("//")
           ? "https:" + s.url.replace("t_thumb", "t_1080p")
           : s.url.replace("t_thumb", "t_1080p")

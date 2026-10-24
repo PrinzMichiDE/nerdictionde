@@ -9,14 +9,16 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
+type MarkdownComponents = React.ComponentProps<typeof ReactMarkdown>["components"];
+
 interface PreviewPanelProps {
   review: Review;
 }
 
 export function PreviewPanel({ review }: PreviewPanelProps) {
   // Custom component for Markdown images to handle placeholders
-  const MarkdownComponents = {
-    p: ({ children, ...props }: any) => {
+  const components: MarkdownComponents = {
+    p: ({ children, ...props }) => {
       const content = children?.toString() || "";
       const match = content.match(/!\[\[IMAGE_(\d+)\]\]/);
       
@@ -86,7 +88,7 @@ export function PreviewPanel({ review }: PreviewPanelProps) {
           <ReactMarkdown 
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeSlug]}
-            components={MarkdownComponents as any}
+            components={components}
           >
             {review.content || "Inhalt schreiben oder generieren lassen"}
           </ReactMarkdown>

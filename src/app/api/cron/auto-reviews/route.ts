@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getIGDBGamesBulk } from "@/lib/igdb";
+import { getIGDBGamesBulk, IGDBGame } from "@/lib/igdb";
 import { getTMDBMoviesBulk, getTMDBSeriesBulk } from "@/lib/tmdb";
 import { processGame, processMovie, processSeries } from "@/lib/review-generation";
 import prisma from "@/lib/prisma";
@@ -17,9 +17,9 @@ export async function GET(req: NextRequest) {
     }
 
     const overallResults = {
-      games: { attempted: 0, successful: 0, failed: 0, reviews: [] as any[] },
-      movies: { attempted: 0, successful: 0, failed: 0, reviews: [] as any[] },
-      series: { attempted: 0, successful: 0, failed: 0, reviews: [] as any[] },
+      games: { attempted: 0, successful: 0, failed: 0, reviews: [] as Array<{ id: string; name: string }> },
+      movies: { attempted: 0, successful: 0, failed: 0, reviews: [] as Array<{ id: string; name: string }> },
+      series: { attempted: 0, successful: 0, failed: 0, reviews: [] as Array<{ id: string; name: string }> },
     };
 
     // 2. Process Games
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
         const existingIgdbIds = await prisma.review.findMany({
           where: {
             igdbId: {
-              in: games.map((g: any) => g.id),
+              in: games.map((g: IGDBGame) => g.id),
             },
             category: "game",
           },
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
         });
 
         const existingIdsSet = new Set(existingIgdbIds.map((r) => r.igdbId));
-        const newGames = games.filter((g: any) => !existingIdsSet.has(g.id));
+        const newGames = games.filter((g: IGDBGame) => !existingIdsSet.has(g.id));
 
         if (newGames.length > 0) {
           // Take top 2 newest games (reduced to make room for movies/series)
@@ -58,17 +58,17 @@ export async function GET(req: NextRequest) {
               skipExisting: true,
             });
 
-            if (result.success) {
+            if (result.success && result.reviewId) {
               overallResults.games.successful++;
-              overallResults.games.reviews.push({ id: result.reviewId, name: game.name });
+              overallResults.games.reviews.push({ id: result.reviewId, name: game.name ?? "" });
             } else {
               overallResults.games.failed++;
-              console.error(`Failed to auto-generate review for game ${game.name}:`, result.error);
+              console.error(`Failed to auto-generate review for game ${game.name ?? ""}:`, result.error);
             }
           }
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error processing games:", error);
       overallResults.games.failed = overallResults.games.attempted;
     }
@@ -84,27 +84,28 @@ export async function GET(req: NextRequest) {
       if (movies && movies.length > 0) {
         // Try to filter out movies that already have reviews
         // If tmdbId column doesn't exist, this will be handled by processMovie
-        let existingTmdbIds: any[] = [];
+        let existingTmdbIds: Array<{ tmdbId: number | null }> = [];
         try {
           existingTmdbIds = await prisma.review.findMany({
             where: {
               tmdbId: {
-                in: movies.map((m: any) => m.id),
+                in: movies.map((m) => m.id),
               },
             },
             select: {
               tmdbId: true,
             },
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
           // If column doesn't exist, processMovie will handle it
-          if (!error.message?.includes("does not exist")) {
-            throw error;
+          const err = error as Error;
+          if (!err.message?.includes("does not exist")) {
+            throw err;
           }
         }
 
         const existingIdsSet = new Set(existingTmdbIds.map((r) => r.tmdbId).filter(Boolean));
-        const newMovies = movies.filter((m: any) => !existingIdsSet.has(m.id));
+        const newMovies = movies.filter((m) => !existingIdsSet.has(m.id));
 
         if (newMovies.length > 0) {
           // Take top 2 newest movies
@@ -117,9 +118,9 @@ export async function GET(req: NextRequest) {
               skipExisting: true,
             });
 
-            if (result.success) {
+            if (result.success && result.reviewId) {
               overallResults.movies.successful++;
-              overallResults.movies.reviews.push({ id: result.reviewId, name: movie.title });
+              overallResults.movies.reviews.push({ id: result.reviewId, name: movie.title ?? "" });
             } else {
               overallResults.movies.failed++;
               console.error(`Failed to auto-generate review for movie ${movie.title}:`, result.error);
@@ -127,7 +128,7 @@ export async function GET(req: NextRequest) {
           }
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error processing movies:", error);
       overallResults.movies.failed = overallResults.movies.attempted;
     }
@@ -143,27 +144,28 @@ export async function GET(req: NextRequest) {
       if (series && series.length > 0) {
         // Try to filter out series that already have reviews
         // If tmdbId column doesn't exist, this will be handled by processSeries
-        let existingTmdbIds: any[] = [];
+        let existingTmdbIds: Array<{ tmdbId: number | null }> = [];
         try {
           existingTmdbIds = await prisma.review.findMany({
             where: {
               tmdbId: {
-                in: series.map((s: any) => s.id),
+                in: series.map((s) => s.id),
               },
             },
             select: {
               tmdbId: true,
             },
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
           // If column doesn't exist, processSeries will handle it
-          if (!error.message?.includes("does not exist")) {
-            throw error;
+          const err = error as Error;
+          if (!err.message?.includes("does not exist")) {
+            throw err;
           }
         }
 
         const existingIdsSet = new Set(existingTmdbIds.map((r) => r.tmdbId).filter(Boolean));
-        const newSeries = series.filter((s: any) => !existingIdsSet.has(s.id));
+        const newSeries = series.filter((s) => !existingIdsSet.has(s.id));
 
         if (newSeries.length > 0) {
           // Take top 1 newest series (to keep total around 5 reviews per day)
@@ -176,17 +178,17 @@ export async function GET(req: NextRequest) {
               skipExisting: true,
             });
 
-            if (result.success) {
+            if (result.success && result.reviewId) {
               overallResults.series.successful++;
-              overallResults.series.reviews.push({ id: result.reviewId, name: serie.name });
+              overallResults.series.reviews.push({ id: result.reviewId, name: serie.name ?? "" });
             } else {
               overallResults.series.failed++;
-              console.error(`Failed to auto-generate review for series ${serie.name}:`, result.error);
+              console.error(`Failed to auto-generate review for series ${serie.name ?? ""}:`, result.error);
             }
           }
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error processing series:", error);
       overallResults.series.failed = overallResults.series.attempted;
     }
@@ -200,9 +202,10 @@ export async function GET(req: NextRequest) {
       message: `Auto-review process completed. ${totalSuccessful} reviews created (${overallResults.games.successful} games, ${overallResults.movies.successful} movies, ${overallResults.series.successful} series).`,
       results: overallResults,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Cron auto-review error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const err = error as Error;
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 

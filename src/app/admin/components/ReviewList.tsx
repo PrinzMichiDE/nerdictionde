@@ -112,11 +112,12 @@ export function ReviewList() {
         title: "Gelöscht",
         description: `„${reviewToDelete.title}“ wurde entfernt.`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting review:", error);
+      const err = error as { response?: { data?: { error?: string } } };
       toast({
         title: "Löschen fehlgeschlagen",
-        description: error.response?.data?.error || "Fehler beim Löschen des Beitrags",
+        description: err.response?.data?.error || "Fehler beim Löschen des Beitrags",
         variant: "destructive",
       });
     } finally {
@@ -134,11 +135,12 @@ export function ReviewList() {
         title: nextStatus === "published" ? "Veröffentlicht" : "Zurück in Entwurf",
         description: `„${review.title}“ ist jetzt ${nextStatus === "published" ? "online" : "ein Entwurf"}.`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error toggling status:", error);
+      const err = error as { response?: { data?: { error?: string } } };
       toast({
         title: "Statuswechsel fehlgeschlagen",
-        description: error.response?.data?.error || "Fehler beim Ändern des Status",
+        description: err.response?.data?.error || "Fehler beim Ändern des Status",
         variant: "destructive",
       });
     } finally {

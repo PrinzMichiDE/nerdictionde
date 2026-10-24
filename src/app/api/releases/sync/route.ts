@@ -19,9 +19,10 @@ export async function GET() {
       skipped: true,
       message: "Release calendar is up to date.",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as Error;
     return NextResponse.json(
-      { success: false, error: error.message || "Unknown error" },
+      { success: false, error: err.message || "Unknown error" },
       { status: 500 }
     );
   }

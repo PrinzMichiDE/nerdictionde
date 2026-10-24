@@ -55,6 +55,18 @@ export interface IGDBGame {
   total_rating_count?: number | null;
   videos?: Array<{ video_id: string; name: string }>;
   game_engines?: Array<{ id: number; name: string }>;
+  storyline?: string | null;
+  keywords?: Array<{ name: string }>;
+  themes?: Array<{ name: string }>;
+  similar_games?: Array<{ name: string }>;
+  franchise?: { name?: string } | null;
+  collections?: Array<{ name: string }>;
+  time_to_beat?: { hastly?: number; normally?: number; completely?: number } | null;
+  age_ratings?: Array<{ category?: number; rating?: number }>;
+  language_supports?: Array<{ language: { name: string } }>;
+  status?: number | null;
+  category?: number | null;
+  total_rating?: number | null;
 }
 
 export async function searchIGDB(query: string) {
@@ -214,18 +226,19 @@ export async function getIGDBGamesBulk(options: BulkQueryOptions = {}) {
     );
 
     return response.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Log the query for debugging
-    const errorMessage = error.response?.data 
-      ? (typeof error.response.data === 'string' 
-          ? error.response.data 
-          : JSON.stringify(error.response.data))
-      : error.message;
+    const axiosError = error as { response?: { data: unknown; status: number; statusText: string }; message?: string } | null;
+    const errorMessage = axiosError?.response?.data
+      ? (typeof axiosError.response.data === 'string'
+          ? axiosError.response.data
+          : JSON.stringify(axiosError.response.data))
+      : axiosError?.message ?? "Unknown error";
     
     console.error("IGDB Query Error:", {
       query,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
+      status: axiosError?.response?.status,
+      statusText: axiosError?.response?.statusText,
       error: errorMessage,
     });
     
@@ -233,16 +246,12 @@ export async function getIGDBGamesBulk(options: BulkQueryOptions = {}) {
   }
 }
 
-/**
- * Fetches a large number of games from IGDB by making multiple requests if needed.
- * IGDB has a limit of 500 games per request, so this function handles pagination automatically.
- */
 export async function getIGDBGamesBulkLarge(
   totalLimit: number,
   options: Omit<BulkQueryOptions, "limit" | "offset"> = {}
-): Promise<any[]> {
+): Promise<IGDBGame[]> {
   const IGDB_MAX_LIMIT = 500;
-  const allGames: any[] = [];
+  const allGames: IGDBGame[] = [];
   let offset = 0;
   const requestDelay = 1000; // 1 second delay between requests to respect rate limits
 
@@ -287,11 +296,12 @@ export async function getIGDBGamesBulkLarge(
       if (allGames.length < totalLimit) {
         await new Promise((resolve) => setTimeout(resolve, requestDelay));
       }
-    } catch (error: any) {
-      console.error(`Error fetching games at offset ${offset}:`, error.message);
+    } catch (error: unknown) {
+      const err = error as { response?: { status: number }; message?: string };
+      console.error(`Error fetching games at offset ${offset}:`, err.message);
       
       // If it's a rate limit error, wait longer before retrying
-      if (error.response?.status === 429 || error.message.includes("rate limit")) {
+      if (err.response?.status === 429 || err.message?.includes("rate limit")) {
         console.log("Rate limit hit, waiting 10 seconds...");
         await new Promise((resolve) => setTimeout(resolve, 10000));
         continue; // Retry the same request

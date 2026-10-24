@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { ReviewEditor } from "@/app/admin/components/ReviewEditor";
+import { Review } from "@/types/review";
 
 export const metadata = {
   title: "Review bearbeiten",
@@ -18,5 +19,5 @@ export default async function EditReviewPage({
 
   if (!review) notFound();
 
-  return <ReviewEditor review={review as any} />;
+  return <ReviewEditor review={review as Review} />;
 }

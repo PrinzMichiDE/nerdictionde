@@ -54,9 +54,10 @@ export async function POST(req: NextRequest) {
         confirmationToken,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { code?: string; message?: string };
     // Unique-Verstoss auf E-Mail defensiv abfangen (Race-Condition).
-    if (error?.code === "P2002") {
+    if (err?.code === "P2002") {
       return NextResponse.json(
         { error: "Diese E-Mail-Adresse ist bereits angemeldet." },
         { status: 409 },
