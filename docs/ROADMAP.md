@@ -13,7 +13,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] Pre-Commit-Hook (`.husky/pre-commit`): Format + Lint + Secret-Scan
 - [x] `type-check` auf `main` grün
 - [x] `build` auf `main` grün
-- [ ] Lint: 254 vorbestehende `no-explicit-any`-Errors inkrementell bereinigen (nicht blockierend für Verify)
+- [x] Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
+- [ ] Lint: 216 vorbestehende `no-explicit-any`-Errors inkrementell bereinigen (nicht blockierend für Verify)
 
 ## Typ B — Lücken schließen (Tests, Doku, Fehlerbehandlung)
 
