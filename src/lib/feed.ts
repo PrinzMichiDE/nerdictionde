@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import prisma from "./prisma";
 import { getFollowing } from "./follow";
+import { isCollectionsFollowEnabled } from "./collections-follow-schema";
 
 export type FeedItem =
   | {
@@ -80,17 +81,20 @@ export type FeedResult = {
  * Cached for 30 seconds
  */
 export const getFeed = unstable_cache(
-  async (userId: string, cursor?: string, limit = 20): Promise<FeedResult> => {
+  async (userId: string, cursor?: string, limit = 20, includeCollections = true): Promise<FeedResult> => {
     // Get list of followed user IDs
     const following = await getFollowing(userId);
     const followedUserIds = following.items.map((f) => f.following.id);
 
     // Get list of followed collection IDs
-    const followedCollections = await prisma.collectionFollow.findMany({
-      where: { userId },
-      select: { collectionId: true },
-    });
-    const followedCollectionIds = followedCollections.map((f) => f.collectionId);
+    let followedCollectionIds: string[] = [];
+    if (includeCollections && isCollectionsFollowEnabled()) {
+      const followedCollections = await prisma.collectionFollow.findMany({
+        where: { userId },
+        select: { collectionId: true },
+      });
+      followedCollectionIds = followedCollections.map((f) => f.collectionId);
+    }
 
     // Build cursor condition
     const cursorCondition = cursor
@@ -138,7 +142,7 @@ export const getFeed = unstable_cache(
           })
         : Promise.resolve([]),
       // Collection items from followed collections
-      followedCollectionIds.length > 0
+      includeCollections && isCollectionsFollowEnabled() && followedCollectionIds.length > 0
         ? prisma.collectionItem.findMany({
             where: {
               collectionId: { in: followedCollectionIds },

@@ -31,8 +31,8 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** Review Collections Follow  
-**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅**  
-**Nächstes Paket:** PKG-6: API Feed Erweiterung (`/api/feed` includeCollections)
+**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅, PKG-6 ✅**  
+**Nächstes Paket:** PKG-7: Client Hook & Types (`useCollectionFollow`)
 
 ---
 
@@ -66,6 +66,12 @@
 - `/api/me/listen/followed` GET mit Cursor Pagination
 - Auth via `requireTwitchAuth`, Validierung via Zod
 - Nutzt `getFollowedCollections` aus Server Logic
+- `type-check` grün
+
+**PKG-6: API Feed Erweiterung** ✅
+- `/api/feed` GET Parameter `includeCollections` (Default: true)
+- `lib/feed.ts` erweitert: `includeCollections` Parameter, Feature-Flag Check
+- Collection Items werden in Feed gemerged (bereits implementiert)
 - `type-check` grün
 
 ---
