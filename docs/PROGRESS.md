@@ -27,8 +27,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Review Reactions (Emoji-Reaktionen)** — F1 Auswahl abgeschlossen.  
-**Phase:** F2 — Spezifikation schreiben (`docs/features/review-reactions.md`).
+**Aktuelles Feature:** **Review Reactions (Emoji-Reaktionen)** — F1–F3 abgeschlossen.  
+**Phase:** F4 — Implementierung startet mit PKG-1 (DB-Migration & Model).
 
 ---
 
@@ -70,3 +70,27 @@
 - **Verworfen:** Leseverlauf (höherer Aufwand, Datenschutz), Kategorie-Abos (Cron nötig), Review-Vergleich (UI-lastig), Community Q&A (Moderation, hoher Aufwand), Collections Follow (niedrigerer Nutzen), Personalisierte Empfehlungen (hoher Aufwand), Hardware-Kompatibilität (sehr hoher Aufwand), Erweiterte Suchfilter (niedrigerer Nutzen), Review-Serien (nischenhaft)
 - **Begründung:** Bestes Nutzen-Aufwand-Verhältnis. Bewährtes Muster (GitHub, Discord, Slack), treibt Engagement & schnelles Feedback, minimaler Backend-Aufwand (1 Model `ReviewReaction`, 1 API `POST/DELETE /api/reviews/[id]/reactions`, 1 UI-Komponente `ReviewReactions`), keine Breaking Changes, sofort sichtbarer Nutzen für Leser & Autoren, erweiterbar für Kommentare später.
 - **Commit:** `docs(feature): select review-reactions` → push
+
+**Spezifikation (F2) — 2026-10-24:**
+- `docs/features/review-reactions.md` erstellt: 13 Abschnitte (Problem, 3 User Stories, Scope, Randfälle, Datenmodell, API, UI/UX, Sicherheit/Performance, Tests, Rollout, Review-Checkliste)
+- 6 feste Emojis (THUMBS_UP, HEART, PARTY, THINKING, CRY, ANGRY)
+- Feature-Flag `FEATURE_REVIEW_REACTIONS` (Default true)
+- Reversible Migration, keine Breaking Changes
+
+**Design & Plan (F3) — 2026-10-24:**
+- `docs/features/review-reactions-design.md` erstellt: Architektur, 10 Arbeitspakete (PKG-1 bis PKG-10), Datenfluss, Cache-Strategie, a11y-Checkliste
+- Keine neuen Dependencies, bestehende Patterns wiederverwenden (Votes, Collections, Comments)
+- Cache: `unstable_cache` 60s + Tag-Invaliderung bei Mutation
+- Geschätzter Aufwand: ~3.5h
+
+**Arbeitspakete (F4 — logische Reihenfolge):**
+1. **PKG-1:** DB-Migration & Model (`ReviewReaction` + Enum `ReactionType`)
+2. **PKG-2:** Types & Zod-Schemas (`review-reactions.ts`, `reaction-schema.ts`)
+3. **PKG-3:** Server Logic (`getCounts`, `getUserReaction`, `toggleReaction` in `lib/review-reactions.ts`)
+4. **PKG-4:** API Routes (`/api/reviews/[id]/reactions` GET/POST/DELETE + Feature-Flag + Rate-Limit)
+5. **PKG-5:** Client Types & Hook (`useReviewReactions` mit optimistic UI)
+6. **PKG-6:** UI Component (`ReviewReactions.tsx` + Skeleton + Tailwind Styles)
+7. **PKG-7:** Review-Detail Integration (Einbindung in `/reviews/[slug]`, SSR-Counts)
+8. **PKG-8:** Review-Card Enhancement (Optionale `reactionsSummary` Prop für Top-1)
+9. **PKG-9:** Tests (Unit, Integration, E2E)
+10. **PKG-10:** Doku & Flag (CHANGELOG, README, .env.example, PROGRESS.md)
