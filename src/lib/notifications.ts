@@ -10,6 +10,16 @@ export type NotificationWithUser = {
   createdAt: Date;
 };
 
+export type NotificationClient = {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  data: Record<string, unknown> | null;
+  readAt: string | null;
+  createdAt: string;
+};
+
 export type NotificationsResult = {
   items: NotificationWithUser[];
   nextCursor: string | null;
