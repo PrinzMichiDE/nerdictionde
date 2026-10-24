@@ -26,7 +26,7 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** **Public User Profiles & Follow-System** (Spec: `docs/features/public-user-profiles.md`)
-**Phase:** F4 Implementierung — PK20 erledigt → PK21: Self-Review & Verify
+**Phase:** F4 Implementierung — PK21 erledigt → PK22: Doku/Changelog
 
 ### Arbeitspakete (F4 Implementierung)
 | PK | Beschreibung | Status |
@@ -51,5 +51,5 @@
 | PK18 | UI: Header Notification-Glocke + Dropdown | **erledigt** |
 | PK19 | UI: `/benachrichtigungen` Seite (alle Notifications, Filter ungelesen) | **erledigt** |
 | PK20 | Tests: Unit (Follow, Feed, Notifications), Integration (APIs), E2E (Flows) | **erledigt** |
-| PK21 | Self-Review & Verify — Build, Lint, Typecheck, Tests grün | **offen** |
+| PK21 | Self-Review & Verify — Build, Lint, Typecheck, Tests grün | **erledigt** |
 | PK22 | Doku/Changelog — README, ROADMAP, DECISIONS, Feature-Spec Review-Sektion | **offen** |
