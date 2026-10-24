@@ -50,6 +50,7 @@ model Review {
   gameProgress    GameProgress[]
   videoChapters   VideoChapter[]
   forumThreads    ForumThread[]
+  collectionItems CollectionItem[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -428,6 +429,7 @@ model TwitchUser {
   pushSubscriptions   PushSubscription[]
   notificationPrefs   NotificationPreference? @relation("NotificationPreferenceUser")
   userProfile         UserProfile?
+  reviewCollections   ReviewCollection[] @relation("ReviewCollectionOwner")
   followers           Follow[]                @relation("Followers")
   following           Follow[]                @relation("Following")
   notifications       Notification[]
@@ -1666,4 +1668,43 @@ model Notification {
 enum NotificationType {
   follow
   // later: comment_reply, review_published, mention, etc.
+}
+
+// Review Collections / Kuratierte Listen
+model ReviewCollection {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?  @db.Text
+  isPublic    Boolean  @default(true) @map("is_public")
+  ownerId     String   @map("owner_id")
+  owner       TwitchUser @relation("ReviewCollectionOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  itemCount   Int      @default(0) @map("item_count")
+  version     Int      @default(1)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  items CollectionItem[]
+
+  @@index([ownerId])
+  @@index([isPublic, updatedAt])
+  @@index([slug])
+  @@map("review_collections")
+}
+
+model CollectionItem {
+  id           String   @id @default(cuid())
+  collectionId String   @map("collection_id")
+  collection   ReviewCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  reviewId     String   @map("review_id")
+  review       Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  position     Int
+  addedAt      DateTime @default(now()) @map("added_at")
+
+  @@unique([collectionId, reviewId])
+  @@unique([collectionId, position])
+  @@index([collectionId, position])
+  @@index([reviewId])
+  @@map("collection_items")
 }
