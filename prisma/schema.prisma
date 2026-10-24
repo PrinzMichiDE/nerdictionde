@@ -436,6 +436,7 @@ model TwitchUser {
   reviewReactions      ReviewReaction[]
   collectionFollows    CollectionFollow[]
   readingHistory       ReadingHistory[]       @relation("ReadingHistoryUser")
+  categorySubscriptions CategorySubscription[]
   followers            Follow[]               @relation("Followers")
   following            Follow[]               @relation("Following")
   notifications        Notification[]
@@ -1611,15 +1612,16 @@ model PushSubscription {
 }
 
 model NotificationPreference {
-  id       String     @id @default(cuid())
-  userId   String     @unique
-  user     TwitchUser @relation("NotificationPreferenceUser", fields: [userId], references: [id], onDelete: Cascade)
-  games    Boolean    @default(true)
-  movies   Boolean    @default(true)
-  series   Boolean    @default(true)
-  hardware Boolean    @default(true)
-  deals    Boolean    @default(true)
-  forum    Boolean    @default(true)
+  id                    String     @id @default(cuid())
+  userId                String     @unique
+  user                  TwitchUser @relation("NotificationPreferenceUser", fields: [userId], references: [id], onDelete: Cascade)
+  games                 Boolean    @default(true)
+  movies                Boolean    @default(true)
+  series                Boolean    @default(true)
+  hardware              Boolean    @default(true)
+  deals                 Boolean    @default(true)
+  forum                 Boolean    @default(true)
+  categoryNewReviewEmail Boolean    @default(false) @map("category_new_review_email")
 }
 
 // Community: User Profiles, Follows, Notifications
@@ -1663,6 +1665,7 @@ model Notification {
   data      Json?
   readAt    DateTime?        @map("read_at")
   createdAt DateTime         @default(now()) @map("created_at")
+  uniqueKey String?          @unique @map("unique_key")
 
   user TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -1674,6 +1677,7 @@ model Notification {
 enum NotificationType {
   follow
   collection_update
+  category_new_review
   // later: comment_reply, review_published, mention, etc.
 }
 
@@ -1756,6 +1760,28 @@ model ReviewReaction {
   @@index([reviewId])
   @@index([userId])
   @@map("review_reactions")
+}
+
+// Category Subscriptions (Kategorie-Abos)
+enum ReviewCategory {
+  GAMES
+  HARDWARE
+  MOVIES
+  SERIES
+}
+
+model CategorySubscription {
+  id        String         @id @default(cuid())
+  userId    String
+  category  ReviewCategory
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  user      TwitchUser     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
+  @@index([category])
+  @@map("category_subscriptions")
 }
 
 // Reading History (Leseverlauf)

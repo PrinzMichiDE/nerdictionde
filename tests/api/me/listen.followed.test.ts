@@ -101,7 +101,7 @@ describe("GET /api/me/listen/followed", () => {
       error: {
         flatten: () => ({ formErrors: [], fieldErrors: { limit: ['Too large'] } })
       }
-    } as any);
+    } as ReturnType<typeof mockFollowedCollectionsQuerySchema.safeParse>);
 
     const req = new NextRequest("http://localhost/api/me/listen/followed?limit=100");
     const res = await GET(req);
