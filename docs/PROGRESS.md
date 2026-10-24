@@ -35,8 +35,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Community Q&A auf Reviews** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 (DB Migration) ✅**  
-**Phase:** F4 Implementierung → **PKG-2: Types & Zod-Schemas** (`src/lib/qa-schema.ts`, `src/types/qa.ts`)
+**Aktuelles Feature:** **Community Q&A auf Reviews** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 (DB Migration) ✅, PKG-2 (Types/Schemas) ✅**  
+**Phase:** F4 Implementierung → **PKG-3: Server Logic** (`src/lib/qa.ts`)
 
 ---
 
