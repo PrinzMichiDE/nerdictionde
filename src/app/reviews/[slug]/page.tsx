@@ -19,6 +19,9 @@ import { ReadingHistoryBadge } from "@/components/reading-history/ReadingHistory
 import { ReadingHistoryTrackerWrapper } from "@/components/reading-history/ReadingHistoryTrackerWrapper";
 import { getReadingHistoryForReview } from "@/lib/reading-history";
 import { FEATURE_READING_HISTORY } from "@/lib/feature-flags";
+import { getReviewSeriesInfo } from "@/lib/review-series";
+import { SeriesBadge } from "@/components/series/SeriesBadge";
+import { FEATURE_REVIEW_SERIES } from "@/lib/feature-flags";
 import { YouTubeEmbed } from "@/components/reviews/YouTubeEmbed";
 import { EpisodeList } from "@/components/reviews/EpisodeList";
 import { GameProgressTracker } from "@/components/reviews/GameProgressTracker";
@@ -217,6 +220,10 @@ export default async function ReviewDetailPage({
   const reactions = await getCachedReviewReactions(review.id, session?.userId ?? null);
   const readingHistory = session?.userId
     ? await getReadingHistoryForReview(session.userId, review.id)
+    : null;
+
+  const seriesInfo = FEATURE_REVIEW_SERIES && review.seriesId
+    ? await getReviewSeriesInfo(review.id)
     : null;
 
   const [userRating, isBookmarked, categoryAvg] = await Promise.all([
@@ -582,6 +589,11 @@ export default async function ReviewDetailPage({
           </div>
         </div>
       </header>
+
+      {/* Series Badge */}
+      {seriesInfo && FEATURE_REVIEW_SERIES && (
+        <SeriesBadge seriesInfo={seriesInfo} />
+      )}
 
       {/* Hero Image */}
       <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
