@@ -57,6 +57,7 @@ model Review {
   seriesOrder     Int?
   series          ReviewSeries?   @relation(fields: [seriesId], references: [id], onDelete: SetNull)
   seriesItems     ReviewSeriesItem[]
+  qaQuestions     ReviewQA[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -445,6 +446,9 @@ model TwitchUser {
   followers            Follow[]               @relation("Followers")
   following            Follow[]               @relation("Following")
   notifications        Notification[]
+  qaQuestions          ReviewQA[]           @relation("ReviewQAAuthor")
+  qaAnswers            QAAnswer[]           @relation("QAAnswerAuthor")
+  qaVotes              QAVote[]
 
   @@index([twitchId])
   @@index([username])
@@ -1683,6 +1687,9 @@ enum NotificationType {
   follow
   collection_update
   category_new_review
+  qa_new_question
+  qa_answer_added
+  qa_answer_accepted
   // later: comment_reply, review_published, mention, etc.
 }
 
@@ -1842,4 +1849,80 @@ model ReviewSeriesItem {
   @@unique([seriesId, seriesOrder])
   @@index([seriesId])
   @@map("review_series_items")
+}
+
+// Community Q&A (Fragen & Antworten zu Reviews)
+enum QAStatus {
+  OPEN
+  RESOLVED
+  CLOSED
+}
+
+model ReviewQA {
+  id              String   @id @default(cuid())
+  reviewId        String   @map("review_id")
+  review          Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  authorId        String   @map("author_id")
+  author          TwitchUser @relation("ReviewQAAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  title           String   @db.VarChar(120)
+  body            String?  @db.Text
+  status          QAStatus @default(OPEN)
+  score           Int      @default(0)
+  answerCount     Int      @default(0) @map("answer_count")
+  acceptedAnswerId String? @unique @map("accepted_answer_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  editedAt        DateTime? @map("edited_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  answers         QAAnswer[]
+  votes           QAVote[]
+
+  @@index([reviewId])
+  @@index([authorId])
+  @@index([reviewId, status, score])
+  @@index([authorId, createdAt])
+  @@map("review_qa")
+}
+
+model QAAnswer {
+  id          String   @id @default(cuid())
+  questionId  String   @map("question_id")
+  question    ReviewQA @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  authorId    String   @map("author_id")
+  author      TwitchUser @relation("QAAnswerAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  body        String   @db.Text
+  score       Int      @default(0)
+  isAccepted  Boolean  @default(false) @map("is_accepted")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  editedAt    DateTime? @map("edited_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  votes       QAVote[]
+
+  @@index([questionId])
+  @@index([authorId])
+  @@index([questionId, isAccepted, score])
+  @@index([authorId, createdAt])
+  @@map("qa_answers")
+}
+
+model QAVote {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  user       TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId String?  @map("question_id")
+  question   ReviewQA? @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerId   String?  @map("answer_id")
+  answer     QAAnswer? @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  value      Int
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, questionId])
+  @@unique([userId, answerId])
+  @@index([userId])
+  @@index([questionId])
+  @@index([answerId])
+  @@map("qa_votes")
 }
