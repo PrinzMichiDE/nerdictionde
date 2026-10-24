@@ -138,6 +138,7 @@ Kernmodelle in `prisma/schema.prisma`:
 - **Notification** – Benachrichtigungen (Follows, später Kommentare, Reviews, Mentions)
 - **ReviewCollection** – Kuratierte Listen von Reviews (Titel, Beschreibung, Sichtbarkeit, Owner, Item-Count, Version für optimistisches Locking, Soft-Delete)
 - **CollectionItem** – Einträge in einer Liste (Review-Referenz, Position, Hinzugefügt-Am)
+- **ReviewReaction** – Emoji-Reaktionen auf Reviews (THUMBS_UP, HEART, PARTY, THINKING, CRY, ANGRY) mit Zählern pro Emoji, Unique-Constraint pro User+Review
 
 ## Entwicklung
 
@@ -207,6 +208,8 @@ Wichtige Variablen (aus `.env`):
 - `NEXT_PUBLIC_BASE_URL` – Basis-URL der App (Build-Zeit)
 - `NEXT_PUBLIC_SITE_URL` – Öffentliche URL der Seite (Build-Zeit)
 - `NEXT_PUBLIC_VAPID_PUBLIC_KEY` – VAPID-Schlüssel für Push-Benachrichtigungen
+- `FEATURE_REVIEW_REACTIONS` – Emoji-Reaktionen auf Reviews aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
+- `FEATURE_REVIEW_COLLECTIONS` – Review Collections aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
 
 Alle weiteren Variablen (API-Keys für IGDB, TMDB, Steam, OpenAI, Tavily usw.) werden zur Laufzeit gelesen.
 

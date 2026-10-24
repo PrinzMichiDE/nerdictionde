@@ -46,7 +46,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ### Neue Kandidaten (auto-generiert 2026-10-24)
 
-- [x] **Review Reactions (Emoji-Reaktionen)** — GitHub-Style Reaktionen (👍 ❤️ 🎉 🤔 😢 😡) auf Reviews; Anzeige der Zähler, eigene Reaktion togglebar; Persistenz pro User (TwitchUser), Aggregation auf Review. Hoher Nutzen (Engagement, schnelles Feedback), niedriger Aufwand (1 Model, 1 API, UI-Komponente), kein Schema-Breaking. **← in Arbeit (F2 Spec fertig)**
+- [x] **Review Reactions (Emoji-Reaktionen)** — GitHub-Style Reaktionen (👍 ❤️ 🎉 🤔 😢 😡) auf Reviews; Anzeige der Zähler, eigene Reaktion togglebar; Persistenz pro User (TwitchUser), Aggregation auf Review. Hoher Nutzen (Engagement, schnelles Feedback), niedriger Aufwand (1 Model, 1 API, UI-Komponente), kein Schema-Breaking. **← erledigt (F1–F9 ✅)**
 - [ ] **Leseverlauf / Reading History** — Automatisches Tracking gelesener Reviews (Scroll-Tiefe > 50% + Verweildauer > 30s), `/verlauf` Seite, Basis für Personalisierung. Hoher Nutzen (Rückkehr, Personalisierung), mittlerer Aufwand (Model, Middleware/Client-Tracking, API, UI), Datenschutz beachten (Opt-out).
 - [ ] **Kategorie-Abos / Category Subscriptions** — User abonniert Kategorien (Games, Hardware, Movies, Series), Benachrichtigung bei neuen Reviews (Push + E-Mail via Newsletter-Prefs). Hoher Nutzen (Retention, Traffic), mittlerer Aufwand (Model, Cron/Trigger, Notification-Prefs erweitern, UI in Einstellungen).
 - [ ] **Review-Vergleich erweitern** — `/reviews/vergleichen` existiert; Side-by-Side: Specs, Pros/Cons, Score, Preisverlauf, Screenshots; URL-teilarbeit (`?ids=slug1,slug2,slug3`). Mittlerer Nutzen (Kaufentscheidung), mittlerer Aufwand (UI, State, Sharing).
@@ -68,8 +68,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Review Reactions (Emoji-Reaktionen)** — F2 Spec fertiggestellt (`docs/features/review-reactions.md`). Nächste Phase: F3 Design & Plan.
+Keines — Review Reactions abgeschlossen (F1–F9 ✅). Nächstes Feature aus ROADMAP wählen.
 
 ## Nächster Schritt
 
-F3 Design & Plan: Technische Lösung entwerfen, Arbeitspakete in `docs/PROGRESS.md` definieren, dann F4 Implementierung starten.
+Hauptschleife: Nächstes Feature aus ROADMAP (Typ D) auswählen → F1 Auswahl → F2 Spec → F3 Design → F4 Implementierung.
