@@ -9,6 +9,7 @@ und dieses Projekt hält sich an [Semantische Versionierung](https://semver.org/
 
 ### Hinzugefügt
 
+- **Öffentliche Nutzerprofile & Follow-System**: Profilseiten `/u/[username]` mit Bio, Avatar, Stats, öffentlichen Bewertungen/Bookmarks (Tabs, Pagination); Follow/Unfollow-Buttons mit optimistischer UI; Follower/Following-Listen; Aktivitäts-Feed `/feed` mit Bewertungen und Bookmarks gefolgter Nutzer; Benachrichtigungs-System (Header-Glocke mit Badge, Dropdown, `/benachrichtigungen` Seite, Filter ungelesen/alle, Als-gelesen-markieren); Profil-Einstellungen `/einstellungen/profil` (Bio max 500 Zeichen, Sichtbarkeits-Toggles für Profil/Bewertungen/Bookmarks)
 - Full-Text Search mit Relevanz-Ranking: Dedizierte Suchseite `/suche`, API `/api/reviews/search` mit Relevanz-Sortierung (Titel > Tags > Inhalt), Highlighting von Suchbegriffen, Filter (Kategorie, Score, Tags), Pagination, URL-shareable Parameter, Empty-State mit Vorschlägen
 - Review als PDF exportieren: `/api/reviews/[slug]/pdf` Endpoint, `ReviewPdfDownload` Button, `ReviewPdfLayout` mit Deckblatt, Inhaltsverzeichnis, Metadaten, Markdown-Rendering, Hardwarespecs, `markdown-to-pdf` Konverter
 - Kommentar-Voting (Up/Down) auf Review-Kommentaren: `score` auf `Comment`, Voting-Buttons, Score-Anzeige, eigene Stimme

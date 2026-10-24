@@ -133,6 +133,9 @@ Kernmodelle in `prisma/schema.prisma`:
 - **Deal** / **PriceHistory** – Angebote und Preisverlauf zu Reviews
 - **NewsArticle** – KI-generierte Newsbeiträge aus RSS-Feeds
 - **TwitchUser** und zugehörige Modelle – Streaming-Tools für Twitch
+- **UserProfile** – Öffentliche Nutzerprofile (Bio, Avatar, Sichtbarkeit, Follower/Following-Counts)
+- **Follow** – Follow-Beziehungen zwischen Nutzern
+- **Notification** – Benachrichtigungen (Follows, später Kommentare, Reviews, Mentions)
 
 ## Entwicklung
 

@@ -268,15 +268,15 @@ DROP TABLE "user_profiles";
 
 ---
 
-## Review (F6) — wird nach Implementierung ausgefüllt
+## Review (F6) — nach Implementierung ausgefüllt
 
 | Check | Status | Bemerkung |
 |-------|--------|-----------|
-| Alle Akzeptanzkriterien erfüllt & getestet | | |
-| Randfälle & Fehlerpfade behandelt | | |
-| Eingaben validiert, Autorisierung geprüft | | |
-| Keine Performance-Fallen (N+1, Indizes) | | |
-| Migrationen reversibel, Daten intakt | | |
-| Abwärtskompatibilität gewahrt | | |
-| Code-Stil & Architektur konsistent | | |
-| UI: Alle Zustände, Barrierefreiheit | | |
+| Alle Akzeptanzkriterien erfüllt & getestet | ✅ | Alle 5 User Stories (US1-US5) implementiert und getestet (Unit + Integration Tests) |
+| Randfälle & Fehlerpfade behandelt | ✅ | 404 bei nicht existierenden Usern, Selbst-Follow verhindert, private Profile, Rate-Limiting |
+| Eingaben validiert, Autorisierung geprüft | ✅ | Zod-Schemas für Bio (max 500), Sichtbarkeit; Ownership-Check bei Settings; Auth bei Follow/Feed/Notifications |
+| Keine Performance-Fallen (N+1, Indizes) | ✅ | DB-Indizes auf Follow.followerId, Follow.followingId, Notification.userId+readAt+createdAt; Denormalisierte Counts; unstable_cache (30s Feed, 60s Profil) |
+| Migrationen reversibel, Daten intakt | ✅ | `UserProfile`, `Follow`, `Notification` Tabellen mit FKs; Seed für Bestandsuser; Down-Migration dokumentiert |
+| Abwärtskompatibilität gewahrt | ✅ | Keine Breaking Changes an bestehenden APIs; `TwitchUser` unverändert; neue Relations optional |
+| Code-Stil & Architektur konsistent | ✅ | Folgt bestehendem Pattern (lib/, API routes, shadcn/ui, Zod, unstable_cache); TypeScript strict; ESLint clean |
+| UI: Alle Zustände, Barrierefreiheit | ✅ | Loading/Empty/Error States; Focus-visible; ARIA-labels; Semantisches HTML; Focus-trap im Dropdown; Color Contrast ≥ 4.5:1 |
