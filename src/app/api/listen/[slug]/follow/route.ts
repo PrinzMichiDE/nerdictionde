@@ -1,180 +1,161 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireTwitchAuth } from '@/lib/auth-twitch';
-import { getCollectionBySlug } from '@/lib/collections';
-import {
-  followCollection,
-  unfollowCollection,
-  getFollowStatus,
-  toggleCollectionFollow,
-} from '@/lib/collection-follow';
-import { isCollectionFollowEnabled } from '@/lib/schemas/collection-follow-schema';
+import prisma from '@/lib/prisma';
+import { isCollectionsFollowEnabled } from '@/lib/collections-follow-schema';
+import { followParamsSchema, followRequestSchema, followStatusSchema, followToggleResponseSchema } from '@/lib/collections-follow-schema';
+import { toggleFollow, getFollowStatusBySlug } from '@/lib/collections-follow';
 
 /**
- * POST /api/listen/[slug]/follow
- * Collection folgen (authentifizierte Nutzer)
+ * API Route: Follow/Unfollow/Status für Review Collections
+ * POST   /api/listen/[slug]/follow  - Liste folgen
+ * DELETE /api/listen/[slug]/follow  - Liste nicht mehr folgen
+ * GET    /api/listen/[slug]/follow  - Follow-Status & Count abrufen
  */
+
+// Feature-Flag Guard
+function checkFeatureFlag() {
+  if (!isCollectionsFollowEnabled()) {
+    return NextResponse.json({ error: 'Feature nicht verfügbar' }, { status: 404 });
+  }
+  return null;
+}
+
 export async function POST(
   request: NextRequest,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  context: { params: Promise<any> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
+  const featureCheck = checkFeatureFlag();
+  if (featureCheck) return featureCheck;
+
+  // Auth
+  const auth = await requireTwitchAuth(request);
+  if (auth instanceof NextResponse) return auth;
+
+  // Params validieren
+  const { slug } = await params;
+  const paramsResult = followParamsSchema.safeParse({ slug });
+  if (!paramsResult.success) {
+    return NextResponse.json({ error: 'Ungültiger Slug' }, { status: 400 });
+  }
+
+  // Body validieren (leer, aber für Konsistenz)
+  let body: unknown;
   try {
-    if (!isCollectionFollowEnabled()) {
-      return NextResponse.json(
-        { error: 'Feature nicht verfügbar' },
-        { status: 404 }
-      );
-    }
+    body = await request.json();
+  } catch {
+    body = {};
+  }
+  const bodyResult = followRequestSchema.safeParse(body);
+  if (!bodyResult.success) {
+    return NextResponse.json({ error: 'Ungültige Anfrage' }, { status: 400 });
+  }
 
-    const auth = await requireTwitchAuth(request);
-    if (auth instanceof NextResponse) return auth;
+  try {
+    const result = await toggleFollow(auth.userId, slug);
 
-    const { slug } = await context.params;
-
-    // Collection by Slug laden
-    const collection = await getCollectionBySlug(slug);
-    if (!collection) {
-      return NextResponse.json(
-        { error: 'Liste nicht gefunden' },
-        { status: 404 }
-      );
-    }
-
-    // Prüfen: Collection muss öffentlich und nicht gelöscht sein
-    if (!collection.isPublic || collection.deletedAt) {
-      return NextResponse.json(
-        { error: 'Liste nicht verfügbar' },
-        { status: 403 }
-      );
-    }
-
-    const result = await followCollection(auth.userId, collection.id);
-
-    // Cache invalidation wäre hier ideal (revalidateTag)
-    // Für jetzt: Cache läuft nach 60s ab
-
-    return NextResponse.json(result);
+    const response = followToggleResponseSchema.parse(result);
+    return NextResponse.json(response);
   } catch (error) {
-    console.error('[API] POST /api/listen/[slug]/follow error:', error);
+    const message = error instanceof Error ? error.message : 'Interner Fehler';
+    const status = message.includes('nicht gefunden') ? 404 :
+                   message.includes('nicht öffentlich') ? 403 :
+                   message.includes('Eigene Liste') ? 400 :
+                   message.includes('Feature nicht aktiviert') ? 404 : 500;
 
-    if (error instanceof Error) {
-      if (error.message === 'Liste nicht gefunden') {
-        return NextResponse.json({ error: error.message }, { status: 404 });
-      }
-      if (error.message === 'Liste nicht verfügbar') {
-        return NextResponse.json({ error: error.message }, { status: 403 });
-      }
-      if (error.message === 'Feature nicht verfügbar') {
-        return NextResponse.json({ error: error.message }, { status: 404 });
-      }
-    }
-
-    return NextResponse.json(
-      { error: 'Interner Serverfehler' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: message }, { status });
   }
 }
 
-/**
- * DELETE /api/listen/[slug]/follow
- * Collection entfolgen (authentifizierte Nutzer)
- */
 export async function DELETE(
   request: NextRequest,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  context: { params: Promise<any> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
+  const featureCheck = checkFeatureFlag();
+  if (featureCheck) return featureCheck;
+
+  // Auth
+  const auth = await requireTwitchAuth(request);
+  if (auth instanceof NextResponse) return auth;
+
+  // Params validieren
+  const { slug } = await params;
+  const paramsResult = followParamsSchema.safeParse({ slug });
+  if (!paramsResult.success) {
+    return NextResponse.json({ error: 'Ungültiger Slug' }, { status: 400 });
+  }
+
   try {
-    if (!isCollectionFollowEnabled()) {
-      return NextResponse.json(
-        { error: 'Feature nicht verfügbar' },
-        { status: 404 }
-      );
+    // Toggle mit aktuellem Status prüfen - wenn bereits gefolgt, unfollow
+    const status = await getFollowStatusBySlug(auth.userId, slug);
+    if (!status) {
+      return NextResponse.json({ error: 'Liste nicht gefunden' }, { status: 404 });
+    }
+    if (!status.followed) {
+      return NextResponse.json({ error: 'Liste wird nicht gefolgt' }, { status: 400 });
     }
 
-    const auth = await requireTwitchAuth(request);
-    if (auth instanceof NextResponse) return auth;
+    const result = await toggleFollow(auth.userId, slug);
 
-    const { slug } = await context.params;
-
-    // Collection by Slug laden
-    const collection = await getCollectionBySlug(slug);
-    if (!collection) {
-      return NextResponse.json(
-        { error: 'Liste nicht gefunden' },
-        { status: 404 }
-      );
-    }
-
-    const result = await unfollowCollection(auth.userId, collection.id);
-
-    return NextResponse.json(result);
+    const response = followToggleResponseSchema.parse(result);
+    return NextResponse.json(response);
   } catch (error) {
-    console.error('[API] DELETE /api/listen/[slug]/follow error:', error);
+    const message = error instanceof Error ? error.message : 'Interner Fehler';
+    const status = message.includes('nicht gefunden') ? 404 :
+                   message.includes('nicht öffentlich') ? 403 :
+                   message.includes('Eigene Liste') ? 400 :
+                   message.includes('Feature nicht aktiviert') ? 404 : 500;
 
-    if (error instanceof Error) {
-      if (error.message === 'Liste nicht gefunden') {
-        return NextResponse.json({ error: error.message }, { status: 404 });
-      }
-      if (error.message === 'Nicht gefolgt') {
-        return NextResponse.json({ error: error.message }, { status: 400 });
-      }
-      if (error.message === 'Feature nicht verfügbar') {
-        return NextResponse.json({ error: error.message }, { status: 404 });
-      }
-    }
-
-    return NextResponse.json(
-      { error: 'Interner Serverfehler' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: message }, { status });
   }
 }
 
-/**
- * GET /api/listen/[slug]/follow-status
- * Follow-Status und Counter für SSR (optional authentifiziert)
- */
 export async function GET(
   request: NextRequest,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  context: { params: Promise<any> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
+  const featureCheck = checkFeatureFlag();
+  if (featureCheck) return featureCheck;
+
+  // Params validieren
+  const { slug } = await params;
+  const paramsResult = followParamsSchema.safeParse({ slug });
+  if (!paramsResult.success) {
+    return NextResponse.json({ error: 'Ungültiger Slug' }, { status: 400 });
+  }
+
+  // Optional: User Session für Follow-Status
+  const auth = await requireTwitchAuth(request);
+  const userId = auth instanceof NextResponse ? null : auth.userId;
+
   try {
-    if (!isCollectionFollowEnabled()) {
-      return NextResponse.json(
-        { error: 'Feature nicht verfügbar' },
-        { status: 404 }
-      );
-    }
+    const collection = await prisma.reviewCollection.findUnique({
+      where: { slug },
+      select: { id: true, followersCount: true, isPublic: true, deletedAt: true },
+    });
 
-    const { slug } = await context.params;
-    const auth = await requireTwitchAuth(request);
-    const userId = auth instanceof NextResponse ? undefined : auth.userId;
-
-    // Collection by Slug laden
-    const collection = await getCollectionBySlug(slug);
     if (!collection) {
-      return NextResponse.json(
-        { error: 'Liste nicht gefunden' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Liste nicht gefunden' }, { status: 404 });
+    }
+    if (!collection.isPublic || collection.deletedAt) {
+      return NextResponse.json({ error: 'Liste nicht verfügbar' }, { status: 404 });
     }
 
-    const result = await getFollowStatus(userId, collection.id);
+    let followed = false;
+    if (userId) {
+      const status = await getFollowStatusBySlug(userId, slug);
+      if (status) {
+        followed = status.followed;
+      }
+    }
 
-    return NextResponse.json(result);
+    const response = followStatusSchema.parse({
+      followed,
+      followerCount: collection.followersCount,
+    });
+
+    return NextResponse.json(response);
   } catch (error) {
-    console.error('[API] GET /api/listen/[slug]/follow-status error:', error);
-
-    if (error instanceof Error && error.message === 'Feature nicht verfügbar') {
-      return NextResponse.json({ error: error.message }, { status: 404 });
-    }
-
-    return NextResponse.json(
-      { error: 'Interner Serverfehler' },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : 'Interner Fehler';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -31,8 +31,8 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** Review Collections Follow  
-**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅, PKG-3 ✅**  
-**Nächstes Paket:** PKG-4: API Routes Follow/Unfollow/Status (`/api/listen/[slug]/follow`)
+**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅**  
+**Nächstes Paket:** PKG-5: API Gefolgte Listen (`/api/me/listen/followed`)
 
 ---
 
@@ -54,6 +54,12 @@
 - Funktionen: `getFollowStatus`, `getFollowStatusBySlug`, `toggleFollow`, `getFollowedCollections`, `getFollowers`, `getFollowerIds`, `getFollowedCollectionIds`, `userFollowsCollection`
 - Cache: `unstable_cache` mit Tag-Invaliderung (30s/60s TTLs)
 - Transaktionen für atomare Count-Updates
+- `type-check` grün
+
+**PKG-4: API Follow/Unfollow/Status** ✅
+- `/api/listen/[slug]/follow` POST/DELETE/GET
+- Feature-Flag Guard, Auth via `requireTwitchAuth`, Validierung via Zod
+- Error Handling mit passenden HTTP Status Codes
 - `type-check` grün
 
 ---
