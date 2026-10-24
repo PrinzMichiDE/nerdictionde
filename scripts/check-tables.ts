@@ -1,32 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+const p = new PrismaClient();
 
 async function main() {
-  // Check if tables exist by querying them
-  const tables = [
-    "twitchUser",
-    "userProfile",
-    "follow",
-    "notification",
-    "userRating",
-    "bookmark",
-    "review",
-  ] as const;
-  
-  for (const table of tables) {
-    try {
-      // @ts-expect-error - dynamic table access
-      const count = await prisma[table].count();
-      console.log(`${table}: ${count} records`);
-    } catch (e) {
-      console.log(`${table}: ERROR - ${e instanceof Error ? e.message : String(e)}`);
-    }
-  }
+  const tables = await p.$queryRaw`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name`;
+  console.log('Tables:', tables);
+  await p.$disconnect();
 }
 
-main()
-  .catch((e) => console.error(e))
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main().catch(console.error);

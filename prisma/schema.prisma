@@ -430,11 +430,12 @@ model TwitchUser {
   pushSubscriptions   PushSubscription[]
   notificationPrefs   NotificationPreference? @relation("NotificationPreferenceUser")
   userProfile         UserProfile?
-  reviewCollections   ReviewCollection[] @relation("ReviewCollectionOwner")
-  reviewReactions     ReviewReaction[]
-  followers           Follow[]                @relation("Followers")
-  following           Follow[]                @relation("Following")
-  notifications       Notification[]
+  reviewCollections    ReviewCollection[]     @relation("ReviewCollectionOwner")
+  reviewReactions      ReviewReaction[]
+  collectionFollows    CollectionFollow[]
+  followers            Follow[]               @relation("Followers")
+  following            Follow[]               @relation("Following")
+  notifications        Notification[]
 
   @@index([twitchId])
   @@index([username])
@@ -1669,30 +1670,48 @@ model Notification {
 
 enum NotificationType {
   follow
+  collection_update
   // later: comment_reply, review_published, mention, etc.
 }
 
 // Review Collections / Kuratierte Listen
 model ReviewCollection {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  description String?  @db.Text
-  isPublic    Boolean  @default(true) @map("is_public")
-  ownerId     String   @map("owner_id")
-  owner       TwitchUser @relation("ReviewCollectionOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  itemCount   Int      @default(0) @map("item_count")
-  version     Int      @default(1)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  deletedAt   DateTime? @map("deleted_at")
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  description    String?  @db.Text
+  isPublic       Boolean  @default(true) @map("is_public")
+  ownerId        String   @map("owner_id")
+  owner          TwitchUser @relation("ReviewCollectionOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  itemCount      Int      @default(0) @map("item_count")
+  followersCount Int      @default(0) @map("followers_count")
+  version        Int      @default(1)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
 
-  items CollectionItem[]
+  items      CollectionItem[]
+  followers  CollectionFollow[]
 
   @@index([ownerId])
   @@index([isPublic, updatedAt])
   @@index([slug])
+  @@index([followersCount])
   @@map("review_collections")
+}
+
+model CollectionFollow {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  user         TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collectionId String   @map("collection_id")
+  collection   ReviewCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, collectionId])
+  @@index([userId])
+  @@index([collectionId])
+  @@map("collection_follows")
 }
 
 model CollectionItem {
