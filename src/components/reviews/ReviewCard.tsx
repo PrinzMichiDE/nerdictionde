@@ -3,15 +3,20 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Review } from "@/types/review";
+import { REACTION_EMOJIS, REACTION_TYPES, type ReactionType } from '@/types/review-reactions';
 import { getCategoryStyle, getScoreColor, getVerdict } from "@/lib/review-category";
 import { ArrowRight, Clock3 } from "lucide-react";
 import { CompareButton } from "./CompareButton";
 
 interface ReviewCardProps {
   review: Review;
+  reactionsSummary?: {
+    counts: Record<ReactionType, number>;
+    total: number;
+  } | null;
 }
 
-export function ReviewCard({ review }: ReviewCardProps) {
+export function ReviewCard({ review, reactionsSummary }: ReviewCardProps) {
   const formattedDate = new Date(review.createdAt).toLocaleDateString("de-DE", {
     year: "numeric",
     month: "long",
@@ -21,6 +26,14 @@ export function ReviewCard({ review }: ReviewCardProps) {
   const style = getCategoryStyle(review.category);
   const snippet = (review.content || "").split(/\s+/).slice(0, 30).join(" ") + "…";
   const readingTime = Math.max(1, Math.ceil((review.content || "").split(/\s+/).length / 200));
+
+  // Top reaction for card display
+  const topReaction = reactionsSummary?.total
+    ? REACTION_TYPES.reduce((max, type) =>
+        (reactionsSummary.counts[type] ?? 0) > (reactionsSummary.counts[max] ?? 0) ? type : max
+      )
+    : null;
+  const topCount = topReaction ? reactionsSummary!.counts[topReaction] : 0;
 
   return (
     <Link
@@ -62,6 +75,13 @@ export function ReviewCard({ review }: ReviewCardProps) {
               </span>
             </span>
           </div>
+
+          {topReaction && topCount > 0 && (
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium text-muted-foreground rounded-full bg-muted" aria-label={`Top-Reaktion: ${topCount} Nutzer`}>
+              <span aria-hidden="true">{REACTION_EMOJIS[topReaction]}</span>
+              <span className="tabular-nums">{topCount}</span>
+            </div>
+          )}
 
           <h3 className="font-serif text-xl font-semibold leading-snug line-clamp-2 transition-colors group-hover:text-primary">
             {review.title}
