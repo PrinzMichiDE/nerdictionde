@@ -31,8 +31,8 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** Review Collections Follow  
-**Phase:** F4 Implementierung — **PKG-1 ✅** (DB Migration & Prisma Schema)  
-**Nächstes Paket:** PKG-2: Types & Zod Schemas (`lib/collections-follow-schema.ts`)
+**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅**  
+**Nächstes Paket:** PKG-3: Server Logic (`lib/collections-follow.ts`)
 
 ---
 
@@ -42,7 +42,12 @@
 - Migration `20261024150000_add_collections_follow` erstellt & als angewendet markiert
 - `CollectionFollow` Model, `followersCount` auf `ReviewCollection`, `NotificationType` Enum (`COLLECTION_ITEM_ADDED`, `COLLECTION_FOLLOWED`)
 - `prisma generate` erfolgreich, `type-check` grün
-- Commit: `feat(collections-follow): db migration & schema`
+
+**PKG-2: Types & Zod Schemas** ✅
+- `src/lib/collections-follow-schema.ts` erstellt
+- Schemas: `followParamsSchema`, `followRequestSchema`, `followStatusSchema`, `followToggleResponseSchema`, `followedCollectionsQuerySchema`, `followedCollectionSchema`, `followerSchema`
+- Types inferiert, Feature-Flag `FEATURE_COLLECTIONS_FOLLOW` definiert
+- `type-check` grün
 
 ---
 
