@@ -1,110 +1,91 @@
-# Feature-Spezifikation: Kategorie-Abos / Category Subscriptions
+# Feature Spec: Kategorie-Abos (Category Subscriptions)
 
-**Datum:** 2026-10-24  
-**Status:** In Arbeit (F2)  
-**Autor:** Autonomes Entwicklungsteam  
-**Feature-Flag:** `FEATURE_CATEGORY_SUBSCRIPTIONS` (Default: `true`)
+## Problem und Nutzen
+**Warum?** Nutzer wollen automatisch benachrichtigt werden, wenn neue Reviews in ihren Interessensbereichen (Games, Hardware, Movies, Series) erscheinen. Erhöht Retention, bringt Traffic zurück auf die Seite, nutzt bestehende Notification-Infrastruktur.
 
----
+**Für wen?** Alle registrierten Nutzer (TwitchUser), die Benachrichtigungen für bestimmte Kategorien aktivieren möchten.
 
-## 1. Problem und Nutzen
+## User Stories & Akzeptanzkriterien
 
-### Problem
-Nutzer verpassen neue Reviews in ihren Interessensbereichen (Games, Hardware, Movies, Series), weil sie die Seite nicht regelmäßig besuchen oder die Startseite zu generisch ist. Es fehlt ein Mechanismus, der Nutzer proaktiv über neue Inhalte in ihren Präferenzen informiert.
+### US1: Kategorie abonnieren/abbestellen
+- **Als** eingeloggter Nutzer
+- **Will ich** Kategorien (Games, Hardware, Movies, Series) abonnieren/abbestellen
+- **Damit** ich über neue Reviews in diesen Kategorien informiert werde
 
-### Nutzen (Warum? Für wen?)
-- **Für Leser:** Erhalten Benachrichtigungen (On-Site + optional E-Mail), sobald ein Review in einer abonnierten Kategorie erscheint → höhere Retention, weniger verpasste Inhalte.
-- **Für Autoren/Plattform:** Mehr Traffic auf neue Reviews kurz nach Veröffentlichung, stärkere Bindung, Messbarkeit über Notification-Opens.
-- **Für SEO/Discovery:** Kategorie-Seiten werden häufiger besucht, interne Verlinkung gestärkt.
+**Akzeptanzkriterien:**
+- [ ] Seite `/einstellungen/kategorien` zeigt 4 Kategorien mit Toggle-Switches
+- [ ] Klick auf Toggle abonniert/abbestellt sofort (optimistic UI)
+- [ ] Toast bestätigt Aktion ("Games abonniert" / "Games abbestellt")
+- [ ] Bei Fehler Rollback + Fehler-Toast
+- [ ] Feature-Flag `FEATURE_CATEGORY_SUBSCRIPTIONS` schaltet Feature komplett ab (404)
 
-### Metriken (messbare Akzeptanzkriterien)
-- ≥ 15% der eingeloggten Nutzer abonnieren mindestens eine Kategorie innerhalb von 30 Tagen.
-- ≥ 25% Klickrate auf Kategorie-Benachrichtigungen (On-Site) innerhalb von 7 Tagen.
-- Benachrichtigungs-Latenz: < 5 Minuten nach Review-Publikation bis Notification-Erstellung.
+### US2: Abonnierte Kategorien auf Startseite anzeigen
+- **Als** eingeloggter Nutzer mit aktiven Abos
+- **Will ich** meine abonnierten Kategorien als Chips auf der Startseite sehen
+- **Damit** ich schnell zu neuen Reviews in diesen Kategorien springen kann
 
----
+**Akzeptanzkriterien:**
+- [ ] Chips erscheinen nur bei eingeloggten Nutzern mit Abos
+- [ ] Klick auf Chip führt zu `/suche?category=GAMES` (entsprechend)
+- [ ] Chips nutzen Prisma Enum-Werte (GAMES, HARDWARE, MOVIES, SERIES)
 
-## 2. User Stories & Akzeptanzkriterien
+### US3: Abonnierte Kategorien auf öffentlichem Profil
+- **Als** Besucher eines öffentlichen Profils
+- **Will ich** sehen, welche Kategorien der Nutzer abonniert hat
+- **Damit** ich seine Interessen verstehe
 
-| ID | User Story | Akzeptanzkriterien |
-|----|------------|-------------------|
-| **US1** | Als eingeloggter Nutzer möchte ich Kategorien (Games, Hardware, Movies, Series) abonnieren/abbestellen, damit ich über neue Reviews informiert werde. | - UI in `/einstellungen/kategorien` zeigt alle 4 Kategorien mit Toggle-Schaltern<br>- Toggle speichert sofort (optimistische UI, Rollback bei Fehler)<br>- Toast-Bestätigung bei Erfolg/Fehler<br>- Standard: keine Kategorie abonniert (Opt-in) |
-| **US2** | Als Nutzer erhalte ich eine On-Site-Benachrichtigung, wenn ein Review in einer abonnierten Kategorie veröffentlicht wird. | - `NotificationType.CATEGORY_NEW_REVIEW` wird erstellt bei Publish<br>- Empfänger: alle User mit `CategorySubscription` für diese Kategorie + `notificationPrefs.categoryNewReview = true`<br>- Notification enthält: Review-Titel, Kategorie, Link zu Review, Thumbnail<br>- Deduplizierung: max 1 Notification pro Review pro User |
-| **US3** | Als Nutzer kann ich in den Benachrichtigungseinstellungen festlegen, ob ich Kategorie-Benachrichtigungen per E-Mail erhalten möchte. | - Erweiterung `NotificationPrefs`: `categoryNewReviewEmail: boolean` (Default: `false`)<br>- UI in `/einstellungen/benachrichtigungen`<br>- Respektiert globale `emailEnabled` |
-| **US4** | Als Nutzer sehe ich meine abonnierten Kategorien auf der Startseite / im Profil als Badge/Chip. | - `/` (Startseite) zeigt Chips für abonnierte Kategorien (max 4)<br>- `/u/[username]` Profil zeigt Kategorie-Chips (öffentlich, nur wenn User das erlaubt)<br>- Klick auf Chip filtert `/suche?category=...` |
-| **US5** | Als Admin/Autor wird bei Publikation eines Reviews automatisch die Benachrichtigung getriggert. | - Hook in Review-Publish-Flow (Server Action / API Route)<br>- Fire-and-forget (non-blocking)<br>- Fehler loggen, aber Publish nicht blockieren |
+**Akzeptanzkriterien:**
+- [ ] Nur bei öffentlichen Profilen (`userProfile.isPublic = true`)
+- [ ] Chips wie auf Startseite, verlinkt auf Suche
 
----
+### US4: Push-Benachrichtigung bei neuem Review
+- **Als** Nutzer mit Kategorie-Abo
+- **Will ich** eine In-App-Benachrichtigung erhalten, wenn ein neues Review in meiner Kategorie veröffentlicht wird
+- **Damit** ich es sofort lesen kann
 
-## 3. Scope & Nicht-Scope
+**Akzeptanzkriterien:**
+- [ ] Bei Veröffentlichung eines Reviews (`status: draft → published`) werden Notifications erstellt
+- [ ] Notification Type: `category_new_review`
+- [ ] Titel: "Neuer Review in {CategoryLabel}"
+- [ ] Link: `/reviews/{slug}`
+- [ ] Dedupe via `uniqueKey: category-review-{reviewId}-{userId}`
+- [ ] Nur Nutzer mit `NotificationPreference` (on-site) erhalten Notification
 
-### In Scope (MVP)
-- 4 feste Kategorien: `GAMES`, `HARDWARE`, `MOVIES`, `SERIES` (Enum `ReviewCategory`)
-- Model `CategorySubscription` (User ↔ Category, Unique)
-- On-Site Notifications bei neuem Review in abonnierter Kategorie
-- E-Mail-Preference für Kategorie-Benachrichtigungen (Opt-in)
-- UI in `/einstellungen/kategorien` + `/einstellungen/benachrichtigungen`
-- Badge/Chip-Anzeige auf Startseite & Profil
-- Feature-Flag `FEATURE_CATEGORY_SUBSCRIPTIONS`
+### US5: E-Mail-Benachrichtigung (Opt-in)
+- **Als** Nutzer mit Kategorie-Abo
+- **Will ich** optional E-Mails bei neuen Reviews erhalten
+- **Damit** ich auch außerhalb der App informiert bin
 
-### Explizit Nicht-Scope (spätere Iterationen)
-- Benutzerdefinierte Kategorien / Tags-Abos
-- Push-Benachrichtigungen (Web Push / Mobile)
-- Digest-E-Mails (täglich/wöchentlich zusammengefasst)
-- Kategorie-spezifische Frequenz-Einstellungen (sofort / daily digest)
-- A/B-Tests für Notification-Timing/-Wording
-- Analytics-Dashboard für Kategorie-Abo-Conversion
+**Akzeptanzkriterien:**
+- [ ] Toggle in Einstellungen: "E-Mail bei neuen Kategorie-Reviews"
+- [ ] Default: aus (Opt-in)
+- [ ] Cron-Job prüft stündlich neue Reviews und sendet E-Mails an Nutzer mit aktiviertem Toggle
+- [ ] Respektiert `NotificationPreference.categoryNewReviewEmail`
 
----
+## Scope
+**In Scope:**
+- 4 Kategorien: Games, Hardware, Movies, Series
+- In-App Notifications bei neuer Veröffentlichung
+- UI in `/einstellungen/kategorien`, Startseite, öffentliches Profil
+- Feature-Flag für schnelles Deaktivieren
+- E-Mail Opt-in (später via Cron)
 
-## 4. Randfälle, Fehlerfälle, Leere Zustände, Berechtigungen, Nebenläufigkeit
+**Out of Scope:**
+- Sub-Kategorien (z.B. "Indie Games", "GPUs")
+- Frequenz-Einstellungen (sofort/täglich/wöchentlich) – initial nur sofort
+- Rich Push Notifications (Web Push) – nur In-App
+- Admin-Interface für Kategorie-Management
 
-### Randfälle
-- **Review in mehreren Kategorien:** Notification pro User nur einmal (Deduplizierung via `Notification.uniqueKey = "category-review-{reviewId}-{userId}"`)
-- **Kategorie ändern nachträglich:** Bestehende Subscriptions bleiben, neue Reviews nutzen neue Kategorie
-- **Review unpublizieren:** Keine Notification-Rücknahme (bereits gesendet), aber keine neuen für unpublizierte
-- **User löscht Account:** Cascade Delete auf `CategorySubscription` + `Notification`
+## Randfälle & Fehlerfälle
+- Nutzer abonniert Kategorie, die keine Reviews hat → leere Notification-Liste, kein Fehler
+- Review hat Kategorie "amazon" → Mapping zu HARDWARE (amazon = Hardware-Produkte)
+- Review-Kategorie ändert sich nach Veröffentlichung → Notification bereits gesendet, keine Nachbearbeitung
+- Nutzer deaktiviert Profil-Öffentlichkeit → Chips verschwinden auf öffentlichem Profil
+- Feature-Flag aus → alle API-Routen geben 404, UI-Komponenten rendern nichts
 
-### Fehlerfälle
-- **DB-Unique-Constraint-Verletzung (Doppel-Abo):** Idempotent behandeln (Upsert), Toast "Bereits abonniert"
-- **Notification-Erstellung schlägt fehl:** Loggen, Review-Publish nicht blockieren, Retry via Outbox-Pattern (später)
-- **Cron/Trigger nicht verfügbar:** Fallback: Notification beim nächsten Seitenaufruf des Users prüfen (später)
+## Datenmodell & Migration
 
-### Leere Zustände
-- **Keine Kategorien abonniert:** UI zeigt "Noch keine Kategorien abonniert. Wähle oben deine Interessen."
-- **Keine Benachrichtigungen:** Standard-Empty-State der Notification-Liste
-
-### Berechtigungen
-- Nur eingeloggte User (Twitch OAuth) können abonnieren
-- `requireTwitchAuth` Guard auf allen APIs
-- Owner-Check: User kann nur eigene Subscriptions verwalten
-
-### Nebenläufigkeit
-- Toggle-Race-Condition: Optimistisches Locking via `version` Feld auf `CategorySubscription` (optional, MVP: idempotent Upsert reicht)
-- Notification-Deduplizierung: Unique Constraint auf `Notification.uniqueKey`
-
----
-
-## 5. Auswirkungen auf bestehende Features & Abwärtskompatibilität
-
-| Feature | Auswirkung |
-|---------|------------|
-| **Notifications** | Neuer `NotificationType.CATEGORY_NEW_REVIEW`, erweitert `NotificationPayload` |
-| **NotificationPrefs** | Neues Feld `categoryNewReviewEmail` (Default `false`) |
-| **Review Publish** | Neuer Side-Effect: Notification-Erstellung (non-blocking) |
-| **Startseite** | Zusätzliche Chips für abonnierte Kategorien (Client Component) |
-| **Profil `/u/[username]`** | Optional: Kategorie-Chips anzeigen (Privacy-Setting später) |
-| **Suche `/suche`** | Chip-Klick setzt `category` Filter (bereits vorhanden) |
-| **Einstellungen** | Zwei neue Tabs/Sections: "Kategorien", "Benachrichtigungen" erweitert |
-
-**Abwärtskompatibilität:** Volle Rückwärtskompatibilität. Keine Breaking Changes an bestehenden APIs/Models. Bestehende Nutzer haben keine Subscriptions (Opt-in).
-
----
-
-## 6. Datenmodell & Migrationen
-
-### Prisma Schema Erweiterungen
-
+### Prisma Schema (bereits vorhanden)
 ```prisma
 enum ReviewCategory {
   GAMES
@@ -124,250 +105,92 @@ model CategorySubscription {
 
   @@unique([userId, category])
   @@index([category])
+  @@map("category_subscriptions")
 }
 
-model Notification {
+model NotificationPreference {
   // ... existing fields
-  type NotificationType
-  // NEW:
-  uniqueKey String?        @unique // für Deduplizierung: "category-review-{reviewId}-{userId}"
-}
-
-enum NotificationType {
-  // ... existing
-  CATEGORY_NEW_REVIEW
-}
-
-model NotificationPrefs {
-  // ... existing fields
-  categoryNewReviewEmail Boolean @default(false)
+  categoryNewReviewEmail Boolean    @default(false) @map("category_new_review_email")
 }
 ```
 
-### Migration (reversibel)
-- **Up:** `CREATE TABLE CategorySubscription`, `ADD COLUMN uniqueKey` auf `Notification`, `ADD COLUMN categoryNewReviewEmail` auf `NotificationPrefs`, `ALTER TYPE NotificationType ADD VALUE 'CATEGORY_NEW_REVIEW'`
-- **Down:** `DROP TABLE CategorySubscription`, `DROP COLUMN uniqueKey`, `DROP COLUMN categoryNewReviewEmail`, `ALTER TYPE NotificationType DROP VALUE 'CATEGORY_NEW_REVIEW'` (PostgreSQL: `ALTER TYPE ... DROP VALUE` erfordert keine abhängigen Objekte)
+### Migration
+- Reversible Migration `20261024xxxxxx_add_category_subscriptions`
+- Erstellt Enum `ReviewCategory` und Tabelle `category_subscriptions`
+- Down-Migration dropt Tabelle und Enum
 
-### Indizes
-- `CategorySubscription(category)` für effizientes Finden aller Subscriber einer Kategorie
-- `Notification(uniqueKey)` Unique für Deduplizierung
+### Mapping Review.category → ReviewCategory
+Review.category (String): `"game" | "hardware" | "amazon" | "movie" | "series"`
+ReviewCategory (Enum): `GAMES | HARDWARE | MOVIES | SERIES`
 
----
+Mapping:
+- `"game"` → `GAMES`
+- `"hardware"` → `HARDWARE`
+- `"amazon"` → `HARDWARE` (Amazon-Produkte = Hardware)
+- `"movie"` → `MOVIES`
+- `"series"` → `SERIES`
 
-## 7. API-Änderungen
+## API-Änderungen
 
-### Neue Endpoints
+### Bestehende Routes (bereits implementiert)
+- `GET /api/me/categories/subscriptions` → Liste abonnierter Kategorien
+- `POST /api/me/categories/subscriptions` → Kategorie abonnieren `{ category: ReviewCategory }`
+- `DELETE /api/me/categories/subscriptions/:category` → Kategorie abbestellen
 
-| Method | Path | Beschreibung |
-|--------|------|--------------|
-| `GET` | `/api/me/categories/subscriptions` | Liste abonnierte Kategorien (Array `ReviewCategory[]`) |
-| `POST` | `/api/me/categories/subscriptions` | Kategorie abonnieren (Body: `{ category: ReviewCategory }`) |
-| `DELETE` | `/api/me/categories/subscriptions/:category` | Kategorie abbestellen |
-| `GET` | `/api/me/notifications/prefs` | Bereits vorhanden, liefert nun `categoryNewReviewEmail` mit |
-| `PATCH` | `/api/me/notifications/prefs` | Bereits vorhanden, akzeptiert nun `categoryNewReviewEmail` |
+### Neue Routes (für E-Mail-Cron)
+- `POST /api/admin/category-notifications/trigger` → Manuell triggern (Admin)
+- `GET /api/admin/category-notifications/status` → Status der letzten Runs
 
-### Bestehende Endpoints (Erweiterung)
-- Review-Publish-API (interne Server Action): triggert `createCategoryNotifications(reviewId)`
+## UI/UX Ablauf
 
-### Request/Response Schemas (Zod)
-```typescript
-// POST /api/me/categories/subscriptions
-const subscribeSchema = z.object({
-  category: z.enum(['GAMES', 'HARDWARE', 'MOVIES', 'SERIES']),
-});
+### `/einstellungen/kategorien`
+- Server Component prüft Feature-Flag + Auth
+- Client Component `CategorySubscriptionsClient` lädt initiale Daten (Skeleton währenddessen)
+- 4 Cards in Grid (sm:2, lg:4), jede mit Icon, Label, Beschreibung, Switch
+- Switch: `aria-checked`, `aria-label`, `disabled` während Loading
 
-// Response: { subscribed: true, category: 'GAMES' }
+### Startseite Chips
+- `HomeSubscribedCategoryChips` Wrapper prüft Feature-Flag
+- `SubscribedCategoryChips` nutzt `useCategorySubscriptions` Hook
+- Badge-Links zu `/suche?category={ENUM}`
 
-// GET /api/me/categories/subscriptions
-// Response: { categories: ['GAMES', 'HARDWARE'] }
-```
+### Öffentliches Profil
+- Server Component lädt `getSubscribedCategories` wenn `isPublic`
+- Übergeben an `PublicProfile` Client Component
+- Render als Badge-Links wie auf Startseite
 
----
+## Sicherheit
+- Alle API-Routen: `requireTwitchAuth` (nur eingeloggte Nutzer)
+- User kann nur eigene Subscriptions lesen/schreiben
+- `uniqueKey` in Notification verhindert Duplikate
+- Keine PII in Logs
+- Rate-Limit nicht nötig (max 4 Subscriptions pro User)
 
-## 8. UI/UX-Ablauf
+## Performance
+- `unstable_cache` 60s für `getSubscribedCategories` und `getSubscribersForCategory`
+- Tags: `category-subscriptions`, `category-subscribers`
+- Invaliderung bei Mutation via `invalidateCategorySubscriptionCache(userId)`
+- Notification-Erstellung: Batch-Insert mit `skipDuplicates`
 
-### `/einstellungen/kategorien` (Server Component + Client Interactions)
-```
-┌─────────────────────────────────────────────────────┐
-│  Kategorie-Abos                                     │
-│  ─────────────────────────────────────────────────  │
-│  Erhalte Benachrichtigungen, sobald ein neues       │
-│  Review in deinen Kategorien erscheint.             │
-│                                                     │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │ 🎮 Games    │  │ 🖥 Hardware │  │ 🎬 Movies   │  │
-│  │ [Toggle ON] │  │ [Toggle OFF]│  │ [Toggle OFF]│  │
-│  └─────────────┘  └─────────────┘  └─────────────┘  │
-│                                                     │
-│  ┌─────────────┐                                   │
-│  │ 📺 Series   │                                   │
-│  │ [Toggle OFF]│                                   │
-│  └─────────────┘                                   │
-└─────────────────────────────────────────────────────┘
-```
-- **Loading:** Skeleton pro Karte während Initial-Load
-- **Error:** Toast "Fehler beim Speichern. Bitte versuche es erneut."
-- **Success:** Toast "Games abonniert" / "Games abbestellt"
-- **a11y:** `<fieldset>` + `<legend>`, Toggle als `<button role="switch" aria-checked>`, Fokus-Ring, Screen-Reader-Text
+## Teststrategie
+- **Unit Tests** (`tests/lib/category-subscriptions.test.ts`): 8 Tests für alle lib-Funktionen
+- **Integration Tests** (`tests/integration/category-subscriptions/api.test.ts`): 9 Tests für alle API-Routen (Auth, Feature-Flag, CRUD)
+- **E2E Tests** (`tests/e2e/category-subscriptions.spec.ts`): 6 Tests für User-Flows (Sub/Unsub, Home-Chips, Profil-Chips, Email-Toggle)
+- Alle Tests müssen grün sein vor Merge
 
-### `/einstellungen/benachrichtigungen` (Erweiterung)
-- Neuer Abschnitt "Kategorie-Benachrichtigungen"
-- Checkbox: "E-Mail bei neuen Reviews in abonnierten Kategorien"
-- Deaktiviert, wenn `emailEnabled = false` oder keine Kategorien abonniert
+## Rollout-Plan
+1. Migration auf Staging anwenden, Tests laufen lassen
+2. Feature-Flag `FEATURE_CATEGORY_SUBSCRIPTIONS=true` auf Staging
+3. Manuelle Prüfung aller User Stories
+4. Feature-Flag auf Production setzen
+5. Cron-Job für E-Mails einrichten (separater Task)
 
-### Startseite `/` (Client Component `SubscribedCategoryChips`)
-- Horizontale Scroll-Liste Chips (max 4, bei 4 alle sichtbar)
-- Chip: Kategorie-Icon + Name, Klick → `/suche?category=GAMES`
-- Nur sichtbar, wenn ≥ 1 Kategorie abonniert
-
-### Profil `/u/[username]` (Erweiterung)
-- Bereich "Interessen" mit Kategorie-Chips (read-only)
-- Sichtbar nur wenn User `profilePublic = true` (bestehendes Feld)
-
----
-
-## 9. Barrierefreiheit (a11y)
-
-- **Semantic HTML:** `<fieldset>`/`<legend>` für Kategorie-Gruppe, `<button role="switch">` für Toggles
-- **ARIA:** `aria-checked` auf Toggles, `aria-live="polite"` für Toast-Container
-- **Tastatur:** Tab-Navigation, Space/Enter für Toggle, Escape schließt Toasts
-- **Fokus:** Sichtbarer Fokus-Ring (`focus-visible:ring-2`)
-- **Color Contrast:** Chips/Toggles mind. 4.5:1 (Tailwind `text-primary` / `bg-primary`)
-- **Reduced Motion:** `@media (prefers-reduced-motion: reduce)` für Chip-Hover-Animationen
-- **Screen Reader:** Kategorie-Name + Status ("Games, abonniert") via `aria-label`
-
----
-
-## 10. Sicherheit
-
-### Eingabevalidierung
-- Zod-Schema auf allen API-Routes (Category Enum Validation)
-- `requireTwitchAuth` Guard (Session Validation)
-- Owner-Check: `userId` aus Session === `userId` in DB
-
-### Autorisierung
-- Keine Admin-Rechte nötig (Self-Service)
-- Notification-Erstellung: Server-seitig nur bei `status = PUBLISHED` Reviews
-
-### Datenschutz
-- Opt-in Default (keine Kategorie abonniert)
-- E-Mail Opt-in Default `false`
-- DSGVO: User kann alle Subscriptions löschen (`DELETE /api/me/categories/subscriptions/:category`)
-- Keine Tracking-Daten an Dritte
-
-### Rate Limiting
-- API: `10 req/min` pro User für Subscribe/Unsubscribe (bestehender Rate-Limiter)
-- Notification-Erstellung: Kein Limit (Server-seitig, pro Review einmalig)
-
----
-
-## 11. Performance-Erwartung
-
-| Metrik | Ziel |
-|--------|------|
-| API `GET /api/me/categories/subscriptions` | < 50ms (cached 60s via `unstable_cache`) |
-| API `POST/DELETE /api/me/categories/subscriptions` | < 100ms (DB Write + Cache Invalidation) |
-| Notification-Erstellung pro Review | < 200ms für bis zu 10.000 Subscriber (Batch-Insert) |
-| Startseite Chips Render | < 10ms (Client-seitig aus Session/Cache) |
-| DB Query: Subscriber für Kategorie | Index Scan auf `CategorySubscription(category)` → < 10ms |
-
-### Caching
-- `GET /api/me/categories/subscriptions`: `unstable_cache` 60s, Tag `category-subscriptions-{userId}`
-- Invaliderung bei POST/DELETE auf gleichen Tag
-- Notification-Prefs: `unstable_cache` 60s, Tag `notification-prefs-{userId}`
-
----
-
-## 12. Teststrategie
-
-### Unit Tests (`tests/lib/category-subscriptions.test.ts`)
-- `getSubscribedCategories(userId)` → liefert korrektes Array
-- `toggleSubscription(userId, category)` → Upsert/Delete, Idempotenz
-- `getSubscribersForCategory(category)` → liefert UserIds
-- `createCategoryNotifications(review)` → erstellt Notifications für alle Subscriber, Deduplizierung via `uniqueKey`
-
-### Integration Tests (`tests/api/me/categories.test.ts`)
-- `GET /api/me/categories/subscriptions` → 200, leeres Array initial
-- `POST /api/me/categories/subscriptions` → 200, Kategorie in Response
-- `POST` doppelt → 200, idempotent (kein Fehler)
-- `DELETE /api/me/categories/subscriptions/GAMES` → 200, Kategorie entfernt
-- Unauthenticated → 401
-- Invalid Category → 400
-
-### Integration Tests (`tests/api/reviews/publish-notifications.test.ts`)
-- Review Publish triggert Notification-Erstellung für Subscriber
-- Notification enthält korrekte Payload (reviewId, title, category, slug)
-- Keine Notification für User ohne Subscription
-- Keine Duplicate-Notifications (uniqueKey)
-
-### E2E Tests (Playwright, `tests/e2e/category-subscriptions.spec.ts`)
-- User loggt ein, besucht `/einstellungen/kategorien`
-- Toggle "Games" → Toast erscheint, Chip auf Startseite sichtbar
-- Neuer Review in "Games" veröffentlicht (Admin) → Notification erscheint in Glocke
-- Klick Notification → landet auf Review-Detailseite
-- E-Mail-Pref in `/einstellungen/benachrichtigungen` toggelbar
-
----
-
-## 13. Rollout-Plan & Feature-Flag
-
-| Phase | Beschreibung | Flag |
-|-------|--------------|------|
-| **1. Dev/Staging** | Vollständige Implementierung, Tests grün | `FEATURE_CATEGORY_SUBSCRIPTIONS=true` |
-| **2. Canary (5% User)** | Flag auf `true` für 5% (Middleware/Random) | `FEATURE_CATEGORY_SUBSCRIPTIONS=canary` |
-| **3. Full Rollout** | Flag auf `true` für alle | `FEATURE_CATEGORY_SUBSCRIPTIONS=true` |
-| **Rollback** | Flag auf `false` → UI ausgeblendet, APIs geben 404, DB bleibt unangetastet | `FEATURE_CATEGORY_SUBSCRIPTIONS=false` |
-
-**Flag-Implementierung:**
-```typescript
-// lib/feature-flags.ts
-export const FEATURE_CATEGORY_SUBSCRIPTIONS = process.env.FEATURE_CATEGORY_SUBSCRIPTIONS === 'true';
-```
-
----
-
-## 14. Review-Checkliste (F6 - Self-Review)
-
-*Wird nach Implementierung ausgefüllt.*
-
-| Kriterium | Status | Bemerkung |
-|-----------|--------|-----------|
-| Alle Akzeptanzkriterien erfüllt & getestet | ⬜ | |
-| Randfälle & Fehlerpfade behandelt | ⬜ | |
-| Eingaben validiert, Autorisierung geprüft | ⬜ | |
-| Keine Performance-Fallen (N+1, Indizes) | ⬜ | |
-| Migration reversibel, Daten intakt | ⬜ | |
-| Abwärtskompatibilität gewahrt | ⬜ | |
-| Code-Stil & Architektur konsistent | ⬜ | |
-| UI: Alle Zustände, a11y beachtet | ⬜ | |
-
----
-
-## 15. Offene Fragen / Entscheidungen
-
-| Frage | Entscheidung | Begründung |
-|-------|--------------|------------|
-| Wie werden Kategorien definiert? | Festes Enum `ReviewCategory` (4 Werte) | Einfach, stabil, passt zu bestehendem `Review.category` Feld |
-| Notification-Deduplizierung Key-Format? | `category-review-{reviewId}-{userId}` | Eindeutig, suchbar, kompakt |
-| Batch-Insert für Notifications? | Ja, `prisma.notification.createMany({ skipDuplicates: true })` | Performant, nutzt Unique Constraint |
-| Cron vs Event-Driven für Notification? | Event-Driven bei Publish (Server Action) | Echtzeit, keine Cron-Latenz, einfacher |
-| E-Mail-Versand synchron oder Queue? | Queue (später), MVP: nur Pref speichern | Nicht blockierend, Skalierbarkeit |
-
----
-
-## 16. Nächste Schritte (F3 - Design & Plan)
-
-1. **PKG-1:** DB Migration & Prisma Schema (`CategorySubscription`, `Notification.uniqueKey`, `NotificationPrefs.categoryNewReviewEmail`, `NotificationType.CATEGORY_NEW_REVIEW`)
-2. **PKG-2:** Types & Zod Schemas (`category-subscriptions.ts`, `category-subscription-schema.ts`)
-3. **PKG-3:** Server Logic (`lib/category-subscriptions.ts`: `getSubscriptions`, `toggleSubscription`, `getSubscribersForCategory`, `createCategoryNotifications`)
-4. **PKG-4:** API Routes (`/api/me/categories/subscriptions` GET/POST/DELETE)
-5. **PKG-5:** Notification Prefs API Erweiterung (`/api/me/notifications/prefs` PATCH)
-6. **PKG-6:** Review Publish Hook (Notification Trigger in `lib/reviews.ts` / Server Action)
-7. **PKG-7:** Client Hook & Types (`hooks/useCategorySubscriptions.ts`)
-8. **PKG-8:** UI Components (`CategorySubscriptionCard.tsx`, `SubscribedCategoryChips.tsx`)
-9. **PKG-9:** Settings Pages (`/einstellungen/kategorien/page.tsx`, Erweiterung `/einstellungen/benachrichtigungen`)
-10. **PKG-10:** Startseite & Profil Integration (Chips)
-11. **PKG-11:** Tests (Unit, Integration, E2E)
-12. **PKG-12:** Doku & Flag (CHANGELOG, README, .env.example, PROGRESS.md, ROADMAP.md)
-
-**Geschätzter Aufwand:** ~5-6h
+## Review-Checkliste (F6)
+- [ ] Alle AK getestet & erfüllt
+- [ ] Randfälle behandelt (amazon-Mapping, Feature-Flag, leere Zustände)
+- [ ] Eingaben validiert (Zod), Auth geprüft, keine Secrets
+- [ ] Keine N+1-Abfragen (Batch-Insert, cached Reads)
+- [ ] Migration reversibel, bestehende Daten intakt
+- [ ] Abwärtskompatibilität gewahrt (neue Tabelle, keine Breaking Changes)
+- [ ] Code-Stil konsistent, keine toten Codeteile
+- [ ] UI: alle Zustände (Loading, Error, Empty, Success), a11y (ARIA, Fokus)
