@@ -121,6 +121,9 @@ export async function GET(req: NextRequest) {
       createdAt: true,
       updatedAt: true,
       tags: { select: { tag: { select: { name: true, slug: true } } } },
+      seriesId: true,
+      seriesOrder: true,
+      series: { select: { id: true, slug: true, title: true } },
     } as const;
 
     const selectWithPrice = {

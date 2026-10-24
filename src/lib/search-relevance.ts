@@ -11,6 +11,9 @@ export interface ReviewWithTags {
   createdAt: Date;
   updatedAt: Date;
   tags: Array<{ tag: { name: string; slug: string } }>;
+  seriesId: string | null;
+  seriesOrder: number | null;
+  series: { id: string; slug: string; title: string } | null;
 }
 
 /**
