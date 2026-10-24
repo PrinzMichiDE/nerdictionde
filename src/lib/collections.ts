@@ -21,6 +21,7 @@ export type CollectionWithItems = ReviewCollection & {
   items: (CollectionItem & {
     review: Pick<Review, 'id' | 'title' | 'slug' | 'category' | 'score' | 'images' | 'releaseDate'>;
   })[];
+  nextCursor: number | null;
 };
 
 export type CollectionListItem = ReviewCollection & {
@@ -449,6 +450,17 @@ export const getMyCollections = async (params: {
 export async function isCollectionOwner(collectionId: string, userId: string): Promise<boolean> {
   const collection = await prisma.reviewCollection.findUnique({
     where: { id: collectionId },
+    select: { ownerId: true },
+  });
+  return collection?.ownerId === userId;
+}
+
+/**
+ * Prüft ob User Owner der Collection ist (by Slug)
+ */
+export async function isCollectionOwnerBySlug(slug: string, userId: string): Promise<boolean> {
+  const collection = await prisma.reviewCollection.findUnique({
+    where: { slug },
     select: { ownerId: true },
   });
   return collection?.ownerId === userId;
