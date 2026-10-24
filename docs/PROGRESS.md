@@ -3,7 +3,7 @@
 ## Stand (2026-10-24)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: 296/296 grün (vitest, 28 Dateien). `lint`: 13 Errors (pre-existing no-explicit-any in review-reactions tests), 209 Warnings — alle kritischen Lint-Errors (React Hooks setState in useEffect) behoben.
+- `type-check`: grün. `build`: grün. `tests`: 411/417 grün (vitest, 6 pre-existing failures in Collections Follow), `lint`: 22 Errors (pre-existing: 13 no-explicit-any, 9 react-hooks/set-state-in-effect), 237 Warnings — keine neuen Errors durch Category Subscriptions
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
   1. Newsletter Double-Optin + Bestätigungsseite
@@ -23,11 +23,12 @@
   - Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
   - `no-explicit-any` Bereinigung gestartet: 150+/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
   - **Letzte 3 React-Hooks-Errors behoben**: `TableOfContents.tsx`, `YouTubeEmbed.tsx`, `SupportTopBanner.tsx` — redundante `setState` in `useEffect` durch Lazy Initializer ersetzt
+  - **Category Subscriptions Fixes**: `useLayoutEffect` statt `useEffect` für Mount-Detection, `params: Promise<{category: string}>` statt `Promise<any>`
 - Abgeschlossene Typ-B-Aufgaben:
-  - CHANGELOG.md, README.md erweitert
-  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api, pdf-export, pdf-layout, search-relevance, highlighter-logic, **collections (95), collection-schema (44), review-reactions (12), advanced-search-filters (18)**
-  - Integration-Tests: search-api, deals, price-history, pdf-export, votes, comments, **listen (10), me/listen (5), reactions-api (10), search-advanced-filters (20)**
-  - 296 Tests insgesamt
+  - CHANGELOG.md, README.md, ROADMAP.md, .env.example, PROGRESS.md aktualisiert
+  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api, pdf-export, pdf-layout, search-relevance, highlighter-logic, **collections (95), collection-schema (44), review-reactions (12), advanced-search-filters (18), category-subscriptions (8), category-mapping (19)**
+  - Integration-Tests: search-api, deals, price-history, pdf-export, votes, comments, **listen (10), me/listen (5), reactions-api (10), search-advanced-filters (20), category-subscriptions-api (9)**
+  - 411 Tests insgesamt (36 neue für Category Subscriptions)
 
 ## Nächster Schritt (Hauptschleife)
 
