@@ -29,8 +29,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Leseverlauf / Reading History** — F1 Auswahl ✅  
-**Phase:** F2 – Spezifikation schreiben (`docs/features/reading-history.md`)
+**Aktuelles Feature:** **Leseverlauf / Reading History** — F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅  
+**Phase:** F4 – Implementierung (PKG-1: DB-Migration & Model)
 
 ---
 
