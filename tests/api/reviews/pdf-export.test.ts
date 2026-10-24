@@ -23,7 +23,7 @@ vi.mock("@/lib/seo", () => ({
   getSiteUrl: mockGetSiteUrl,
 }));
 
-import { GET } from "@/app/api/reviews/[slug]/pdf/route";
+import { GET } from "@/app/api/reviews/[id]/pdf/route";
 
 // Mock NextRequest
 function createMockRequest(url: string): NextRequest {
@@ -33,7 +33,7 @@ function createMockRequest(url: string): NextRequest {
   });
 }
 
-describe("GET /api/reviews/[slug]/pdf", () => {
+describe("GET /api/reviews/[id]/pdf", () => {
   const mockReview = {
     id: "review-1",
     slug: "test-game",
@@ -81,7 +81,7 @@ describe("GET /api/reviews/[slug]/pdf", () => {
     mockReviewFindUnique.mockResolvedValue(null);
 
     const request = createMockRequest("https://nerdiction.de/api/reviews/non-existent/pdf");
-    const response = await GET(request, { params: Promise.resolve({ slug: "non-existent" }) });
+    const response = await GET(request, { params: Promise.resolve({ id: "non-existent" }) });
 
     expect(response.status).toBe(404);
   });
@@ -90,7 +90,7 @@ describe("GET /api/reviews/[slug]/pdf", () => {
     mockReviewFindUnique.mockResolvedValue({ ...mockReview, status: "draft" });
 
     const request = createMockRequest("https://nerdiction.de/api/reviews/test-game/pdf");
-    const response = await GET(request, { params: Promise.resolve({ slug: "test-game" }) });
+    const response = await GET(request, { params: Promise.resolve({ id: "review-1" }) });
 
     expect(response.status).toBe(404);
   });
@@ -100,7 +100,7 @@ describe("GET /api/reviews/[slug]/pdf", () => {
     mockRenderReviewPdfToBuffer.mockResolvedValue(Buffer.from("fake-pdf-content"));
 
     const request = createMockRequest("https://nerdiction.de/api/reviews/test-game/pdf");
-    const response = await GET(request, { params: Promise.resolve({ slug: "test-game" }) });
+    const response = await GET(request, { params: Promise.resolve({ id: "review-1" }) });
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toBe("application/pdf");
@@ -113,7 +113,7 @@ describe("GET /api/reviews/[slug]/pdf", () => {
     mockRenderReviewPdfToBuffer.mockResolvedValue(Buffer.from("fake-pdf-content"));
 
     const request = createMockRequest("https://nerdiction.de/api/reviews/test-game/pdf?lang=en");
-    const response = await GET(request, { params: Promise.resolve({ slug: "test-game" }) });
+    const response = await GET(request, { params: Promise.resolve({ id: "review-1" }) });
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toBe("application/pdf");
@@ -125,7 +125,7 @@ describe("GET /api/reviews/[slug]/pdf", () => {
     mockRenderReviewPdfToBuffer.mockResolvedValue(Buffer.from("fake-pdf-content"));
 
     const request = createMockRequest("https://nerdiction.de/api/reviews/test-game/pdf?lang=en");
-    await GET(request, { params: Promise.resolve({ slug: "test-game" }) });
+    await GET(request, { params: Promise.resolve({ id: "review-1" }) });
 
     expect(mockRenderReviewPdfToBuffer).toHaveBeenCalledWith(mockReview, true, "https://nerdiction.de");
   });
@@ -135,7 +135,7 @@ describe("GET /api/reviews/[slug]/pdf", () => {
     mockRenderReviewPdfToBuffer.mockRejectedValue(new Error("PDF generation failed"));
 
     const request = createMockRequest("https://nerdiction.de/api/reviews/test-game/pdf");
-    const response = await GET(request, { params: Promise.resolve({ slug: "test-game" }) });
+    const response = await GET(request, { params: Promise.resolve({ id: "review-1" }) });
 
     expect(response.status).toBe(500);
   });

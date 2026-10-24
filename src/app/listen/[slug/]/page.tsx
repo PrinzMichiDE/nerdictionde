@@ -1,0 +1,121 @@
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { getCollectionWithItems, getCollectionBySlug } from "@/lib/collections";
+import { CollectionItems } from "@/components/collections/CollectionItems";
+import { ShareButton } from "@/components/collections/ShareButton";
+import { getCategoryColor } from "@/lib/utils";
+
+interface Props {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ cursor?: string }>;
+}
+
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const { cursor } = await searchParams;
+  const collection = await getCollectionWithItems({
+    slug,
+    cursor: cursor ? parseInt(cursor) : 0,
+    limit: 1,
+  });
+
+  if (!collection) {
+    return { title: "Liste nicht gefunden - Nerdiction" };
+  }
+
+  const firstItem = collection.items[0];
+
+  return {
+    title: `${collection.title} - Nerdiction`,
+    description: collection.description || `Kurierte Liste mit ${collection.itemCount} Reviews von ${collection.owner.displayName}.`,
+    openGraph: {
+      title: collection.title,
+      description: collection.description || `Kurierte Liste mit ${collection.itemCount} Reviews von ${collection.owner.displayName}.`,
+      type: "website",
+      images: firstItem?.review?.images?.[0] ? [firstItem.review.images[0]] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: collection.title,
+      description: collection.description || undefined,
+      images: firstItem?.review?.images?.[0] ? [firstItem.review.images[0]] : undefined,
+    },
+  };
+}
+
+interface Props {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ cursor?: string }>;
+}
+
+export default async function ListenDetailPage({ params, searchParams }: Props) {
+  const { slug } = await params;
+  const { cursor } = await searchParams;
+
+  const collection = await getCollectionWithItems({
+    slug,
+    cursor: cursor ? parseInt(cursor) : 0,
+    limit: 12,
+  });
+
+  if (!collection) {
+    notFound();
+  }
+
+  const isOwner = false; // Will be determined by client component via session
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <article>
+        {/* Header */}
+        <header className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+            <div>
+              <h1 className="font-serif text-3xl md:text-4xl font-semibold tracking-tight">
+                {collection.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  Von <a href={`/u/${collection.owner.username}`} className="font-medium hover:text-primary transition-colors">
+                    {collection.owner.displayName}
+                  </a>
+                </span>
+                <span className="flex items-center gap-1">
+                  {collection.itemCount} Review{collection.itemCount !== 1 ? "s" : ""}
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-xs font-medium border"
+                  style={{ borderColor: collection.isPublic ? "var(--primary)" : "var(--muted-foreground)" }}>
+                  {collection.isPublic ? "Öffentlich" : "Privat"}
+                </span>
+              </div>
+              {collection.description && (
+                <p className="mt-4 text-muted-foreground whitespace-pre-wrap">{collection.description}</p>
+              )}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <ShareButton url={typeof window !== "undefined" ? window.location.href : ""} title={collection.title} />
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground border-t pt-4">
+            <span className="flex items-center gap-1">
+              Erstellt: {new Date(collection.createdAt).toLocaleDateString("de-DE", { month: "long", year: "numeric" })}
+            </span>
+            <span className="flex items-center gap-1">
+              Aktualisiert: {new Date(collection.updatedAt).toLocaleDateString("de-DE", { month: "long", year: "numeric" })}
+            </span>
+          </div>
+        </header>
+
+        {/* Items */}
+        <CollectionItems
+          initialItems={collection.items}
+          initialCursor={collection.nextCursor}
+          slug={collection.slug}
+          isOwner={isOwner}
+        />
+      </article>
+    </div>
+  );
+}

@@ -5,16 +5,16 @@ import { getSiteUrl } from "@/lib/seo";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { slug } = await params;
+  const { id } = await params;
   const { searchParams } = new URL(request.url);
   const lang = searchParams.get("lang") === "en" ? "en" : "de";
   const isEn = lang === "en";
 
   try {
     const review = await prisma.review.findUnique({
-      where: { slug },
+      where: { id },
       include: {
         tags: { include: { tag: true } },
       },
@@ -27,7 +27,7 @@ export async function GET(
     const siteUrl = getSiteUrl();
     const pdfBuffer = await renderReviewPdfToBuffer(review, isEn, siteUrl);
 
-    const filename = `${sanitizeFilename(slug)}-review.pdf`;
+    const filename = `${sanitizeFilename(review.slug)}-review.pdf`;
 
     // Convert Buffer to Uint8Array for Blob
     const pdfBytes = new Uint8Array(pdfBuffer);

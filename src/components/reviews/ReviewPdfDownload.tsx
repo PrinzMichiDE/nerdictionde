@@ -6,18 +6,18 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 interface ReviewPdfDownloadProps {
-  slug: string;
+  reviewId: string;
   lang?: string;
 }
 
-export function ReviewPdfDownload({ slug, lang = "de" }: ReviewPdfDownloadProps) {
+export function ReviewPdfDownload({ reviewId, lang = "de" }: ReviewPdfDownloadProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleDownload = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/reviews/${slug}/pdf?lang=${lang}`, {
+      const response = await fetch(`/api/reviews/${reviewId}/pdf?lang=${lang}`, {
         method: "GET",
         headers: { Accept: "application/pdf" },
       });
@@ -33,7 +33,7 @@ export function ReviewPdfDownload({ slug, lang = "de" }: ReviewPdfDownloadProps)
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${slug}-review.pdf`;
+      link.download = `${reviewId}-review.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

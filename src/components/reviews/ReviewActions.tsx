@@ -30,7 +30,7 @@ export function ReviewActions({
     <div className="flex flex-wrap items-center gap-2">
       <ShareButtons title={title} url={url} />
 
-      <ReviewPdfDownload slug={slug} lang={lang} />
+      <ReviewPdfDownload reviewId={reviewId} lang={lang} />
 
       <Button
         variant="outline"
