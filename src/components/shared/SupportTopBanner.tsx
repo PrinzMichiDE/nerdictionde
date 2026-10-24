@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export function SupportTopBanner() {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const dismissed = localStorage.getItem("support-top-banner-dismissed");
+    return !dismissed;
+  });
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const dismissed = localStorage.getItem("support-top-banner-dismissed");
-    if (!dismissed) setVisible(true);
     setHydrated(true);
   }, []);
 

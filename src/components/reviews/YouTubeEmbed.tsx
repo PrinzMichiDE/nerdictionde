@@ -40,7 +40,10 @@ export function YouTubeEmbed({
   isEn = false,
 }: YouTubeEmbedProps) {
   const [isClient, setIsClient] = useState(false);
-  const [embedId, setEmbedId] = useState<string | null>(null);
+  const [embedId, setEmbedId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return extractVideoId(videoId);
+  });
   const [startAt, setStartAt] = useState(0);
 
   useEffect(() => {

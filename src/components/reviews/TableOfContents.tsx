@@ -22,6 +22,9 @@ export function TableOfContents({ headings, isEn }: TableOfContentsProps) {
     setMounted(true);
   }, []);
 
+  // Hydration-safe: only set mounted after client-side render
+  // Using lazy initializer would be better but SSR needs false initially
+
   useEffect(() => {
     if (!mounted || typeof window === "undefined") return;
 

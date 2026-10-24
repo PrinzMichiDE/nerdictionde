@@ -4,6 +4,7 @@ import { SearchResults } from "@/components/search/SearchResults";
 import { SearchFilters } from "@/components/search/SearchFilters";
 import { SearchSkeleton } from "@/components/search/SearchSkeleton";
 import { SearchIcon, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 interface SearchPageContentProps {
   searchParams: Promise<{
@@ -162,13 +163,13 @@ export async function SearchPageContent({ searchParams }: SearchPageContentProps
               aria-autocomplete="list"
             />
             {query && (
-              <a
+              <Link
                 href="/suche"
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm p-1"
                 aria-label="Suche leeren"
               >
                 <SearchIcon className="size-5" />
-              </a>
+              </Link>
             )}
           </div>
 
@@ -211,12 +212,12 @@ export async function SearchPageContent({ searchParams }: SearchPageContentProps
             <Loader2 className="size-8 mx-auto text-destructive mb-3" />
             <p className="text-destructive font-medium">Fehler bei der Suche</p>
             <p className="text-sm text-muted-foreground mt-1">{error}</p>
-            <a
+            <Link
               href="/reviews"
               className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
             >
               Alle Reviews ansehen
-            </a>
+            </Link>
           </div>
         ) : query && data && data.reviews.length === 0 ? (
           <section className="text-center py-20">
@@ -231,14 +232,14 @@ export async function SearchPageContent({ searchParams }: SearchPageContentProps
                     <p className="text-sm font-medium text-muted-foreground mb-2">Beliebte Tags:</p>
                     <div className="flex flex-wrap gap-2 justify-center">
                       {popularTags.slice(0, 8).map((tag) => (
-                        <a
+                        <Link
                           key={tag.slug}
                           href={`/suche?tags=${tag.slug}`}
                           className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1 text-sm hover:bg-accent transition-colors"
                         >
                           #{tag.name}
                           <span className="text-xs text-muted-foreground">({tag.count})</span>
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -248,13 +249,13 @@ export async function SearchPageContent({ searchParams }: SearchPageContentProps
                     <p className="text-sm font-medium text-muted-foreground mb-2">Neueste Tests:</p>
                     <div className="flex flex-wrap gap-2 justify-center">
                       {latestReviews.map((r) => (
-                        <a
+                        <Link
                           key={r.id}
                           href={`/reviews/${r.slug}`}
                           className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1 text-sm hover:bg-accent transition-colors"
                         >
                           {r.title}
-                        </a>
+                        </Link>
                       ))}
                     </div>
                   </div>

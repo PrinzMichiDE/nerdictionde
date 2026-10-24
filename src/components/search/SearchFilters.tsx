@@ -37,24 +37,16 @@ export function SearchFilters({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [localCategory, setLocalCategory] = useState(category);
-  const [localMinScore, setLocalMinScore] = useState(minScore);
-  const [localMaxScore, setLocalMaxScore] = useState(maxScore);
-  const [localSort, setLocalSort] = useState(sort);
+  const [localCategory, setLocalCategory] = useState<string>(() => category);
+  const [localMinScore, setLocalMinScore] = useState<string>(() => minScore);
+  const [localMaxScore, setLocalMaxScore] = useState<string>(() => maxScore);
+  const [localSort, setLocalSort] = useState<string>(() => sort);
   const [showCategory, setShowCategory] = useState(false);
   const [showSort, setShowSort] = useState(false);
   const [showScore, setShowScore] = useState(false);
   const categoryRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
   const scoreRef = useRef<HTMLDivElement>(null);
-
-  // Sync local state with URL params on mount
-  useEffect(() => {
-    setLocalCategory(category);
-    setLocalMinScore(minScore);
-    setLocalMaxScore(maxScore);
-    setLocalSort(sort);
-  }, [category, minScore, maxScore, sort]);
 
   // Click outside to close dropdowns
   useEffect(() => {

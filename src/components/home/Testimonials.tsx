@@ -104,7 +104,7 @@ export function Testimonials() {
 
               {/* Content */}
               <p className="text-muted-foreground leading-relaxed italic">
-                "{testimonial.content}"
+                &ldquo;{testimonial.content}&rdquo;
               </p>
 
               {/* Author */}

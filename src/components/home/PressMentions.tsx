@@ -92,7 +92,7 @@ export function PressMentions() {
 
               {/* Quote */}
               <p className="text-muted-foreground leading-relaxed italic text-lg">
-                "{mention.quote}"
+                &ldquo;{mention.quote}&rdquo;
               </p>
 
               {/* Source */}

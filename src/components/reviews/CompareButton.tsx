@@ -28,17 +28,15 @@ interface CompareButtonProps {
 export function CompareButton({ slug, className }: CompareButtonProps) {
   const router = useRouter();
 
-  const [cart, setCart] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  const [cart, setCart] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      setCart(stored ? JSON.parse(stored) : []);
+      return stored ? JSON.parse(stored) : [];
     } catch {
-      setCart([]);
+      return [];
     }
-  }, []);
+  });
 
   const inCart = cart.includes(slug);
   const full = cart.length >= MAX_COMPARE && !inCart;

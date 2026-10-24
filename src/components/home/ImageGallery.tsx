@@ -49,14 +49,24 @@ export function ImageGallery({ reviews }: ImageGalleryProps) {
     };
   }, []);
 
+  // Handle body scroll lock when lightbox is open
+  useEffect(() => {
+    if (selectedImage) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [selectedImage]);
+
   const openLightbox = (src: string, title: string, index: number) => {
     setSelectedImage({ src, title, index });
-    document.body.style.overflow = "hidden";
   };
 
   const closeLightbox = () => {
     setSelectedImage(null);
-    document.body.style.overflow = "unset";
   };
 
   const navigateImage = (direction: "prev" | "next") => {

@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export async function generateMetadata({
   params,
@@ -38,12 +39,12 @@ export default async function ConfirmPage({
           Dein Newsletter-Abonnement war bereits bestaetigt. Du erhaeltst
           weiterhin Neuigkeiten von Nerdiction.
         </p>
-        <a
+        <Link
           href="/"
           className="mt-6 inline-flex items-center gap-2 text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
         >
           Zur Startseite
-        </a>
+        </Link>
       </div>
     );
   }
@@ -61,12 +62,12 @@ export default async function ConfirmPage({
       <p className="mt-3 text-muted-foreground">
         Du erhaeltst ab jetzt Neuigkeiten von Nerdiction.
       </p>
-      <a
+      <Link
         href="/"
         className="mt-6 inline-flex items-center gap-2 text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
       >
         Zur Startseite
-      </a>
+      </Link>
     </div>
   );
 }

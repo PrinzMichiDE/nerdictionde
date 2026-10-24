@@ -192,7 +192,7 @@ export default async function ComparePage({
           Zum Test lesen:{reviews
             .map((r) => (
               <span key={r.id} className="ml-1 font-medium text-foreground">
-                "{r.title}"
+                &ldquo;{r.title}&rdquo;
               </span>
             ))}
         </p>

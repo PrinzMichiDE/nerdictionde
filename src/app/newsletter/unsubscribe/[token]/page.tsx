@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export async function generateMetadata({
   params,
@@ -43,12 +44,12 @@ export default async function UnsubscribePage({
         Wenn du dich wieder anmelden moechtest, kannst du das jederzeit
         auf der Startseite tun.
       </p>
-      <a
+      <Link
         href="/"
         className="mt-6 inline-flex items-center gap-2 text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
       >
         Zur Startseite
-      </a>
+      </Link>
     </div>
   );
 }

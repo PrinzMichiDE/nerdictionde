@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3, PieChart, TrendingUp } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 
 interface ChartData {
   label: string;
@@ -126,21 +126,24 @@ export function CategoryPieChart({ data }: PieChartProps) {
   }, []);
 
   const total = data.reduce((sum, item) => sum + item.value, 0);
-  let currentAngle = -90; // Start at top
+  
+  // Calculate segments without mutating external variable
+  const segments = useMemo(() => {
+    let currentAngle = -90; // Start at top
+    return data.map((item) => {
+      const percentage = (item.value / total) * 100;
+      const angle = (item.value / total) * 360;
+      const startAngle = currentAngle;
+      currentAngle += angle;
 
-  const segments = data.map((item) => {
-    const percentage = (item.value / total) * 100;
-    const angle = (item.value / total) * 360;
-    const startAngle = currentAngle;
-    currentAngle += angle;
-
-    return {
-      ...item,
-      percentage,
-      angle,
-      startAngle,
-    };
-  });
+      return {
+        ...item,
+        percentage,
+        angle,
+        startAngle,
+      };
+    });
+  }, [data, total]);
 
   return (
     <Card ref={ref} className="border-2 hover:border-primary/30 transition-all duration-500">
