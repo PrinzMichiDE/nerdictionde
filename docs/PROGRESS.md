@@ -29,8 +29,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Leseverlauf / Reading History** — F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅  
-**Phase:** F4 – Implementierung (PKG-1: DB-Migration & Model)
+**Aktuelles Feature:** **Leseverlauf / Reading History** — F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 ✅  
+**Phase:** F4 – Implementierung (PKG-2: Types & Zod-Schemas)
 
 ---
 
