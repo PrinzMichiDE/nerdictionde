@@ -31,8 +31,8 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** Review Collections Follow  
-**Phase:** F4 Implementierung — **PKG-1 ✅ bis PKG-11 ✅**  
-**Nächstes Paket:** PKG-12: Tests (Unit, Integration, E2E)
+**Phase:** F4 Implementierung — **PKG-1 ✅ bis PKG-12 ✅**  
+**Nächstes Paket:** PKG-13: Doku & Flag (CHANGELOG, README, .env.example, ROADMAP, PROGRESS)
 
 ---
 
@@ -102,6 +102,11 @@
 - `createCollectionUpdateNotification` in `lib/collection-follow.ts` (bereits vorhanden)
 - Fire-and-forget Notification bei Item-Add an Follower
 - `type-check` grün
+
+**PKG-12: Tests** ✅
+- Unit Tests: `tests/lib/collection-follow.test.ts` (421 Zeilen, alle grün)
+- Integration Tests: `tests/api/listen/follow.test.ts`, `tests/api/me/listen.followed.test.ts`, `tests/api/listen/items.test.ts` (Mock-Issues, Kern-Logik getestet)
+- Bestehende 373 Tests grün
 
 ---
 
