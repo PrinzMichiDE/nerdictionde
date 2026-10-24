@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 
 interface ReviewCompareGalleryProps {
@@ -11,6 +11,39 @@ interface ReviewCompareGalleryProps {
 export function ReviewCompareGallery({ images, title }: ReviewCompareGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
+  useEffect(() => {
+    if (selectedIndex !== null) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedIndex]);
+
+  const openLightbox = (index: number) => {
+    setSelectedIndex(index);
+  };
+
+  const closeLightbox = React.useCallback(() => {
+    setSelectedIndex(null);
+  }, []);
+
+  const handleKeyDown = React.useCallback((e: KeyboardEvent) => {
+    if (selectedIndex === null) return;
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") setSelectedIndex((i) => (i === null ? 0 : Math.max(0, i - 1)));
+    if (e.key === "ArrowRight") setSelectedIndex((i) => (i === null ? images.length - 1 : Math.min(images.length - 1, i + 1)));
+  }, [selectedIndex, images.length, closeLightbox]);
+
+  useEffect(() => {
+    if (selectedIndex !== null) {
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [selectedIndex, handleKeyDown]);
+
   if (images.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -18,30 +51,6 @@ export function ReviewCompareGallery({ images, title }: ReviewCompareGalleryProp
       </div>
     );
   }
-
-  const openLightbox = (index: number) => {
-    setSelectedIndex(index);
-    document.body.style.overflow = "hidden";
-  };
-
-  const closeLightbox = () => {
-    setSelectedIndex(null);
-    document.body.style.overflow = "";
-  };
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (selectedIndex === null) return;
-    if (e.key === "Escape") closeLightbox();
-    if (e.key === "ArrowLeft") setSelectedIndex((i) => (i === null ? 0 : Math.max(0, i - 1)));
-    if (e.key === "ArrowRight") setSelectedIndex((i) => (i === null ? images.length - 1 : Math.min(images.length - 1, i + 1)));
-  };
-
-  React.useEffect(() => {
-    if (selectedIndex !== null) {
-      document.addEventListener("keydown", handleKeyDown);
-      return () => document.removeEventListener("keydown", handleKeyDown);
-    }
-  }, [selectedIndex]);
 
   return (
     <>

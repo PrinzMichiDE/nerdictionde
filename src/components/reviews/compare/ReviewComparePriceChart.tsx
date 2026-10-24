@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -119,13 +120,13 @@ export function ReviewComparePriceChart({ priceHistory, deals }: ReviewComparePr
                 className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors"
               >
                 {deal.imageUrl && (
-                  <img
+                  <Image
                     src={deal.imageUrl}
                     alt=""
                     width={48}
                     height={48}
                     className="rounded object-cover"
-                    loading="lazy"
+                    unoptimized
                   />
                 )}
                 <div className="flex-1 min-w-0">
