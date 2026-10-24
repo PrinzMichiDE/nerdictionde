@@ -29,8 +29,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Leseverlauf / Reading History** — F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 ✅, PKG-2 ✅  
-**Phase:** F4 – Implementierung (PKG-3: Server Logic)
+**Aktuelles Feature:** **Leseverlauf / Reading History** — F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 ✅, PKG-2 ✅, PKG-3 ✅  
+**Phase:** F4 – Implementierung (PKG-4: API Routes)
 
 ---
 
