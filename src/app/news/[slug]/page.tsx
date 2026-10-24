@@ -5,9 +5,12 @@ import { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlugCustomId from "rehype-slug-custom-id";
-import { ArrowLeft, Tag } from "lucide-react";
+import { ArrowLeft, Printer, Tag } from "lucide-react";
 import { getSiteUrl, generateArticleSchema } from "@/lib/seo";
 import { MetaLine } from "@/components/shared/MetaLine";
+import { Button } from "@/components/ui/button";
+import { ShareButtons } from "@/components/reviews/ShareButtons";
+import { RelatedNews } from "@/components/news/RelatedNews";
 
 export async function generateMetadata({
   params,
@@ -131,6 +134,21 @@ export default async function NewsDetailPage({
         </div>
       </header>
 
+      {/* Teilen & Drucken */}
+      <div className="flex flex-wrap items-center gap-2 pt-4 border-t">
+        <ShareButtons title={title} url={`/news/${slug}`} />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => window.print()}
+          className="h-9 rounded-full px-4 gap-2 transition-colors hover:border-primary/50"
+          aria-label="Artikel drucken"
+        >
+          <Printer className="size-4" />
+          <span className="text-xs font-semibold">Drucken</span>
+        </Button>
+      </div>
+
       <article className="prose prose-neutral dark:prose-invert max-w-none news-content">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
@@ -153,6 +171,8 @@ export default async function NewsDetailPage({
           ))}
         </div>
       )}
+
+      <RelatedNews currentId={article.id} category={article.category} />
     </div>
   );
 }

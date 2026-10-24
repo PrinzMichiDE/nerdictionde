@@ -20,14 +20,7 @@ const isClient = typeof window !== "undefined";
 export function TableOfContents({ headings, isEn }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string>("");
   // Use lazy initializer to avoid setState in effect - SSR renders false, client renders true
-  const [mounted, setMounted] = useState<boolean>(() => isClient);
-
-  // Hydration-safe: set mounted to true after client-side hydration
-  // This useEffect only runs on the client (since isClient is true there)
-  useEffect(() => {
-    if (!isClient) return;
-    setMounted(true);
-  }, []);
+  const [mounted] = useState<boolean>(() => isClient);
 
   useEffect(() => {
     if (!mounted || typeof window === "undefined") return;
