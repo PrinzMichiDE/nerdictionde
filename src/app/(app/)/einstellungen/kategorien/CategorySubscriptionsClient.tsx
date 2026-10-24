@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { ReviewCategory } from '@prisma/client';
 import { CategorySubscriptionCard } from '@/components/settings/CategorySubscriptionCard';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,7 +15,7 @@ interface CategorySubscriptionsClientProps {
 export function CategorySubscriptionsClient({ initialUserId }: CategorySubscriptionsClientProps) {
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  useLayoutEffect(() => { setMounted(true); }, []);
 
   if (!mounted) {
     return (

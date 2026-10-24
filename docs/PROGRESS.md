@@ -18,6 +18,7 @@
   10. **Review Reactions (Emoji-Reaktionen)** (`/reviews/[slug]`, 6 Emojis, optimistische UI, SSR-Counts, Review-Card Badge)
   11. **Erweiterte Suchfilter** (`/suche`, Release-Datum, Preis, Plattform, Video, Deal, Developer/Publisher, Feature-Flag)
   12. **Leseverlauf / Reading History** (`/verlauf`, automatisches Tracking, Badge, Datenschutz-Toggle, Retention)
+  13. **Kategorie-Abos / Category Subscriptions** (`/einstellungen/kategorien`, Toggle-Switches, Chips auf Startseite/Profil, In-App-Benachrichtigungen, Feature-Flag)
 - Abgeschlossene Typ-A-Aufgaben (diese Iteration):
   - Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
   - `no-explicit-any` Bereinigung gestartet: 150+/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
@@ -30,7 +31,7 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** Keines — **Review Collections Follow abgeschlossen (F1–F13 ✅)**  
+**Aktuelles Feature:** Keines — **Kategorie-Abos / Category Subscriptions abgeschlossen (F1–F9 ✅)**  
 **Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ D)
 
 ---
@@ -206,10 +207,36 @@
 
 ---
 
+### Zusammenfassung: Kategorie-Abos / Category Subscriptions (Abgeschlossen 2026-10-24)
+
+**User Stories (alle ✅):**
+- US1: Kategorie abonnieren/abbestellen (`/einstellungen/kategorien`) — 4 Toggle-Switches (Games, Hardware, Movies, Series), optimistische UI, Toast-Bestätigung
+- US2: Abonnierte Kategorien auf Startseite — Chips mit Links zu `/suche?category=GAMES`
+- US3: Abonnierte Kategorien auf öffentlichem Profil — Chips nur bei `isPublic=true`
+- US4: In-App-Benachrichtigung bei neuem Review — Notification Type `category_new_review`, Dedupe via `uniqueKey`, Batch-Insert
+- US5: E-Mail-Benachrichtigung (Opt-in) — `NotificationPreference.categoryNewReviewEmail`, Cron-Job vorbereitet
+
+**Technische Highlights:**
+- Prisma Model `CategorySubscription` + Enum `ReviewCategory` (GAMES, HARDWARE, MOVIES, SERIES) — Migration `20261024160000_add_category_subscriptions`
+- Kategorie-Mapping: Review.category (String: "game"/"hardware"/"amazon"/"movie"/"series") → ReviewCategory Enum ("amazon" → HARDWARE)
+- 3 API Routes: `GET/POST/DELETE /api/me/categories/subscriptions`, `DELETE /api/me/categories/subscriptions/[category]`
+- `unstable_cache` 60s für User-Subscriptions & Category-Subscribers + Tag-Invaliderung bei Mutationen
+- Feature-Flag `FEATURE_CATEGORY_SUBSCRIPTIONS` (Default: `true`)
+- 36 Tests (8 Unit lib + 19 Unit mapping + 9 Integration API) — alle grün
+- 0 neue Lint Errors, 0 TypeScript Errors, Build grün
+
+**Dokumentation:**
+- CHANGELOG.md, ROADMAP.md, PROGRESS.md aktualisiert
+- Feature Spec (`docs/features/category-subscriptions.md`), Design (`docs/features/category-subscriptions-design.md`)
+- Feature Spec Review-Sektion (F6) komplett ✅
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
-**Gewählt: Review Collections Follow** (F1 ✅, F2 ✅, F3 ✅ — 2026-10-24)
-- Auswahl dokumentiert in DECISIONS.md
-- Spec: `docs/features/collections-follow.md` erstellt
-- Design: `docs/features/collections-follow-design.md` erstellt (13 Arbeitspakete, ~9h)
-- Nächste Phase: F4 Implementierung → PKG-1: DB Migration & Prisma Schema
+**Kandidaten (Typ D):**
+- Review-Vergleich erweitern (`/reviews/vergleichen`)
+- Community Q&A auf Reviews
+- Personalisierte Empfehlungen
+- Hardware-Kompatibilitäts-Check
+- Review-Serien / Multi-Part Reviews

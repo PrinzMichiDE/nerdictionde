@@ -9,7 +9,7 @@ import { FEATURE_CATEGORY_SUBSCRIPTIONS } from '@/lib/feature-flags';
 // DELETE /api/me/categories/subscriptions/:category
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<any> }
+  { params }: { params: Promise<{ category: string }> }
 ) {
   if (!FEATURE_CATEGORY_SUBSCRIPTIONS) {
     return NextResponse.json({ error: 'Feature nicht aktiviert' }, { status: 404 });

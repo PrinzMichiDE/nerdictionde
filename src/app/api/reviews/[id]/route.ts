@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { requireAdminAuth } from "@/lib/auth";
 import { FEATURE_CATEGORY_SUBSCRIPTIONS } from "@/lib/feature-flags";
 import { createCategoryNotifications } from "@/lib/category-subscriptions";
+import { mapReviewCategoryToEnum } from "@/lib/category-mapping";
 
 export async function GET(
   req: NextRequest,
@@ -53,15 +54,20 @@ export async function PUT(
     if (FEATURE_CATEGORY_SUBSCRIPTIONS && !wasPublished && willBePublished && review.category) {
       // Fire-and-forget: don't await, errors logged internally
       const thumbnailUrl = review.images && review.images.length > 0 ? review.images[0] : undefined;
-      createCategoryNotifications(
-        review.id,
-        review.title,
-        review.slug,
-        review.category as any, // Review.category is String, mapped to ReviewCategory enum
-        thumbnailUrl
-      ).catch(err => {
-        console.error('[CategorySubscriptions] Failed to create notifications:', err);
-      });
+      const categoryEnum = mapReviewCategoryToEnum(review.category);
+      if (categoryEnum) {
+        createCategoryNotifications(
+          review.id,
+          review.title,
+          review.slug,
+          categoryEnum,
+          thumbnailUrl
+        ).catch(err => {
+          console.error('[CategorySubscriptions] Failed to create notifications:', err);
+        });
+      } else {
+        console.warn('[CategorySubscriptions] Unknown review category, skipping notification:', review.category);
+      }
     }
 
     return NextResponse.json(review);
