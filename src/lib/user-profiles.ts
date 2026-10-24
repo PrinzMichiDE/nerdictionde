@@ -54,45 +54,63 @@ export type PublicProfile = {
 const PROFILE_CACHE_TAG = "user-profile";
 const PROFILE_CACHE_TTL = 60; // seconds
 
+// Non-cached version for testing
+async function getUserProfileUncached(username: string): Promise<PublicProfile | null> {
+  const user = await prisma.twitchUser.findUnique({
+    where: { username },
+    select: {
+      id: true,
+      username: true,
+      displayName: true,
+      profileImageUrl: true,
+      createdAt: true,
+      userProfile: {
+        select: {
+          bio: true,
+          isPublic: true,
+          showRatings: true,
+          showBookmarks: true,
+          followerCount: true,
+          followingCount: true,
+        },
+      },
+    },
+  });
+
+  if (!user) return null;
+
+  // Check if profile is public
+  if (user.userProfile && !user.userProfile.isPublic) {
+    return null;
+  }
+
+  // Transform to PublicProfile structure
+  return {
+    user: {
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+      profileImageUrl: user.profileImageUrl,
+      createdAt: user.createdAt,
+      userProfile: user.userProfile,
+    },
+    ratings: { items: [], totalCount: 0, nextCursor: null },
+    bookmarks: { items: [], totalCount: 0, nextCursor: null },
+  } as PublicProfile;
+}
+
 /**
  * Get public profile by username
  * Cached for 60 seconds
  */
 export const getUserProfile = unstable_cache(
-  async (username: string): Promise<PublicProfile | null> => {
-    const user = await prisma.twitchUser.findUnique({
-      where: { username },
-      select: {
-        id: true,
-        username: true,
-        displayName: true,
-        profileImageUrl: true,
-        createdAt: true,
-        userProfile: {
-          select: {
-            bio: true,
-            isPublic: true,
-            showRatings: true,
-            showBookmarks: true,
-            followerCount: true,
-            followingCount: true,
-          },
-        },
-      },
-    });
-
-    if (!user) return null;
-
-    // Check if profile is public
-    if (user.userProfile && !user.userProfile.isPublic) {
-      return null; // Treat as not found for privacy
-    }
-
-    return user as unknown as PublicProfile;
-  },
+  getUserProfileUncached,
   ["user-profile"],
   { tags: [PROFILE_CACHE_TAG], revalidate: PROFILE_CACHE_TTL }
 );
+
+// Export uncached version for testing
+export { getUserProfileUncached };
 
 /**
  * Get profile by userId (for settings page)
