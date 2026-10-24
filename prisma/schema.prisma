@@ -51,6 +51,7 @@ model Review {
   videoChapters   VideoChapter[]
   forumThreads    ForumThread[]
   collectionItems CollectionItem[]
+  reactions       ReviewReaction[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -430,6 +431,7 @@ model TwitchUser {
   notificationPrefs   NotificationPreference? @relation("NotificationPreferenceUser")
   userProfile         UserProfile?
   reviewCollections   ReviewCollection[] @relation("ReviewCollectionOwner")
+  reviewReactions     ReviewReaction[]
   followers           Follow[]                @relation("Followers")
   following           Follow[]                @relation("Following")
   notifications       Notification[]
@@ -1707,4 +1709,29 @@ model CollectionItem {
   @@index([collectionId, position])
   @@index([reviewId])
   @@map("collection_items")
+}
+
+// Review Reactions (Emoji-Reaktionen)
+enum ReactionType {
+  THUMBS_UP
+  HEART
+  PARTY
+  THINKING
+  CRY
+  ANGRY
+}
+
+model ReviewReaction {
+  id        String       @id @default(cuid())
+  userId    String
+  user      TwitchUser   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewId  String
+  review    Review       @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  type      ReactionType
+  createdAt DateTime     @default(now())
+
+  @@unique([userId, reviewId])
+  @@index([reviewId])
+  @@index([userId])
+  @@map("review_reactions")
 }
