@@ -35,8 +35,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Community Q&A auf Reviews** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 (DB Migration) ✅, PKG-2 (Types/Schemas) ✅, PKG-3 (Server Logic) ✅, PKG-4 (API Questions) ✅**  
-**Phase:** F4 Implementierung → **PKG-5: API Routes — Antworten CRUD** (`src/app/api/reviews/[slug]/qa/[questionId]/answers/route.ts`, `src/app/api/reviews/[slug]/qa/[questionId]/answers/[answerId]/route.ts`)
+**Aktuelles Feature:** **Community Q&A auf Reviews** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 (DB Migration) ✅, PKG-2 (Types/Schemas) ✅, PKG-3 (Server Logic) ✅, PKG-4 (API Questions) ✅, PKG-5 (API Answers) ✅**  
+**Phase:** F4 Implementierung → **PKG-6: API Routes — Votes & Accept** (`src/app/api/reviews/[slug]/qa/[questionId]/vote/route.ts`, `src/app/api/reviews/[slug]/qa/[questionId]/answers/[answerId]/vote/route.ts`, `src/app/api/reviews/[slug]/qa/[questionId]/accept/route.ts`)
 
 ---
 
