@@ -215,6 +215,7 @@ Wichtige Variablen (aus `.env`):
 - `FEATURE_COLLECTIONS_FOLLOW` – Collections Follow (Listen folgen, Feed-Integration, Benachrichtigungen) aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
 - `FEATURE_ADVANCED_SEARCH_FILTERS` – Erweiterte Suchfilter (Release-Datum, Preis, Plattform, Video, Deal, Developer/Publisher) aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
 - `FEATURE_READING_HISTORY` – Leseverlauf aktivieren (Default: `false`, Opt-in via Einstellungen; auf `true` setzen für globale Aktivierung)
+- `FEATURE_REVIEW_COMPARE_ENHANCED` – Erweiterter Review-Vergleich (bis 3 Reviews, Specs, Preise, Medien, ScoreCompare, Share) aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
 
 Alle weiteren Variablen (API-Keys für IGDB, TMDB, Steam, OpenAI, Tavily usw.) werden zur Laufzeit gelesen.
 

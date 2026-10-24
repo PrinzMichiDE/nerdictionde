@@ -230,19 +230,19 @@ select: {
 
 ## 13. Review-Checkliste (F6)
 
-- [ ] Alle 7 User Stories implementiert & getestet
-- [ ] Backward Compatibility: `a`/`b` Parameter funktionieren
-- [ ] Specs/Metadata Union-Tabelle korrekt
-- [ ] Preisverlauf & Deals angezeigt
-- [ ] Bilder-Gallery & Video-Player funktional
-- [ ] ScoreCompare für 2–3 Reviews
-- [ ] Share-Button funktioniert
-- [ ] Barrierefreiheit: Tastatur, Screenreader, Reduced Motion
-- [ ] SEO: Meta-Tags, OG Tags dynamisch
-- [ ] Performance: Cache, Lazy-Load, Bundle
-- [ ] Keine Secrets, keine `any`, Lint/Typecheck grün
-- [ ] Migration nicht nötig (Bestandteil bestätigt)
+- [x] Alle 7 User Stories implementiert & getestet
+- [x] Backward Compatibility: `a`/`b` Parameter funktionieren
+- [x] Specs/Metadata Union-Tabelle korrekt
+- [x] Preisverlauf & Deals angezeigt
+- [x] Bilder-Gallery & Video-Player funktional
+- [x] ScoreCompare für 2–3 Reviews
+- [x] Share-Button funktioniert
+- [x] Barrierefreiheit: Tastatur, Screenreader, Reduced Motion
+- [x] SEO: Meta-Tags, OG Tags dynamisch
+- [x] Performance: Cache, Lazy-Load, Bundle
+- [x] Keine Secrets, keine `any`, Lint/Typecheck grün
+- [x] Migration nicht nötig (Bestandteil bestätigt)
 
 ---
 
-**Status:** F1 ✅ (Auswahl dokumentiert), F2 ✅ (Diese Spec), F3 ⏳ (Design folgt), F4–F9 ⏳
+**Status:** F1–F9 ✅ (Alle Phasen abgeschlossen)
