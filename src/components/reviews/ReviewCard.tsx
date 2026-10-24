@@ -7,6 +7,15 @@ import { REACTION_EMOJIS, REACTION_TYPES, type ReactionType } from '@/types/revi
 import { getCategoryStyle, getScoreColor, getVerdict } from "@/lib/review-category";
 import { ArrowRight, Clock3 } from "lucide-react";
 import { CompareButton } from "./CompareButton";
+import { cn } from "@/lib/utils";
+
+interface SeriesInfo {
+  id: string;
+  slug: string;
+  title: string;
+  seriesOrder: number;
+  partCount: number;
+}
 
 interface ReviewCardProps {
   review: Review;
@@ -14,9 +23,10 @@ interface ReviewCardProps {
     counts: Record<ReactionType, number>;
     total: number;
   } | null;
+  series?: SeriesInfo | null;
 }
 
-export function ReviewCard({ review, reactionsSummary }: ReviewCardProps) {
+export function ReviewCard({ review, reactionsSummary, series }: ReviewCardProps) {
   const formattedDate = new Date(review.createdAt).toLocaleDateString("de-DE", {
     year: "numeric",
     month: "long",
@@ -86,6 +96,22 @@ export function ReviewCard({ review, reactionsSummary }: ReviewCardProps) {
           <h3 className="font-serif text-xl font-semibold leading-snug line-clamp-2 transition-colors group-hover:text-primary">
             {review.title}
           </h3>
+
+          {series && series.partCount >= 2 && (
+            <Link
+              href={`/serien/${series.slug}`}
+              className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium",
+                "bg-secondary/50 text-secondary-foreground rounded-full",
+                "hover:bg-secondary transition-colors group-hover:opacity-80"
+              )}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              Teil {series.seriesOrder} von {series.partCount}: {series.title}
+            </Link>
+          )}
 
           <p className="line-clamp-3 text-sm text-muted-foreground leading-relaxed">
             {snippet}
