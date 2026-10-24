@@ -26,7 +26,7 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** **Public User Profiles & Follow-System** (Spec: `docs/features/public-user-profiles.md`)
-**Phase:** F4 Implementierung — PK17 erledigt → PK18: UI Header Notification-Glocke + Dropdown
+**Phase:** F4 Implementierung — PK18 erledigt → PK19: UI `/benachrichtigungen` Seite
 
 ### Arbeitspakete (F4 Implementierung)
 | PK | Beschreibung | Status |
@@ -48,7 +48,7 @@
 | PK15 | UI: Follow-Button Component (optimistic, Loading, Tooltip) | **erledigt** |
 | PK16 | UI: Profil-Einstellungen (`/einstellungen/profil` oder Tab) — Bio, Sichtbarkeit | **erledigt** |
 | PK17 | UI: Feed-Seite `/feed` (Server Component, Infinite Scroll/Pagination) | **erledigt** |
-| PK18 | UI: Header Notification-Glocke + Dropdown | **offen** |
+| PK18 | UI: Header Notification-Glocke + Dropdown | **erledigt** |
 | PK19 | UI: `/benachrichtigungen` Seite (alle Notifications, Filter ungelesen) | **offen** |
 | PK20 | Tests: Unit (Follow, Feed, Notifications), Integration (APIs), E2E (Flows) | **offen** |
 | PK21 | Self-Review & Verify — Build, Lint, Typecheck, Tests grün | **offen** |
