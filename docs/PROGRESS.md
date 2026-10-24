@@ -3,7 +3,7 @@
 ## Stand (2026-10-24)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: 121/121 grün (vitest, 17 Dateien). `lint`: 150 Errors (davon 150 `no-explicit-any`, inkrementelle Bereinigung), 136 Warnings — kritische Bugs (React Hooks, unescaped entities, html links, empty object types) behoben, TypeScript-Errors behoben.
+- `type-check`: grün. `build`: grün. `tests`: 121/121 grün (vitest, 17 Dateien). `lint`: 153 Errors (davon 153 `no-explicit-any`, inkrementelle Bereinigung), 137 Warnings — kritische Bugs (React Hooks, unescaped entities, html links, empty object types) behoben, TypeScript-Errors behoben.
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
   1. Newsletter Double-Optin + Bestätigungsseite
