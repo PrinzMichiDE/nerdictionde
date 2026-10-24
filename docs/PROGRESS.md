@@ -35,8 +35,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Community Q&A auf Reviews** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 (DB Migration) ✅, PKG-2 (Types/Schemas) ✅, PKG-3 (Server Logic) ✅, PKG-4 (API Questions) ✅, PKG-5 (API Answers) ✅, PKG-6 (API Votes/Accept) ✅, PKG-7 (Client Hooks) ✅, PKG-8 (UI Questions) ✅**  
-**Phase:** F4 Implementierung → **PKG-9: UI Components — Antworten & Formulare** (bereits in PKG-8 enthalten: `QAAnswers`, `QAAnswer`, `QAQuestionForm`, `QAAnswerForm`)
+**Aktuelles Feature:** **Community Q&A auf Reviews** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design ✅, F4 PKG-1 (DB Migration) ✅, PKG-2 (Types/Schemas) ✅, PKG-3 (Server Logic) ✅, PKG-4 (API Questions) ✅, PKG-5 (API Answers) ✅, PKG-6 (API Votes/Accept) ✅, PKG-7 (Client Hooks) ✅, PKG-8 (UI Questions) ✅, PKG-9 (UI Answers/Forms) ✅, PKG-10 (Review Integration) ✅**  
+**Phase:** F4 Implementierung → **PKG-11: Tests** (`tests/api/reviews/qa.test.ts`, `tests/lib/qa.test.ts`, `tests/hooks/useQA.test.ts`, `tests/hooks/useQAVote.test.ts`) → **PKG-12: Doku & Flag**
 
 ---
 

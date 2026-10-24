@@ -133,8 +133,8 @@ export interface UseQAMutationsReturn {
   updateQuestion: (questionId: string, data: Partial<QAQuestionFormData>) => Promise<QAQuestionListItem>;
   deleteQuestion: (questionId: string) => Promise<void>;
   createAnswer: (questionId: string, data: QAAnswerFormData) => Promise<QAAnswerWithUserVote>;
-  updateAnswer: (answerId: string, data: QAAnswerFormData) => Promise<QAAnswerWithUserVote>;
-  deleteAnswer: (answerId: string) => Promise<void>;
+  updateAnswer: (questionId: string, answerId: string, data: QAAnswerFormData) => Promise<QAAnswerWithUserVote>;
+  deleteAnswer: (questionId: string, answerId: string) => Promise<void>;
   acceptAnswer: (questionId: string, answerId: string) => Promise<QAAcceptAnswerResponse>;
   isMutating: boolean;
 }

@@ -91,8 +91,9 @@ export function useQAList(reviewSlug: string, initialData?: QAListResponse): Use
 
 /**
  * Hook für Q&A Mutations (Create, Update, Delete, Accept)
+ * Erwartet reviewSlug als Parameter und gibt Funktionen ohne reviewSlug zurück
  */
-export function useQAMutations(): UseQAMutationsReturn {
+export function useQAMutations(reviewSlug: string): UseQAMutationsReturn {
   const [isMutating, setIsMutating] = useState(false);
 
   const apiCall = useCallback(
@@ -121,72 +122,72 @@ export function useQAMutations(): UseQAMutationsReturn {
   );
 
   const createQuestion = useCallback(
-    async (reviewSlug: string, data: QAQuestionFormData): Promise<QAQuestionListItem> => {
+    async (data: QAQuestionFormData): Promise<QAQuestionListItem> => {
       const result = await apiCall<{ question: QAQuestionListItem }>(`/api/reviews/${reviewSlug}/qa`, {
         method: 'POST',
         body: JSON.stringify(data),
       });
       return result.question;
     },
-    [apiCall]
+    [apiCall, reviewSlug]
   );
 
   const updateQuestion = useCallback(
-    async (reviewSlug: string, questionId: string, data: Partial<QAQuestionFormData>): Promise<QAQuestionListItem> => {
+    async (questionId: string, data: Partial<QAQuestionFormData>): Promise<QAQuestionListItem> => {
       const result = await apiCall<{ question: QAQuestionListItem }>(
         `/api/reviews/${reviewSlug}/qa/${questionId}`,
         { method: 'PATCH', body: JSON.stringify(data) }
       );
       return result.question;
     },
-    [apiCall]
+    [apiCall, reviewSlug]
   );
 
   const deleteQuestion = useCallback(
-    async (reviewSlug: string, questionId: string): Promise<void> => {
+    async (questionId: string): Promise<void> => {
       await apiCall(`/api/reviews/${reviewSlug}/qa/${questionId}`, { method: 'DELETE' });
     },
-    [apiCall]
+    [apiCall, reviewSlug]
   );
 
   const createAnswer = useCallback(
-    async (reviewSlug: string, questionId: string, data: QAAnswerFormData): Promise<QAAnswerWithUserVote> => {
+    async (questionId: string, data: QAAnswerFormData): Promise<QAAnswerWithUserVote> => {
       const result = await apiCall<{ answer: QAAnswerWithUserVote }>(
         `/api/reviews/${reviewSlug}/qa/${questionId}/answers`,
         { method: 'POST', body: JSON.stringify(data) }
       );
       return result.answer;
     },
-    [apiCall]
+    [apiCall, reviewSlug]
   );
 
   const updateAnswer = useCallback(
-    async (reviewSlug: string, questionId: string, answerId: string, data: QAAnswerFormData): Promise<QAAnswerWithUserVote> => {
+    async (questionId: string, answerId: string, data: QAAnswerFormData): Promise<QAAnswerWithUserVote> => {
       const result = await apiCall<{ answer: QAAnswerWithUserVote }>(
         `/api/reviews/${reviewSlug}/qa/${questionId}/answers/${answerId}`,
         { method: 'PATCH', body: JSON.stringify(data) }
       );
       return result.answer;
     },
-    [apiCall]
+    [apiCall, reviewSlug]
   );
 
   const deleteAnswer = useCallback(
-    async (reviewSlug: string, questionId: string, answerId: string): Promise<void> => {
+    async (questionId: string, answerId: string): Promise<void> => {
       await apiCall(`/api/reviews/${reviewSlug}/qa/${questionId}/answers/${answerId}`, { method: 'DELETE' });
     },
-    [apiCall]
+    [apiCall, reviewSlug]
   );
 
   const acceptAnswer = useCallback(
-    async (reviewSlug: string, questionId: string, answerId: string): Promise<QAAcceptAnswerResponse> => {
+    async (questionId: string, answerId: string): Promise<QAAcceptAnswerResponse> => {
       const result = await apiCall<QAAcceptAnswerResponse>(
         `/api/reviews/${reviewSlug}/qa/${questionId}/accept`,
         { method: 'POST', body: JSON.stringify({ answerId }) }
       );
       return result;
     },
-    [apiCall]
+    [apiCall, reviewSlug]
   );
 
   return {
