@@ -31,8 +31,8 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** Review Collections Follow  
-**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅, PKG-6 ✅, PKG-7 ✅**  
-**Nächstes Paket:** PKG-8: UI Follow Button & Count (`CollectionFollowButton`, `CollectionFollowerCount`)
+**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅, PKG-6 ✅, PKG-7 ✅, PKG-8 ✅, PKG-9 ✅**  
+**Nächstes Paket:** PKG-10: UI Einstellungen Tab & Feed (`FollowedCollectionsTab`, `FeedCollectionItems`)
 
 ---
 
@@ -79,6 +79,16 @@
 - Optimistische UI: sofortiger Toggle, Rollback bei Error
 - Toast-Benachrichtigungen via `sonner`
 - Refresh-Funktion nutzt korrekten API-Endpunkt
+- `type-check` grün
+
+**PKG-8: UI Follow Button & Count** ✅
+- `CollectionFollowButton.tsx` (bereits vorhanden): Optimistische UI, Loading, Auth-Redirect, a11y
+- `CollectionFollowerCount.tsx` (neu): SSR Count + Client Hydration
+- `type-check` grün
+
+**PKG-9: Owner Follower Modal** ✅
+- `CollectionFollowerListModal.tsx`: Dialog mit Pagination, Avatar, Profil-Link
+- Nur für Owner sichtbar, nutzt `getFollowers` Server Logic
 - `type-check` grün
 
 ---
