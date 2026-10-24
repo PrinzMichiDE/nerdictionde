@@ -11,6 +11,8 @@ import { CollectionCard } from "./CollectionCard";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
+type SortOption = "updated" | "created" | "itemCount" | "popular" | "popularity";
+
 interface CollectionsListProps {
   initialCollections: {
     id: string;
@@ -28,7 +30,7 @@ interface CollectionsListProps {
   }[];
   initialCursor: string | null;
   searchQuery?: string;
-  sort?: "updated" | "created" | "itemCount" | "popularity";
+  sort?: SortOption;
 }
 
 export function CollectionsList({
@@ -94,7 +96,7 @@ export function CollectionsList({
     fetchCollections(null, false);
   };
 
-  const handleSortChange = (newSort: "updated" | "created" | "itemCount" | "popularity") => {
+  const handleSortChange = (newSort: SortOption) => {
     setSortBy(newSort);
     setShowSortMenu(false);
     setCollections([]);
@@ -157,7 +159,16 @@ export function CollectionsList({
             className="gap-2 whitespace-nowrap"
           >
             <ChevronDown className="h-4 w-4" />
-            Sortieren: {sortBy === "updated" ? "Neueste" : sortBy === "created" ? "Älteste" : sortBy === "itemCount" ? "Meiste Reviews" : "Beliebteste"}
+            Sortieren:{' '}
+            {sortBy === "updated"
+              ? "Neueste"
+              : sortBy === "created"
+              ? "Älteste"
+              : sortBy === "itemCount"
+              ? "Meiste Reviews"
+              : sortBy === "popular"
+              ? "Beliebt"
+              : "Beliebteste"}
           </Button>
           {showSortMenu && (
             <div className="absolute right-0 top-full mt-1 z-10 w-48 rounded-md border bg-popover p-1 shadow-lg">
@@ -165,6 +176,7 @@ export function CollectionsList({
                 { value: "updated", label: "Neueste zuerst" },
                 { value: "created", label: "Älteste zuerst" },
                 { value: "itemCount", label: "Meiste Reviews" },
+                { value: "popular", label: "Meist gefolgt" },
                 { value: "popularity", label: "Beliebteste" },
               ] as const).map((option) => (
                 <button

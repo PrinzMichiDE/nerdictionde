@@ -44,6 +44,30 @@ export type FeedItem =
         score: number;
         images: string[];
       };
+    }
+  | {
+      type: "collection_item";
+      id: string;
+      createdAt: Date;
+      user: {
+        id: string;
+        username: string;
+        displayName: string;
+        profileImageUrl: string | null;
+      };
+      collection: {
+        id: string;
+        slug: string;
+        title: string;
+      };
+      review: {
+        id: string;
+        title: string;
+        slug: string;
+        category: string;
+        score: number;
+        images: string[];
+      };
     };
 
 export type FeedResult = {
@@ -61,51 +85,83 @@ export const getFeed = unstable_cache(
     const following = await getFollowing(userId);
     const followedUserIds = following.items.map((f) => f.following.id);
 
-    if (followedUserIds.length === 0) {
-      return { items: [], nextCursor: null };
-    }
+    // Get list of followed collection IDs
+    const followedCollections = await prisma.collectionFollow.findMany({
+      where: { userId },
+      select: { collectionId: true },
+    });
+    const followedCollectionIds = followedCollections.map((f) => f.collectionId);
 
     // Build cursor condition
     const cursorCondition = cursor
       ? { createdAt: { lt: new Date(cursor) } }
       : {};
 
-    // Fetch feed item types in parallel (only user-linked activities)
-    const [ratings, bookmarks] = await Promise.all([
+    // Fetch feed item types in parallel
+    const [ratings, bookmarks, collectionItems] = await Promise.all([
       // Ratings by followed users
-      prisma.userRating.findMany({
-        where: {
-          userId: { in: followedUserIds },
-          ...cursorCondition,
-        },
-        include: {
-          user: {
-            select: { id: true, username: true, displayName: true, profileImageUrl: true },
-          },
-          review: {
-            select: { id: true, title: true, slug: true, category: true, score: true, images: true },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-        take: limit,
-      }),
+      followedUserIds.length > 0
+        ? prisma.userRating.findMany({
+            where: {
+              userId: { in: followedUserIds },
+              ...cursorCondition,
+            },
+            include: {
+              user: {
+                select: { id: true, username: true, displayName: true, profileImageUrl: true },
+              },
+              review: {
+                select: { id: true, title: true, slug: true, category: true, score: true, images: true },
+              },
+            },
+            orderBy: { createdAt: "desc" },
+            take: limit,
+          })
+        : Promise.resolve([]),
       // Bookmarks by followed users
-      prisma.bookmark.findMany({
-        where: {
-          userId: { in: followedUserIds },
-          ...cursorCondition,
-        },
-        include: {
-          user: {
-            select: { id: true, username: true, displayName: true, profileImageUrl: true },
-          },
-          review: {
-            select: { id: true, title: true, slug: true, category: true, score: true, images: true },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-        take: limit,
-      }),
+      followedUserIds.length > 0
+        ? prisma.bookmark.findMany({
+            where: {
+              userId: { in: followedUserIds },
+              ...cursorCondition,
+            },
+            include: {
+              user: {
+                select: { id: true, username: true, displayName: true, profileImageUrl: true },
+              },
+              review: {
+                select: { id: true, title: true, slug: true, category: true, score: true, images: true },
+              },
+            },
+            orderBy: { createdAt: "desc" },
+            take: limit,
+          })
+        : Promise.resolve([]),
+      // Collection items from followed collections
+      followedCollectionIds.length > 0
+        ? prisma.collectionItem.findMany({
+            where: {
+              collectionId: { in: followedCollectionIds },
+              collection: {
+                isPublic: true,
+                deletedAt: null,
+              },
+              review: {
+                status: 'published',
+              },
+            },
+            include: {
+              collection: {
+                select: { id: true, slug: true, title: true, owner: { select: { id: true, username: true, displayName: true, profileImageUrl: true } } },
+              },
+              review: {
+                select: { id: true, title: true, slug: true, category: true, score: true, images: true },
+              },
+            },
+            orderBy: { addedAt: "desc" },
+            take: limit,
+          })
+        : Promise.resolve([]),
     ]);
 
     // Transform to unified FeedItem type
@@ -125,6 +181,30 @@ export const getFeed = unstable_cache(
         user: b.user,
         review: b.review,
       })),
+      ...collectionItems
+        // Deduplicate: skip if review already appears via user follow (rating/bookmark)
+        .filter((ci) => {
+          const reviewId = ci.review.id;
+          return !ratings.some((r) => r.review.id === reviewId) &&
+                 !bookmarks.some((b) => b.review.id === reviewId);
+        })
+        .map((ci) => ({
+          type: "collection_item" as const,
+          id: ci.id,
+          createdAt: ci.addedAt,
+          user: ci.collection.owner ? {
+            id: ci.collection.owner.id,
+            username: ci.collection.owner.username,
+            displayName: ci.collection.owner.displayName,
+            profileImageUrl: ci.collection.owner.profileImageUrl,
+          } : { id: '', username: '', displayName: '', profileImageUrl: null },
+          collection: {
+            id: ci.collection.id,
+            slug: ci.collection.slug,
+            title: ci.collection.title,
+          },
+          review: ci.review,
+        })),
     ];
 
     // Sort by createdAt descending

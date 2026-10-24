@@ -14,10 +14,12 @@ export const metadata: Metadata = {
   },
 };
 
+type SortOption = "updated" | "created" | "itemCount" | "popular" | "popularity";
+
 interface Props {
   searchParams: Promise<{
     q?: string;
-    sort?: string;
+    sort?: SortOption;
     cursor?: string;
   }>;
 }
@@ -26,7 +28,7 @@ export default async function ListenPage({ searchParams }: Props) {
   const params = await searchParams;
   const { collections, nextCursor } = await getPublicCollections({
     q: params.q,
-    sort: (params.sort as "updated" | "created" | "itemCount" | "popularity") || "updated",
+    sort: (params.sort as SortOption) || "updated",
     cursor: params.cursor,
     limit: 20,
   });
@@ -46,7 +48,7 @@ export default async function ListenPage({ searchParams }: Props) {
         initialCollections={collections}
         initialCursor={nextCursor}
         searchQuery={params.q}
-        sort={params.sort as "updated" | "created" | "itemCount" | "popularity"}
+        sort={params.sort as SortOption}
       />
     </div>
   );
