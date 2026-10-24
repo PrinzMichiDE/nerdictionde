@@ -31,8 +31,8 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** Review Collections Follow  
-**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅**  
-**Nächstes Paket:** PKG-5: API Gefolgte Listen (`/api/me/listen/followed`)
+**Phase:** F4 Implementierung — **PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅**  
+**Nächstes Paket:** PKG-6: API Feed Erweiterung (`/api/feed` includeCollections)
 
 ---
 
@@ -60,6 +60,12 @@
 - `/api/listen/[slug]/follow` POST/DELETE/GET
 - Feature-Flag Guard, Auth via `requireTwitchAuth`, Validierung via Zod
 - Error Handling mit passenden HTTP Status Codes
+- `type-check` grün
+
+**PKG-5: API Gefolgte Listen** ✅
+- `/api/me/listen/followed` GET mit Cursor Pagination
+- Auth via `requireTwitchAuth`, Validierung via Zod
+- Nutzt `getFollowedCollections` aus Server Logic
 - `type-check` grün
 
 ---
