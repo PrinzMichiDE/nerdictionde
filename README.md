@@ -210,6 +210,7 @@ Wichtige Variablen (aus `.env`):
 - `NEXT_PUBLIC_VAPID_PUBLIC_KEY` – VAPID-Schlüssel für Push-Benachrichtigungen
 - `FEATURE_REVIEW_REACTIONS` – Emoji-Reaktionen auf Reviews aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
 - `FEATURE_REVIEW_COLLECTIONS` – Review Collections aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
+- `FEATURE_ADVANCED_SEARCH_FILTERS` – Erweiterte Suchfilter (Release-Datum, Preis, Plattform, Video, Deal, Developer/Publisher) aktivieren (Default: `true`, auf `false` setzen zum Deaktivieren)
 
 Alle weiteren Variablen (API-Keys für IGDB, TMDB, Steam, OpenAI, Tavily usw.) werden zur Laufzeit gelesen.
 

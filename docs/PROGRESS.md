@@ -3,7 +3,7 @@
 ## Stand (2026-10-24)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: 290/290 grün (vitest, 27 Dateien). `lint`: 0 Errors, 215 Warnings — alle kritischen Lint-Errors (React Hooks setState in useEffect) behoben.
+- `type-check`: grün. `build`: grün. `tests`: 296/296 grün (vitest, 28 Dateien). `lint`: 13 Errors (pre-existing no-explicit-any in review-reactions tests), 209 Warnings — alle kritischen Lint-Errors (React Hooks setState in useEffect) behoben.
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
   1. Newsletter Double-Optin + Bestätigungsseite
@@ -16,19 +16,20 @@
   8. **Öffentliche Nutzerprofile & Follow-System** (`/u/[username]`, Follow, Feed, Notifications)
   9. **Review Collections / Kuratierte Listen** (`/listen`, `/listen/[slug]`, Erstellung, Drag-and-Drop, Teilen, Profil-Tab)
   10. **Review Reactions (Emoji-Reaktionen)** (`/reviews/[slug]`, 6 Emojis, optimistische UI, SSR-Counts, Review-Card Badge)
+  11. **Erweiterte Suchfilter** (`/suche`, Release-Datum, Preis, Plattform, Video, Deal, Developer/Publisher, Feature-Flag)
 - Abgeschlossene Typ-A-Aufgaben (diese Iteration):
   - Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
   - `no-explicit-any` Bereinigung gestartet: 150+/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
   - **Letzte 3 React-Hooks-Errors behoben**: `TableOfContents.tsx`, `YouTubeEmbed.tsx`, `SupportTopBanner.tsx` — redundante `setState` in `useEffect` durch Lazy Initializer ersetzt
 - Abgeschlossene Typ-B-Aufgaben:
   - CHANGELOG.md, README.md erweitert
-  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api, pdf-export, pdf-layout, search-relevance, highlighter-logic, **collections (95), collection-schema (44), review-reactions (12)**
-  - Integration-Tests: search-api, deals, price-history, pdf-export, votes, comments, **listen (10), me/listen (5), reactions-api (10)**
-  - 290 Tests insgesamt
+  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api, pdf-export, pdf-layout, search-relevance, highlighter-logic, **collections (95), collection-schema (44), review-reactions (12), advanced-search-filters (18)**
+  - Integration-Tests: search-api, deals, price-history, pdf-export, votes, comments, **listen (10), me/listen (5), reactions-api (10), search-advanced-filters (20)**
+  - 296 Tests insgesamt
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Review Reactions (Emoji-Reaktionen)** — F1–F9 ✅ abgeschlossen.  
+**Aktuelles Feature:** **Erweiterte Suchfilter** — F1–F9 ✅ abgeschlossen.  
 **Phase:** Hauptschleife — nächstes Feature aus ROADMAP wählen (Typ D).
 
 ---

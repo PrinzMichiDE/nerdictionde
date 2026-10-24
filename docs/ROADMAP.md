@@ -47,6 +47,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 ### Neue Kandidaten (auto-generiert 2026-10-24)
 
 - [x] **Review Reactions (Emoji-Reaktionen)** — GitHub-Style Reaktionen (👍 ❤️ 🎉 🤔 😢 😡) auf Reviews; Anzeige der Zähler, eigene Reaktion togglebar; Persistenz pro User (TwitchUser), Aggregation auf Review. Hoher Nutzen (Engagement, schnelles Feedback), niedriger Aufwand (1 Model, 1 API, UI-Komponente), kein Schema-Breaking. **← erledigt (F1–F9 ✅)**
+- [x] **Erweiterte Suchfilter** — Release-Datum-Range, Preis-Range, Plattform (PC/PS5/Xbox/Switch), "Nur mit Video", "Nur mit Deal", Developer/Publisher. Mittlerer Nutzen (Präzision), niedriger Aufwand (UI + API-Parameter, bestehende Search-Relevanz nutzen). **← erledigt (F1–F9 ✅)**
 - [ ] **Leseverlauf / Reading History** — Automatisches Tracking gelesener Reviews (Scroll-Tiefe > 50% + Verweildauer > 30s), `/verlauf` Seite, Basis für Personalisierung. Hoher Nutzen (Rückkehr, Personalisierung), mittlerer Aufwand (Model, Middleware/Client-Tracking, API, UI), Datenschutz beachten (Opt-out).
 - [ ] **Kategorie-Abos / Category Subscriptions** — User abonniert Kategorien (Games, Hardware, Movies, Series), Benachrichtigung bei neuen Reviews (Push + E-Mail via Newsletter-Prefs). Hoher Nutzen (Retention, Traffic), mittlerer Aufwand (Model, Cron/Trigger, Notification-Prefs erweitern, UI in Einstellungen).
 - [ ] **Review-Vergleich erweitern** — `/reviews/vergleichen` existiert; Side-by-Side: Specs, Pros/Cons, Score, Preisverlauf, Screenshots; URL-teilarbeit (`?ids=slug1,slug2,slug3`). Mittlerer Nutzen (Kaufentscheidung), mittlerer Aufwand (UI, State, Sharing).
@@ -68,7 +69,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-Keines — Review Reactions abgeschlossen (F1–F9 ✅). Nächstes Feature aus ROADMAP wählen.
+Keines — Erweiterte Suchfilter abgeschlossen (F1–F9 ✅). Nächstes Feature aus ROADMAP wählen.
 
 ## Nächster Schritt
 
