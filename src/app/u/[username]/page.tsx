@@ -1,0 +1,56 @@
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { getUserProfile } from "@/lib/user-profiles";
+import { PublicProfile } from "@/components/profiles/PublicProfile";
+import { getSiteUrl } from "@/lib/seo";
+
+interface Props {
+  params: Promise<{ username: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { username } = await params;
+  const profile = await getUserProfile(username);
+
+  if (!profile) {
+    return {
+      title: "Profil nicht gefunden - Nerdiction",
+      description: "Das angeforderte Nutzerprofil existiert nicht oder ist privat.",
+    };
+  }
+
+  const displayName = profile.user.displayName;
+  const bio = profile.user.userProfile?.bio || "";
+  const avatar = profile.user.profileImageUrl || `${getSiteUrl()}/default-avatar.png`;
+
+  return {
+    title: `${displayName} (@${username}) - Nerdiction`,
+    description: bio || `Profil von ${displayName} auf Nerdiction. Entdecke Bewertungen und gespeicherte Reviews.`,
+    openGraph: {
+      title: `${displayName} (@${username})`,
+      description: bio || `Profil von ${displayName} auf Nerdiction`,
+      type: "profile",
+      images: [{ url: avatar }],
+      username,
+      firstName: displayName.split(" ")[0],
+      lastName: displayName.split(" ").slice(1).join(" "),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${displayName} (@${username})`,
+      description: bio || `Profil von ${displayName} auf Nerdiction`,
+      images: [avatar],
+    },
+  };
+}
+
+export default async function PublicProfilePage({ params }: Props) {
+  const { username } = await params;
+  const profile = await getUserProfile(username);
+
+  if (!profile) {
+    notFound();
+  }
+
+  return <PublicProfile profile={profile} username={username} />;
+}
