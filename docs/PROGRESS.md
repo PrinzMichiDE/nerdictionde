@@ -25,8 +25,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Public User Profiles & Follow-System** — **ABGESCHLOSSEN** ✅
-**Phase:** F9 Done → Hauptschleife → Neues Feature evaluieren (Roadmap leer → neue Features generieren)
+**Aktuelles Feature:** **Review Collections / Kuratierte Listen** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design & Plan** 🔄
+**Phase:** F3 Design & Plan → F4 Implementierung
 
 ---
 
@@ -78,3 +78,59 @@
 | PK20 | Tests: Unit (Follow, Feed, Notifications), Integration (APIs), E2E (Flows) | **erledigt** |
 | PK21 | Self-Review & Verify — Build, Lint, Typecheck, Tests grün | **erledigt** |
 | PK22 | Doku/Changelog — README, ROADMAP, DECISIONS, Feature-Spec Review-Sektion | **erledigt** |
+
+---
+
+### Neues Feature: Review Collections / Kuratierte Listen
+
+**Ziel:** Nutzer erstellen, teilen und entdecken kuratierte Listen von Reviews ("Beste RPGs 2024", "Hidden Gems", "Koop-Spiele").
+
+**User Stories (MVP):**
+- US1: Öffentliche Liste ansehen (`/listen/[slug]`)
+- US2: Eigene Liste erstellen
+- US3: Liste bearbeiten (Metadaten)
+- US4: Reviews zur Liste hinzufügen/entfernen (Max 100)
+- US5: Reihenfolge per Drag-and-Drop ändern
+- US6: Liste löschen (Soft-Delete)
+- US7: Eigene Listen verwalten (`/einstellungen/listen`)
+- US8: Öffentliche Listen entdecken (`/listen` mit Filter/Sort)
+- US9: Liste teilen (Web Share API, OG Tags)
+- US10: Listen auf Profil anzeigen (`/u/[username]` Tab "Listen")
+
+**Technische Highlights (geplant):**
+- 2 neue Prisma Models: `ReviewCollection`, `CollectionItem` + Relations zu `TwitchUser`, `Review`
+- Denormalisierter `itemCount` + `version` für optimistisches Locking
+- `unstable_cache` für Listen-Übersicht (60s) und Detail (30s)
+- Cursor-Pagination für Items und Listen-Übersicht
+- Optimistische UI bei Reorder/Add/Remove mit `@dnd-kit`
+- Feature-Flag `FEATURE_REVIEW_COLLECTIONS`
+
+### Arbeitspakete (F4 Implementierung)
+| PK | Beschreibung | Status |
+|----|--------------|--------|
+| PK1 | Prisma Schema: `ReviewCollection`, `CollectionItem` + Migration | ☐ |
+| PK2 | Zod Schemas: `collection-schema.ts` (Create, Update, AddItem, Reorder) | ☐ |
+| PK3 | Lib: `src/lib/collections.ts` (Utilities: Slug-Generierung, Reorder-Validierung, Count-Sync) | ☐ |
+| PK4 | API: `GET /api/listen` (Public Lists mit Filter/Sort/Pagination) | ☐ |
+| PK5 | API: `POST /api/listen` (Create) | ☐ |
+| PK6 | API: `GET /api/listen/[slug]` (Detail, Public/Private, Items Pagination) | ☐ |
+| PK7 | API: `PATCH /api/listen/[slug]` (Update Metadaten, Owner-Check) | ☐ |
+| PK8 | API: `DELETE /api/listen/[slug]` (Soft Delete, Owner-Check) | ☐ |
+| PK9 | API: `POST /api/listen/[slug]/items` (Add Review, Max 100, Published-Check) | ☐ |
+| PK10 | API: `DELETE /api/listen/[slug]/items/[reviewId]` (Remove Review) | ☐ |
+| PK11 | API: `PATCH /api/listen/[slug]/reorder` (Reorder, Validierung, Owner-Check) | ☐ |
+| PK12 | API: `GET /api/me/listen` (Eigene Listen, Pagination) | ☐ |
+| PK13 | UI: `/listen` Seite (Server Component, Filter, Sort, Grid, Infinite Scroll) | ☐ |
+| PK14 | UI: `/listen/[slug]` Seite (Server Component + Client Islands: Header, Items, Owner-Mode) | ☐ |
+| PK15 | UI: `CollectionCard` Component (Wiederverwendbar für Grid) | ☐ |
+| PK16 | UI: `CollectionItems` Client Component (Grid, Pagination, Owner-Mode: Add/Remove/DnD) | ☐ |
+| PK17 | UI: `/einstellungen/listen` Seite (Eigene Listen verwalten) | ☐ |
+| PK18 | UI: Profil-Tab "Listen" auf `/u/[username]` | ☐ |
+| PK19 | UI: Share-Button (Web Share API + Clipboard Fallback + Toast) | ☐ |
+| PK20 | UI: OG Tags auf `/listen/[slug]` (Metadata Export) | ☐ |
+| PK21 | Drag-and-Drop: `@dnd-kit/core` + `@dnd-kit/sortable` Integration | ☐ |
+| PK22 | Unit Tests (Utils, Schemas, Components) | ☐ |
+| PK23 | Integration Tests (Alle API Endpoints) | ☐ |
+| PK24 | E2E Tests (Kritische Flows) | ☐ |
+| PK25 | Self-Review (F6) + Verify (F7: Build, Lint, Typecheck, Tests) | ☐ |
+| PK26 | Doku: CHANGELOG, README, ROADMAP, Feature-Spec Review-Sektion | ☐ |
