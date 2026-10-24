@@ -169,4 +169,6 @@
 
 ### Nächstes Feature (ROADMAP)
 
-Aus ROADMAP.md Typ D auswählen. Kandidaten: Kategorie-Abos, Review-Vergleich, Community Q&A, Collections Follow, Personalisierte Empfehlungen, Hardware-Kompatibilität, Review-Serien.
+**Gewählt: Review Collections Follow** (F1 ✅ — 2026-10-24)
+- Auswahl dokumentiert in DECISIONS.md
+- Nächste Phase: F2 Spezifikation → `docs/features/collections-follow.md`
