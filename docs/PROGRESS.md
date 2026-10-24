@@ -25,8 +25,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Review Collections / Kuratierte Listen** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design & Plan** 🔄
-**Phase:** F3 Design & Plan → F4 Implementierung
+**Aktuelles Feature:** **Review Collections / Kuratierte Listen** — **F1 Auswahl ✅, F2 Spec ✅, F3 Design & Plan ✅, F4 API Implementierung (PK4-PK12) ✅**
+**Phase:** F4 UI Implementierung (PK13-PK21)
 
 ---
 
@@ -111,15 +111,15 @@
 | PK1 | Prisma Schema: `ReviewCollection`, `CollectionItem` + Migration | **erledigt** |
 | PK2 | Zod Schemas: `collection-schema.ts` (Create, Update, AddItem, Reorder) | **erledigt** |
 | PK3 | Lib: `src/lib/collections.ts` (Utilities: Slug-Generierung, Reorder-Validierung, Count-Sync) | **erledigt** |
-| PK4 | API: `GET /api/listen` (Public Lists mit Filter/Sort/Pagination) | ☐ |
-| PK5 | API: `POST /api/listen` (Create) | ☐ |
-| PK6 | API: `GET /api/listen/[slug]` (Detail, Public/Private, Items Pagination) | ☐ |
-| PK7 | API: `PATCH /api/listen/[slug]` (Update Metadaten, Owner-Check) | ☐ |
-| PK8 | API: `DELETE /api/listen/[slug]` (Soft Delete, Owner-Check) | ☐ |
-| PK9 | API: `POST /api/listen/[slug]/items` (Add Review, Max 100, Published-Check) | ☐ |
-| PK10 | API: `DELETE /api/listen/[slug]/items/[reviewId]` (Remove Review) | ☐ |
-| PK11 | API: `PATCH /api/listen/[slug]/reorder` (Reorder, Validierung, Owner-Check) | ☐ |
-| PK12 | API: `GET /api/me/listen` (Eigene Listen, Pagination) | ☐ |
+| PK4 | API: `GET /api/listen` (Public Lists mit Filter/Sort/Pagination) | **erledigt** |
+| PK5 | API: `POST /api/listen` (Create) | **erledigt** |
+| PK6 | API: `GET /api/listen/[slug]` (Detail, Public/Private, Items Pagination) | **erledigt** |
+| PK7 | API: `PATCH /api/listen/[slug]` (Update Metadaten, Owner-Check) | **erledigt** |
+| PK8 | API: `DELETE /api/listen/[slug]` (Soft Delete, Owner-Check) | **erledigt** |
+| PK9 | API: `POST /api/listen/[slug]/items` (Add Review, Max 100, Published-Check) | **erledigt** |
+| PK10 | API: `DELETE /api/listen/[slug]/items/[reviewId]` (Remove Review) | **erledigt** |
+| PK11 | API: `PATCH /api/listen/[slug]/reorder` (Reorder, Validierung, Owner-Check) | **erledigt** |
+| PK12 | API: `GET /api/me/listen` (Eigene Listen, Pagination) | **erledigt** |
 | PK13 | UI: `/listen` Seite (Server Component, Filter, Sort, Grid, Infinite Scroll) | ☐ |
 | PK14 | UI: `/listen/[slug]` Seite (Server Component + Client Islands: Header, Items, Owner-Mode) | ☐ |
 | PK15 | UI: `CollectionCard` Component (Wiederverwendbar für Grid) | ☐ |
