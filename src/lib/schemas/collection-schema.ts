@@ -85,7 +85,7 @@ export type ReorderInput = z.infer<typeof reorderSchema>;
 /** GET /api/listen - Öffentliche Listen mit Filter/Sort/Pagination */
 export const listCollectionsQuerySchema = z.object({
   q: z.string().max(200, 'Suchbegriff zu lang').optional(),
-  sort: z.enum(['updated', 'created', 'itemCount', 'popularity']).default('updated'),
+  sort: z.enum(['updated', 'created', 'itemCount', 'popular', 'popularity']).default('updated'),
   cursor: z.string().cuid().optional(),
   limit: z.coerce.number().int().min(1).max(50).default(20),
   ownerId: z.string().cuid().optional(), // für /api/me/listen

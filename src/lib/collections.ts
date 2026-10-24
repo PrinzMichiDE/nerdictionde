@@ -285,7 +285,7 @@ export async function removeItemFromCollection(
  */
 export const getPublicCollections = async (params: {
   q?: string;
-  sort?: 'updated' | 'created' | 'itemCount' | 'popularity';
+  sort?: 'updated' | 'created' | 'itemCount' | 'popular' | 'popularity';
   cursor?: string;
   limit?: number;
 }): Promise<{ collections: CollectionListItem[]; nextCursor: string | null }> => {
@@ -311,6 +311,7 @@ export const getPublicCollections = async (params: {
     switch (sort) {
       case 'created': return { createdAt: 'desc' as const };
       case 'itemCount': return { itemCount: 'desc' as const };
+      case 'popular': return { followersCount: 'desc' as const };
       case 'popularity': return { itemCount: 'desc' as const }; // später: viewCount
       default: return { updatedAt: 'desc' as const };
     }
