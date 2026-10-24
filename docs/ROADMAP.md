@@ -14,8 +14,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] `type-check` auf `main` grün
 - [x] `build` auf `main` grün
 - [x] Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
-- [x] `no-explicit-any` Bereinigung: 66/216 behoben (hardware-catalog, types/review, markdown-to-pdf, streaming, job-status, bulk-create routes, auto-generate, releases, review-detail, IGDBGame types)
-- [ ] Lint: 153 vorbestehende `no-explicit-any`-Errors inkrementell bereinigen (nicht blockierend für Verify)
+- [x] `no-explicit-any` Bereinigung: ~150/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
+- [ ] Lint: 3 vorbestehende `no-explicit-any`-Errors inkrementell bereinigen (nicht blockierend für Verify)
 
 ## Typ B — Lücken schließen (Tests, Doku, Fehlerbehandlung)
 
@@ -51,4 +51,4 @@ Keines. Full-Text Search abgeschlossen.
 
 ## Nächster Schritt
 
-Neues Feature aus Roadmap evaluieren. Aktuelle Kandidaten: keine offenen Typ-D-Features mehr. Nächste Iteration: Typ A (Lint-Bereinigung: 153 `no-explicit-any` Errors) oder Typ B (weitere Unit-Tests / Doku).
+Neues Feature aus Roadmap evaluieren. Aktuelle Kandidaten: keine offenen Typ-D-Features mehr. Nächste Iteration: Typ A (Lint-Bereinigung: 3 `no-explicit-any` Errors) oder Typ B (weitere Unit-Tests / Doku).
