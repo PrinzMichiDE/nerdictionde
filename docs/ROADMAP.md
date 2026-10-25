@@ -80,8 +80,9 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Review-Serien für Nutzer** — **F1–F9 ✅ abgeschlossen**. Nächstes Feature: **Erweiterte Benachrichtigungs-Präferenzen** (siehe Typ D Kandidaten).
+**Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅**  
+**Nächster Schritt:** **PKG-5: API Routes — Mutes & Push** (`/api/user/notification-mutes` GET/POST, `/api/user/notification-mutes/[id]` DELETE, `/api/user/push-subscription` GET/POST/DELETE)
 
 ### Nächste Schritte
 
-Neues Feature starten: **Erweiterte Benachrichtigungs-Präferenzen**.
+PKG-5 für Erweiterte Benachrichtigungs-Präferenzen implementieren.

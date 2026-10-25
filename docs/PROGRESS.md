@@ -1180,8 +1180,42 @@
 
 ---
 
+### Zusammenfassung: Erweiterte Benachrichtigungs-Präferenzen — PKG-4 (API Routes — Preferences & Test) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- `src/app/api/user/notification-preferences/route.ts` — GET (alle Preferences laden) und PATCH (Bulk-Update) implementiert
+- `src/app/api/user/notification-preferences/test/route.ts` — POST (Test-Notification für IN_APP/EMAIL/PUSH) implementiert
+- Feature-Flag Guards (`FEATURE_ENHANCED_NOTIFICATION_PREFS`)
+- Rate-Limiting: 30 req/min für Updates, 5 req/min für Tests
+- Validierung: NotificationType, Channel, Frequency, Enabled via Prisma Enums
+- Integration-Tests: `tests/api/user/notification-preferences.test.ts` — 23 Tests (alle grün)
+  - GET: 401, 403, 200 OK
+  - PATCH: 401, 403, 400 (Validierung), 200 OK, 429, 500
+  - POST test: 401, 403, 400, 200 (sent/not sent), 429, 500
+
+**Technische Highlights:**
+- Bestehende Patterns: `unstable_cache` (60s TTL), Tag-Invaliderung, `requireAuth` Pattern
+- `shouldNotifyUser` Integration für Test-Route (prüft Preference + Mutes)
+- `createNotification` für In-App Test, `sendPushToUser` für Push Test
+- E-Mail Test loggt nur (MVP ohne echten Versand)
+
+**Verifikation:**
+- Type-Check ✅
+- Build ✅
+- Tests: 900/900 grün ✅
+- Lint: keine neuen Errors (nur Pre-existing) ✅
+
+**Dateien (neu/geändert):**
+- `tests/api/user/notification-preferences.test.ts` (neu, 23 Tests)
+- `src/app/api/user/notification-preferences/route.ts` (GET: req Parameter hinzugefügt, unused imports entfernt)
+- `src/lib/notification-preferences.ts` (revalidate export wiederhergestellt, MuteTargetType Import korrigiert)
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
-**Aktuelles Feature:** **Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅ PKG-3✅**  
-**Nächster Schritt:** **PKG-4: API Routes — Preferences & Test** (`/api/user/notification-preferences` GET/PATCH, `/api/user/notification-preferences/test` POST)
+**Aktuelles Feature:** **Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ F4✅ (PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅)**  
+**Nächster Schritt:** **PKG-5: API Routes — Mutes & Push** (`/api/user/notification-mutes` GET/POST, `/api/user/notification-mutes/[id]` DELETE, `/api/user/push-subscription` GET/POST/DELETE)
 

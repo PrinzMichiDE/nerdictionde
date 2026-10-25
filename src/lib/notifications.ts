@@ -1,4 +1,5 @@
 import prisma from "./prisma";
+import type { InputJsonValue } from "@prisma/client/runtime/library";
 
 export type NotificationWithUser = {
   id: string;
@@ -135,5 +136,28 @@ export async function createFollowNotification(
 export async function getUnreadNotificationCount(userId: string): Promise<number> {
   return prisma.notification.count({
     where: { userId, readAt: null },
+  });
+}
+
+/**
+ * Create a generic notification
+ */
+export async function createNotification(data: {
+  userId: string;
+  type: import('@prisma/client').NotificationType;
+  title: string;
+  message: string;
+  data?: Record<string, unknown>;
+  uniqueKey?: string;
+}) {
+  return prisma.notification.create({
+    data: {
+      userId: data.userId,
+      type: data.type,
+      title: data.title,
+      message: data.message,
+      data: (data.data as InputJsonValue) ?? null,
+      uniqueKey: data.uniqueKey,
+    },
   });
 }

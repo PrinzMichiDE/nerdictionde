@@ -1,9 +1,9 @@
 import { unstable_cache } from "next/cache";
 import prisma from "@/lib/prisma";
-import { NotificationType, NotificationChannel, NotificationFrequency } from "@prisma/client";
+import { NotificationType, NotificationChannel, NotificationFrequency, MuteTargetType } from "@prisma/client";
 import { revalidateTag } from "next/cache";
 
-const revalidate = (tag: string) => (revalidateTag as (tag: string) => void)(tag);
+export const revalidate = (tag: string) => (revalidateTag as (tag: string) => void)(tag);
 import { getDefaultPreferences } from "@/lib/notification-preferences-schema";
 import { isMutedTarget } from "@/lib/notification-mutes";
 
@@ -83,7 +83,11 @@ export async function shouldNotifyUser(
 ): Promise<boolean> {
   // 1. Mute Check (falls targetType/targetId angegeben)
   if (options?.targetType && options?.targetId) {
-    const isMuted = await isMutedTarget(userId, options.targetType as any, options.targetId);
+    const isMuted = await isMutedTarget(
+      userId,
+      options.targetType as MuteTargetType,
+      options.targetId
+    );
     if (isMuted) return false;
   }
 
