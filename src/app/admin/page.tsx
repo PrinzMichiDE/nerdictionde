@@ -10,7 +10,7 @@ import { ReleaseSyncButton } from "./components/ReleaseSyncButton";
 import { ForumGenerator } from "./components/ForumGenerator";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
-import { Rocket, Database, ListVideo, List, MessageSquare } from "lucide-react";
+import { Rocket, Database, ListVideo, List, MessageSquare, FileText, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAdminReviews } from "./reviews-store";
 
@@ -23,6 +23,7 @@ interface TabDef {
 
 const TABS: TabDef[] = [
   { value: "quick", label: "Quick Create", shortLabel: "Quick", icon: <Rocket className="h-4 w-4" /> },
+  { value: "manual", label: "Manuell erstellen", shortLabel: "Neu", icon: <FileText className="h-4 w-4" /> },
   { value: "bulk", label: "Massen-Erstellung", shortLabel: "Massen", icon: <Database className="h-4 w-4" /> },
   { value: "mass-200", label: "Massen-Jobs", shortLabel: "Jobs", icon: <ListVideo className="h-4 w-4" /> },
   { value: "list", label: "Alle Beiträge", shortLabel: "Liste", icon: <List className="h-4 w-4" /> },
@@ -117,6 +118,9 @@ function AdminTabs() {
       <TabsContent value="quick" className="space-y-4 mt-2">
         <QuickCreate />
       </TabsContent>
+      <TabsContent value="manual" className="space-y-4 mt-2">
+        <ManualCreate />
+      </TabsContent>
       <TabsContent value="bulk" className="space-y-4 mt-2">
         <BulkCreate />
       </TabsContent>
@@ -130,6 +134,32 @@ function AdminTabs() {
         <ForumGenerator />
       </TabsContent>
     </Tabs>
+  );
+}
+
+function ManualCreate() {
+  const router = useRouter();
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <h2 className="text-xl font-bold">Manueller Review erstellen</h2>
+        <p className="text-sm text-muted-foreground">
+          Erstellen Sie einen Review manuell mit Template-Auswahl und strukturiertem Editor.
+        </p>
+      </div>
+      <Button
+        onClick={() => router.push("/admin/reviews/new")}
+        className="w-full md:w-auto"
+        size="lg"
+      >
+        <Plus className="mr-2 h-4 w-4" />
+        Neuer Review mit Template
+      </Button>
+      <p className="text-xs text-muted-foreground">
+        Wählen Sie ein Template (Game, Hardware, Film/Serie) und füllen Sie die strukturierten Felder aus.
+      </p>
+    </div>
   );
 }
 

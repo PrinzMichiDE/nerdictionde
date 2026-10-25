@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
  * mitfeuert.
  */
 const STORAGE_KEY = "nerdiction:compare";
-const MAX_COMPARE = 2;
+const MAX_COMPARE = 3;
 
 interface CompareButtonProps {
   slug: string;
@@ -63,6 +63,7 @@ export function CompareButton({ slug, className }: CompareButtonProps) {
       const params = new URLSearchParams();
       if (next[0]) params.set("a", next[0]);
       if (next[1]) params.set("b", next[1]);
+      if (next[2]) params.set("c", next[2]);
       router.push(`/reviews/vergleichen?${params.toString()}`);
     },
     [cart, slug, inCart, full, router],
@@ -71,7 +72,7 @@ export function CompareButton({ slug, className }: CompareButtonProps) {
   const label = inCart
     ? "Aus Vergleich entfernen"
     : full
-      ? "Vergleich voll (2)"
+      ? "Vergleich voll (3)"
       : "Zum Vergleich hinzufügen";
 
   return (

@@ -41,6 +41,37 @@ describe("parseCompareIds", () => {
   it("nur a Parameter", () => {
     expect(parseCompareIds(null, "only-a", null)).toEqual(["only-a"]);
   });
+
+  it("fallback auf c Parameter", () => {
+    expect(parseCompareIds(null, null, null, "slug-c")).toEqual(["slug-c"]);
+  });
+
+  it("kombiniert a, b und c ohne Duplikate", () => {
+    expect(parseCompareIds(null, "slug-a", "slug-b", "slug-c")).toEqual([
+      "slug-a",
+      "slug-b",
+      "slug-c",
+    ]);
+  });
+
+  it("c Parameter wird ignoriert wenn doppelt mit a oder b", () => {
+    expect(parseCompareIds(null, "slug-a", "slug-b", "slug-a")).toEqual([
+      "slug-a",
+      "slug-b",
+    ]);
+    expect(parseCompareIds(null, "slug-a", "slug-b", "slug-b")).toEqual([
+      "slug-a",
+      "slug-b",
+    ]);
+  });
+
+  it("ungültiger c Parameter wird ignoriert", () => {
+    expect(parseCompareIds(null, null, null, "INVALID")).toEqual([]);
+  });
+
+  it("begrenzt a/b/c auf maximal 3", () => {
+    expect(parseCompareIds(null, "a", "b", "c")).toEqual(["a", "b", "c"]);
+  });
 });
 
 describe("validateSlug", () => {

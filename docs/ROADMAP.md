@@ -80,8 +80,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Review-Template-System** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 in Arbeit)**. Nächster Schritt: PKG-5 Template Selector UI → PKG-6 Editor → PKG-7 Frontend Renderer → Tests → Doku → Verify.
+**Review-Template-System** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅, PKG-6 ✅, PKG-7 in Arbeit)**. Nächster Schritt: PKG-7 Frontend Renderer → PKG-8 Schema.org → PKG-9 Styles → PKG-10 Tests → PKG-11 Doku → PKG-12 Verify.
 
 ## Nächster Schritt
 
-Hauptschleife: PKG-5 Template Selector UI → PKG-6 Editor → PKG-7 Frontend Renderer → PKG-8 Schema.org → PKG-9 Styles → PKG-10 Tests → PKG-11 Doku → PKG-12 Verify.
+Hauptschleife: PKG-7 Frontend Renderer → PKG-8 Schema.org → PKG-9 Styles → PKG-10 Tests → PKG-11 Doku → PKG-12 Verify.

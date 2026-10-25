@@ -6,7 +6,8 @@ const YOUTUBE_REGEX = /(?:(?:www\.)?youtube\.com\/(?:watch\?v=|embed\/|v\/)|yout
 export function parseCompareIds(
   idsParam: string | null | undefined,
   aParam: string | null | undefined,
-  bParam: string | null | undefined
+  bParam: string | null | undefined,
+  cParam: string | null | undefined = null
 ): string[] {
   const slugs: string[] = [];
 
@@ -22,6 +23,7 @@ export function parseCompareIds(
   if (slugs.length === 0) {
     if (aParam && SLUG_REGEX.test(aParam)) slugs.push(aParam);
     if (bParam && SLUG_REGEX.test(bParam) && bParam !== aParam) slugs.push(bParam);
+    if (cParam && SLUG_REGEX.test(cParam) && cParam !== aParam && cParam !== bParam) slugs.push(cParam);
   }
 
   const unique = [...new Set(slugs)];

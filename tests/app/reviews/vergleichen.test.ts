@@ -32,6 +32,32 @@ describe("Review Compare Utilities", () => {
       const result = parseCompareIds("ids-slug", "a-slug", "b-slug");
       expect(result).toEqual(["ids-slug"]);
     });
+
+    it("fallback auf c-Parameter", () => {
+      const result = parseCompareIds(null, null, null, "slug-c");
+      expect(result).toEqual(["slug-c"]);
+    });
+
+    it("kombiniert a, b und c ohne Duplikate", () => {
+      const result = parseCompareIds(null, "slug-a", "slug-b", "slug-c");
+      expect(result).toEqual(["slug-a", "slug-b", "slug-c"]);
+    });
+
+    it("c-Parameter wird ignoriert wenn doppelt mit a oder b", () => {
+      expect(parseCompareIds(null, "slug-a", "slug-b", "slug-a")).toEqual([
+        "slug-a",
+        "slug-b",
+      ]);
+      expect(parseCompareIds(null, "slug-a", "slug-b", "slug-b")).toEqual([
+        "slug-a",
+        "slug-b",
+      ]);
+    });
+
+    it("ungültiger c-Parameter wird ignoriert", () => {
+      const result = parseCompareIds(null, null, null, "INVALID");
+      expect(result).toEqual([]);
+    });
   });
 
   describe("getSpecsUnion", () => {

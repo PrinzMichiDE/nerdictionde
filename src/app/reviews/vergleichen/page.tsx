@@ -111,11 +111,11 @@ async function fetchReviewsBySlugs(slugs: string[]): Promise<ReviewShape[]> {
 export default async function ComparePage({
   searchParams,
 }: {
-  searchParams: Promise<{ ids?: string; a?: string; b?: string }>;
+  searchParams: Promise<{ ids?: string; a?: string; b?: string; c?: string }>;
 }) {
-  const { ids: idsParam, a: slugA, b: slugB } = await searchParams;
+  const { ids: idsParam, a: slugA, b: slugB, c: slugC } = await searchParams;
 
-  const slugs = parseCompareIds(idsParam, slugA, slugB);
+  const slugs = parseCompareIds(idsParam, slugA, slugB, slugC);
 
   if (slugs.length === 0) notFound();
 
