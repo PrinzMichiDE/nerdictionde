@@ -23,6 +23,7 @@
   15. **Review-Serien / Multi-Part Reviews** (`/serien`, `/serien/[slug]`, Admin-UI `/admin/serien`, Drag-and-Drop-Reorder, Review-Detail Badge, Review-Card Badge, Search-API Erweiterung, Feature-Flag)
   16. **Community Q&A auf Reviews** (`/reviews/[slug]`, Fragen & Antworten, Upvote/Downvote, Accepted Answer, Notifications, Feature-Flag)
   17. **Personalisierte Empfehlungen** (`/`, `/reviews/[slug]`, Content-Based + Collaborative + Trending, MMR-Diversifizierung, Begründungen, Dismiss, Feature-Flag, Settings Toggle)
+  18. **Hardware-Kompatibilitäts-Check** (`/einstellungen/hardware`, `/reviews/[slug]`, CPU/GPU/RAM Profil, Kompatibilitäts-Badge, FPS-Schätzungen, Feature-Flag)
 - Abgeschlossene Typ-A-Aufgaben (diese Iteration):
   - Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
   - `no-explicit-any` Bereinigung gestartet: 150+/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
@@ -37,8 +38,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Personalisierte Empfehlungen** — **F1–F12 ✅ (Abgeschlossen)**  
-**Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ D: Hardware-Kompatibilität)
+**Aktuelles Feature:** **Hardware-Kompatibilitäts-Check** — **F1–F9 ✅ (Abgeschlossen)**  
+**Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ A/B/C: Lint-Bereinigung, Tests)
 
 ---
 
