@@ -3,27 +3,11 @@
 // ============================================
 
 import prisma from '@/lib/prisma';
-import type { UserSignals, ReviewSummary } from '@/types/recommendations';
+import type { UserSignals, ReviewWithTags } from '@/types/recommendations';
 
 export interface CandidateOptions {
   excludeIds?: Set<string>;
   limit?: number;
-}
-
-interface ReviewWithTags {
-  id: string;
-  slug: string;
-  title: string;
-  title_en: string | null;
-  category: string;
-  score: number;
-  images: string[];
-  metaDescription: string | null;
-  releaseDate: Date | null;
-  userRatingAvg: number | null;
-  userRatingCount: number | null;
-  metadata: Record<string, unknown> | null;
-  tags: { tag: { name: string; slug: string } }[];
 }
 
 type PrismaReviewWithTags = {
