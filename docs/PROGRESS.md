@@ -3,7 +3,7 @@
 ## Stand (2026-10-25)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: **762/762 grün** (vitest), `lint`: **31 Errors** (alle `no-explicit-any` in externen Skills/Admin, nicht blockierend), 363 Warnings — keine neuen Errors
+- `type-check`: grün. `build`: grün. `tests`: **791/791 grün** (vitest), `lint`: **31 Errors** (alle `no-explicit-any` in externen Skills/Admin, nicht blockierend), 363 Warnings — keine neuen Errors
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
   1. Newsletter Double-Optin + Bestätigungsseite
@@ -42,8 +42,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Review-Serien für Nutzer** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅** (Types & Zod-Schemas)  
-**Nächster Schritt:** **PKG-3: Server Core Logic** (`src/lib/user-series.ts`)
+**Aktuelles Feature:** **Review-Serien für Nutzer** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅ PKG-3✅** (Server Core Logic)  
+**Nächster Schritt:** **PKG-4: User API Routes** (`/api/user/serien/*`)
 
 ---
 
@@ -510,6 +510,29 @@
 
 ---
 
+### Zusammenfassung: Review-Serien für Nutzer — PKG-3 (Server Core Logic) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- `src/lib/user-series.ts` — Vollständige Server-Logik für User-Serien
+  - Permission Checks: Owner/Editor/Viewer/None mit Collaborator-Support
+  - CRUD: createUserSeries, updateUserSeries, deleteUserSeries
+  - Reorder mit optimistischem Locking (version)
+  - Add/Remove Items (max 50, Validierung)
+  - Follow/Unfollow mit denormalisiertem followersCount
+  - Collaborator Management: invite, accept, update role (Owner/Editor), remove
+  - Cache Tags & Invalidation via unstable_cache (5 Tags)
+  - Reused Logic: slugify, generateUniqueSlug, computeAggregateScore, validateOrder
+- `tests/lib/user-series.test.ts` — 29 Unit-Tests (alle grün)
+- Verifikation: Type-Check ✅, Build ✅, Tests 791/791 ✅
+
+**Dateien (neu):**
+- `src/lib/user-series.ts`
+- `tests/lib/user-series.test.ts`
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
 **Kandidaten (Typ D):**
@@ -691,6 +714,29 @@
 **Dateien (neu):**
 - `src/lib/user-series-schema.ts`
 - `tests/lib/user-series-schema.test.ts`
+
+---
+
+### Zusammenfassung: Review-Serien für Nutzer — PKG-3 (Server Core Logic) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- `src/lib/user-series.ts` — Vollständige Server-Logik für User-Serien
+  - Permission Checks: Owner/Editor/Viewer/None mit Collaborator-Support
+  - CRUD: createUserSeries, updateUserSeries, deleteUserSeries
+  - Reorder mit optimistischem Locking (version)
+  - Add/Remove Items (max 50, Validierung)
+  - Follow/Unfollow mit denormalisiertem followersCount
+  - Collaborator Management: invite, accept, update role (Owner/Editor), remove
+  - Cache Tags & Invalidation via unstable_cache (5 Tags)
+  - Reused Logic: slugify, generateUniqueSlug, computeAggregateScore, validateOrder
+- `tests/lib/user-series.test.ts` — 29 Unit-Tests (alle grün)
+- Verifikation: Type-Check ✅, Build ✅, Tests 791/791 ✅
+
+**Dateien (neu):**
+- `src/lib/user-series.ts`
+- `tests/lib/user-series.test.ts`
 
 ---
 
