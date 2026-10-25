@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSeriesBySlug } from "@/lib/review-series";
+import { FEATURE_REVIEW_SERIES, FEATURE_USER_SERIES } from "@/lib/feature-flags";
 
 /**
  * GET /api/serien/[slug]
  * Öffentliche API für Serien-Detail mit allen Teilen
- * Feature-Flag: FEATURE_REVIEW_SERIES
+ * Feature-Flags: FEATURE_REVIEW_SERIES, FEATURE_USER_SERIES
+ * PRIVATE-Serien sind über öffentliche API nicht zugänglich (404)
  */
 
 export async function GET(
@@ -12,7 +14,7 @@ export async function GET(
   context: { params: Promise<{ slug: string }> }
 ) {
   // Feature-Flag prüfen
-  if (process.env.FEATURE_REVIEW_SERIES !== "true") {
+  if (!FEATURE_REVIEW_SERIES) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
@@ -26,6 +28,11 @@ export async function GET(
     const series = await getSeriesBySlug(slug);
 
     if (!series) {
+      return NextResponse.json({ error: "Serie nicht gefunden" }, { status: 404 });
+    }
+
+    // Wenn FEATURE_USER_SERIES deaktiviert ist, USER-Serien nicht anzeigen
+    if (!FEATURE_USER_SERIES && series.type === "USER") {
       return NextResponse.json({ error: "Serie nicht gefunden" }, { status: 404 });
     }
 

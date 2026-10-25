@@ -25,6 +25,8 @@ import {
 
 export const SERIES_CACHE_TAGS = {
   list: "series:list",
+  listTyped: (type?: string, visibility?: string, ownerId?: string) =>
+    `series:list:${type || "all"}:${visibility || "all"}:${ownerId || "all"}`,
   detail: (slug: string) => `series:${slug}`,
   review: (reviewId: string) => `review:${reviewId}`,
 } as const;
@@ -101,7 +103,7 @@ export function validateOrder(
 
 export const getSeriesList = unstable_cache(
   async (query: SeriesListQuery): Promise<SeriesListResponse> => {
-    const { cursor, limit, q, sort, order } = query;
+    const { cursor, limit, q, sort, order, type, visibility, ownerId } = query;
 
     const where: Record<string, unknown> = {
       deletedAt: null,
@@ -112,6 +114,26 @@ export const getSeriesList = unstable_cache(
         { title: { contains: q, mode: "insensitive" } },
         { description: { contains: q, mode: "insensitive" } },
       ];
+    }
+
+    // NEW: Filter by series type (ADMIN vs USER)
+    if (type) {
+      where.type = type;
+    }
+
+    // NEW: Filter by visibility
+    // For non-authenticated public API, only show PUBLIC series
+    // PRIVATE series are only visible via authenticated user API
+    if (visibility) {
+      where.visibility = visibility;
+    } else {
+      // Default: only PUBLIC series for public API
+      where.visibility = "PUBLIC";
+    }
+
+    // NEW: Filter by owner
+    if (ownerId) {
+      where.ownerId = ownerId;
     }
 
     const orderBy: Record<string, "asc" | "desc"> = { [sort]: order };
@@ -129,8 +151,12 @@ export const getSeriesList = unstable_cache(
         coverImage: true,
         partCount: true,
         aggregateScore: true,
+        followersCount: true,
         createdAt: true,
         updatedAt: true,
+        ownerId: true,
+        type: true,
+        visibility: true,
       },
     });
 
@@ -145,6 +171,11 @@ export const getSeriesList = unstable_cache(
   ["series-list"],
   { tags: [SERIES_CACHE_TAGS.list], revalidate: 60 }
 );
+
+// Cache key function for typed list queries
+function getListCacheKey(query: SeriesListQuery): string[] {
+  return [SERIES_CACHE_TAGS.listTyped(query.type || "all", query.visibility || "all", query.ownerId || "all")];
+}
 
 export const getSeriesBySlug = unstable_cache(
   async (slug: string): Promise<PublicSeriesWithParts | null> => {
@@ -170,10 +201,19 @@ export const getSeriesBySlug = unstable_cache(
             },
           },
         },
+        owner: {
+          select: { id: true, username: true, displayName: true },
+        },
       },
     });
 
     if (!series) return null;
+
+    // Visibility check: PRIVATE series are not accessible via public API
+    // They can only be accessed via authenticated user API (user/serien/[slug])
+    if (series.visibility === "PRIVATE") {
+      return null;
+    }
 
     const parts: PublicSeriesPart[] = series.items.map((item) => ({
       id: item.review.id,
@@ -196,8 +236,13 @@ export const getSeriesBySlug = unstable_cache(
       coverImage: series.coverImage,
       partCount: series.partCount,
       aggregateScore: series.aggregateScore,
+      followersCount: series.followersCount,
       createdAt: series.createdAt,
       updatedAt: series.updatedAt,
+      ownerId: series.ownerId,
+      ownerUsername: series.owner?.username ?? null,
+      type: series.type,
+      visibility: series.visibility,
       parts,
     };
   },

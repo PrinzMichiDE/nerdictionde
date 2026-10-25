@@ -15,6 +15,7 @@ export const FEATURE_HARDWARE_COMPATIBILITY = process.env.FEATURE_HARDWARE_COMPA
 export const FEATURE_REVIEW_TEMPLATES = process.env.FEATURE_REVIEW_TEMPLATES === 'true';
 export const FEATURE_SOCIAL_SHARING = process.env.FEATURE_SOCIAL_SHARING !== 'false';
 export const FEATURE_SHARE_TRACKING = process.env.FEATURE_SHARE_TRACKING !== 'false';
+export const FEATURE_USER_SERIES = process.env.FEATURE_USER_SERIES !== 'false';
 
 // Object export for easy access
 export const featureFlags = {
@@ -31,4 +32,5 @@ export const featureFlags = {
   get reviewTemplates() { return FEATURE_REVIEW_TEMPLATES; },
   get socialSharing() { return FEATURE_SOCIAL_SHARING; },
   get shareTracking() { return FEATURE_SHARE_TRACKING; },
+  get userSeries() { return FEATURE_USER_SERIES; },
 };

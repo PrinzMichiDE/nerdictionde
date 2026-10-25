@@ -53,15 +53,18 @@ export const seriesItemParamsSchema = z.object({
 });
 
 // ============================================
-// Public Query Schemas
+// Public Query Schemas (Extended for User Series)
 // ============================================
 
 export const seriesListQuerySchema = z.object({
   cursor: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(50).default(20),
   q: z.string().max(100).optional(),
-  sort: z.enum(["title", "createdAt", "partCount"]).default("createdAt"),
+  sort: z.enum(["title", "createdAt", "partCount", "followersCount"]).default("createdAt"),
   order: z.enum(["asc", "desc"]).default("desc"),
+  type: z.enum(["ADMIN", "USER"]).optional(),
+  visibility: z.enum(["PUBLIC", "PRIVATE"]).optional(),
+  ownerId: z.string().cuid().optional(),
 });
 
 // ============================================
@@ -88,8 +91,13 @@ export interface PublicSeries {
   coverImage: string | null;
   partCount: number;
   aggregateScore: number | null;
+  followersCount: number;
   createdAt: Date;
   updatedAt: Date;
+  ownerId: string | null;
+  ownerUsername: string | null;
+  type: "ADMIN" | "USER";
+  visibility: "PUBLIC" | "PRIVATE";
 }
 
 export interface PublicSeriesWithParts extends PublicSeries {

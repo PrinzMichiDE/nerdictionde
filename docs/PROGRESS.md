@@ -25,6 +25,7 @@
   17. **Personalisierte Empfehlungen** (`/`, `/reviews/[slug]`, Content-Based + Collaborative + Trending, MMR-Diversifizierung, Begründungen, Dismiss, Feature-Flag, Settings Toggle)
   18. **Hardware-Kompatibilitäts-Check** (`/einstellungen/hardware`, `/reviews/[slug]`, CPU/GPU/RAM Profil, Kompatibilitäts-Badge, FPS-Schätzungen, Feature-Flag)
   19. **Social Sharing & Viral Loops** (`/reviews/[slug]`, `/listen/[slug]`, `/serien/[slug]`, `/u/[username]`, `/news/[slug]`, 6 Plattformen, Meta-Tags, Tracking, Feature-Flag)
+  20. **Review-Serien für Nutzer (User-Created Series)** — PKG-1 bis PKG-5 abgeschlossen (DB, Types, Core Logic, User API Routes, **Public API Erweiterung**)
 - Abgeschlossene Typ-A-Aufgaben (diese Iteration):
   - Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
   - `no-explicit-any` Bereinigung: **vollständig in Quelldateien** (src/lib/qa.ts, src/lib/recommendations-candidates.ts, src/app/api/user/hardware-profile/route.ts), 150+/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
@@ -34,16 +35,17 @@
   - **Test-Infrastruktur**: OpenAI Client für Browser-Test-Umgebung freigegeben (`dangerouslyAllowBrowser: true`)
   - **Type-Check Reparaturen**: 6 Test-Dateien von `no-explicit-any` bereinigt (category-subscriptions, recommendation-schema, recommendations-candidates, recommendations-scoring, recommendations, review-reactions), Mock-Typen korrigiert
   - **Test-Dateien RequestInit/API-Fixes**: listen/follow, listen/items, recommendations API, review-reactions
+  - **User Series API Routes repariert**: Auth-Pattern auf `requireTwitchAuth` umgestellt, Feature-Flag `FEATURE_USER_SERIES` hinzugefügt, Prisma-Import korrigiert
 - Abgeschlossene Typ-B-Aufgaben:
   - CHANGELOG.md, README.md, ROADMAP.md, .env.example, PROGRESS.md aktualisiert
-  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api, pdf-export, pdf-layout, search-relevance, highlighter-logic, **collections (95), collection-schema (44), review-reactions (12), advanced-search-filters (18), category-subscriptions (8), category-mapping (19), review-compare (28), review-series (20), qa-schema (25), social-sharing (54)**
-  - Integration-Tests: search-api, deals, price-history, pdf-export, votes, comments, **listen (10), me/listen (5), reactions-api (10), search-advanced-filters (20), category-subscriptions-api (9), review-compare (16), review-series (10), qa-api (35), share-tracking (9)**
-  - 723 Tests insgesamt (alle grün)
+  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api, pdf-export, pdf-layout, search-relevance, highlighter-logic, **collections (95), collection-schema (44), review-reactions (12), advanced-search-filters (18), category-subscriptions (8), category-mapping (19), review-compare (28), review-series (20), qa-schema (25), social-sharing (54), user-series (29)**
+  - Integration-Tests: search-api, deals, price-history, pdf-export, votes, comments, **listen (10), me/listen (5), reactions-api (10), search-advanced-filters (20), category-subscriptions-api (9), review-compare (16), review-series (10), qa-api (35), share-tracking (9), user-series-api (7)**
+  - 791 Tests insgesamt (alle grün)
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Review-Serien für Nutzer** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅ PKG-3✅** (Server Core Logic)  
-**Nächster Schritt:** **PKG-4: User API Routes** (`/api/user/serien/*`)
+**Aktuelles Feature:** **Review-Serien für Nutzer** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅ PKG-5✅** (Public API Erweiterung)  
+**Nächster Schritt:** **PKG-6: Feed & Notification Integration** (`lib/feed.ts` Erweiterung `includeUserSeries`, Notification Types `user_series_update`, `user_series_invite`)
 
 ---
 
@@ -533,6 +535,25 @@
 
 ---
 
+### Zusammenfassung: Review-Serien für Nutzer — PKG-5 (Public API Erweiterung) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- `src/lib/review-series-schema.ts` — `seriesListQuerySchema` erweitert um `type` (ADMIN/USER), `visibility` (PUBLIC/PRIVATE), `ownerId` Filter; `PublicSeries` / `PublicSeriesWithParts` Interface um `followersCount`, `ownerId`, `ownerUsername`, `type`, `visibility` erweitert
+- `src/lib/review-series.ts` — `getSeriesList` unterstützt neue Filter (`type`, `visibility`, `ownerId`), Cache-Tag `series:list:{type}:{visibility}:{ownerId}`; `getSeriesBySlug` prüft `visibility === PRIVATE` und gibt `null` zurück (404 in API), Owner-Info in Response
+- `src/app/api/serien/route.ts` — Query-Parameter `type`, `visibility`, `ownerId` validiert; `FEATURE_USER_SERIES` Flag berücksichtigt (deaktiviert → USER-Serien ausgeblendet)
+- `src/app/api/serien/[slug]/route.ts` — PRIVATE-Serien geben 404; `FEATURE_USER_SERIES` Flag prüft `series.type === USER`
+- Verifikation: Type-Check ✅, Build ✅, Tests 791/791 ✅, Lint keine neuen Errors ✅
+
+**Dateien (geändert):**
+- `src/lib/review-series-schema.ts`
+- `src/lib/review-series.ts`
+- `src/app/api/serien/route.ts`
+- `src/app/api/serien/[slug]/route.ts`
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
 **Kandidaten (Typ D):**
@@ -737,6 +758,25 @@
 **Dateien (neu):**
 - `src/lib/user-series.ts`
 - `tests/lib/user-series.test.ts`
+
+---
+
+### Zusammenfassung: Review-Serien für Nutzer — PKG-5 (Public API Erweiterung) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- `src/lib/review-series-schema.ts` — `seriesListQuerySchema` erweitert um `type` (ADMIN/USER), `visibility` (PUBLIC/PRIVATE), `ownerId` Filter; `PublicSeries` / `PublicSeriesWithParts` Interface um `followersCount`, `ownerId`, `ownerUsername`, `type`, `visibility` erweitert
+- `src/lib/review-series.ts` — `getSeriesList` unterstützt neue Filter (`type`, `visibility`, `ownerId`), Cache-Tag `series:list:{type}:{visibility}:{ownerId}`; `getSeriesBySlug` prüft `visibility === PRIVATE` und gibt `null` zurück (404 in API), Owner-Info in Response
+- `src/app/api/serien/route.ts` — Query-Parameter `type`, `visibility`, `ownerId` validiert; `FEATURE_USER_SERIES` Flag berücksichtigt (deaktiviert → USER-Serien ausgeblendet)
+- `src/app/api/serien/[slug]/route.ts` — PRIVATE-Serien geben 404; `FEATURE_USER_SERIES` Flag prüft `series.type === USER`
+- Verifikation: Type-Check ✅, Build ✅, Tests 791/791 ✅, Lint keine neuen Errors ✅
+
+**Dateien (geändert):**
+- `src/lib/review-series-schema.ts`
+- `src/lib/review-series.ts`
+- `src/app/api/serien/route.ts`
+- `src/app/api/serien/[slug]/route.ts`
 
 ---
 
