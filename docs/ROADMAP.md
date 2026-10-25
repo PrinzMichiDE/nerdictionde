@@ -80,9 +80,9 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅**  
-**Nächster Schritt:** **PKG-5: API Routes — Mutes & Push** (`/api/user/notification-mutes` GET/POST, `/api/user/notification-mutes/[id]` DELETE, `/api/user/push-subscription` GET/POST/DELETE)
+**Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ F4✅ F5✅ (PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅ PKG-5✅)**  
+**Nächster Schritt:** **PKG-6: Cron Job für Digest** (Täglich/Wöchentlich Digest-E-Mails & Push versenden) + **PKG-7: UI Einstellungen-Seite** (`/einstellungen/benachrichtigungen` mit Tabs für Preferences, Mutes, Push)
 
 ### Nächste Schritte
 
-PKG-5 für Erweiterte Benachrichtigungs-Präferenzen implementieren.
+PKG-6 und PKG-7 für Erweiterte Benachrichtigungs-Präferenzen implementieren.

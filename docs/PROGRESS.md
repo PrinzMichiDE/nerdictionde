@@ -1214,8 +1214,58 @@
 
 ---
 
+### Zusammenfassung: Erweiterte Benachrichtigungs-Präferenzen — PKG-5 (API Routes — Mutes & Push) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Implementierte Änderungen:**
+
+1. **`/api/user/notification-mutes` (GET/POST)** — Mutes für authentifizierten User auflisten und erstellen
+   - GET: Gibt alle Mutes mit aufgelösten Target-Infos (Titel, Slug, URL) zurück
+   - POST: Erstellt neuen Mute (targetType: REVIEW/COLLECTION/SERIES/USER, targetId)
+   - Rate-Limit: 30 req/min pro User
+   - Feature-Flag Guards: `FEATURE_NOTIFICATION_MUTES`, `FEATURE_ENHANCED_NOTIFICATION_PREFS`
+
+2. **`/api/user/notification-mutes/[id]` (DELETE)** — Mute entfernen
+   - Prüft Owner-Berechtigung
+   - Rate-Limit: 30 req/min pro User
+
+3. **`/api/user/push-subscription` (GET/POST/DELETE)** — Push Subscription Management
+   - GET: Subscription-Status + VAPID Public Key
+   - POST: Subscription speichern/aktualisieren (endpoint, p256dh, auth)
+   - DELETE: Subscription entfernen
+   - Rate-Limit: 10 req/min pro User
+   - Prüft VAPID Konfiguration (503 wenn nicht konfiguriert)
+   - Feature-Flag Guards: `FEATURE_PUSH_NOTIFICATIONS`, `FEATURE_ENHANCED_NOTIFICATION_PREFS`
+
+**Technische Highlights:**
+- Bestehende Core Logic wiederverwendet: `getUserMutes`, `muteTarget`, `unmuteTarget`, `resolveMuteTargets`, `getUserPushSubscription`, `savePushSubscription`, `deletePushSubscription`, `isPushConfigured`, `getVapidPublicKey`
+- Konsistente Auth-Patterns (`getServerSession`), Rate-Limiting, Error-Handling
+- Zod-Schemas aus `notification-preferences-schema.ts` für Validierung
+- Cache-Invaliderung über bestehende `revalidateTag` Helpers
+
+**Tests:**
+- `tests/api/user/notification-mutes.test.ts` — 18 Tests (GET, POST, DELETE: Auth, Feature-Flags, Validation, Success, Rate-Limit, Errors)
+- `tests/api/user/push-subscription.test.ts` — 19 Tests (GET, POST, DELETE: Auth, Feature-Flags, VAPID Config, Validation, Success, Rate-Limit, Errors)
+- Gesamt: 37 neue Integration-Tests, alle grün
+
+**Verifikation:**
+- Type-Check ✅
+- Build ✅
+- Tests: 937/937 grün ✅ (inkl. 37 neue)
+- Lint: keine neuen Errors (nur Pre-existing Warnings) ✅
+
+**Dateien (neu/geändert):**
+- `src/app/api/user/notification-mutes/route.ts` (neu)
+- `src/app/api/user/notification-mutes/[id]/route.ts` (neu)
+- `src/app/api/user/push-subscription/route.ts` (neu)
+- `tests/api/user/notification-mutes.test.ts` (neu, 18 Tests)
+- `tests/api/user/push-subscription.test.ts` (neu, 19 Tests)
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
-**Aktuelles Feature:** **Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ F4✅ (PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅)**  
-**Nächster Schritt:** **PKG-5: API Routes — Mutes & Push** (`/api/user/notification-mutes` GET/POST, `/api/user/notification-mutes/[id]` DELETE, `/api/user/push-subscription` GET/POST/DELETE)
+**Aktuelles Feature:** **Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ F4✅ F5✅ (PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅ PKG-5✅)**  
+**Nächster Schritt:** **PKG-6: Cron Job für Digest** (Täglich/Wöchentlich Digest-E-Mails & Push versenden) + **PKG-7: UI Einstellungen-Seite** (`/einstellungen/benachrichtigungen` mit Tabs für Preferences, Mutes, Push)
 
