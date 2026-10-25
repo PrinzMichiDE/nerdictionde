@@ -1388,20 +1388,25 @@
 
 ---
 
+---
+
 ### Nächstes Feature (ROADMAP)
 
 **Kandidaten (Typ D):**
-- **Review-Embed für externe Sites** — Einbettbarer Widget-Code (`<script>` + `<div>`) für Reviews/Listen/Serien; Responsive, Themeable, No-Cookie. Hoher Nutzen (Distribution, Backlinks), mittlerer Aufwand (neuer Endpunkt, Widget-React-App, CSP).
+- **Review-Embed für externe Sites** — Einbettbarer Widget-Code (`<script>` + `<div>`) für Reviews/Listen/Serien; Responsive, Themeable, No-Cookie. Hoher Nutzen (Distribution, Backlinks), mittlerer Aufwand (neuer Endpunkt, Widget-React-App, CSP). **← F1✅ F2✅ F3✅ → F4 PKG-1 (in Arbeit)**
 - **Dark Mode System-Präferenz Sync** — Automatische Erkennung (`prefers-color-scheme`), Sync mit User-Setting, keine Flash-of-wrong-theme. Mittlerer Nutzen (UX), niedriger Aufwand (Cookie/LocalStorage, Script im `<head>`).
 - **Barrierefreiheits-Audit & Zertifizierung** — Vollständiger axe-core CI, WCAG 2.1 AA Checkliste, Screenreader-Tests, Tastatur-Navigation aller Flows. Hoher Nutzen (Inklusion, Legal), hoher Aufwand (Audit, Fixes, Regression-Tests).
 - **Performance-Budget & Lighthouse CI** — Budgets für JS/CSS/Images/Fonts, PR-Gate bei Regression, Core Web Vitals Monitoring. Hoher Nutzen (UX, SEO, Conversion), mittlerer Aufwand (CI-Integration, Budgets definieren).
 
 ---
 
+---
+
 ### Aktueller Stand (2026-10-25)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: **937/937 grün** (vitest), `lint`: **31 Errors** (alle `no-explicit-any` in externen Skills/Admin, nicht blockierend), 363 Warnings — keine neuen Errors
+- `type-check`: grün. `build`: grün. `tests`: **1013/1013 grün** (vitest), `lint`: **112 Errors** (alle Pre-existing: `no-explicit-any` in externen Skills/Admin, React-Hooks), 422 Warnings — **keine neuen Errors**
 - Abgeschlossene Features: 21 (inkl. Erweiterte Benachrichtigungs-Präferenzen)
-- Nächster Zyklus: Hauptschleife → Typ D Feature Auswahl
+- **Aktuelles Feature: Review-Embed für externe Sites** — **F1✅ F2✅ F3✅ F4 PKG-1✅ PKG-2✅ → PKG-3 (Embed Widget Core)**
+- Nächster Zyklus: PKG-3 abschließen (Widget React App mit Shadow DOM, Theme-System, Responsive)
 
