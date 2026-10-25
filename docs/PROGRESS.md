@@ -507,6 +507,13 @@
 - `.env.example` aktualisiert
 - Type-Check, Build, Tests (655 passed) grün
 
+**PKG-2 ✅:**
+- `src/lib/share-urls.ts`: URL-Generierung für 6 Plattformen (Twitter, Bluesky, Mastodon, Reddit, Discord, Copy Link)
+- Text-Vorlagen pro Content-Type, Längen-Begrenzung (Twitter 280, Mastodon 500, Bluesky 300, Reddit 300)
+- Hashtag-Generierung, URL-Encoding, Special-Char-Handling
+- Unit-Tests: `tests/lib/share-urls.test.ts` (19 Tests, alle grün)
+- Type-Check, Tests (674 passed) grün
+
 ---
 
 ### Nächstes Feature (ROADMAP)

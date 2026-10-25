@@ -80,8 +80,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Social Sharing & Viral Loops** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅)**. Nächster Schritt: PKG-2 Share-URL-Generierung.
+**Social Sharing & Viral Loops** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅)**. Nächster Schritt: PKG-3 Meta-Tags Generierung.
 
 ## Nächster Schritt
 
-F4 PKG-2: `lib/share-urls.ts` mit URL-Generierung für 6 Plattformen (Twitter, Bluesky, Mastodon, Reddit, Discord, Copy Link), Text-Vorlagen pro Content-Type, Längen-Begrenzung, Unit-Tests.
+F4 PKG-3: `lib/share-meta.ts` für OG/Twitter Meta-Tags Generierung pro Content-Type (Review, Collection, Series, Profile), `generateMetadata` Integration, `unstable_cache` 5 Min, Fallback-Bilder.
