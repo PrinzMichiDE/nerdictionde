@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
             select: { slug: true, title: true },
           });
           if (review) {
-            const sent = await notifySubscribers("hardware", {
+            const sent = await notifySubscribers("review_published", {
               title: `Neuer Hardware-Test: ${item.name}`,
               body: "Wir haben ein neues Produkt getestet – jetzt auf Nerdiction lesen.",
               url: `/reviews/${review.slug}`,

@@ -446,7 +446,8 @@ model TwitchUser {
   votes               Vote[]
   bookmarks           Bookmark[]
   pushSubscriptions   PushSubscription[]
-  notificationPrefs   NotificationPreference? @relation("NotificationPreferenceUser")
+  notificationPreferences NotificationPreference[] @relation("NotificationPreferenceUser")
+  notificationMutes   NotificationMute[]
   userProfile         UserProfile?
   reviewCollections    ReviewCollection[]     @relation("ReviewCollectionOwner")
   reviewReactions      ReviewReaction[]
@@ -1628,23 +1629,39 @@ model PushSubscription {
   endpoint  String
   p256dh    String
   auth      String
+  userAgent String?
   createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   @@unique([endpoint])
   @@index([userId])
 }
 
 model NotificationPreference {
-  id                    String     @id @default(cuid())
-  userId                String     @unique
-  user                  TwitchUser @relation("NotificationPreferenceUser", fields: [userId], references: [id], onDelete: Cascade)
-  games                 Boolean    @default(true)
-  movies                Boolean    @default(true)
-  series                Boolean    @default(true)
-  hardware              Boolean    @default(true)
-  deals                 Boolean    @default(true)
-  forum                 Boolean    @default(true)
-  categoryNewReviewEmail Boolean    @default(false) @map("category_new_review_email")
+  id        String               @id @default(cuid())
+  userId    String
+  user      TwitchUser           @relation("NotificationPreferenceUser", fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  channel   NotificationChannel
+  frequency NotificationFrequency @default(IMMEDIATE)
+  enabled   Boolean              @default(true)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@unique([userId, type, channel])
+  @@index([userId])
+}
+
+model NotificationMute {
+  id        String          @id @default(cuid())
+  userId    String
+  user      TwitchUser      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetType MuteTargetType
+  targetId  String
+  createdAt DateTime        @default(now())
+
+  @@unique([userId, targetType, targetId])
+  @@index([userId])
 }
 
 // Community: User Profiles, Follows, Notifications
@@ -1706,7 +1723,30 @@ enum NotificationType {
   qa_answer_accepted
   user_series_update
   user_series_invite
-  // later: comment_reply, review_published, mention, etc.
+  review_comment
+  review_reaction
+  review_published
+  mention
+  // later: comment_reply, etc.
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  PUSH
+}
+
+enum NotificationFrequency {
+  IMMEDIATE
+  DAILY
+  WEEKLY
+}
+
+enum MuteTargetType {
+  REVIEW
+  COLLECTION
+  SERIES
+  USER
 }
 
 // Review Collections / Kuratierte Listen

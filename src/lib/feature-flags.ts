@@ -16,6 +16,10 @@ export const FEATURE_REVIEW_TEMPLATES = process.env.FEATURE_REVIEW_TEMPLATES ===
 export const FEATURE_SOCIAL_SHARING = process.env.FEATURE_SOCIAL_SHARING !== 'false';
 export const FEATURE_SHARE_TRACKING = process.env.FEATURE_SHARE_TRACKING !== 'false';
 export const FEATURE_USER_SERIES = process.env.FEATURE_USER_SERIES !== 'false';
+export const FEATURE_ENHANCED_NOTIFICATION_PREFS = process.env.FEATURE_ENHANCED_NOTIFICATION_PREFS !== 'false';
+export const FEATURE_NOTIFICATION_DIGEST = process.env.FEATURE_NOTIFICATION_DIGEST !== 'false';
+export const FEATURE_PUSH_NOTIFICATIONS = process.env.FEATURE_PUSH_NOTIFICATIONS === 'true';
+export const FEATURE_NOTIFICATION_MUTES = process.env.FEATURE_NOTIFICATION_MUTES !== 'false';
 
 // Object export for easy access
 export const featureFlags = {
@@ -33,4 +37,8 @@ export const featureFlags = {
   get socialSharing() { return FEATURE_SOCIAL_SHARING; },
   get shareTracking() { return FEATURE_SHARE_TRACKING; },
   get userSeries() { return FEATURE_USER_SERIES; },
+  get enhancedNotificationPrefs() { return FEATURE_ENHANCED_NOTIFICATION_PREFS; },
+  get notificationDigest() { return FEATURE_NOTIFICATION_DIGEST; },
+  get pushNotifications() { return FEATURE_PUSH_NOTIFICATIONS; },
+  get notificationMutes() { return FEATURE_NOTIFICATION_MUTES; },
 };
