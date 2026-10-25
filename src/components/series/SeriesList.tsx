@@ -10,7 +10,7 @@ import { SeriesSkeleton } from "./SeriesSkeleton";
 interface SeriesListProps {
   series: PublicSeries[];
   nextCursor: string | null;
-  currentParams: { q?: string; sort?: string; order?: string };
+  currentParams: { q?: string; sort?: string; order?: string; type?: string };
 }
 
 export function SeriesList({ series, nextCursor, currentParams }: SeriesListProps) {

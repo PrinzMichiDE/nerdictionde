@@ -62,7 +62,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 - [x] **Review-Template-System** — Vordefinierte Review-Strukturen (Pro/Contra, Score-Kategorien, Checkliste) für Autoren; Konsistenz, schnellere Erstellung, SEO-Vorteil durch strukturierte Daten. Hoher Nutzen (Qualität, Effizienz), mittlerer Aufwand (Editor-Erweiterung, Templates als JSON, Validierung). **← erledigt (F1–F12 ✅)**
 - [x] **Social Sharing & Viral Loops** — One-Click Share für Reviews/Listen/Serien (Twitter/X, Bluesky, Mastodon, Reddit, Discord, Link-Kopie); OG/Twitter Cards optimieren; Share-Statistiken. Hoher Nutzen (Traffic, Markenbekanntheit), niedriger Aufwand (bestehende Share-Buttons erweitern, Meta-Tags). **← erledigt (F1–F9 ✅)**
-- [x] **Review-Serien für Nutzer (nicht nur Admin)** — Nutzer können eigene Serien erstellen (z.B. "Meine Top 10 RPGs 2024"), öffentlich/privat, kollaborativ. Hoher Nutzen (Community, UGC), mittlerer Aufwand (bestehende Series-Model wiederverwenden, UI für Erstellung). **← in Arbeit (F1✅ F2✅ F3✅ → F4)**
+- [x] **Review-Serien für Nutzer (nicht nur Admin)** — Nutzer können eigene Serien erstellen (z.B. "Meine Top 10 RPGs 2024"), öffentlich/privat, kollaborativ. Hoher Nutzen (Community, UGC), mittlerer Aufwand (bestehende Series-Model wiederverwenden, UI für Erstellung). **← in Arbeit (F1✅ F2✅ F3✅ → F4: PKG-1 bis PKG-7 ✅, PKG-8–13 offen)**
 - [ ] **Erweiterte Benachrichtigungs-Präferenzen** — Granulare Einstellungen pro Kategorie/Typ (Push, E-Mail, In-App, Digest), Frequenz (sofort, täglich, wöchentlich), Stumm-Schaltung pro Objekt. Hoher Nutzen (Retention, Kontrolle), mittlerer Aufwand (Prefs-Model, Digest-Cron, UI).
 - [ ] **Review-Embed für externe Sites** — Einbettbarer Widget-Code (`<script>` + `<div>`) für Reviews/Listen/Serien; Responsive, Themeable, No-Cookie. Hoher Nutzen (Distribution, Backlinks), mittlerer Aufwand (neuer Endpunkt, Widget-React-App, CSP).
 - [ ] **Dark Mode System-Präferenz Sync** — Automatische Erkennung (`prefers-color-scheme`), Sync mit User-Setting, keine Flash-of-wrong-theme. Mittlerer Nutzen (UX), niedriger Aufwand (Cookie/LocalStorage, Script im `<head>`).
@@ -80,8 +80,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Review-Serien für Nutzer** — **F1✅ F2✅ F3✅ → F4 Implementierung (PKG-1: DB-Migration & Models)**. Nächstes Feature nach Abschluss: **Erweiterte Benachrichtigungs-Präferenzen** (siehe Typ D Kandidaten).
+**Review-Serien für Nutzer** — **F1✅ F2✅ F3✅ → F4 Implementierung (PKG-1 bis PKG-7 erledigt)**. Nächstes Feature nach Abschluss: **Erweiterte Benachrichtigungs-Präferenzen** (siehe Typ D Kandidaten).
 
 ## Nächster Schritt
 
-Neues Feature implementieren: **Review-Serien für Nutzer** — **PKG-1: DB-Migration & Prisma Models** (Enums, ReviewSeries erweitern, UserSeriesFollow, UserSeriesCollaborator).
+Neues Feature implementieren: **Review-Serien für Nutzer** — **PKG-8: User Pages** (`/serien/neu` Form + Review-Suche + DnD, `/serien/[slug]/bearbeiten` Form + DnD + Collaborators Section).

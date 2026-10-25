@@ -7,6 +7,8 @@ interface SeriesCardProps {
 }
 
 export function SeriesCard({ series }: SeriesCardProps) {
+  const isUserSeries = series.type === "USER" && series.ownerUsername;
+
   return (
     <article className={cn(
       "group relative flex flex-col h-full bg-card border rounded-xl overflow-hidden",
@@ -27,6 +29,15 @@ export function SeriesCard({ series }: SeriesCardProps) {
       )}
 
       <div className="flex-1 flex flex-col p-4">
+        {isUserSeries && (
+          <div className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span className="font-medium text-foreground">Von @{series.ownerUsername}</span>
+          </div>
+        )}
+
         <Link href={`/serien/${series.slug}`} className="group">
           <h3 className={cn(
             "font-semibold text-lg line-clamp-2 mb-2",

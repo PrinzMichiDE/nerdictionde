@@ -44,8 +44,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Review-Serien für Nutzer** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅ PKG-5✅ PKG-6✅** (Feed & Notification Integration)  
-**Nächster Schritt:** **PKG-7: Public Pages Erweiterung** (`/serien` Filter-Chips, `/serien/[slug]` Visibility-Check + Follow-Button, Profil-Tab "Serien")
+**Aktuelles Feature:** **Review-Serien für Nutzer** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅ PKG-5✅ PKG-6✅ PKG-7✅** (Public Pages Erweiterung)  
+**Nächster Schritt:** **PKG-8: User Pages** (`/serien/neu` Form + Review-Suche + DnD, `/serien/[slug]/bearbeiten` Form + DnD + Collaborators)
 
 ---
 
@@ -843,3 +843,45 @@
 - Dark Mode System-Präferenz Sync — Automatische Erkennung (`prefers-color-scheme`), Sync mit User-Setting, keine Flash-of-wrong-theme. Mittlerer Nutzen (UX), niedriger Aufwand (Cookie/LocalStorage, Script im `<head>`).
 - Barrierefreiheits-Audit & Zertifizierung — Vollständiger axe-core CI, WCAG 2.1 AA Checkliste, Screenreader-Tests, Tastatur-Navigation aller Flows. Hoher Nutzen (Inklusion, Legal), hoher Aufwand (Audit, Fixes, Regression-Tests).
 - Performance-Budget & Lighthouse CI — Budgets für JS/CSS/Images/Fonts, PR-Gate bei Regression, Core Web Vitals Monitoring. Hoher Nutzen (UX, SEO, Conversion), mittlerer Aufwand (CI-Integration, Budgets definieren).
+
+### Zusammenfassung: Review-Serien für Nutzer — PKG-7 (Public Pages Erweiterung) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Implementierte Änderungen:**
+
+1. **`/serien` Seite** — Filter-Chips für "Alle", "Redaktion" (ADMIN), "Nutzer" (USER) mit `type` Query-Parameter, bedingt über `FEATURE_USER_SERIES` Flag
+2. **`SeriesCard` Komponente** — Badge "Von @username" für User-Serien (`type === "USER" && ownerUsername`)
+3. **`/serien/[slug]` Seite** — Verwendet `getSeriesBySlug` für öffentliche Serien, fällt auf `getUserSeriesDetail` mit User-ID zurück für private User-Serien (Owner/Collaborator-Zugriff)
+4. **`SeriesDetail` Komponente** — Erweiterte Props für User-Serien:
+   - Owner-Anzeige mit Link zum Profil
+   - Visibility Badge (Privat/PUBLIC)
+   - Type Badge (Redaktion/Nutzer)
+   - Follow-Button mit optimistischer UI (nur für User-Serien, nicht für Owner)
+   - Edit-Link für Owner/Collaborator
+   - Follower-Count Anzeige
+   - Teilen-Button (ShareButtons)
+5. **Profil-Seite (`/u/[username]`)** — Neuer Tab "Serien" (nur bei `FEATURE_USER_SERIES`), zeigt öffentliche User-Serien des Nutzers via `/api/serien?ownerId=...&type=USER&visibility=PUBLIC`
+
+**Technische Highlights:**
+- Keine neuen DB-Migrationen nötig (bestehende Models/Enums aus PKG-1)
+- `getServerSession` in Server Components für Auth-Check bei Series-Detail
+- `getUserSeriesDetail` Cache-Funktion mit `userId` Parameter für Follow-Status, Owner/Collaborator-Info
+- Public API `/api/serien` unterstützt `ownerId`, `type`, `visibility` Filter
+- Follow-Button nutzt bestehenden `/api/user/serien/[slug]/follow` Endpoint
+- Barrierefreiheit: ARIA-Labels, Keyboard-Navigation, Fokus-Management, Reduced Motion
+
+**Verifikation:**
+- Type-Check ✅
+- Build ✅
+- Tests: 791/791 grün ✅
+- Lint: keine neuen Errors (nur Pre-existing) ✅
+
+**Dateien (neu/geändert):**
+- `src/app/serien/page.tsx` (Filter-Chips)
+- `src/components/series/SeriesCard.tsx` (Owner Badge)
+- `src/app/serien/[slug]/page.tsx` (Auth-Check, getUserSeriesDetail)
+- `src/components/series/SeriesDetail.tsx` (Owner, Follow, Visibility, Edit, Badges)
+- `src/components/series/SeriesList.tsx` (type Parameter für Load More)
+- `src/components/profiles/PublicProfile.tsx` (Serien Tab + UserSeriesTab Component)
+
