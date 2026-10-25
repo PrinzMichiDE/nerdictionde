@@ -1144,8 +1144,44 @@
 
 ---
 
+### Zusammenfassung: Erweiterte Benachrichtigungs-Präferenzen — PKG-3 (Server Core Logic) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- `src/lib/notification-preferences.ts` — Core Logic für Preferences
+  - `getUserPreferences` / `getUserPreferencesFlat` (cached 60s, grouped by Type)
+  - `shouldNotifyUser(userId, type, channel, options?)` — prüft Preference + Frequency + Mutes
+  - `shouldIncludeInDigest(userId, type, channel)` — ermittelt Digest-Frequency (DAILY/WEEKLY/null)
+  - `updateUserPreferences(userId, updates[])` — Bulk-Upsert mit Cache-Invaliderung
+  - `ensureDefaultPreferences(userId)` — Default-Factory für neue User (alle Types × 3 Channels)
+  - Label-Helpers: `getNotificationTypeLabel`, `getChannelLabel`, `getFrequencyLabel`
+- `src/lib/notification-mutes.ts` — Mute Logic
+  - `getUserMutes` / `isMutedTarget` (cached 60s)
+  - `muteTarget` / `unmuteTarget` (Upsert/Delete mit Cache-Invaliderung)
+  - `resolveMuteTargets` — Batch-Loading für UI (Review/Collection/Series/User)
+  - Label/Icon Helpers: `getMuteTargetTypeLabel`, `getMuteTargetTypeIcon`
+- `src/lib/push-notifications.ts` — Web Push (VAPID)
+  - VAPID Config: `ensureVapidConfig`, `isPushConfigured`, `getVapidPublicKey`, `generateVapidKeys`
+  - Subscription Management: `getUserPushSubscription`, `savePushSubscription`, `deletePushSubscription`
+  - Sending: `sendPushNotification` (single), `sendPushToUser`, `sendPushToUsers` (batch, deduped)
+  - Cleanup: `cleanupInvalidSubscriptions` (90 Tage Cutoff)
+- Unit-Tests: 34 (preferences) + 29 (mutes) + 21 (push) = 84 neue Tests (alle grün)
+- **Verifikation:** Type-Check ✅, Build ✅, Tests 877/877 ✅, Lint keine neuen Errors ✅
+
+**Dateien (neu):**
+- `src/lib/notification-preferences.ts`
+- `src/lib/notification-mutes.ts`
+- `src/lib/push-notifications.ts`
+- `tests/lib/notification-preferences.test.ts` (34 Tests)
+- `tests/lib/notification-mutes.test.ts` (29 Tests)
+- `tests/lib/push-notifications.test.ts` (21 Tests)
+- `src/lib/feature-flags.ts` (revalidate helper export)
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
-**Aktuelles Feature:** **Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅**  
-**Nächster Schritt:** **PKG-3: Server Core Logic** (`src/lib/notification-preferences.ts`, `src/lib/notification-mutes.ts`, `src/lib/push-notifications.ts`, Tests)
+**Aktuelles Feature:** **Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅ PKG-3✅**  
+**Nächster Schritt:** **PKG-4: API Routes — Preferences & Test** (`/api/user/notification-preferences` GET/PATCH, `/api/user/notification-preferences/test` POST)
 
