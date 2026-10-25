@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { scoreRelevance } from "@/lib/search-relevance";
+import { scoreRelevance, ReviewWithTags } from "@/lib/search-relevance";
 import { searchParamsSchema } from "@/lib/search-filter-schema";
 import { parseSearchParams, buildSearchWhereClause, buildPlatformWhereClause, normalizePlatform } from "@/lib/search-filters";
 import { getReviewsWithPrices, filterByPriceRange } from "@/lib/price-utils";
@@ -123,7 +123,7 @@ export async function GET(req: NextRequest) {
       tags: { select: { tag: { select: { name: true, slug: true } } } },
       seriesId: true,
       seriesOrder: true,
-      series: { select: { id: true, slug: true, title: true } },
+      series: { select: { id: true, slug: true, title: true, type: true, visibility: true, ownerId: true } },
     } as const;
 
     const selectWithPrice = {
@@ -151,7 +151,7 @@ export async function GET(req: NextRequest) {
         select: advancedEnabled && (minPrice !== undefined || maxPrice !== undefined)
           ? selectWithPrice
           : selectBase,
-      }),
+      }) as Promise<ReviewWithTags[]>,
       prisma.review.count({ where: baseWhere }),
     ]);
 

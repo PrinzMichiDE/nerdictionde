@@ -489,7 +489,7 @@ export const getUserSeriesForEdit = unstable_cache(
         items: {
           orderBy: { seriesOrder: "asc" },
           include: {
-            review: { select: { id: true, slug: true, title: true, score: true, images: true } },
+            review: { select: { id: true, slug: true, title: true, title_en: true, category: true, score: true, images: true, releaseDate: true, content: true } },
           },
         },
         owner: { select: { id: true, username: true, displayName: true } },
@@ -520,8 +520,12 @@ export const getUserSeriesForEdit = unstable_cache(
           id: item.review.id,
           slug: item.review.slug,
           title: item.review.title,
+          title_en: item.review.title_en,
+          category: item.review.category,
           score: item.review.score,
           images: item.review.images,
+          releaseDate: item.review.releaseDate,
+          content: item.review.content,
         },
       })),
       collaborators: series.collaborators.map((c) => ({

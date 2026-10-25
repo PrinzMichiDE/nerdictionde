@@ -198,8 +198,12 @@ export interface UserSeriesEditData {
       id: string;
       slug: string;
       title: string;
+      title_en: string | null;
+      category: string;
       score: number;
       images: string[];
+      releaseDate: Date | null;
+      content: string | null;
     };
   }[];
   collaborators: {

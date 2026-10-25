@@ -13,7 +13,7 @@ export interface ReviewWithTags {
   tags: Array<{ tag: { name: string; slug: string } }>;
   seriesId: string | null;
   seriesOrder: number | null;
-  series: { id: string; slug: string; title: string } | null;
+  series: { id: string; slug: string; title: string; type: string; visibility: string; ownerId: string | null } | null;
 }
 
 /**
