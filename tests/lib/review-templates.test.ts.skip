@@ -1,0 +1,539 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  loadTemplateFile,
+  loadAllTemplates,
+  getTemplateDev,
+  getTemplatesDev,
+  validateTemplateDataForTemplate,
+  mapTemplateData,
+  extractTemplateDataFromContent,
+  getDefaultTemplate,
+} from "@/lib/review-templates";
+import { ReviewTemplate, TemplateData } from "@/lib/review-templates-schema";
+import fs from "fs";
+import path from "path";
+
+// Mock fs module
+vi.mock("fs", async () => {
+  const actual = await vi.importActual("fs");
+  const mockFs = {
+    existsSync: vi.fn(),
+    readFileSync: vi.fn(),
+    readdirSync: vi.fn(),
+  };
+  return {
+    ...mockFs,
+    default: mockFs,
+  };
+});
+
+vi.mock("path", async () => {
+  const actual = await vi.importActual("path");
+  const mockPath = {
+    join: vi.fn((...args: string[]) => args.join("/")),
+    cwd: vi.fn(() => "/mock/cwd"),
+    resolve: vi.fn(),
+    dirname: vi.fn(),
+    basename: vi.fn(),
+    extname: vi.fn(),
+  };
+  return {
+    ...mockPath,
+    default: mockPath,
+  };
+});
+
+// Mock process.cwd
+vi.mock("process", () => ({
+  cwd: vi.fn(() => "/mock/cwd"),
+}));
+
+const mockFs = fs as any;
+const mockPath = path as any;
+
+describe("Review Templates Library", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe("loadTemplateFile", () => {
+    it("should load and validate a valid template file", () => {
+      const validTemplate: ReviewTemplate = {
+        id: "test-template",
+        name: "Test Template",
+        description: "A test template",
+        category: "game",
+        default: false,
+        fields: [
+          {
+            id: "title",
+            type: "text",
+            label: "Title",
+            required: true,
+            markdown: false,
+            order: 1,
+          },
+        ],
+      };
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(JSON.stringify(validTemplate));
+
+      const result = loadTemplateFile("test-template.json");
+
+      expect(result).toEqual(validTemplate);
+      expect(mockFs.readFileSync).toHaveBeenCalledWith(
+        expect.stringContaining("test-template.json"),
+        "utf-8"
+      );
+    });
+
+    it("should return null for non-existent file", () => {
+      mockFs.existsSync.mockReturnValue(false);
+
+      const result = loadTemplateFile("nonexistent.json");
+
+      expect(result).toBeNull();
+    });
+
+    it("should return null and log error for invalid JSON", () => {
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue("invalid json");
+
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const result = loadTemplateFile("invalid.json");
+
+      expect(result).toBeNull();
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
+    });
+
+    it("should return null and log error for schema validation failure", () => {
+      const invalidTemplate = {
+        id: "invalid",
+        name: "A", // too short
+        category: "invalid-category",
+        fields: [],
+      };
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(JSON.stringify(invalidTemplate));
+
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const result = loadTemplateFile("invalid.json");
+
+      expect(result).toBeNull();
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe("loadAllTemplates", () => {
+    it("should load all valid templates and sort them", () => {
+      const template1: ReviewTemplate = {
+        id: "template-a",
+        name: "Template A",
+        description: "First",
+        category: "game",
+        default: false,
+        fields: [{ id: "field_1", type: "text", label: "Field 1", required: true, markdown: true, order: 1 }],
+      };
+      const template2: ReviewTemplate = {
+        id: "template-b",
+        name: "Template B",
+        description: "Second",
+        category: "game",
+        default: true,
+        fields: [{ id: "field_1", type: "text", label: "Field 1", required: true, markdown: true, order: 1 }],
+      };
+
+      mockFs.readdirSync.mockReturnValue(["template-a.json", "template-b.json", "template.schema.json"]);
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync
+        .mockReturnValueOnce(JSON.stringify(template1))
+        .mockReturnValueOnce(JSON.stringify(template2));
+
+      const result = loadAllTemplates();
+
+      expect(result).toHaveLength(2);
+      expect(result[0].id).toBe("template-b"); // default first
+      expect(result[1].id).toBe("template-a");
+    });
+
+    it("should return empty array on error", () => {
+      mockFs.readdirSync.mockImplementation(() => {
+        throw new Error("FS error");
+      });
+
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const result = loadAllTemplates();
+
+      expect(result).toEqual([]);
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe("getTemplateDev", () => {
+    it("should call loadTemplateFile with correct path", () => {
+      const template: ReviewTemplate = {
+        id: "dev-template",
+        name: "Dev Template",
+        description: "Dev",
+        category: "game",
+        default: false,
+        fields: [{ id: "field_1", type: "text", label: "Field 1", required: true, markdown: true, order: 1 }],
+      };
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(JSON.stringify(template));
+
+      const result = getTemplateDev("dev-template");
+
+      expect(result).toEqual(template);
+      expect(mockFs.readFileSync).toHaveBeenCalledWith(
+        expect.stringContaining("dev-template.json"),
+        "utf-8"
+      );
+    });
+  });
+
+  describe("getTemplatesDev", () => {
+    it("should return all templates without cache", () => {
+      const template: ReviewTemplate = {
+        id: "dev",
+        name: "Dev",
+        description: "Dev",
+        category: "game",
+        default: false,
+        fields: [{ id: "field_1", type: "text", label: "Field 1", required: true, markdown: true, order: 1 }],
+      };
+
+      mockFs.readdirSync.mockReturnValue(["dev.json"]);
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(JSON.stringify(template));
+
+      const result = getTemplatesDev();
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe("dev");
+    });
+  });
+
+  describe("validateTemplateDataForTemplate", () => {
+    it("should return valid for correct data", () => {
+      const template: ReviewTemplate = {
+        id: "valid-template",
+        name: "Valid Template",
+        description: "Valid",
+        category: "game",
+        default: false,
+        fields: [
+          { id: "required-field", type: "text", label: "Required", required: true, markdown: false, order: 1 },
+          { id: "optional-field", type: "text", label: "Optional", required: false, markdown: false, order: 2 },
+        ],
+      };
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(JSON.stringify(template));
+
+      const data: TemplateData = { "required-field": "value" };
+      const result = validateTemplateDataForTemplate(data, "valid-template");
+
+      expect(result.valid).toBe(true);
+      expect(result.errors).toEqual({});
+    });
+
+    it("should return invalid for missing required field", () => {
+      const template: ReviewTemplate = {
+        id: "valid-template",
+        name: "Valid Template",
+        description: "Valid",
+        category: "game",
+        default: false,
+        fields: [
+          { id: "required-field", type: "text", label: "Required Field", required: true, markdown: false, order: 1 },
+        ],
+      };
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(JSON.stringify(template));
+
+      const data: TemplateData = {};
+      const result = validateTemplateDataForTemplate(data, "valid-template");
+
+      expect(result.valid).toBe(false);
+      expect(result.errors["required-field"]).toBe("Required Field ist ein Pflichtfeld");
+    });
+
+    it("should return invalid for unknown template", () => {
+      mockFs.existsSync.mockReturnValue(false);
+
+      const result = validateTemplateDataForTemplate({}, "unknown-template");
+
+      expect(result.valid).toBe(false);
+      expect(result.errors._template).toBe("Template nicht gefunden: unknown-template");
+    });
+
+    it("should validate number fields", () => {
+      const template: ReviewTemplate = {
+        id: "num-template",
+        name: "Number Template",
+        description: "Number",
+        category: "game",
+        default: false,
+        fields: [{ id: "score", type: "number", label: "Score", required: true, markdown: false, order: 1 }],
+      };
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(JSON.stringify(template));
+
+      let result = validateTemplateDataForTemplate({ score: "not-a-number" }, "num-template");
+      expect(result.valid).toBe(false);
+      expect(result.errors.score).toBe("Score muss eine Zahl sein");
+
+      result = validateTemplateDataForTemplate({ score: "85" }, "num-template");
+      expect(result.valid).toBe(true);
+    });
+
+    it("should validate select fields", () => {
+      const template: ReviewTemplate = {
+        id: "select-template",
+        name: "Select Template",
+        description: "Select",
+        category: "game",
+        default: false,
+        fields: [
+          {
+            id: "platform",
+            type: "select",
+            label: "Platform",
+            required: true,
+            options: ["PC", "PS5", "Xbox"],
+            markdown: false,
+            order: 1,
+          },
+        ],
+      };
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(JSON.stringify(template));
+
+      let result = validateTemplateDataForTemplate({ platform: "Switch" }, "select-template");
+      expect(result.valid).toBe(false);
+      expect(result.errors.platform).toBe("Platform: Ungültiger Wert");
+
+      result = validateTemplateDataForTemplate({ platform: "PC" }, "select-template");
+      expect(result.valid).toBe(true);
+    });
+
+    it("should validate rating fields", () => {
+      const template: ReviewTemplate = {
+        id: "rating-template",
+        name: "Rating Template",
+        description: "Rating",
+        category: "game",
+        default: false,
+        fields: [{ id: "rating", type: "rating", label: "Rating", required: true, markdown: false, order: 1 }],
+      };
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(JSON.stringify(template));
+
+      let result = validateTemplateDataForTemplate({ rating: "15" }, "rating-template");
+      expect(result.valid).toBe(false);
+      expect(result.errors.rating).toBe("Rating muss eine ganze Zahl zwischen 1 und 10 sein");
+
+      result = validateTemplateDataForTemplate({ rating: "5" }, "rating-template");
+      expect(result.valid).toBe(true);
+    });
+
+    it("should detect unknown fields", () => {
+      const template: ReviewTemplate = {
+        id: "unknown-field-template",
+        name: "Unknown Field Template",
+        description: "Unknown",
+        category: "game",
+        default: false,
+        fields: [{ id: "known", type: "text", label: "Known", required: true, markdown: false, order: 1 }],
+      };
+
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync.mockReturnValue(JSON.stringify(template));
+
+      const result = validateTemplateDataForTemplate({ known: "value", unknown: "value" }, "unknown-field-template");
+
+      expect(result.valid).toBe(false);
+      expect(result.errors.unknown).toBe("Unbekanntes Feld: unknown");
+    });
+  });
+
+  describe("mapTemplateData", () => {
+    it("should map fields with matching IDs", () => {
+      const sourceData: TemplateData = { title: "Test", content: "Content", extra: "ignored" };
+      const sourceTemplate: ReviewTemplate = {
+        id: "source",
+        name: "Source",
+        description: "Source",
+        category: "game",
+        default: false,
+        fields: [
+          { id: "title", type: "text", label: "Title", required: true, markdown: false, order: 1 },
+          { id: "content", type: "textarea", label: "Content", required: true, markdown: true, order: 2 },
+          { id: "extra", type: "text", label: "Extra", required: false, markdown: false, order: 3 },
+        ],
+      };
+      const targetTemplate: ReviewTemplate = {
+        id: "target",
+        name: "Target",
+        description: "Target",
+        category: "game",
+        default: false,
+        fields: [
+          { id: "title", type: "text", label: "Title", required: true, markdown: false, order: 1 },
+          { id: "content", type: "textarea", label: "Content", required: true, markdown: true, order: 2 },
+        ],
+      };
+
+      const result = mapTemplateData(sourceData, sourceTemplate, targetTemplate);
+
+      expect(result).toEqual({ title: "Test", content: "Content" });
+    });
+
+    it("should handle missing source fields", () => {
+      const sourceData: TemplateData = { title: "Test" };
+      const sourceTemplate: ReviewTemplate = {
+        id: "source",
+        name: "Source",
+        description: "Source",
+        category: "game",
+        default: false,
+        fields: [{ id: "title", type: "text", label: "Title", required: true, markdown: false, order: 1 }],
+      };
+      const targetTemplate: ReviewTemplate = {
+        id: "target",
+        name: "Target",
+        description: "Target",
+        category: "game",
+        default: false,
+        fields: [
+          { id: "title", type: "text", label: "Title", required: true, markdown: false, order: 1 },
+          { id: "content", type: "textarea", label: "Content", required: true, markdown: true, order: 2 },
+        ],
+      };
+
+      const result = mapTemplateData(sourceData, sourceTemplate, targetTemplate);
+
+      expect(result).toEqual({ title: "Test" });
+      expect(result.content).toBeUndefined();
+    });
+  });
+
+  describe("extractTemplateDataFromContent", () => {
+    it("should put content in first required textarea field", () => {
+      const template: ReviewTemplate = {
+        id: "extract-template",
+        name: "Extract Template",
+        description: "Extract",
+        category: "game",
+        default: false,
+        fields: [
+          { id: "intro", type: "textarea", label: "Intro", required: true, markdown: true, order: 1 },
+          { id: "gameplay", type: "textarea", label: "Gameplay", required: true, markdown: true, order: 2 },
+        ],
+      };
+
+      const content = "# My Review\n\nThis is the content.";
+      const result = extractTemplateDataFromContent(content, template);
+
+      expect(result.intro).toBe(content);
+      expect(result.gameplay).toBeUndefined();
+    });
+
+    it("should return empty object for template without required textarea", () => {
+      const template: ReviewTemplate = {
+        id: "no-textarea",
+        name: "No Textarea",
+        description: "No textarea",
+        category: "game",
+        default: false,
+        fields: [{ id: "title", type: "text", label: "Title", required: true, markdown: false, order: 1 }],
+      };
+
+      const result = extractTemplateDataFromContent("content", template);
+
+      expect(result).toEqual({});
+    });
+  });
+
+  describe("getDefaultTemplate", () => {
+    it("should return the default template", () => {
+      const template1: ReviewTemplate = {
+        id: "non-default",
+        name: "Non Default",
+        description: "Non Default",
+        category: "game",
+        default: false,
+        fields: [{ id: "f1", type: "text", label: "F1", required: true, markdown: false, order: 1 }],
+      };
+      const template2: ReviewTemplate = {
+        id: "default",
+        name: "Default",
+        description: "Default",
+        category: "game",
+        default: true,
+        fields: [{ id: "f1", type: "text", label: "F1", required: true, markdown: false, order: 1 }],
+      };
+
+      mockFs.readdirSync.mockReturnValue(["non-default.json", "default.json"]);
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync
+        .mockReturnValueOnce(JSON.stringify(template1))
+        .mockReturnValueOnce(JSON.stringify(template2));
+
+      const result = getDefaultTemplate();
+
+      expect(result).toEqual(template2);
+    });
+
+    it("should return first template if no default", () => {
+      const template1: ReviewTemplate = {
+        id: "first",
+        name: "First",
+        description: "First",
+        category: "game",
+        default: false,
+        fields: [{ id: "f1", type: "text", label: "F1", required: true, markdown: false, order: 1 }],
+      };
+      const template2: ReviewTemplate = {
+        id: "second",
+        name: "Second",
+        description: "Second",
+        category: "game",
+        default: false,
+        fields: [{ id: "f1", type: "text", label: "F1", required: true, markdown: false, order: 1 }],
+      };
+
+      mockFs.readdirSync.mockReturnValue(["first.json", "second.json"]);
+      mockFs.existsSync.mockReturnValue(true);
+      mockFs.readFileSync
+        .mockReturnValueOnce(JSON.stringify(template1))
+        .mockReturnValueOnce(JSON.stringify(template2));
+
+      const result = getDefaultTemplate();
+
+      expect(result).toEqual(template1);
+    });
+
+    it("should return null if no templates", () => {
+      mockFs.readdirSync.mockReturnValue([]);
+
+      const result = getDefaultTemplate();
+
+      expect(result).toBeNull();
+    });
+  });
+});

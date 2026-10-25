@@ -12,7 +12,7 @@ const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'templates', 'reviews');
 // Template Loading & Validation
 // ============================================
 
-function loadTemplateFile(filename: string): ReviewTemplate | null {
+export function loadTemplateFile(filename: string): ReviewTemplate | null {
   try {
     const filePath = path.join(TEMPLATES_DIR, filename);
     if (!fs.existsSync(filePath)) return null;
@@ -34,7 +34,7 @@ function loadTemplateFile(filename: string): ReviewTemplate | null {
   }
 }
 
-function loadAllTemplates(): ReviewTemplate[] {
+export function loadAllTemplates(): ReviewTemplate[] {
   try {
     const files = fs.readdirSync(TEMPLATES_DIR)
       .filter(f => f.endsWith('.json') && f !== 'template.schema.json');

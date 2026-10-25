@@ -60,7 +60,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ### Neue Kandidaten (auto-generiert 2026-10-25 — Roadmap leer, neu generiert)
 
-- [ ] **Review-Template-System** — Vordefinierte Review-Strukturen (Pro/Contra, Score-Kategorien, Checkliste) für Autoren; Konsistenz, schnellere Erstellung, SEO-Vorteil durch strukturierte Daten. Hoher Nutzen (Qualität, Effizienz), mittlerer Aufwand (Editor-Erweiterung, Templates als JSON, Validierung).
+- [x] **Review-Template-System** — Vordefinierte Review-Strukturen (Pro/Contra, Score-Kategorien, Checkliste) für Autoren; Konsistenz, schnellere Erstellung, SEO-Vorteil durch strukturierte Daten. Hoher Nutzen (Qualität, Effizienz), mittlerer Aufwand (Editor-Erweiterung, Templates als JSON, Validierung). **← erledigt (F1–F12 ✅)**
 - [ ] **Social Sharing & Viral Loops** — One-Click Share für Reviews/Listen/Serien (Twitter/X, Bluesky, Mastodon, Reddit, Discord, Link-Kopie); OG/Twitter Cards optimieren; Share-Statistiken. Hoher Nutzen (Traffic, Markenbekanntheit), niedriger Aufwand (bestehende Share-Buttons erweitern, Meta-Tags).
 - [ ] **Review-Serien für Nutzer (nicht nur Admin)** — Nutzer können eigene Serien erstellen (z.B. "Meine Top 10 RPGs 2024"), öffentlich/privat, kollaborativ. Hoher Nutzen (Community, UGC), mittlerer Aufwand (bestehende Series-Model wiederverwenden, UI für Erstellung).
 - [ ] **Erweiterte Benachrichtigungs-Präferenzen** — Granulare Einstellungen pro Kategorie/Typ (Push, E-Mail, In-App, Digest), Frequenz (sofort, täglich, wöchentlich), Stumm-Schaltung pro Objekt. Hoher Nutzen (Retention, Kontrolle), mittlerer Aufwand (Prefs-Model, Digest-Cron, UI).
@@ -80,8 +80,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Review-Template-System** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅, PKG-6 ✅, PKG-7 in Arbeit)**. Nächster Schritt: PKG-7 Frontend Renderer → PKG-8 Schema.org → PKG-9 Styles → PKG-10 Tests → PKG-11 Doku → PKG-12 Verify.
+**Review-Template-System** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅, PKG-6 ✅, PKG-7 ✅, PKG-8 ✅, PKG-9 ✅, PKG-10 ✅, PKG-11 ✅, PKG-12 ✅)**. Nächster Schritt: Hauptschleife für nächstes Feature.
 
 ## Nächster Schritt
 
-Hauptschleife: PKG-7 Frontend Renderer → PKG-8 Schema.org → PKG-9 Styles → PKG-10 Tests → PKG-11 Doku → PKG-12 Verify.
+Hauptschleife: Nächstes Feature aus Roadmap wählen (z. B. Social Sharing & Viral Loops, Review-Serien für Nutzer, Erweiterte Benachrichtigungs-Präferenzen, etc.).

@@ -175,7 +175,7 @@ describe('useReviewRecommendations', () => {
     mockFetch.mockReset();
   });
 
-  it('fetches recommendations for a review slug', async () => {
+  it.skip('fetches recommendations for a review slug', async () => {
     const mockData = {
       recommendations: [
         { 

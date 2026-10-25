@@ -125,7 +125,7 @@ Die Anwendung ist eine Next.js 16-App mit App Router, React 19, TypeScript, Tail
 
 Kernmodelle in `prisma/schema.prisma`:
 
-- **Review** – Produkttests (Games, Filme, Serien, Hardware) mit Score, Pros/Cons, Kommentaren, Bewertungen, Lesezeichen
+- **Review** – Produkttests (Games, Filme, Serien, Hardware) mit Score, Pros/Cons, Kommentaren, Bewertungen, Lesezeichen; Template-System: `templateId` (String), `templateData` (JSON), `templateVersion` (Int) für strukturierte Review-Vorlagen (Standard-Game, Hardware, Movie/Series)
 - **Comment** – Kommentare zu Reviews, optional als Antwort auf einen anderen Kommentar (`parentId`)
 - **UserRating** – Nutzerbewertungen (0–10) zu Reviews
 - **Bookmark** – Gespeicherte Reviews pro Nutzer
@@ -148,6 +148,31 @@ Kernmodelle in `prisma/schema.prisma`:
 - **QAVote** – Votes auf Fragen/Antworten (User, Question/Answer-Ref, Value +1/-1, Unique-Constraints)
 - **RecommendationDismiss** – Abgelehnte Empfehlungen pro Nutzer (User+Review-Ref, Grund, Ablaufdatum 30 Tage), Unique-Constraint pro User+Review
 - **TwitchUser** (Erweitert) – `personalizedRecommendationsEnabled` (Default `true`) für Opt-in-Status bei personalisierten Empfehlungen
+
+## Features
+
+### Review-Template-System (Feature-Flag: `FEATURE_REVIEW_TEMPLATES`)
+
+Strukturierte Review-Vorlagen für konsistente, qualitativ hochwertige Inhalte:
+
+- **3 Standard-Templates**: Standard-Game, Hardware, Movie/Series (JSON in `src/templates/reviews/`)
+- **Admin-Erstellung**: `/admin/reviews/new` mit Template-Auswahl (Cards mit Preview) und strukturiertem Editor (Tabs/Accordion, Pflichtfelder markiert, Live-Validierung)
+- **Template-Wechsel**: Content-Migration per Feld-ID-Mapping mit Warnung vor Datenverlust
+- **Frontend-Rendering**: Review-Detailseiten rendern Template-Felder in definierter Reihenfolge, leere optionale Felder werden ausgeblendet
+- **Schema.org SEO**: JSON-LD Microdata für `Review`, `ItemReviewed` (Game/Product/Movie/TVSeries), `Pros/Cons` als `ItemList`
+- **Responsive Design**: Mobile (Accordion), Desktop (Tabs), Dark Mode Support
+- **Feature-Flag**: `FEATURE_REVIEW_TEMPLATES` (Default: `false`)
+- **Caching**: `unstable_cache` 5 Min + Tag-Invaliderung (`templates:reviews`)
+
+### Review-Templates (Details)
+
+| Template | Kategorie | Pflichtfelder | Beschreibung |
+|----------|-----------|---------------|--------------|
+| Standard-Game | game | 7 | Einleitung, Gameplay, Grafik, Sound (optional), Pros, Cons, Fazit |
+| Hardware | hardware | 8 | Einleitung, Specs, Verarbeitung, Performance, Software (optional), Pros, Cons, Fazit |
+| Movie/Series | movie | 7 | Einleitung, Handlung, Schauspiel, Regie, Drehbuch (optional), Pros, Cons, Fazit |
+
+Alle Templates nutzen Markdown für Textfelder (außer Pros/Cons als Listen).
 
 ## Entwicklung
 

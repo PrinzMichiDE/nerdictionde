@@ -50,9 +50,13 @@ import { ReadingProgressBar } from "@/components/shared/ReadingProgressBar";
 import { ScrollToTop } from "@/components/shared/ScrollToTop";
 import { getCachedReviewReactions } from "@/lib/review-reactions";
 import { generateBreadcrumbSchema, generateFAQSchema, generateReviewSchema, getSiteUrl } from "@/lib/seo";
+import { buildSchemaOrgReview } from "@/lib/review-templates";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { ReviewRecommendations } from "@/components/recommendations";
+import { ReviewTemplateRenderer } from "@/components/reviews/ReviewTemplateRenderer";
+import { getTemplate } from "@/lib/review-templates";
+import { FEATURE_REVIEW_TEMPLATES } from "@/lib/feature-flags";
 
 export async function generateMetadata({
   params,
@@ -234,6 +238,9 @@ export default async function ReviewDetailPage({
       userRatingAvg: true,
       seriesId: true,
       seriesOrder: true,
+      templateId: true,
+      templateData: true,
+      templateVersion: true,
       createdAt: true,
       updatedAt: true,
       comments: true,
@@ -303,6 +310,16 @@ export default async function ReviewDetailPage({
     }
   }
 
+  // Fetch template if review has one
+  let template = null;
+  if (FEATURE_REVIEW_TEMPLATES && review.templateId) {
+    try {
+      template = await getTemplate(review.templateId);
+    } catch (error) {
+      console.warn('[Review Detail] Failed to fetch template:', error);
+    }
+  }
+
   const [userRating, isBookmarked, categoryAvg] = await Promise.all([
     session
       ? prisma.userRating.findUnique({
@@ -354,7 +371,12 @@ export default async function ReviewDetailPage({
   const wordCount = (content || "").split(/\s+/).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
-  const jsonLd = generateReviewSchema({ ...review, title, content });
+  const jsonLd = template && review.templateData && FEATURE_REVIEW_TEMPLATES
+    ? buildSchemaOrgReview(
+        { ...review, title, author: { displayName: "Redaktion", id: review.id }, id: review.id, slug: review.slug, templateData: review.templateData as Record<string, string> },
+        template
+      )
+    : generateReviewSchema({ ...review, title, content });
 
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/reviews/${slug}`;
@@ -888,21 +910,41 @@ export default async function ReviewDetailPage({
             />
           )}
 
+          {/* Template Renderer - for reviews with structured templates */}
+          {template && review.templateData && FEATURE_REVIEW_TEMPLATES && (
+            <ReviewTemplateRenderer
+              template={template}
+              templateData={review.templateData as Record<string, string>}
+              review={{
+                title: review.title,
+                slug: review.slug,
+                score: review.score,
+                category: review.category,
+                author: { displayName: "Redaktion" },
+                createdAt: review.createdAt,
+                images: review.images,
+              }}
+              variant="sections"
+            />
+          )}
+
           {/* Reading History Tracker - wraps main content for scroll/dwell tracking */}
-          <ReadingHistoryTrackerWrapper
-            reviewId={review.id}
-            featureEnabled={FEATURE_READING_HISTORY}
-          >
-            <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed prose-headings:scroll-mt-24 prose-headings:font-serif prose-headings:tracking-tight prose-headings:font-semibold" data-reading-content>
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm, spoilerPlugin]}
-                rehypePlugins={[[rehypeSlugCustomId, { enableCustomId: true }]]}
-                components={MarkdownComponents as Record<string, React.ComponentType<Record<string, unknown>>>}
-              >
-                {content || ""}
-              </ReactMarkdown>
-            </div>
-          </ReadingHistoryTrackerWrapper>
+          {!template && (
+            <ReadingHistoryTrackerWrapper
+              reviewId={review.id}
+              featureEnabled={FEATURE_READING_HISTORY}
+            >
+              <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed prose-headings:scroll-mt-24 prose-headings:font-serif prose-headings:tracking-tight prose-headings:font-semibold" data-reading-content>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, spoilerPlugin]}
+                  rehypePlugins={[[rehypeSlugCustomId, { enableCustomId: true }]]}
+                  components={MarkdownComponents as Record<string, React.ComponentType<Record<string, unknown>>>}
+                >
+                  {content || ""}
+                </ReactMarkdown>
+              </div>
+            </ReadingHistoryTrackerWrapper>
+          )}
 
           {/* Hardware Requirements */}
           {review.category === "game" && specs && (
