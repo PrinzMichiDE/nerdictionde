@@ -4,6 +4,7 @@ import { getCollaborators, inviteCollaborator } from "@/lib/user-series";
 import { inviteCollaboratorSchema, userSeriesParamsSchema } from "@/lib/user-series-schema";
 import { featureFlags } from "@/lib/feature-flags";
 import prisma from "@/lib/prisma";
+import { createUserSeriesInviteNotification } from "@/lib/user-series";
 
 export const dynamic = "force-dynamic";
 
@@ -98,6 +99,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
   try {
     const result = await inviteCollaborator(userId, series.id, schemaParse.data);
+    
+    // Notification für eingeladenen User erstellen (async, nicht blockierend)
+    createUserSeriesInviteNotification(series.id, schemaParse.data.userId, userId).catch((err) =>
+      console.error("[Notification] Failed to create user series invite notification:", err)
+    );
+    
     return NextResponse.json({ collaborator: result }, { status: 201 });
   } catch (error) {
     console.error("POST /api/user/serien/[slug]/collaborators error:", error);

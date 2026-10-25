@@ -10,8 +10,9 @@ export async function GET(request: NextRequest) {
   const cursor = searchParams.get("cursor") || undefined;
   const limit = parseInt(searchParams.get("limit") || "20", 10);
   const includeCollections = searchParams.get("includeCollections") !== "false";
+  const includeUserSeries = searchParams.get("includeUserSeries") !== "false";
 
-  const result = await getFeed(auth.userId, cursor, limit, includeCollections);
+  const result = await getFeed(auth.userId, cursor, limit, includeCollections, includeUserSeries);
 
   return NextResponse.json({
     success: true,

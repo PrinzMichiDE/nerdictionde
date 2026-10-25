@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import prisma from "./prisma";
 import { getFollowing } from "./follow";
 import { isCollectionsFollowEnabled } from "./collections-follow-schema";
+import { featureFlags } from "./feature-flags";
 
 export type FeedItem =
   | {
@@ -69,6 +70,30 @@ export type FeedItem =
         score: number;
         images: string[];
       };
+    }
+  | {
+      type: "user_series_item";
+      id: string;
+      createdAt: Date;
+      user: {
+        id: string;
+        username: string;
+        displayName: string;
+        profileImageUrl: string | null;
+      };
+      series: {
+        id: string;
+        slug: string;
+        title: string;
+      };
+      review: {
+        id: string;
+        title: string;
+        slug: string;
+        category: string;
+        score: number;
+        images: string[];
+      };
     };
 
 export type FeedResult = {
@@ -81,7 +106,13 @@ export type FeedResult = {
  * Cached for 30 seconds
  */
 export const getFeed = unstable_cache(
-  async (userId: string, cursor?: string, limit = 20, includeCollections = true): Promise<FeedResult> => {
+  async (
+    userId: string,
+    cursor?: string,
+    limit = 20,
+    includeCollections = true,
+    includeUserSeries = true
+  ): Promise<FeedResult> => {
     // Get list of followed user IDs
     const following = await getFollowing(userId);
     const followedUserIds = following.items.map((f) => f.following.id);
@@ -96,13 +127,23 @@ export const getFeed = unstable_cache(
       followedCollectionIds = followedCollections.map((f) => f.collectionId);
     }
 
+    // Get list of followed user series IDs
+    let followedUserSeriesIds: string[] = [];
+    if (includeUserSeries && featureFlags.userSeries) {
+      const followedUserSeries = await prisma.userSeriesFollow.findMany({
+        where: { userId },
+        select: { seriesId: true },
+      });
+      followedUserSeriesIds = followedUserSeries.map((f) => f.seriesId);
+    }
+
     // Build cursor condition
     const cursorCondition = cursor
       ? { createdAt: { lt: new Date(cursor) } }
       : {};
 
     // Fetch feed item types in parallel
-    const [ratings, bookmarks, collectionItems] = await Promise.all([
+    const [ratings, bookmarks, collectionItems, userSeriesItems] = await Promise.all([
       // Ratings by followed users
       followedUserIds.length > 0
         ? prisma.userRating.findMany({
@@ -166,6 +207,32 @@ export const getFeed = unstable_cache(
             take: limit,
           })
         : Promise.resolve([]),
+      // User Series items from followed user series
+      includeUserSeries && featureFlags.userSeries && followedUserSeriesIds.length > 0
+        ? prisma.reviewSeriesItem.findMany({
+            where: {
+              seriesId: { in: followedUserSeriesIds },
+              series: {
+                deletedAt: null,
+                type: "USER",
+                visibility: "PUBLIC",
+              },
+              review: {
+                status: 'published',
+              },
+            },
+            include: {
+              series: {
+                select: { id: true, slug: true, title: true, owner: { select: { id: true, username: true, displayName: true, profileImageUrl: true } } },
+              },
+              review: {
+                select: { id: true, title: true, slug: true, category: true, score: true, images: true },
+              },
+            },
+            orderBy: { createdAt: "desc" },
+            take: limit,
+          })
+        : Promise.resolve([]),
     ]);
 
     // Transform to unified FeedItem type
@@ -208,6 +275,31 @@ export const getFeed = unstable_cache(
             title: ci.collection.title,
           },
           review: ci.review,
+        })),
+      ...userSeriesItems
+        // Deduplicate: skip if review already appears via user follow or collection
+        .filter((si) => {
+          const reviewId = si.review.id;
+          return !ratings.some((r) => r.review.id === reviewId) &&
+                 !bookmarks.some((b) => b.review.id === reviewId) &&
+                 !collectionItems.some((ci) => ci.review.id === reviewId);
+        })
+        .map((si) => ({
+          type: "user_series_item" as const,
+          id: si.id,
+          createdAt: si.createdAt,
+          user: si.series.owner ? {
+            id: si.series.owner.id,
+            username: si.series.owner.username,
+            displayName: si.series.owner.displayName,
+            profileImageUrl: si.series.owner.profileImageUrl,
+          } : { id: '', username: '', displayName: '', profileImageUrl: null },
+          series: {
+            id: si.series.id,
+            slug: si.series.slug,
+            title: si.series.title,
+          },
+          review: si.review,
         })),
     ];
 

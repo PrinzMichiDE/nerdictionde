@@ -1272,3 +1272,116 @@ export const getReviewUserSeriesInfo = unstable_cache(
   ["review-user-series-info"],
   { tags: [USER_SERIES_CACHE_TAGS.review], revalidate: 30 }
 );
+
+// ============================================
+// Notification Helpers
+// ============================================
+
+/**
+ * Erstellt Notification für Follower, wenn ein neues Item zu einer User-Serie hinzugefügt wird
+ * Wird aufgerufen nach addUserSeriesItem
+ */
+export async function createUserSeriesItemNotification(
+  seriesId: string,
+  actorId: string,
+  reviewIds: string[]
+): Promise<void> {
+  // Serie und Owner laden
+  const series = await prisma.reviewSeries.findUnique({
+    where: { id: seriesId },
+    select: { id: true, title: true, ownerId: true },
+  });
+
+  if (!series) return;
+
+  // Alle Follower der Serie laden (außer dem Actor)
+  const follows = await prisma.userSeriesFollow.findMany({
+    where: {
+      seriesId,
+      userId: { not: actorId },
+    },
+    select: { userId: true },
+  });
+
+  if (follows.length === 0) return;
+
+  // Actor-Info laden
+  const actor = await prisma.twitchUser.findUnique({
+    where: { id: actorId },
+    select: { displayName: true, username: true },
+  });
+
+  if (!actor) return;
+
+  // Review-Titel für Details laden
+  const reviews = await prisma.review.findMany({
+    where: { id: { in: reviewIds } },
+    select: { id: true, title: true, slug: true },
+  });
+
+  const reviewTitles = reviews.map((r) => r.title).join(", ");
+
+  // Notifications für alle Follower erstellen (Batch)
+  await prisma.notification.createMany({
+    data: follows.map((f) => ({
+      userId: f.userId,
+      type: "user_series_update" as const,
+      title: `Neues Review in "${series.title}"`,
+      message: `${actor.displayName} (@${actor.username}) hat "${reviewTitles}" zu "${series.title}" hinzugefügt`,
+      data: {
+        seriesId,
+        seriesTitle: series.title,
+        action: "item_added",
+        actorId,
+        actorDisplayName: actor.displayName,
+        actorUsername: actor.username,
+        reviewIds,
+        reviewCount: reviewIds.length,
+      },
+    })),
+  });
+}
+
+/**
+ * Erstellt Notification für eingeladenen User, wenn er als Collaborator eingeladen wird
+ * Wird aufgerufen nach inviteCollaborator
+ */
+export async function createUserSeriesInviteNotification(
+  seriesId: string,
+  invitedUserId: string,
+  inviterId: string
+): Promise<void> {
+  // Serie und Inviter laden
+  const [series, inviter] = await Promise.all([
+    prisma.reviewSeries.findUnique({
+      where: { id: seriesId },
+      select: { id: true, title: true, ownerId: true },
+    }),
+    prisma.twitchUser.findUnique({
+      where: { id: inviterId },
+      select: { displayName: true, username: true },
+    }),
+  ]);
+
+  if (!series || !inviter) return;
+
+  // Nicht selbst benachrichtigen
+  if (invitedUserId === inviterId) return;
+
+  await prisma.notification.create({
+    data: {
+      userId: invitedUserId,
+      type: "user_series_invite" as const,
+      title: `Einladung zur Kollaboration`,
+      message: `${inviter.displayName} (@${inviter.username}) hat dich als Kollaborator zu "${series.title}" eingeladen`,
+      data: {
+        seriesId,
+        seriesTitle: series.title,
+        inviterId,
+        inviterDisplayName: inviter.displayName,
+        inviterUsername: inviter.username,
+        role: "EDITOR",
+      },
+    },
+  });
+}

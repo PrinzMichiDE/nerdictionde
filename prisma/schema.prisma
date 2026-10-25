@@ -1704,6 +1704,8 @@ enum NotificationType {
   qa_new_question
   qa_answer_added
   qa_answer_accepted
+  user_series_update
+  user_series_invite
   // later: comment_reply, review_published, mention, etc.
 }
 

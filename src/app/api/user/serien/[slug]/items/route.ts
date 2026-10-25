@@ -3,6 +3,8 @@ import { requireTwitchAuth } from "@/lib/auth-twitch";
 import { addUserSeriesItem } from "@/lib/user-series";
 import { addUserSeriesItemSchema, userSeriesParamsSchema } from "@/lib/user-series-schema";
 import { featureFlags } from "@/lib/feature-flags";
+import { createUserSeriesItemNotification } from "@/lib/user-series";
+import prisma from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +46,18 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
   try {
     const result = await addUserSeriesItem(userId, slug, schemaParse.data);
+    
+    // Notification für Follower erstellen (async, nicht blockierend)
+    const series = await prisma.reviewSeries.findUnique({
+      where: { slug, deletedAt: null },
+      select: { id: true },
+    });
+    if (series) {
+      createUserSeriesItemNotification(series.id, userId, [schemaParse.data.reviewId]).catch((err) =>
+        console.error("[Notification] Failed to create user series item notification:", err)
+      );
+    }
+    
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.error("POST /api/user/serien/[slug]/items error:", error);
