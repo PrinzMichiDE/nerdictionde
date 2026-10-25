@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET as getHomeRecommendations } from '@/app/api/recommendations/route';
 import { POST as dismissRecommendation } from '@/app/api/recommendations/dismiss/route';
 import { GET as getReviewRecommendations } from '@/app/api/reviews/[slug]/recommendations/route';
+import { ZodError } from 'zod';
 
 // Mock dependencies
 vi.mock('@/lib/session', () => ({
@@ -63,6 +64,17 @@ import {
   dismissRecommendationSchema,
 } from '@/lib/recommendation-schema';
 
+function createZodError<T>(fieldErrors: Record<string, string[]>): ZodError<T> {
+  const issues = Object.entries(fieldErrors).flatMap(([field, messages]) =>
+    messages.map((message) => ({
+      code: 'custom' as const,
+      message,
+      path: [field],
+    }))
+  );
+  return new ZodError(issues) as ZodError<T>;
+}
+
 describe('Recommendations API Routes', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -109,8 +121,8 @@ describe('Recommendations API Routes', () => {
       vi.mocked(getServerSession).mockResolvedValue({ userId: 'user1', username: 'test' });
       vi.mocked(recommendationsQuerySchema.safeParse).mockReturnValue({
         success: false,
-        error: { flatten: () => ({ fieldErrors: { limit: ['Invalid'] } }) },
-      } as any);
+        error: createZodError({ limit: ['Invalid'] }),
+      });
 
       const request = new Request('http://localhost/api/recommendations?limit=invalid');
       const response = await getHomeRecommendations(request);
@@ -194,8 +206,8 @@ describe('Recommendations API Routes', () => {
       vi.mocked(getServerSession).mockResolvedValue({ userId: 'user1', username: 'test' });
       vi.mocked(dismissRecommendationSchema.safeParse).mockReturnValue({
         success: false,
-        error: { flatten: () => ({ fieldErrors: { reviewId: ['Invalid'] } }) },
-      } as any);
+        error: createZodError({ reviewId: ['Invalid'] }),
+      });
 
       const request = new Request('http://localhost/api/recommendations/dismiss', {
         method: 'POST',
@@ -256,8 +268,8 @@ describe('Recommendations API Routes', () => {
     it('returns 400 for invalid query params', async () => {
       vi.mocked(reviewRecommendationsQuerySchema.safeParse).mockReturnValue({
         success: false,
-        error: { flatten: () => ({ fieldErrors: { limit: ['Invalid'] } }) },
-      } as any);
+        error: createZodError({ limit: ['Invalid'] }),
+      });
 
       const request = new Request('http://localhost/api/reviews/test/recommendations?limit=invalid');
       const response = await getReviewRecommendations(request, { params: Promise.resolve({ slug: 'test' }) });

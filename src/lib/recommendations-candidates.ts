@@ -4,6 +4,7 @@
 
 import prisma from '@/lib/prisma';
 import type { UserSignals, ReviewWithTags } from '@/types/recommendations';
+import type { Prisma } from '@prisma/client';
 
 export interface CandidateOptions {
   excludeIds?: Set<string>;
@@ -83,34 +84,36 @@ export async function getContentCandidates(
   }
 
   // Build where clause
-  const where: any = {
-    status: 'published',
-    id: { notIn: Array.from(excludeIds) },
-    OR: [],
-  };
+  const orConditions: Prisma.ReviewWhereInput[] = [];
 
   if (categories.size > 0) {
-    where.OR.push({ category: { in: Array.from(categories) } });
+    orConditions.push({ category: { in: Array.from(categories) } });
   }
   if (tagSlugs.size > 0) {
-    where.OR.push({
+    orConditions.push({
       tags: { some: { tag: { slug: { in: Array.from(tagSlugs) } } } },
     });
   }
   if (developers.size > 0) {
-    where.OR.push({
+    orConditions.push({
       metadata: { path: ['developer'], array_contains: Array.from(developers) },
     });
   }
   if (publishers.size > 0) {
-    where.OR.push({
+    orConditions.push({
       metadata: { path: ['publisher'], array_contains: Array.from(publishers) },
     });
   }
 
-  if (where.OR.length === 0) {
+  if (orConditions.length === 0) {
     return [];
   }
+
+  const where: Prisma.ReviewWhereInput = {
+    status: 'published',
+    id: { notIn: Array.from(excludeIds) },
+    OR: orConditions,
+  };
 
   const candidates = await prisma.review.findMany({
     where,
@@ -296,35 +299,36 @@ export async function getContentCandidatesForReview(
 ): Promise<ReviewWithTags[]> {
   const { excludeIds = new Set(), limit = 50 } = options;
 
-  const where: any = {
-    status: 'published',
-    id: { notIn: Array.from(excludeIds) },
-    OR: [],
-  };
-
-  // Same category
-  where.OR.push({ category: reviewSignals.category });
+  const orConditions: Prisma.ReviewWhereInput[] = [
+    { category: reviewSignals.category },
+  ];
 
   // Shared tags
   if (reviewSignals.tagSlugs.length > 0) {
-    where.OR.push({
+    orConditions.push({
       tags: { some: { tag: { slug: { in: reviewSignals.tagSlugs } } } },
     });
   }
 
   // Same developer
   if (reviewSignals.developer) {
-    where.OR.push({
+    orConditions.push({
       metadata: { path: ['developer'], equals: reviewSignals.developer },
     });
   }
 
   // Same publisher
   if (reviewSignals.publisher) {
-    where.OR.push({
+    orConditions.push({
       metadata: { path: ['publisher'], equals: reviewSignals.publisher },
     });
   }
+
+  const where: Prisma.ReviewWhereInput = {
+    status: 'published',
+    id: { notIn: Array.from(excludeIds) },
+    OR: orConditions,
+  };
 
   const candidates = await prisma.review.findMany({
     where,

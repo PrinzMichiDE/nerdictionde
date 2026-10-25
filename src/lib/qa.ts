@@ -9,6 +9,7 @@ import type {
   TwitchUser,
   Review,
   PrismaClient,
+  NotificationType,
 } from '@prisma/client';
 
 // Type für Transaktions-Client
@@ -695,7 +696,7 @@ export async function acceptAnswer(
 
 async function createQANotification(
   reviewId: string,
-  type: 'qa_new_question' | 'qa_answer_added' | 'qa_answer_accepted',
+  type: NotificationType,
   actorId: string,
   questionId: string,
   answerId?: string
@@ -741,7 +742,7 @@ async function createQANotification(
   await prisma.notification.create({
     data: {
       userId: targetUserId,
-      type: type as any,
+      type,
       title: titles[type],
       message: messages[type],
       data: {

@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/lib/session';
 import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { hardwareProfileInputSchema, hardwareProfileUpdateSchema, hardwareProfileResponseSchema } from '@/lib/hardware-compatibility-schema';
 import { revalidateTag } from 'next/cache';
 
@@ -95,7 +96,7 @@ export async function PATCH(request: NextRequest) {
     });
     
     const currentProfile = currentUser?.hardwareProfile as Record<string, unknown> | null;
-    const mergedProfile = { ...currentProfile, ...profileData };
+    const mergedProfile = { ...currentProfile, ...profileData } as Record<string, unknown>;
     
     const requiredFields = ['cpu', 'gpu', 'ram'];
     hasRequiredFields = requiredFields.every(field => mergedProfile[field] && String(mergedProfile[field]).trim().length > 0);
@@ -111,7 +112,7 @@ export async function PATCH(request: NextRequest) {
     const updatedUser = await prisma.twitchUser.update({
       where: { id: session.userId },
       data: {
-        hardwareProfile: mergedProfile as any,
+        hardwareProfile: mergedProfile as Prisma.InputJsonValue,
         hardwareProfileEnabled: data.enabled ?? true, // Default to enabled when saving profile
         hardwareProfileVersion: { increment: 1 },
       },
@@ -155,7 +156,7 @@ export async function DELETE() {
     await prisma.twitchUser.update({
       where: { id: session.userId },
       data: {
-        hardwareProfile: null as any,
+        hardwareProfile: Prisma.JsonNull,
         hardwareProfileEnabled: false,
         hardwareProfileVersion: { increment: 1 },
       },
