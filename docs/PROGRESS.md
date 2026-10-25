@@ -1113,8 +1113,39 @@
 
 ---
 
+### Zusammenfassung: Erweiterte Benachrichtigungs-Präferenzen — PKG-2 (Types & Zod-Schemas) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- `src/lib/notification-preferences-schema.ts` — Alle Zod-Schemas für Enhanced Notification Preferences API
+  - Preference Schemas: `preferenceUpdateItemSchema`, `preferenceBulkUpdateSchema`, `testNotificationSchema`, `userPreferencesResponseSchema`
+  - Mute Schemas: `muteCreateSchema`, `muteParamsSchema`, `userMutesResponseSchema`
+  - Push Subscription Schemas: `pushSubscriptionCreateSchema`, `pushSubscriptionResponseSchema`
+  - Query Schemas: `notificationListQuerySchema`
+  - Type Exports für alle Input/Response Types
+  - Feature-Flag Guard Funktionen: `checkEnhancedNotificationPrefsEnabled`, `checkNotificationMutesEnabled`, `checkPushNotificationsEnabled`
+  - `getDefaultPreferences()` Factory für Default-Werte (alle Types × 3 Channels)
+- `tests/lib/notification-preferences-schema.test.ts` — 34 Unit-Tests (alle grün)
+  - Preference Validation (Type, Channel, Frequency, Enabled, Defaults)
+  - Bulk Update Validation
+  - Test Notification Validation
+  - Mute Create/Params Validation
+  - Push Subscription Validation
+  - Query Schema Validation
+  - Default Preferences Factory Tests
+- Feature-Flag Check Functions in `src/lib/feature-flags.ts` exportiert
+- **Verifikation:** Type-Check ✅, Build ✅, Tests 825/825 ✅ (34 neue), Lint keine neuen Errors ✅
+
+**Dateien (neu):**
+- `src/lib/notification-preferences-schema.ts`
+- `tests/lib/notification-preferences-schema.test.ts`
+- `src/lib/feature-flags.ts` (Exports erweitert)
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
-**Aktuelles Feature:** **Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ → F4 PKG-1✅**  
-**Nächster Schritt:** **PKG-2: Types & Zod-Schemas** (`src/lib/notification-preferences-schema.ts`, Tests)
+**Aktuelles Feature:** **Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅**  
+**Nächster Schritt:** **PKG-3: Server Core Logic** (`src/lib/notification-preferences.ts`, `src/lib/notification-mutes.ts`, `src/lib/push-notifications.ts`, Tests)
 
