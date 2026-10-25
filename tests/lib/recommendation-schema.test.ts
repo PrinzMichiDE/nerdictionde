@@ -288,7 +288,7 @@ describe('Recommendation Schemas', () => {
     });
 
     it('validates without nextCursor', () => {
-      const { nextCursor, ...rest } = validResponse;
+      const { nextCursor: _nextCursor, ...rest } = validResponse;
       const result = recommendationsResponseSchema.safeParse(rest);
       expect(result.success).toBe(true);
     });

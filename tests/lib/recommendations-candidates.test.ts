@@ -28,7 +28,23 @@ const mockReviewFindMany = prisma.review.findMany as unknown as ReturnType<typeo
 const mockReviewFindUnique = prisma.review.findUnique as unknown as ReturnType<typeof vi.fn>;
 const mockUserRatingFindMany = prisma.userRating.findMany as unknown as ReturnType<typeof vi.fn>;
 
-const createMockReview = (overrides: Partial<any> = {}) => ({
+type ReviewOverrides = Partial<{
+  id: string;
+  slug: string;
+  title: string;
+  title_en: string | null;
+  category: string;
+  score: number;
+  images: string[];
+  metaDescription: string | null;
+  releaseDate: Date | null;
+  userRatingAvg: number | null;
+  userRatingCount: number | null;
+  metadata: Record<string, unknown> | null;
+  tags: Array<{ tag: { name: string; slug: string } }>;
+}>;
+
+const createMockReview = (overrides: ReviewOverrides = {}) => ({
   id: 'rev1',
   slug: 'test-review',
   title: 'Test Review',
@@ -102,7 +118,7 @@ describe('Recommendations Candidates', () => {
         ])
         .mockResolvedValueOnce([createMockReview({ id: 'candidate1' })]);
 
-      const result = await getContentCandidates(signals, {
+      await getContentCandidates(signals, {
         excludeIds: new Set(['candidate1']),
       });
 

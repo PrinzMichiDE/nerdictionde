@@ -10,7 +10,7 @@ import {
   determineStrategy,
   DEFAULT_SCORING_CONFIG,
 } from '@/lib/recommendations-scoring';
-import type { UserSignals, ReviewWithTags, RecommendationReason } from '@/types/recommendations';
+import type { UserSignals, ReviewWithTags } from '@/types/recommendations';
 
 const createMockReview = (overrides: Partial<ReviewWithTags> = {}): ReviewWithTags => ({
   id: 'rev1',

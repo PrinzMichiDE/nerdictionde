@@ -21,7 +21,7 @@ vi.mock('@/lib/prisma', () => ({
 }));
 
 vi.mock('next/cache', () => ({
-  unstable_cache: (fn: any) => fn,
+  unstable_cache: <T extends (...args: unknown[]) => unknown>(fn: T) => fn,
   revalidateTag: vi.fn(),
 }));
 
@@ -192,7 +192,7 @@ describe('category-subscriptions', () => {
       );
       // user_2 should not be in the notifications
       const callData = mockPrisma.notification.createMany.mock.calls[0][0].data;
-      expect(callData.map((d: any) => d.userId)).not.toContain('user_2');
+      expect(callData.map((d: { userId: string }) => d.userId)).not.toContain('user_2');
     });
 
     it('uses correct category labels', async () => {

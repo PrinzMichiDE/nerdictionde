@@ -1,14 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
-  getRecommendations,
-  getReviewRecommendations,
   getHomeRecommendationsCore,
   getDetailRecommendationsCore,
   dismissRecommendation,
   isDismissed,
   getDismissedReviewIds,
 } from '@/lib/recommendations';
-import type { RecommendationResult, RecommendationItem } from '@/types/recommendations';
 
 // Mock all dependencies
 vi.mock('@/lib/recommendations-signals', () => ({
@@ -272,7 +269,14 @@ describe('Recommendations Main Logic', () => {
 
   describe('dismissRecommendation', () => {
     it('creates dismiss record with expiry', async () => {
-      vi.mocked(prisma.recommendationDismiss.upsert).mockResolvedValue({} as any);
+      vi.mocked(prisma.recommendationDismiss.upsert).mockResolvedValue({
+        id: 'dismiss1',
+        userId: 'user1',
+        reviewId: 'review1',
+        reason: 'not_interested',
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      });
 
       await dismissRecommendation('user1', 'review1', 'not_interested');
 
@@ -294,7 +298,14 @@ describe('Recommendations Main Logic', () => {
     });
 
     it('uses default reason when not provided', async () => {
-      vi.mocked(prisma.recommendationDismiss.upsert).mockResolvedValue({} as any);
+      vi.mocked(prisma.recommendationDismiss.upsert).mockResolvedValue({
+        id: 'dismiss2',
+        userId: 'user1',
+        reviewId: 'review1',
+        reason: 'not_interested',
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      });
 
       await dismissRecommendation('user1', 'review1');
 
@@ -309,7 +320,14 @@ describe('Recommendations Main Logic', () => {
 
   describe('isDismissed', () => {
     it('returns true when dismissed', async () => {
-      vi.mocked(prisma.recommendationDismiss.findUnique).mockResolvedValue({ id: 'dismiss1' } as any);
+      vi.mocked(prisma.recommendationDismiss.findUnique).mockResolvedValue({
+        id: 'dismiss1',
+        userId: 'user1',
+        reviewId: 'review1',
+        reason: 'not_interested',
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      });
 
       const result = await isDismissed('user1', 'review1');
 
@@ -328,9 +346,23 @@ describe('Recommendations Main Logic', () => {
   describe('getDismissedReviewIds', () => {
     it('returns set of dismissed review IDs', async () => {
       vi.mocked(prisma.recommendationDismiss.findMany).mockResolvedValue([
-        { reviewId: 'rev1' },
-        { reviewId: 'rev2' },
-      ] as any);
+        {
+          id: 'dismiss1',
+          userId: 'user1',
+          reviewId: 'rev1',
+          reason: 'not_interested',
+          createdAt: new Date(),
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        },
+        {
+          id: 'dismiss2',
+          userId: 'user1',
+          reviewId: 'rev2',
+          reason: 'not_interested',
+          createdAt: new Date(),
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        },
+      ]);
 
       const result = await getDismissedReviewIds('user1');
 

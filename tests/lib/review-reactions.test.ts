@@ -24,8 +24,6 @@ const mockUpsert = vi.mocked(prisma.reviewReaction.upsert);
 const mockDelete = vi.mocked(prisma.reviewReaction.delete);
 const mockReviewFindUnique = vi.mocked(prisma.review.findUnique);
 
-const REACTION_TYPES: ReactionType[] = ['THUMBS_UP', 'HEART', 'PARTY', 'THINKING', 'CRY', 'ANGRY'];
-
 describe('review-reactions server logic', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -49,10 +47,10 @@ describe('review-reactions server logic', () => {
 
     it('aggregates counts correctly from groupBy result', async () => {
       mockGroupBy.mockResolvedValue([
-        { type: 'THUMBS_UP', _count: { type: 42 } },
-        { type: 'HEART', _count: { type: 12 } },
-        { type: 'PARTY', _count: { type: 5 } },
-      ] as any);
+        { type: 'THUMBS_UP', _count: { type: 42 } } as any,
+        { type: 'HEART', _count: { type: 12 } } as any,
+        { type: 'PARTY', _count: { type: 5 } } as any,
+      ]);
 
       const counts = await getReactionCounts('clx1234567890abcdefghijkl');
 
@@ -92,8 +90,8 @@ describe('review-reactions server logic', () => {
   describe('getReviewReactionsData', () => {
     it('combines counts and user reaction', async () => {
       mockGroupBy.mockResolvedValue([
-        { type: 'THUMBS_UP', _count: { type: 10 } },
-      ] as any);
+        { type: 'THUMBS_UP', _count: { type: 10 } } as any,
+      ]);
       mockFindUnique.mockResolvedValue({ type: 'THUMBS_UP' } as any);
 
       const data = await getReviewReactionsData('clx1234567890abcdefghijkl', 'user-1');
