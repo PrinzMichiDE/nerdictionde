@@ -3,7 +3,7 @@
 ## Stand (2026-10-25)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: **723/723 grün** (vitest), `lint`: **31 Errors** (alle `no-explicit-any` in externen Skills/Admin, nicht blockierend), 363 Warnings — keine neuen Errors
+- `type-check`: grün. `build`: grün. `tests`: **762/762 grün** (vitest), `lint`: **31 Errors** (alle `no-explicit-any` in externen Skills/Admin, nicht blockierend), 363 Warnings — keine neuen Errors
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
   1. Newsletter Double-Optin + Bestätigungsseite
@@ -42,8 +42,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Review-Serien für Nutzer** — **F1✅ F2✅ F3✅ → F4 PKG-1✅** (DB Migration & Models)  
-**Nächster Schritt:** **PKG-2: Types & Zod-Schemas** (`src/lib/user-series-schema.ts`)
+**Aktuelles Feature:** **Review-Serien für Nutzer** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅** (Types & Zod-Schemas)  
+**Nächster Schritt:** **PKG-3: Server Core Logic** (`src/lib/user-series.ts`)
 
 ---
 
@@ -492,6 +492,24 @@
 
 ---
 
+### Zusammenfassung: Review-Serien für Nutzer — PKG-2 (Types & Zod-Schemas) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- `src/lib/user-series-schema.ts` — Alle Zod-Schemas für User Series API
+  - Create/Update/Reorder/Item/Follow/Collaborator Schemas
+  - Extended `seriesListQuerySchema` mit `type`/`visibility`/`ownerId` Filtern
+  - Response Types: `PublicSeries`, `UserSeriesEditData`, `FollowStatus`, `Collaborators`
+- `tests/lib/user-series-schema.test.ts` — 39 Unit-Tests (alle grün)
+- Verifikation: Type-Check ✅, Build ✅, Tests 762/762 ✅
+
+**Dateien (neu):**
+- `src/lib/user-series-schema.ts`
+- `tests/lib/user-series-schema.test.ts`
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
 **Kandidaten (Typ D):**
@@ -655,6 +673,24 @@
 - `docs/features/review-series-user.md` (Feature Spec F2)
 - `docs/features/review-series-user-design.md` (Design & Plan F3)
 - `docs/ROADMAP.md`, `docs/DECISIONS.md`, `docs/PROGRESS.md` aktualisiert
+
+---
+
+### Zusammenfassung: Review-Serien für Nutzer — PKG-2 (Types & Zod-Schemas) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- `src/lib/user-series-schema.ts` — Alle Zod-Schemas für User Series API
+  - Create/Update/Reorder/Item/Follow/Collaborator Schemas
+  - Extended `seriesListQuerySchema` mit `type`/`visibility`/`ownerId` Filtern
+  - Response Types: `PublicSeries`, `UserSeriesEditData`, `FollowStatus`, `Collaborators`
+- `tests/lib/user-series-schema.test.ts` — 39 Unit-Tests (alle grün)
+- Verifikation: Type-Check ✅, Build ✅, Tests 762/762 ✅
+
+**Dateien (neu):**
+- `src/lib/user-series-schema.ts`
+- `tests/lib/user-series-schema.test.ts`
 
 ---
 
