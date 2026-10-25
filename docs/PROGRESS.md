@@ -522,6 +522,13 @@
 - Unit-Tests: `tests/lib/share-meta.test.ts` (28 Tests, alle grün)
 - Type-Check, Build, Tests (702 passed) grün
 
+**PKG-4 ✅:**
+- `src/app/api/share/track/route.ts`: POST Endpoint mit Zod-Validierung, Rate-Limit (30 req/min/IP), `keepalive` fetch
+- Batch-Insert via `prisma.shareEvent.createMany` (alle 30s), Counter-Increment auf `shareCounts` JSON
+- Feature-Flag Guard (`FEATURE_SOCIAL_SHARING`, `FEATURE_SHARE_TRACKING`)
+- Integration-Tests: `tests/api/share/track.test.ts` (9 Tests, alle grün)
+- Type-Check, Build, Tests (711 passed) grün
+
 ---
 
 ### Nächstes Feature (ROADMAP)

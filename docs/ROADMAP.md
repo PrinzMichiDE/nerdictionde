@@ -80,8 +80,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Social Sharing & Viral Loops** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅, PKG-3 ✅)**. Nächster Schritt: PKG-4 Share-Tracking API.
+**Social Sharing & Viral Loops** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅)**. Nächster Schritt: PKG-5 ShareButtons UI Komponente.
 
 ## Nächster Schritt
 
-F4 PKG-4: `/api/share/track` Route — POST mit Zod-Validierung, Rate-Limit (30 req/min/IP), `keepalive` fetch, Batch-Insert via `createMany`, Counter-Increment auf `shareCounts` JSON, Integration-Tests.
+F4 PKG-5: `components/ui/ShareButtons.tsx` — Zentrale Share-Komponente mit 3 Varianten (inline, dropdown, minimal), 6 Plattform-Icons (lucide-react), Mastodon Instance-Dialog, Copy-Link Toast, Accessibility (ARIA, Fokus), Dark Mode Support, Click-Handler mit Tracking.
