@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
 import { getServerSession } from "@/lib/session";
-import { checkEnhancedNotificationPrefsEnabled } from "@/lib/notification-preferences-schema";
 import { NotificationChannel, NotificationType } from "@prisma/client";
-import { shouldNotifyUser } from "@/lib/notification-preferences";
-import { sendPushToUser } from "@/lib/push-notifications";
+import { checkEnhancedNotificationPrefsEnabled } from "@/lib/notification-preferences-schema";
 import { rateLimit } from "@/lib/rate-limit";
+import { shouldNotifyUser } from "@/lib/notification-preferences";
 import { createNotification } from "@/lib/notifications";
+import { sendPushToUser } from "@/lib/push-notifications";
+import prisma from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
 /**
  * POST /api/user/notification-preferences/test
- * Sends a test notification via the specified channel
+ * Sends a test notification to the authenticated user
  * Body: { channel: NotificationChannel, type?: NotificationType }
+ * Response: { sent: boolean, channel: string, type?: string, reason?: string }
  */
 export async function POST(req: NextRequest) {
   try {
@@ -38,70 +39,102 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Ungültige Daten" }, { status: 400 });
   }
 
-  const channel = body.channel as NotificationChannel;
-  const type = body.type as NotificationType | undefined;
+  const { channel, type } = body;
 
-  if (!Object.values(NotificationChannel).includes(channel)) {
-    return NextResponse.json({ error: `Ungültiger Channel: ${channel}` }, { status: 400 });
+  // Validate channel
+  if (!channel || !Object.values(NotificationChannel).includes(channel as NotificationChannel)) {
+    return NextResponse.json({ error: "Ungültiger Channel" }, { status: 400 });
+  }
+  const validChannel = channel as NotificationChannel;
+
+  // Validate type
+  if (type && !Object.values(NotificationType).includes(type as NotificationType)) {
+    return NextResponse.json({ error: `Ungültiger NotificationType: ${type}` }, { status: 400 });
   }
 
-  // Default type for test
-  const testType = type || "review_published";
+  // Use a default type if not specified
+  const notificationType = (type as NotificationType) || "review_published";
 
-  // Check if user would actually receive this notification
-  const wouldNotify = await shouldNotifyUser(session.userId, testType, channel);
-  if (!wouldNotify) {
-    return NextResponse.json({
-      sent: false,
-      reason: "Preference disabled or muted",
-    }, { status: 200 });
-  }
+  // Human-readable channel names for messages
+  const channelLabels: Record<NotificationChannel, string> = {
+    IN_APP: "In-App",
+    EMAIL: "E-Mail",
+    PUSH: "Push",
+  };
+
+  const channelLabel = channelLabels[validChannel] || validChannel;
 
   try {
-    let sent = false;
+    // Check if user should be notified for this channel/type
+    const shouldNotify = await shouldNotifyUser(session.userId, notificationType, validChannel);
 
-    switch (channel) {
+    if (!shouldNotify) {
+      return NextResponse.json({
+        sent: false,
+        reason: "Preference disabled or muted",
+      });
+    }
+
+    // Send notification based on channel
+    switch (validChannel) {
       case NotificationChannel.IN_APP: {
-        // Create a test In-App notification
         await createNotification({
           userId: session.userId,
-          type: testType,
+          type: notificationType,
           title: "Test-Benachrichtigung",
-          message: "Dies ist eine Test-Benachrichtigung für In-App.",
+          message: `Dies ist eine Test-Benachrichtigung für ${channelLabel}.`,
           data: { test: true },
         });
-        sent = true;
-        break;
+        return NextResponse.json({
+          sent: true,
+          channel: "IN_APP",
+          type: notificationType,
+        });
       }
+
       case NotificationChannel.EMAIL: {
-        // Send test email - fetch user email from DB
+        // For test, just check if user has email
         const user = await prisma.twitchUser.findUnique({
           where: { id: session.userId },
           select: { email: true },
         });
-        if (user?.email) {
-          // In a real implementation, this would send an email via Resend/nodemailer
-          // For now, we log and return success (email sending not implemented in MVP)
-          console.log(`[TestNotification] Would send test email to ${user.email}`);
-        }
-        sent = true;
-        break;
-      }
-      case NotificationChannel.PUSH: {
-        // Send test push
-        const pushSent = await sendPushToUser(session.userId, {
-          title: "Test-Benachrichtigung",
-          body: "Dies ist eine Test-Benachrichtigung für Push.",
-          url: "/einstellungen/benachrichtigungen",
-        });
-        sent = pushSent > 0;
-        break;
-      }
-    }
 
-    return NextResponse.json({ sent, channel, type: testType });
+        if (!user?.email) {
+          return NextResponse.json({
+            sent: false,
+            reason: "No email configured",
+          });
+        }
+
+        // In a real implementation, this would send an email
+        // For now, we just log and return success
+        console.log(`[Test] Would send email to ${user.email} for ${notificationType}`);
+        return NextResponse.json({
+          sent: true,
+          channel: "EMAIL",
+          type: notificationType,
+        });
+      }
+
+      case NotificationChannel.PUSH: {
+        const pushPayload = {
+          title: "Test-Benachrichtigung",
+          body: `Dies ist eine Test-Benachrichtigung für ${channelLabel}.`,
+          url: "/einstellungen/benachrichtigungen",
+        };
+        const sent = await sendPushToUser(session.userId, pushPayload);
+        return NextResponse.json({
+          sent: sent > 0,
+          channel: "PUSH",
+          type: notificationType,
+        });
+      }
+
+      default:
+        return NextResponse.json({ error: "Ungültiger Channel" }, { status: 400 });
+    }
   } catch (err) {
-    console.error("[NotificationTest] Failed:", err);
+    console.error("[NotificationPreferences] Test failed:", err);
     return NextResponse.json({ error: "Test fehlgeschlagen" }, { status: 500 });
   }
 }

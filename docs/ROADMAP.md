@@ -63,7 +63,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] **Review-Template-System** — Vordefinierte Review-Strukturen (Pro/Contra, Score-Kategorien, Checkliste) für Autoren; Konsistenz, schnellere Erstellung, SEO-Vorteil durch strukturierte Daten. Hoher Nutzen (Qualität, Effizienz), mittlerer Aufwand (Editor-Erweiterung, Templates als JSON, Validierung). **← erledigt (F1–F12 ✅)**
 - [x] **Social Sharing & Viral Loops** — One-Click Share für Reviews/Listen/Serien (Twitter/X, Bluesky, Mastodon, Reddit, Discord, Link-Kopie); OG/Twitter Cards optimieren; Share-Statistiken. Hoher Nutzen (Traffic, Markenbekanntheit), niedriger Aufwand (bestehende Share-Buttons erweitern, Meta-Tags). **← erledigt (F1–F9 ✅)**
 - [x] **Review-Serien für Nutzer (nicht nur Admin)** — Nutzer können eigene Serien erstellen (z.B. "Meine Top 10 RPGs 2024"), öffentlich/privat, kollaborativ. Hoher Nutzen (Community, UGC), mittlerer Aufwand (bestehende Series-Model wiederverwenden, UI für Erstellung). **← erledigt (F1–F9 ✅)**
-- [ ] **Erweiterte Benachrichtigungs-Präferenzen** — Granulare Einstellungen pro Kategorie/Typ (Push, E-Mail, In-App, Digest), Frequenz (sofort, täglich, wöchentlich), Stumm-Schaltung pro Objekt. Hoher Nutzen (Retention, Kontrolle), mittlerer Aufwand (Prefs-Model, Digest-Cron, UI).
+- [x] **Erweiterte Benachrichtigungs-Präferenzen** — Granulare Einstellungen pro Kategorie/Typ (Push, E-Mail, In-App, Digest), Frequenz (sofort, täglich, wöchentlich), Stumm-Schaltung pro Objekt. Hoher Nutzen (Retention, Kontrolle), mittlerer Aufwand (Prefs-Model, Digest-Cron, UI). **← erledigt (F1–F9 ✅)**
 - [ ] **Review-Embed für externe Sites** — Einbettbarer Widget-Code (`<script>` + `<div>`) für Reviews/Listen/Serien; Responsive, Themeable, No-Cookie. Hoher Nutzen (Distribution, Backlinks), mittlerer Aufwand (neuer Endpunkt, Widget-React-App, CSP).
 - [ ] **Dark Mode System-Präferenz Sync** — Automatische Erkennung (`prefers-color-scheme`), Sync mit User-Setting, keine Flash-of-wrong-theme. Mittlerer Nutzen (UX), niedriger Aufwand (Cookie/LocalStorage, Script im `<head>`).
 - [ ] **Barrierefreiheits-Audit & Zertifizierung** — Vollständiger axe-core CI, WCAG 2.1 AA Checkliste, Screenreader-Tests, Tastatur-Navigation aller Flows. Hoher Nutzen (Inklusion, Legal), hoher Aufwand (Audit, Fixes, Regression-Tests).
@@ -80,9 +80,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ F4✅ F5✅ (PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅ PKG-5✅)**  
-**Nächster Schritt:** **PKG-6: Cron Job für Digest** (Täglich/Wöchentlich Digest-E-Mails & Push versenden) + **PKG-7: UI Einstellungen-Seite** (`/einstellungen/benachrichtigungen` mit Tabs für Preferences, Mutes, Push)
+**Nächste Auswahl ausstehend** — Nach Abschluss von "Erweiterte Benachrichtigungs-Präferenzen" wartet die Hauptschleife auf die nächste Feature-Auswahl (Typ D).
 
 ### Nächste Schritte
 
-PKG-6 und PKG-7 für Erweiterte Benachrichtigungs-Präferenzen implementieren.
+Hauptschleife: Nach 2 erledigten Typ A/B/C Aufgaben folgt ein neues Feature (D). Roadmap-Kandidaten prüfen und bestes Nutzen-Aufwand-Verhältnis wählen.

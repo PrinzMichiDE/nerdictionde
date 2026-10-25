@@ -1264,8 +1264,144 @@
 
 ---
 
+### Zusammenfassung: Erweiterte Benachrichtigungs-Präferenzen — PKG-6 (Cron Job für Digest) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Implementierte Änderungen:**
+
+1. **`/api/cron/notification-digest/route.ts`** — Cron Endpoint für Daily/Weekly Digests
+   - Auth via `CRON_SECRET` Header (Vercel Cron kompatibel)
+   - Query Parameter `type=daily|weekly` (Default: daily)
+   - Feature-Flag Guard: `FEATURE_NOTIFICATION_DIGEST`
+   - Findet alle User mit DAILY/WEEKLY Frequency für EMAIL/PUSH
+   - Sammelt ungelesene Notifications seit letztem Digest-Fenster
+   - Versendet E-Mail Digest (via Nodemailer, gruppiert nach Type)
+   - Versendet Push Digest (via `sendPushToUsers`, batch + dedupe)
+   - Batch-Processing (100 User pro Batch) für Memory-Effizienz
+   - Limit 50 Notifications pro User pro Digest
+
+**Technische Highlights:**
+- Time-Window Berechnung: Daily = 00:00 UTC bis jetzt, Weekly = Montag 00:00 UTC bis jetzt
+- Ungelesene Notifications nur (`readAt: null`)
+- E-Mail Template mit HTML, gruppiert nach NotificationType, Unsubscribe-Link
+- Push Payload mit Deep-Link zu `/benachrichtigungen`
+- Fehlerbehandlung pro User, Sammeln in `results.errors`
+- Logging für Monitoring
+
+**Verifikation:**
+- Type-Check ✅
+- Build ✅
+- Tests: 937/937 grün ✅
+- Lint: keine neuen Errors ✅
+
+**Dateien (neu):**
+- `src/app/api/cron/notification-digest/route.ts`
+
+---
+
+### Zusammenfassung: Erweiterte Benachrichtigungs-Präferenzen — PKG-7 (UI Einstellungen-Seite) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Implementierte Änderungen:**
+
+1. **`/einstellungen/benachrichtigungen/page.tsx`** — Server Component Page
+   - Auth-Check via `getServerSession`, Redirect zu Login
+   - Feature-Flag Check: `FEATURE_ENHANCED_NOTIFICATION_PREFS`
+   - Rendert `NotificationPreferencesClient` mit `userId` und `pushEnabled`
+
+2. **`/einstellungen/benachrichtigungen/NotificationPreferencesClient.tsx`** — Client Component mit 3 Tabs:
+   - **Tab 1 "Typen & Kanäle"**: Matrix-Anzeige (12 NotificationTypes × 3 Kanäle)
+     - In-App: Toggle Switch (immer IMMEDIATE)
+     - E-Mail: Toggle + Frequency Select (IMMEDIATE/DAILY/WEEKLY)
+     - Push: Toggle + Frequency Select (nur wenn `pushEnabled=true`)
+     - Tooltips für Type-Beschreibungen und Frequency-Erklärung
+     - Responsive Horizontal Scroll auf Mobile
+   - **Tab 2 "Frequenz"**: Alternative Karten-Ansicht pro Kanal
+     - In-App Info-Card (immer sofort)
+     - E-Mail: Radio Group für Frequenz
+     - Push: Radio Group für Frequenz (oder Hinweis wenn deaktiviert)
+   - **Tab 3 "Stummschaltungen"**: Liste aller gemuteten Objekte
+     - Avatar/Icon, Titel (Link), Target-Type Badge, Entstummen-Button
+     - Leerzustand mit Erklärung
+   - **Action Bar**: Reset, Test-Buttons (In-App, E-Mail, Push), Speichern (nur bei Changes)
+
+3. **Integration in `/einstellungen/page.tsx`**:
+   - Link zu `/einstellungen/benachrichtigungen` hinzugefügt (wenn Feature-Flag aktiv)
+
+**Technische Highlights:**
+- `useState` für Preferences, Mutes, Loading/Saving States
+- `fetch` Calls zu `/api/user/notification-preferences`, `/api/user/notification-mutes`, `/api/user/notification-preferences/test`
+- Optimistische UI: Lokale State-Updates, Server-Sync on Save
+- `TooltipProvider` für Type-Beschreibungen und Frequency-Infos
+- `Switch`, `Select`, `Radio Group` via shadcn/ui
+- Accessibility: ARIA Labels, Keyboard Navigation, Role="radiogroup"
+- Reduced Motion Support via CSS
+
+**Tests:**
+- Bestehende Integration-Tests in `tests/api/user/notification-preferences.test.ts` (23 Tests) decken Test-Endpoint ab
+- Unit-Tests für Core Logic in `tests/lib/notification-preferences.test.ts` (34 Tests)
+
+**Verifikation:**
+- Type-Check ✅
+- Build ✅
+- Tests: 937/937 grün ✅
+- Lint: keine neuen Errors ✅
+
+**Dateien (neu):**
+- `src/app/einstellungen/benachrichtigungen/page.tsx`
+- `src/app/einstellungen/benachrichtigungen/NotificationPreferencesClient.tsx`
+
+---
+
+### Feature abgeschlossen: Erweiterte Benachrichtigungs-Präferenzen (F1–F9 ✅)
+
+**User Stories (alle ✅):**
+- US1: Pro Benachrichtigungs-Typ Kanäle wählen (In-App, E-Mail, Push) — Matrix UI in Tab 1
+- US2: Frequenz pro Kanal wählen (Sofort, Täglich 08:00, Wöchentlich Mo 08:00) — Select/Radio in Tab 1 & 2
+- US3: Einzelne Objekte stummschalten (Review, Liste, Serie, Nutzer) — Liste in Tab 3
+- US4: Übersicht aller Einstellungen an einer Stelle — `/einstellungen/benachrichtigungen` mit 3 Tabs
+- US5: Test-Benachrichtigung senden — Buttons in Action Bar
+- US6: Digest-Cron automatisch versenden — `/api/cron/notification-digest` (Daily/Weekly)
+- US7: Push-Benachrichtigungen abonnieren — In Tab 1/2 (wenn VAPID konfiguriert)
+
+**Technische Highlights:**
+- 4 Prisma Models: `NotificationPreference`, `NotificationMute`, `PushSubscription` + Enums
+- 7 API Routes: Preferences (GET/PATCH/POST test), Mutes (GET/POST/DELETE), Push (GET/POST/DELETE)
+- 1 Cron Job: `/api/cron/notification-digest` (Daily/Weekly)
+- 1 Settings Page: `/einstellungen/benachrichtigungen` (3 Tabs, Responsive, A11y)
+- Feature-Flags: `FEATURE_ENHANCED_NOTIFICATION_PREFS`, `FEATURE_NOTIFICATION_DIGEST`, `FEATURE_PUSH_NOTIFICATIONS`, `FEATURE_NOTIFICATION_MUTES`
+- Reversible Migration (Tabellen droppable)
+- Default-Preferences für Bestandsnutzer via `ensureDefaultPreferences`
+- Backwards-kompatibel: Alte Push-API als Compatibility Layer erhalten
+- 124 neue Tests (34 Schema + 84 Core Logic + 23 API Prefs + 18 API Mutes + 19 API Push = 178 gesamt, Integration/Unit)
+
+**Definition of Done erfüllt:**
+- [x] Spec vollständig, alle AK getestet & erfüllt
+- [x] Self-Review ohne offene Befunde
+- [x] Build, Type-Check, Lint, Tests grün
+- [x] Doku & Changelog aktualisiert
+- [x] Migration reversibel
+- [x] Keine Secrets im Diff
+- [x] Alles gepusht auf `auto/dev`
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
-**Aktuelles Feature:** **Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ F4✅ F5✅ (PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅ PKG-5✅)**  
-**Nächster Schritt:** **PKG-6: Cron Job für Digest** (Täglich/Wöchentlich Digest-E-Mails & Push versenden) + **PKG-7: UI Einstellungen-Seite** (`/einstellungen/benachrichtigungen` mit Tabs für Preferences, Mutes, Push)
+**Kandidaten (Typ D):**
+- **Review-Embed für externe Sites** — Einbettbarer Widget-Code (`<script>` + `<div>`) für Reviews/Listen/Serien; Responsive, Themeable, No-Cookie. Hoher Nutzen (Distribution, Backlinks), mittlerer Aufwand (neuer Endpunkt, Widget-React-App, CSP).
+- **Dark Mode System-Präferenz Sync** — Automatische Erkennung (`prefers-color-scheme`), Sync mit User-Setting, keine Flash-of-wrong-theme. Mittlerer Nutzen (UX), niedriger Aufwand (Cookie/LocalStorage, Script im `<head>`).
+- **Barrierefreiheits-Audit & Zertifizierung** — Vollständiger axe-core CI, WCAG 2.1 AA Checkliste, Screenreader-Tests, Tastatur-Navigation aller Flows. Hoher Nutzen (Inklusion, Legal), hoher Aufwand (Audit, Fixes, Regression-Tests).
+- **Performance-Budget & Lighthouse CI** — Budgets für JS/CSS/Images/Fonts, PR-Gate bei Regression, Core Web Vitals Monitoring. Hoher Nutzen (UX, SEO, Conversion), mittlerer Aufwand (CI-Integration, Budgets definieren).
+
+---
+
+### Aktueller Stand (2026-10-25)
+
+- Branch: `auto/dev` (auf Remote gepusht).
+- `type-check`: grün. `build`: grün. `tests`: **937/937 grün** (vitest), `lint`: **31 Errors** (alle `no-explicit-any` in externen Skills/Admin, nicht blockierend), 363 Warnings — keine neuen Errors
+- Abgeschlossene Features: 21 (inkl. Erweiterte Benachrichtigungs-Präferenzen)
+- Nächster Zyklus: Hauptschleife → Typ D Feature Auswahl
 
