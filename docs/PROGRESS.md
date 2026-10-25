@@ -3,7 +3,7 @@
 ## Stand (2026-10-25)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: **525/525 grün** (vitest), `lint`: **0 Errors** (nur Warnings in externen Skills/Admin), 236 Warnings — keine neuen Errors
+- `type-check`: grün. `build`: grün. `tests`: **628/628 grün** (vitest), `lint`: **0 Errors** (nur Warnings in externen Skills/Admin), 236 Warnings — keine neuen Errors
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
   1. Newsletter Double-Optin + Bestätigungsseite
@@ -22,6 +22,7 @@
   14. **Review-Vergleich erweitern** (`/reviews/vergleichen`, bis 3 Reviews, Specs, Preisverlauf, Screenshots/Video, ScoreCompare, Share, Feature-Flag)
   15. **Review-Serien / Multi-Part Reviews** (`/serien`, `/serien/[slug]`, Admin-UI `/admin/serien`, Drag-and-Drop-Reorder, Review-Detail Badge, Review-Card Badge, Search-API Erweiterung, Feature-Flag)
   16. **Community Q&A auf Reviews** (`/reviews/[slug]`, Fragen & Antworten, Upvote/Downvote, Accepted Answer, Notifications, Feature-Flag)
+  17. **Personalisierte Empfehlungen** (`/`, `/reviews/[slug]`, Content-Based + Collaborative + Trending, MMR-Diversifizierung, Begründungen, Dismiss, Feature-Flag, Settings Toggle)
 - Abgeschlossene Typ-A-Aufgaben (diese Iteration):
   - Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
   - `no-explicit-any` Bereinigung gestartet: 150+/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
@@ -36,8 +37,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Community Q&A auf Reviews** — **F1–F12 ✅ (Abgeschlossen)**  
-**Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ D: Personalisierte Empfehlungen, Hardware-Kompatibilität)
+**Aktuelles Feature:** **Personalisierte Empfehlungen** — **F1–F12 ✅ (Abgeschlossen)**  
+**Phase:** Hauptschleife → Nächstes Feature aus ROADMAP wählen (Typ D: Hardware-Kompatibilität)
 
 ---
 
@@ -370,10 +371,58 @@
 - [x] Keine Secrets im Diff
 - [x] Alles gepusht auf `auto/dev`
 
+- [x] Migration reversibel
+- [x] Keine Secrets im Diff
+- [x] Alles gepusht auf `auto/dev`
+
+---
+
+### Zusammenfassung: Personalisierte Empfehlungen (Abgeschlossen 2026-10-25)
+
+**Implementierte User Stories (alle ✅):**
+- US1: "Für dich empfohlen" auf Startseite (`/`) — Grid 2/3/4 Spalten, 5–10 Empfehlungen, Begründungen pro Karte, Dismiss-Button, nur für eingeloggte Nutzer
+- US2: "Auch interessant" auf Review-Detailseiten (`/reviews/[slug]`) — Horizontal scrollbar (Mobile) / Grid (Desktop), 3–5 Empfehlungen, Begründungen, Content-Based
+- US3: Dismiss-Funktion — Pro Empfehlung dismissbar (Nicht interessant / Bereits gelesen / Nicht relevant), persistiert 30 Tage, optimistische UI
+- US4: Begründungen — Badge pro Karte: "Weil du X bewertet hast", "Ähnlich zu Y", "Beliebt in Kategorie Z", "Von Entwickler X", "Trending"
+- US5: Cold-Start Fallback — Trending + Kategorie-Mix für Nutzer ohne Signale
+- US6: Einstellungen Toggle — In `/einstellungen` abschaltbar (API `GET/POST /api/user/recommendations-preference`)
+
+**Technische Highlights:**
+- Content-Based (Tags, Kategorie, Developer/Publisher), User-User Collaborative (Follows), Item-Item Collaborative (Co-Occurrence), Trending (Views × Rating)
+- MMR (Maximal Marginal Relevance) für Diversität (lambda=0.3)
+- Gewichte konfigurierbar: Content 40%, User-User 30%, Item-Item 20%, Trending 10%
+- Cold-Start: Category-Subscriptions → Top-Rated pro Kategorie, sonst Trending-Mix
+- `unstable_cache`: Home 5 Min (`recommendations:home:{userId}`), Detail 15 Min (`recommendations:detail:{reviewId}`), Signals 5 Min
+- Cache-Invaliderung via Tags bei Rating/Bookmark/Follow/ReadingHistory/CategorySub/Dismiss
+- Prisma Model `RecommendationDismiss` + `personalizedRecommendationsEnabled` auf `TwitchUser`
+- Feature-Flag `FEATURE_PERSONALIZED_RECOMMENDATIONS` (Default: `true`)
+- 122 neue Tests (Unit: Signals, Candidates, Scoring, MMR, Reason, Dismiss; Integration: API Routes; E2E: Hooks, Dismiss, Toggle)
+- Reversible Migration `RecommendationDismiss` Tabelle
+
+**Dateien (neu/geändert):**
+- `prisma/schema.prisma` (RecommendationDismiss Model, TwitchUser.personalizedRecommendationsEnabled)
+- `src/types/recommendations.ts`, `src/lib/recommendation-schema.ts`
+- `src/lib/recommendations-signals.ts`, `src/lib/recommendations-candidates.ts`, `src/lib/recommendations-scoring.ts`, `src/lib/recommendations.ts`
+- `src/app/api/recommendations/route.ts`, `src/app/api/recommendations/dismiss/route.ts`, `src/app/api/reviews/[slug]/recommendations/route.ts`, `src/app/api/user/recommendations-preference/route.ts`
+- `src/hooks/useRecommendations.ts`
+- `src/components/recommendations/` (RecommendationCard, RecommendationSkeleton, RecommendationsSection, ReviewRecommendations, PersonalizedRecommendationsToggle)
+- `src/app/page.tsx` (RecommendationsSection Integration), `src/app/reviews/[slug]/page.tsx` (ReviewRecommendations Integration), `src/app/einstellungen/page.tsx` (Toggle)
+- `src/app/api/user/recommendations-preference/route.ts`
+- Tests: `tests/lib/recommendation-schema.test.ts`, `tests/lib/recommendations-signals.test.ts`, `tests/lib/recommendations-candidates.test.ts`, `tests/lib/recommendations-scoring.test.ts`, `tests/lib/recommendations.test.ts`, `tests/hooks/useRecommendations.test.ts`, `tests/app/api/recommendations.test.ts`
+- Doku: `CHANGELOG.md`, `README.md`, `ROADMAP.md`, `.env.example`, `docs/features/personalized-recommendations.md`, `docs/features/personalized-recommendations-design.md`, `docs/PROGRESS.md`
+
+**Definition of Done erfüllt:**
+- [x] Spec vollständig, alle AK getestet & erfüllt
+- [x] Self-Review ohne offene Befunde
+- [x] Build, Type-Check, Lint, Tests grün
+- [x] Doku & Changelog aktualisiert
+- [x] Migration reversibel
+- [x] Keine Secrets im Diff
+- [x] Alles gepusht auf `auto/dev`
+
 ---
 
 ### Nächstes Feature (ROADMAP)
 
 **Kandidaten (Typ D):**
-- Personalisierte Empfehlungen
 - Hardware-Kompatibilitäts-Check

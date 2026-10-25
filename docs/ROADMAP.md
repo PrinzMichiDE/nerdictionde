@@ -53,7 +53,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] **Review-Vergleich erweitern** — `/reviews/vergleichen` existiert; Side-by-Side: Specs, Pros/Cons, Score, Preisverlauf, Screenshots; URL-teilarbeit (`?ids=slug1,slug2,slug3`). Mittlerer Nutzen (Kaufentscheidung), mittlerer Aufwand (UI, State, Sharing). **← erledigt (F1–F9 ✅)**
 - [x] **Community Q&A auf Reviews** — Fragen & Antworten pro Review (StackOverflow-light), Upvote/Downvote, Akzeptierte Antwort, Benachrichtigung Autor. Hoher Nutzen (Community, SEO durch UGC), mittlerer Aufwand (Models, Threading, Moderation, UI). **← erledigt (F1–F12 ✅)**
 - [x] **Review Collections Follow** — Nicht nur User folgen, sondern Listen folgen; Feed zeigt neue Items gefolzter Listen; Benachrichtigung bei Änderungen. Mittlerer Nutzen (Entdeckung), niedriger Aufwand (bestehende Follow/Notification-Infrastruktur wiederverwenden). **← erledigt (F1–F13 ✅)**
-- [ ] **Personalisierte Empfehlungen** — "Für dich empfohlen" auf Startseite/Reviews basierend auf Ratings, Bookmarks, Follows, Leseverlauf, Kategorien. Sehr hoher Nutzen (Retention, Entdeckung), hoher Aufwand (ML/Heuristik, Caching, A/B-Testbarkeit).
+- [x] **Personalisierte Empfehlungen** — "Für dich empfohlen" auf Startseite/Reviews basierend auf Ratings, Bookmarks, Follows, Leseverlauf, Kategorien. Sehr hoher Nutzen (Retention, Entdeckung), hoher Aufwand (ML/Heuristik, Caching, A/B-Testbarkeit). **← erledigt (F1–F12 ✅)**
 - [ ] **Hardware-Kompatibilitäts-Check** — User hinterlegt PC-Specs (CPU, GPU, RAM); Review zeigt "Läuft auf deinem System" Badge + geschätzte FPS. Hoher Nutzen (Kaufentscheidung Hardware), hoher Aufwand (Specs-Parsing, Benchmark-DB, User-Profil-Erweiterung).
 - [ ] **Erweiterte Suchfilter** — Preisrange, Release-Datum-Range, Score-Range, Plattform (PC/PS5/Xbox), Genre-Multi-Select, "Nur mit Video", "Nur mit Preisverlauf". Mittlerer Nutzen (Präzision), niedriger Aufwand (UI + API-Parameter, bestehende Search-Relevanz nutzen).
 - [x] **Review-Serien / Multi-Part Reviews** — Zusammengehörige Reviews (Base Game + DLCs, Staffel-Reviews), Navigation zwischen Teilen, gemeinsamer Score. Mittlerer Nutzen (Struktur), mittlerer Aufwand (Model-Erweiterung, UI). **← erledigt (F1–F9 ✅)**
@@ -69,7 +69,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-Keines — **Community Q&A auf Reviews abgeschlossen (F1–F12 ✅)**. Nächstes Feature aus ROADMAP wählen (Typ D: Personalisierte Empfehlungen, Hardware-Kompatibilität).
+Keines — **Personalisierte Empfehlungen abgeschlossen (F1–F12 ✅)**. Nächstes Feature aus ROADMAP wählen (Typ D: Hardware-Kompatibilität).
 
 ## Nächster Schritt
 

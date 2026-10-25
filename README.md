@@ -146,6 +146,8 @@ Kernmodelle in `prisma/schema.prisma`:
 - **ReviewQA** – Fragen zu Reviews (Titel, Body, Status, Score, Answer-Count, Accepted-Answer-Ref, Author, Timestamps, Soft-Delete)
 - **QAAnswer** – Antworten auf Fragen (Body, Score, isAccepted, Author, Timestamps, Soft-Delete)
 - **QAVote** – Votes auf Fragen/Antworten (User, Question/Answer-Ref, Value +1/-1, Unique-Constraints)
+- **RecommendationDismiss** – Abgelehnte Empfehlungen pro Nutzer (User+Review-Ref, Grund, Ablaufdatum 30 Tage), Unique-Constraint pro User+Review
+- **TwitchUser** (Erweitert) – `personalizedRecommendationsEnabled` (Default `true`) für Opt-in-Status bei personalisierten Empfehlungen
 
 ## Entwicklung
 

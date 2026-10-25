@@ -363,6 +363,7 @@ model TwitchUser {
   tokenExpiresAt        DateTime?
   broadcasterType       String?
   readingHistoryEnabled Boolean   @default(false) @map("reading_history_enabled")
+  personalizedRecommendationsEnabled Boolean @default(true) @map("personalized_recommendations_enabled")
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 

@@ -6,7 +6,8 @@ import { getSiteUrl } from "@/lib/seo";
 import { ArrowLeft, Settings as SettingsIcon } from "lucide-react";
 import { PushNotificationManager } from "@/components/pwa/PushNotificationManager";
 import { ReadingHistoryPrivacyToggle } from "@/components/reading-history/ReadingHistoryPrivacyToggle";
-import { FEATURE_CATEGORY_SUBSCRIPTIONS } from "@/lib/feature-flags";
+import { PersonalizedRecommendationsToggle } from "@/components/recommendations";
+import { FEATURE_CATEGORY_SUBSCRIPTIONS, FEATURE_PERSONALIZED_RECOMMENDATIONS } from "@/lib/feature-flags";
 
 export const metadata: Metadata = {
   title: "Einstellungen - Nerdiction",
@@ -65,6 +66,16 @@ export default async function SettingsPage() {
         <h2 className="mb-4 font-serif text-xl font-semibold">Datenschutz</h2>
         <ReadingHistoryPrivacyToggle />
       </section>
+
+      {FEATURE_PERSONALIZED_RECOMMENDATIONS && (
+        <section className="rounded-lg border border-border bg-card p-6">
+          <h2 className="mb-4 font-serif text-xl font-semibold">Personalisierte Empfehlungen</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Erhalte auf der Startseite und in Reviews Empfehlungen, die auf deinen Bewertungen, Lesezeichen, Follows und deinem Leseverlauf basieren.
+          </p>
+          <PersonalizedRecommendationsToggle />
+        </section>
+      )}
     </div>
   );
 }
