@@ -41,8 +41,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Social Sharing & Viral Loops** — **F1 ✅, F2 ✅, F3 ✅**  
-**Phase:** F4 Implementierung — **PKG-8: Tests, Doku & Rollout**
+**Aktuelles Feature:** **Social Sharing & Viral Loops** — **F1–F9 ✅ (abgeschlossen 2026-10-25)**  
+**Nächstes Feature:** **Review-Serien für Nutzer** (Typ D) — F1 Auswahl, F2 Spec, F3 Design
 
 ---
 
@@ -474,7 +474,12 @@
 ### Nächstes Feature (ROADMAP)
 
 **Kandidaten (Typ D):**
-- Hardware-Kompatibilitäts-Check
+- **Review-Serien für Nutzer** — Nutzer können eigene Serien erstellen (z.B. "Meine Top 10 RPGs 2024"), öffentlich/privat, kollaborativ. Hoher Nutzen (Community, UGC), mittlerer Aufwand (bestehende Series-Model wiederverwenden, UI für Erstellung).
+- Erweiterte Benachrichtigungs-Präferenzen — Granulare Einstellungen pro Kategorie/Typ (Push, E-Mail, In-App, Digest), Frequenz (sofort, täglich, wöchentlich), Stumm-Schaltung pro Objekt. Hoher Nutzen (Retention, Kontrolle), mittlerer Aufwand (Prefs-Model, Digest-Cron, UI).
+- Review-Embed für externe Sites — Einbettbarer Widget-Code (`<script>` + `<div>`) für Reviews/Listen/Serien; Responsive, Themeable, No-Cookie. Hoher Nutzen (Distribution, Backlinks), mittlerer Aufwand (neuer Endpunkt, Widget-React-App, CSP).
+- Dark Mode System-Präferenz Sync — Automatische Erkennung (`prefers-color-scheme`), Sync mit User-Setting, keine Flash-of-wrong-theme. Mittlerer Nutzen (UX), niedriger Aufwand (Cookie/LocalStorage, Script im `<head>`).
+- Barrierefreiheits-Audit & Zertifizierung — Vollständiger axe-core CI, WCAG 2.1 AA Checkliste, Screenreader-Tests, Tastatur-Navigation aller Flows. Hoher Nutzen (Inklusion, Legal), hoher Aufwand (Audit, Fixes, Regression-Tests).
+- Performance-Budget & Lighthouse CI — Budgets für JS/CSS/Images/Fonts, PR-Gate bei Regression, Core Web Vitals Monitoring. Hoher Nutzen (UX, SEO, Conversion), mittlerer Aufwand (CI-Integration, Budgets definieren).
 
 ---
 
@@ -559,9 +564,65 @@
   - `src/components/reviews/ShareButtons.tsx`
 - Type-Check, Build, Tests (723 passed) grün
 
+**PKG-8 ✅:**
+- E2E-Tests: `tests/social-sharing.e2e.ts` (12 Tests: Review/Collection/Series/Profile Share-Buttons, Copy-Link Toast, Meta-Tags OG/Twitter für alle 4 Types + News, Mastodon Instance-Dialog, Dark Mode)
+- Doku: `CHANGELOG.md`, `ROADMAP.md`, `docs/PROGRESS.md` aktualisiert
+- Feature-Flags `FEATURE_SOCIAL_SHARING`, `FEATURE_SHARE_TRACKING` in `.env.example` bestätigt (Default `true`)
+- `npm run verify` (Build + Type-Check + Tests) grün
+- Gesamt: 723 Tests (55 Dateien), alle grün
+
+---
+
+### Feature abgeschlossen: Social Sharing & Viral Loops (F1–F9 ✅)
+
+**User Stories (alle ✅):**
+- US1: Review teilen (Twitter, Bluesky, Mastodon, Reddit, Discord, Copy Link) — Buttons auf `/reviews/[slug]`
+- US2: Listen teilen — Buttons auf `/listen/[slug]`
+- US3: Serien teilen — Buttons auf `/serien/[slug]`
+- US4: Profile teilen — Buttons auf `/u/[username]`
+- US5: News teilen — Buttons auf `/news/[slug]`
+- US6: Meta-Tags (OG/Twitter) für alle Content-Types — konsistent via `share-meta.ts`
+- US7: Share-Tracking — `POST /api/share/track` mit Rate-Limit, Batch-Insert, JSON-Counter
+- US8: Mastodon Instance-Auswahl — Dialog vor Redirect, Default `mastodon.social`
+
+**Technische Highlights:**
+- 1 zentrale `ShareButtons` Komponente ersetzt 4 alte (Collections, Series, Compare, Reviews)
+- 6 Plattformen: Twitter/X, Bluesky, Mastodon, Reddit, Discord, Copy Link
+- 3 Varianten: `inline`, `dropdown`, `minimal`
+- Accessibility: ARIA Labels, Keyboard-Navigation, Fokus-Management, Reduced Motion
+- Dark Mode via CSS-Variablen
+- `unstable_cache` 5 Min für Meta-Tags + Tag-Invaliderung
+- Reversible Migration mit `ShareEvent`, `ShareContentType`, `SharePlatform` Enums, `shareCounts` JSON
+- Feature-Flags: `FEATURE_SOCIAL_SHARING`, `FEATURE_SHARE_TRACKING`
+- 54 neue Tests (Unit: 19+28+7, Integration: 9, E2E: 12)
+- 0 neue Lint Errors, 0 TypeScript Errors, Build grün
+
+**Dateien (neu/geändert):**
+- `src/lib/share-urls.ts`, `src/lib/share-meta.ts`, `src/app/api/share/track/route.ts`
+- `src/components/ui/ShareButtons.tsx`, `tests/components/ui/ShareButtons.test.tsx`
+- `src/app/reviews/[slug]/page.tsx`, `src/app/listen/[slug]/page.tsx`, `src/app/serien/[slug]/page.tsx`, `src/app/u/[username]/page.tsx`, `src/app/news/[slug]/page.tsx`
+- `src/components/reviews/ReviewActions.tsx`, `src/components/series/SeriesDetail.tsx`, `src/app/reviews/vergleichen/page.tsx`
+- `tests/lib/share-urls.test.ts`, `tests/lib/share-meta.test.ts`, `tests/api/share/track.test.ts`, `tests/social-sharing.e2e.ts`
+- Gelöscht: `src/components/collections/ShareButton.tsx`, `src/components/series/SeriesShareButton.tsx`, `src/components/reviews/compare/ReviewCompareShareButton.tsx`, `src/components/reviews/ShareButtons.tsx`
+- Doku: `CHANGELOG.md`, `README.md` (bereits aktuell), `ROADMAP.md`, `.env.example`, `docs/features/social-sharing.md`, `docs/features/social-sharing-design.md`, `docs/PROGRESS.md`
+
+**Definition of Done erfüllt:**
+- [x] Spec vollständig, alle AK getestet & erfüllt
+- [x] Self-Review ohne offene Befunde
+- [x] Build, Type-Check, Lint, Tests grün
+- [x] Doku & Changelog aktualisiert
+- [x] Migration reversibel
+- [x] Keine Secrets im Diff
+- [x] Alles gepusht auf `auto/dev`
+
 ---
 
 ### Nächstes Feature (ROADMAP)
 
 **Kandidaten (Typ D):**
-- Hardware-Kompatibilitäts-Check
+- **Review-Serien für Nutzer** — Nutzer können eigene Serien erstellen (z.B. "Meine Top 10 RPGs 2024"), öffentlich/privat, kollaborativ. Hoher Nutzen (Community, UGC), mittlerer Aufwand (bestehende Series-Model wiederverwenden, UI für Erstellung).
+- Erweiterte Benachrichtigungs-Präferenzen — Granulare Einstellungen pro Kategorie/Typ (Push, E-Mail, In-App, Digest), Frequenz (sofort, täglich, wöchentlich), Stumm-Schaltung pro Objekt. Hoher Nutzen (Retention, Kontrolle), mittlerer Aufwand (Prefs-Model, Digest-Cron, UI).
+- Review-Embed für externe Sites — Einbettbarer Widget-Code (`<script>` + `<div>`) für Reviews/Listen/Serien; Responsive, Themeable, No-Cookie. Hoher Nutzen (Distribution, Backlinks), mittlerer Aufwand (neuer Endpunkt, Widget-React-App, CSP).
+- Dark Mode System-Präferenz Sync — Automatische Erkennung (`prefers-color-scheme`), Sync mit User-Setting, keine Flash-of-wrong-theme. Mittlerer Nutzen (UX), niedriger Aufwand (Cookie/LocalStorage, Script im `<head>`).
+- Barrierefreiheits-Audit & Zertifizierung — Vollständiger axe-core CI, WCAG 2.1 AA Checkliste, Screenreader-Tests, Tastatur-Navigation aller Flows. Hoher Nutzen (Inklusion, Legal), hoher Aufwand (Audit, Fixes, Regression-Tests).
+- Performance-Budget & Lighthouse CI — Budgets für JS/CSS/Images/Fonts, PR-Gate bei Regression, Core Web Vitals Monitoring. Hoher Nutzen (UX, SEO, Conversion), mittlerer Aufwand (CI-Integration, Budgets definieren).
