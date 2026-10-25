@@ -3,7 +3,7 @@
 ## Stand (2026-10-25)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: **636/636 grün** (vitest), `lint`: **31 Errors** (alle `no-explicit-any` in externen Skills/Admin, nicht blockierend), 321 Warnings — keine neuen Errors
+- `type-check`: grün. `build`: grün. `tests`: **723/723 grün** (vitest), `lint`: **31 Errors** (alle `no-explicit-any` in externen Skills/Admin, nicht blockierend), 363 Warnings — keine neuen Errors
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
   1. Newsletter Double-Optin + Bestätigungsseite
@@ -24,6 +24,7 @@
   16. **Community Q&A auf Reviews** (`/reviews/[slug]`, Fragen & Antworten, Upvote/Downvote, Accepted Answer, Notifications, Feature-Flag)
   17. **Personalisierte Empfehlungen** (`/`, `/reviews/[slug]`, Content-Based + Collaborative + Trending, MMR-Diversifizierung, Begründungen, Dismiss, Feature-Flag, Settings Toggle)
   18. **Hardware-Kompatibilitäts-Check** (`/einstellungen/hardware`, `/reviews/[slug]`, CPU/GPU/RAM Profil, Kompatibilitäts-Badge, FPS-Schätzungen, Feature-Flag)
+  19. **Social Sharing & Viral Loops** (`/reviews/[slug]`, `/listen/[slug]`, `/serien/[slug]`, `/u/[username]`, `/news/[slug]`, 6 Plattformen, Meta-Tags, Tracking, Feature-Flag)
 - Abgeschlossene Typ-A-Aufgaben (diese Iteration):
   - Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
   - `no-explicit-any` Bereinigung: **vollständig in Quelldateien** (src/lib/qa.ts, src/lib/recommendations-candidates.ts, src/app/api/user/hardware-profile/route.ts), 150+/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
@@ -35,14 +36,14 @@
   - **Test-Dateien RequestInit/API-Fixes**: listen/follow, listen/items, recommendations API, review-reactions
 - Abgeschlossene Typ-B-Aufgaben:
   - CHANGELOG.md, README.md, ROADMAP.md, .env.example, PROGRESS.md aktualisiert
-  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api, pdf-export, pdf-layout, search-relevance, highlighter-logic, **collections (95), collection-schema (44), review-reactions (12), advanced-search-filters (18), category-subscriptions (8), category-mapping (19), review-compare (28), review-series (20), qa-schema (25)**
-  - Integration-Tests: search-api, deals, price-history, pdf-export, votes, comments, **listen (10), me/listen (5), reactions-api (10), search-advanced-filters (20), category-subscriptions-api (9), review-compare (16), review-series (10), qa-api (35)**
-  - 636 Tests insgesamt (alle grün)
+  - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api, pdf-export, pdf-layout, search-relevance, highlighter-logic, **collections (95), collection-schema (44), review-reactions (12), advanced-search-filters (18), category-subscriptions (8), category-mapping (19), review-compare (28), review-series (20), qa-schema (25), social-sharing (54)**
+  - Integration-Tests: search-api, deals, price-history, pdf-export, votes, comments, **listen (10), me/listen (5), reactions-api (10), search-advanced-filters (20), category-subscriptions-api (9), review-compare (16), review-series (10), qa-api (35), share-tracking (9)**
+  - 723 Tests insgesamt (alle grün)
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Social Sharing & Viral Loops** — **F1–F9 ✅ (abgeschlossen 2026-10-25)**  
-**Nächstes Feature:** **Review-Serien für Nutzer** (Typ D) — F1 Auswahl, F2 Spec, F3 Design
+**Aktuelles Feature:** **Review-Serien für Nutzer** — **F1✅ F2✅ F3✅ → F4 PKG-1✅** (DB Migration & Models)  
+**Nächster Schritt:** **PKG-2: Types & Zod-Schemas** (`src/lib/user-series-schema.ts`)
 
 ---
 
@@ -471,6 +472,26 @@
 
 ---
 
+### Zusammenfassung: Review-Serien für Nutzer — PKG-1 (DB Migration & Models) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- **Enums:** `SeriesVisibility` (PUBLIC/PRIVATE), `SeriesType` (ADMIN/USER), `CollaboratorRole` (OWNER/EDITOR)
+- **ReviewSeries erweitert:** `ownerId`, `visibility`, `type`, `followersCount` (denormalisiert), Relationen `owner`, `followers`, `collaborators`
+- **Neue Models:** `UserSeriesFollow` (Follow für User-Serien), `UserSeriesCollaborator` (Kollaboration Owner/Editor)
+- **TwitchUser erweitert:** Inverse Relationen `userSeries`, `userSeriesFollows`, `userSeriesCollaborators`
+- **Migration:** Via `prisma db push` angewendet (Shadow-DB Probleme mit Legacy-Migrationen umgangen)
+- **Verifikation:** Type-Check ✅, Build ✅, Tests 723/723 ✅, Lint keine neuen Errors ✅
+
+**Dateien (neu/geändert):**
+- `prisma/schema.prisma` (Enums, Model-Erweiterungen, 2 neue Models)
+- `docs/features/review-series-user.md` (Feature Spec F2)
+- `docs/features/review-series-user-design.md` (Design & Plan F3)
+- `docs/ROADMAP.md`, `docs/DECISIONS.md`, `docs/PROGRESS.md` aktualisiert
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
 **Kandidaten (Typ D):**
@@ -614,6 +635,26 @@
 - [x] Migration reversibel
 - [x] Keine Secrets im Diff
 - [x] Alles gepusht auf `auto/dev`
+
+---
+
+### Zusammenfassung: Review-Serien für Nutzer — PKG-1 (DB Migration & Models) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- **Enums:** `SeriesVisibility` (PUBLIC/PRIVATE), `SeriesType` (ADMIN/USER), `CollaboratorRole` (OWNER/EDITOR)
+- **ReviewSeries erweitert:** `ownerId`, `visibility`, `type`, `followersCount` (denormalisiert), Relationen `owner`, `followers`, `collaborators`
+- **Neue Models:** `UserSeriesFollow` (Follow für User-Serien), `UserSeriesCollaborator` (Kollaboration Owner/Editor)
+- **TwitchUser erweitert:** Inverse Relationen `userSeries`, `userSeriesFollows`, `userSeriesCollaborators`
+- **Migration:** Via `prisma db push` angewendet (Shadow-DB Probleme mit Legacy-Migrationen umgangen)
+- **Verifikation:** Type-Check ✅, Build ✅, Tests 723/723 ✅, Lint keine neuen Errors ✅
+
+**Dateien (neu/geändert):**
+- `prisma/schema.prisma` (Enums, Model-Erweiterungen, 2 neue Models)
+- `docs/features/review-series-user.md` (Feature Spec F2)
+- `docs/features/review-series-user-design.md` (Design & Plan F3)
+- `docs/ROADMAP.md`, `docs/DECISIONS.md`, `docs/PROGRESS.md` aktualisiert
 
 ---
 
