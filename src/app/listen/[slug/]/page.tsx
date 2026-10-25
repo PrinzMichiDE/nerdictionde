@@ -4,9 +4,10 @@ import { getCollectionWithItems, getCollectionBySlug } from "@/lib/collections";
 import { getFollowStatus } from "@/lib/collection-follow";
 import { isCollectionFollowEnabled } from "@/lib/schemas/collection-follow-schema";
 import { CollectionItems } from "@/components/collections/CollectionItems";
-import { ShareButton } from "@/components/collections/ShareButton";
 import { CollectionFollowButton } from "@/components/collections/CollectionFollowButton";
 import { getCategoryColor } from "@/lib/utils";
+import { generateCollectionMetadata } from "@/lib/share-meta";
+import { ShareButtons } from "@/components/ui/ShareButtons";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -26,24 +27,16 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     return { title: "Liste nicht gefunden - Nerdiction" };
   }
 
-  const firstItem = collection.items[0];
-
-  return {
-    title: `${collection.title} - Nerdiction`,
-    description: collection.description || `Kurierte Liste mit ${collection.itemCount} Reviews von ${collection.owner.displayName}.`,
-    openGraph: {
-      title: collection.title,
-      description: collection.description || `Kurierte Liste mit ${collection.itemCount} Reviews von ${collection.owner.displayName}.`,
-      type: "website",
-      images: firstItem?.review?.images?.[0] ? [firstItem.review.images[0]] : undefined,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: collection.title,
-      description: collection.description || undefined,
-      images: firstItem?.review?.images?.[0] ? [firstItem.review.images[0]] : undefined,
-    },
-  };
+  return generateCollectionMetadata({
+    id: collection.id,
+    slug: collection.slug,
+    title: collection.title,
+    description: collection.description,
+    owner: collection.owner,
+    items: collection.items,
+    createdAt: collection.createdAt,
+    updatedAt: collection.updatedAt,
+  });
 }
 
 interface Props {
@@ -107,7 +100,16 @@ export default async function ListenDetailPage({ params, searchParams }: Props) 
               )}
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <ShareButton url={typeof window !== "undefined" ? window.location.href : ""} title={collection.title} />
+              <ShareButtons
+                contentType="collection"
+                contentId={collection.id}
+                title={collection.title}
+                description={collection.description || undefined}
+                url={`/listen/${collection.slug}`}
+                image={collection.items?.[0]?.review?.images?.[0]}
+                author={collection.owner.displayName}
+                variant="inline"
+              />
               {isCollectionFollowEnabled() && (
                 <CollectionFollowButton
                   collectionId={collection.id}

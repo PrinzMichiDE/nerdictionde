@@ -2,7 +2,7 @@
 
 import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ShareButtons } from "./ShareButtons";
+import { ShareButtons } from "@/components/ui/ShareButtons";
 import { BookmarkButton } from "@/components/shared/BookmarkButton";
 import { CompareButton } from "./CompareButton";
 import { ReviewPdfDownload } from "./ReviewPdfDownload";
@@ -28,7 +28,14 @@ export function ReviewActions({
 }: ReviewActionsProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <ShareButtons title={title} url={url} />
+      <ShareButtons
+        contentType="review"
+        contentId={reviewId}
+        title={title}
+        url={url}
+        variant="inline"
+        showLabels={true}
+      />
 
       <ReviewPdfDownload reviewId={reviewId} lang={lang} />
 

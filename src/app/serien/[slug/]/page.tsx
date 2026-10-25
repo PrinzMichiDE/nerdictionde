@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSeriesBySlug } from "@/lib/review-series";
+import { generateSeriesMetadata } from "@/lib/share-meta";
 import { SeriesDetail } from "@/components/series/SeriesDetail";
 
 interface SeriesPageProps {
@@ -17,37 +18,17 @@ export async function generateMetadata({ params }: SeriesPageProps): Promise<Met
     return { title: "Serie nicht gefunden | Nerdiction" };
   }
 
-  return {
-    title: `${series.title} | Nerdiction`,
-    description: series.description || `Alle Teile der Serie "${series.title}" – ${series.partCount} Reviews mit Scores, Release-Daten und Details.`,
-    openGraph: {
-      title: series.title,
-      description: series.description || `Alle ${series.partCount} Teile der Serie "${series.title}"`,
-      type: "website",
-      images: series.coverImage ? [series.coverImage] : (series.parts[0]?.coverImage ? [series.parts[0].coverImage] : []),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: series.title,
-      description: series.description || `Alle ${series.partCount} Teile der Serie "${series.title}"`,
-      images: series.coverImage ? [series.coverImage] : (series.parts[0]?.coverImage ? [series.parts[0].coverImage] : []),
-    },
-    other: {
-      "schema.org": JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        name: series.title,
-        description: series.description,
-        numberOfItems: series.partCount,
-        itemListElement: series.parts.map((part, index) => ({
-          "@type": "ListItem",
-          position: index + 1,
-          url: `https://nerdiction.de/reviews/${part.slug}`,
-          name: part.title,
-        })),
-      }),
-    },
-  };
+  return generateSeriesMetadata({
+    id: series.id,
+    slug: series.slug,
+    title: series.title,
+    description: series.description,
+    coverImage: series.coverImage,
+    partCount: series.partCount,
+    aggregateScore: series.aggregateScore,
+    createdAt: series.createdAt,
+    updatedAt: series.updatedAt,
+  });
 }
 
 export default async function SeriesDetailPage({ params }: SeriesPageProps) {

@@ -80,8 +80,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Social Sharing & Viral Loops** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅)**. Nächster Schritt: PKG-5 ShareButtons UI Komponente.
+**Social Sharing & Viral Loops** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅)**. Nächster Schritt: F6 Self-Review, F7 Vollverifikation, F8 Doku.
 
 ## Nächster Schritt
 
-F4 PKG-5: `components/ui/ShareButtons.tsx` — Zentrale Share-Komponente mit 3 Varianten (inline, dropdown, minimal), 6 Plattform-Icons (lucide-react), Mastodon Instance-Dialog, Copy-Link Toast, Accessibility (ARIA, Fokus), Dark Mode Support, Click-Handler mit Tracking.
+F6 Self-Review: Code-Review gegen Spec-Checkliste, F7 Vollverifikation (Build, Type-Check, Lint, Tests), F8 Doku & Changelog, F9 Abschluss.

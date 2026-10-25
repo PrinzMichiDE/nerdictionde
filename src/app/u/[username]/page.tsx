@@ -5,6 +5,7 @@ import { getSubscribedCategories } from "@/lib/category-subscriptions";
 import { PublicProfile } from "@/components/profiles/PublicProfile";
 import { getSiteUrl } from "@/lib/seo";
 import { FEATURE_CATEGORY_SUBSCRIPTIONS } from "@/lib/feature-flags";
+import { generateProfileMetadata } from "@/lib/share-meta";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -23,27 +24,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const displayName = profile.user.displayName;
   const bio = profile.user.userProfile?.bio || "";
-  const avatar = profile.user.profileImageUrl || `${getSiteUrl()}/default-avatar.png`;
+  const avatar = profile.user.profileImageUrl || undefined;
 
-  return {
-    title: `${displayName} (@${username}) - Nerdiction`,
-    description: bio || `Profil von ${displayName} auf Nerdiction. Entdecke Bewertungen und gespeicherte Reviews.`,
-    openGraph: {
-      title: `${displayName} (@${username})`,
-      description: bio || `Profil von ${displayName} auf Nerdiction`,
-      type: "profile",
-      images: [{ url: avatar }],
-      username,
-      firstName: displayName.split(" ")[0],
-      lastName: displayName.split(" ").slice(1).join(" "),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${displayName} (@${username})`,
-      description: bio || `Profil von ${displayName} auf Nerdiction`,
-      images: [avatar],
-    },
-  };
+  return generateProfileMetadata({
+    id: profile.user.id,
+    username: profile.user.username,
+    displayName: profile.user.displayName,
+    bio: profile.user.userProfile?.bio || undefined,
+    profileImageUrl: avatar,
+    followerCount: profile.user.userProfile?.followerCount ?? 0,
+    followingCount: profile.user.userProfile?.followingCount ?? 0,
+  });
 }
 
 export default async function PublicProfilePage({ params }: Props) {

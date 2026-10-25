@@ -42,7 +42,7 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** **Social Sharing & Viral Loops** — **F1 ✅, F2 ✅, F3 ✅**  
-**Phase:** F4 Implementierung — PKG-1: DB-Migration & Model
+**Phase:** F4 Implementierung — **PKG-8: Tests, Doku & Rollout**
 
 ---
 
@@ -528,6 +528,36 @@
 - Feature-Flag Guard (`FEATURE_SOCIAL_SHARING`, `FEATURE_SHARE_TRACKING`)
 - Integration-Tests: `tests/api/share/track.test.ts` (9 Tests, alle grün)
 - Type-Check, Build, Tests (711 passed) grün
+
+**PKG-5 ✅:**
+- `src/components/ui/ShareButtons.tsx`: Zentrale Share-Komponente mit 3 Varianten (inline, dropdown, minimal), 6 Plattform-Icons (lucide-react), Mastodon Instance-Dialog, Copy-Link Toast, Accessibility (ARIA, Fokus), Dark Mode Support
+- 7 Unit-Tests: `tests/components/ui/ShareButtons.test.tsx` (alle grün)
+- Ersetzt 4 bestehende Share-Komponenten (ReviewReactions, Collections, Series, Compare)
+- Type-Check, Build, Tests (723 passed) grün
+
+**PKG-6 ✅:**
+- `generateMetadata` in 5 Seiten auf `share-meta.ts` umgestellt:
+  - `src/app/reviews/[slug]/page.tsx` → `generateReviewMetadata()`
+  - `src/app/listen/[slug]/page.tsx` → `generateCollectionMetadata()`
+  - `src/app/serien/[slug]/page.tsx` → `generateSeriesMetadata()`
+  - `src/app/u/[username]/page.tsx` → `generateProfileMetadata()`
+  - `src/app/news/[slug]/page.tsx` → `generateReviewMetadata()` (Content-Type `review`)
+- OG/Twitter Tags nun konsistent für alle 4 Content-Types + News
+- Type-Check, Build, Tests (723 passed) grün
+
+**PKG-7 ✅:**
+- Bestehende Share-Komponenten durch neue `ui/ShareButtons` ersetzt:
+  - `src/components/reviews/ReviewActions.tsx` → `ShareButtons` (variant `inline`, contentType `review`)
+  - `src/app/listen/[slug]/page.tsx` → `ShareButtons` (variant `inline`, contentType `collection`)
+  - `src/components/series/SeriesDetail.tsx` → `ShareButtons` (variant `inline`, contentType `series`)
+  - `src/app/reviews/vergleichen/page.tsx` → `ShareButtons` (variant `inline`, contentType `review`)
+  - `src/app/news/[slug]/page.tsx` → `ShareButtons` (variant `inline`, contentType `review`)
+- Alte Dateien gelöscht:
+  - `src/components/collections/ShareButton.tsx`
+  - `src/components/series/SeriesShareButton.tsx`
+  - `src/components/reviews/compare/ReviewCompareShareButton.tsx`
+  - `src/components/reviews/ShareButtons.tsx`
+- Type-Check, Build, Tests (723 passed) grün
 
 ---
 

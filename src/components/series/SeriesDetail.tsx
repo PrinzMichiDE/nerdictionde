@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { PublicSeriesWithParts, PublicSeriesPart } from "@/lib/review-series-schema";
-import { SeriesShareButton } from "./SeriesShareButton";
+import { ShareButtons } from "@/components/ui/ShareButtons";
 
 interface SeriesDetailProps {
   series: PublicSeriesWithParts;
@@ -80,9 +80,14 @@ export function SeriesDetail({ series }: SeriesDetailProps) {
               </svg>
               Zur Übersicht
             </Link>
-            <SeriesShareButton
+            <ShareButtons
+              contentType="series"
+              contentId={series.id}
               title={series.title}
-              url={`https://nerdiction.de/serien/${series.slug}`}
+              description={series.description || undefined}
+              url={`/serien/${series.slug}`}
+              image={series.coverImage || undefined}
+              variant="inline"
             />
           </div>
         </div>

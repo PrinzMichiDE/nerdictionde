@@ -9,8 +9,9 @@ import { ArrowLeft, Printer, Tag } from "lucide-react";
 import { getSiteUrl, generateArticleSchema } from "@/lib/seo";
 import { MetaLine } from "@/components/shared/MetaLine";
 import { Button } from "@/components/ui/button";
-import { ShareButtons } from "@/components/reviews/ShareButtons";
 import { RelatedNews } from "@/components/news/RelatedNews";
+import { generateReviewMetadata } from "@/lib/share-meta";
+import { ShareButtons } from "@/components/ui/ShareButtons";
 
 export async function generateMetadata({
   params,
@@ -27,38 +28,26 @@ export async function generateMetadata({
   if (!article) return {};
 
   const title = isEn && article.title_en ? article.title_en : article.title;
-  const excerpt = isEn && article.excerpt_en ? article.excerpt_en : article.excerpt;
-  const url = `${getSiteUrl()}/news/${slug}`;
+  const content = isEn && article.content_en ? article.content_en : article.content;
 
-  return {
-    title,
-    description: excerpt || undefined,
-    alternates: {
-      canonical: url,
-      languages: {
-        "de-DE": url,
-        en: `${url}?lang=en`,
-        "x-default": url,
-      },
+  return generateReviewMetadata(
+    {
+      id: article.id,
+      slug: article.slug,
+      title: article.title,
+      title_en: article.title_en,
+      content: article.content,
+      category: "news",
+      images: [],
+      score: 0,
+      author: undefined,
+      createdAt: article.publishedAt,
+      updatedAt: article.updatedAt,
+      tags: article.tags?.map((t) => ({ tag: { name: t } })) || [],
+      youtubeVideos: [],
     },
-    keywords: article.tags,
-    openGraph: {
-      type: "article",
-      title,
-      description: excerpt || undefined,
-      url,
-      siteName: "Nerdiction",
-      locale: "de_DE",
-      publishedTime: article.publishedAt.toISOString(),
-      modifiedTime: article.updatedAt.toISOString(),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description: excerpt || undefined,
-    },
-    robots: { index: true, follow: true },
-  };
+    isEn ? "en" : "de"
+  );
 }
 
 export default async function NewsDetailPage({
@@ -136,7 +125,14 @@ export default async function NewsDetailPage({
 
       {/* Teilen & Drucken */}
       <div className="flex flex-wrap items-center gap-2 pt-4 border-t">
-        <ShareButtons title={title} url={`/news/${slug}`} />
+        <ShareButtons
+          contentType="review"
+          contentId={article.id}
+          title={title}
+          description={excerpt || undefined}
+          url={`/news/${slug}`}
+          variant="inline"
+        />
         <Button
           variant="outline"
           size="sm"

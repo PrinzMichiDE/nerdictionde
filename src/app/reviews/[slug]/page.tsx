@@ -57,6 +57,7 @@ import { ReviewRecommendations } from "@/components/recommendations";
 import { ReviewTemplateRenderer } from "@/components/reviews/ReviewTemplateRenderer";
 import { getTemplate } from "@/lib/review-templates";
 import { FEATURE_REVIEW_TEMPLATES } from "@/lib/feature-flags";
+import { generateReviewMetadata } from "@/lib/share-meta";
 
 export async function generateMetadata({
   params,
@@ -71,6 +72,7 @@ export async function generateMetadata({
 
   const review = await prisma.review.findUnique({
     where: { slug },
+    include: { tags: { include: { tag: true } } },
   });
 
   if (!review) return {};
@@ -80,46 +82,24 @@ export async function generateMetadata({
   const description =
     review.metaDescription || content.substring(0, 160).replace(/\n/g, " ");
 
-  const url = `${getSiteUrl()}/reviews/${slug}`;
-
-  const image = review.images?.[0];
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: url,
-      languages: {
-        "de-DE": url,
-        en: `${url}?lang=en`,
-        "x-default": url,
-      },
+  return generateReviewMetadata(
+    {
+      id: review.id,
+      slug: review.slug,
+      title: review.title,
+      title_en: review.title_en,
+      content: review.content,
+      category: review.category,
+      images: review.images,
+      score: review.score,
+      author: undefined, // Author info not in this select
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
+      tags: review.tags ?? undefined,
+      youtubeVideos: review.youtubeVideos,
     },
-    keywords: review.metaKeywords
-      ? review.metaKeywords.split(",").map((k) => k.trim()).filter(Boolean)
-      : [title, review.category, "Review", "Test", "Kritik"],
-    openGraph: {
-      type: "article",
-      title: `${title} Test & Review`,
-      description,
-      url,
-      siteName: "Nerdiction",
-      locale: "de_DE",
-      images: image ? [{ url: image, alt: title }] : [],
-      publishedTime: review.createdAt instanceof Date ? review.createdAt.toISOString() : undefined,
-      modifiedTime: review.updatedAt instanceof Date ? review.updatedAt.toISOString() : undefined,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${title} Test & Review`,
-      description,
-      images: image ? [image] : [],
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
-  };
+    isEn ? "en" : "de"
+  );
 }
 
 interface FaqReviewShape {

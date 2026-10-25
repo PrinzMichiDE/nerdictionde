@@ -9,13 +9,13 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["tests/**/*.test.ts"],
+    include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
     projects: [
       {
         extends: true,
         test: {
           environment: "jsdom",
-          include: ["tests/hooks/**/*.test.ts"],
+          include: ["tests/hooks/**/*.test.ts", "tests/hooks/**/*.test.tsx"],
           setupFiles: [],
         },
       },

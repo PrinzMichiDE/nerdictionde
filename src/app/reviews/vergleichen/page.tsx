@@ -19,7 +19,7 @@ import { ReviewCompareGallery } from "@/components/reviews/compare/ReviewCompare
 import { ReviewCompareVideos } from "@/components/reviews/compare/ReviewCompareVideos";
 import { ReviewComparePriceChart } from "@/components/reviews/compare/ReviewComparePriceChart";
 import { ReviewCompareScoreCompare } from "@/components/reviews/compare/ReviewCompareScoreCompare";
-import { ReviewCompareShareButton } from "@/components/reviews/compare/ReviewCompareShareButton";
+import { ShareButtons } from "@/components/ui/ShareButtons";
 
 export const metadata: Metadata = {
   title: "Reviews vergleichen",
@@ -139,9 +139,12 @@ export default async function ComparePage({
           <ArrowLeft className="size-4" />
           Zurück zu allen Reviews
         </Link>
-        <ReviewCompareShareButton
-          url={typeof window !== "undefined" ? window.location.href : ""}
+        <ShareButtons
+          contentType="review"
+          contentId={reviews[0]?.id || "compare"}
           title={reviews.map((r) => r.title).join(" vs. ")}
+          url={typeof window !== "undefined" ? window.location.href : ""}
+          variant="inline"
         />
       </header>
 
