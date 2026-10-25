@@ -461,8 +461,11 @@ model TwitchUser {
   qaVotes              QAVote[]
   recommendationDismisses RecommendationDismiss[]
 
-  @@index([twitchId])
-  @@index([username])
+   userSeries            ReviewSeries[]       @relation("UserSeriesOwner")
+   userSeriesFollows     UserSeriesFollow[]
+   userSeriesCollaborators UserSeriesCollaborator[]
+   @@index([twitchId])
+   @@index([username])
 }
 
 model StreamSchedule {
@@ -1838,15 +1841,26 @@ model ReviewSeries {
   partCount      Int      @default(0)
   aggregateScore Float?
   shareCounts    Json?    @default("{}") @map("share_counts")
+  followersCount Int      @default(0) @map("followers_count")
   version        Int      @default(1)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   deletedAt      DateTime?
 
+  // User-Series Felder
+  ownerId        String?  @map("owner_id")
+  owner          TwitchUser? @relation("UserSeriesOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  visibility     SeriesVisibility @default(PUBLIC)
+  type           SeriesType @default(ADMIN)
+
   items          ReviewSeriesItem[]
   reviews        Review[] // Inverse relation for Review.series
+  followers      UserSeriesFollow[]
+  collaborators  UserSeriesCollaborator[]
 
   @@index([deletedAt])
+  @@index([ownerId])
+  @@index([type, visibility])
   @@map("review_series")
 }
 
@@ -1862,6 +1876,53 @@ model ReviewSeriesItem {
   @@unique([seriesId, seriesOrder])
   @@index([seriesId])
   @@map("review_series_items")
+}
+
+// User Series Follow (für Nutzer-erstellte Serien)
+model UserSeriesFollow {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  seriesId  String   @map("series_id")
+  series    ReviewSeries @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, seriesId])
+  @@index([userId])
+  @@index([seriesId])
+  @@map("user_series_follows")
+}
+
+// User Series Collaborators (Kollaboration für Nutzer-Serien)
+enum CollaboratorRole {
+  OWNER
+  EDITOR
+}
+
+model UserSeriesCollaborator {
+  id        String             @id @default(cuid())
+  userId    String             @map("user_id")
+  user      TwitchUser         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  seriesId  String             @map("series_id")
+  series    ReviewSeries       @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  role      CollaboratorRole   @default(EDITOR)
+  invitedAt DateTime           @default(now()) @map("invited_at")
+  acceptedAt DateTime?         @map("accepted_at")
+
+  @@unique([userId, seriesId])
+  @@index([userId])
+  @@index([seriesId])
+  @@map("user_series_collaborators")
+}
+
+enum SeriesVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum SeriesType {
+  ADMIN
+  USER
 }
 
 // Community Q&A (Fragen & Antworten zu Reviews)
