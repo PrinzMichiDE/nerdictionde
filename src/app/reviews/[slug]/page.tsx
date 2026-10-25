@@ -619,6 +619,7 @@ export default async function ReviewDetailPage({
                 isLoggedIn={!!session}
                 initialBookmarked={!!isBookmarked}
                 lang={isEn ? "en" : "de"}
+                coverImage={review.images?.[0] ?? null}
               />
             </div>
 

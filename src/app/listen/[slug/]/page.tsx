@@ -8,6 +8,7 @@ import { CollectionFollowButton } from "@/components/collections/CollectionFollo
 import { getCategoryColor } from "@/lib/utils";
 import { generateCollectionMetadata } from "@/lib/share-meta";
 import { ShareButtons } from "@/components/ui/ShareButtons";
+import { EmbedModal } from "@/components/embed/EmbedModal";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -109,6 +110,12 @@ export default async function ListenDetailPage({ params, searchParams }: Props) 
                 image={collection.items?.[0]?.review?.images?.[0]}
                 author={collection.owner.displayName}
                 variant="inline"
+              />
+              <EmbedModal
+                type="collection"
+                slug={collection.slug}
+                title={collection.title}
+                coverImage={collection.items?.[0]?.review?.images?.[0] ?? null}
               />
               {isCollectionFollowEnabled() && (
                 <CollectionFollowButton

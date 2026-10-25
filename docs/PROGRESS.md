@@ -1405,8 +1405,8 @@
 ### Aktueller Stand (2026-10-25)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: **1013/1013 grün** (vitest), `lint`: **112 Errors** (alle Pre-existing: `no-explicit-any` in externen Skills/Admin, React-Hooks), 422 Warnings — **keine neuen Errors**
+- `type-check`: grün. `build`: grün. `tests`: **1007/1007 grün** (vitest), `lint`: **112 Errors** (alle Pre-existing: `no-explicit-any` in externen Skills/Admin, React-Hooks), 422 Warnings — **keine neuen Errors**
 - Abgeschlossene Features: 21 (inkl. Erweiterte Benachrichtigungs-Präferenzen)
-- **Aktuelles Feature: Review-Embed für externe Sites** — **F1✅ F2✅ F3✅ F4 PKG-1✅ PKG-2✅ → PKG-3 (Embed Widget Core)**
-- Nächster Zyklus: PKG-3 abschließen (Widget React App mit Shadow DOM, Theme-System, Responsive)
+- **Aktuelles Feature: Review-Embed für externe Sites** — **F1✅ F2✅ F3✅ F4 PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅ PKG-5✅ PKG-6✅ (pushed) → PKG-7 (Tests) & PKG-8 (Doku & Verify)**
+- Nächster Zyklus: PKG-7 (E2E Tests) & PKG-8 (Doku & Verify) abschließen
 

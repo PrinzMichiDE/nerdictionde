@@ -6,6 +6,7 @@ import { ShareButtons } from "@/components/ui/ShareButtons";
 import { BookmarkButton } from "@/components/shared/BookmarkButton";
 import { CompareButton } from "./CompareButton";
 import { ReviewPdfDownload } from "./ReviewPdfDownload";
+import { EmbedModal } from "@/components/embed/EmbedModal";
 
 interface ReviewActionsProps {
   title: string;
@@ -15,6 +16,7 @@ interface ReviewActionsProps {
   isLoggedIn: boolean;
   initialBookmarked?: boolean;
   lang?: string;
+  coverImage?: string | null;
 }
 
 export function ReviewActions({
@@ -25,6 +27,7 @@ export function ReviewActions({
   isLoggedIn,
   initialBookmarked,
   lang = "de",
+  coverImage,
 }: ReviewActionsProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -36,6 +39,8 @@ export function ReviewActions({
         variant="inline"
         showLabels={true}
       />
+
+      <EmbedModal type="review" slug={slug} title={title} coverImage={coverImage} />
 
       <ReviewPdfDownload reviewId={reviewId} lang={lang} />
 

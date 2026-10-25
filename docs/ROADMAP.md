@@ -64,7 +64,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] **Social Sharing & Viral Loops** — One-Click Share für Reviews/Listen/Serien (Twitter/X, Bluesky, Mastodon, Reddit, Discord, Link-Kopie); OG/Twitter Cards optimieren; Share-Statistiken. Hoher Nutzen (Traffic, Markenbekanntheit), niedriger Aufwand (bestehende Share-Buttons erweitern, Meta-Tags). **← erledigt (F1–F9 ✅)**
 - [x] **Review-Serien für Nutzer (nicht nur Admin)** — Nutzer können eigene Serien erstellen (z.B. "Meine Top 10 RPGs 2024"), öffentlich/privat, kollaborativ. Hoher Nutzen (Community, UGC), mittlerer Aufwand (bestehende Series-Model wiederverwenden, UI für Erstellung). **← erledigt (F1–F9 ✅)**
 - [x] **Erweiterte Benachrichtigungs-Präferenzen** — Granulare Einstellungen pro Kategorie/Typ (Push, E-Mail, In-App, Digest), Frequenz (sofort, täglich, wöchentlich), Stumm-Schaltung pro Objekt. Hoher Nutzen (Retention, Kontrolle), mittlerer Aufwand (Prefs-Model, Digest-Cron, UI). **← erledigt (F1–F9 ✅)**
-- [ ] **Review-Embed für externe Sites** — Einbettbarer Widget-Code (`<script>` + `<div>`) für Reviews/Listen/Serien; Responsive, Themeable, No-Cookie. Hoher Nutzen (Distribution, Backlinks), mittlerer Aufwand (neuer Endpunkt, Widget-React-App, CSP). **← F1✅ F2✅ F3✅ F4 PKG-1✅ PKG-2✅ → PKG-3**
+- [ ] **Review-Embed für externe Sites** — Einbettbarer Widget-Code (`<script>` + `<div>`) für Reviews/Listen/Serien; Responsive, Themeable, No-Cookie. Hoher Nutzen (Distribution, Backlinks), mittlerer Aufwand (neuer Endpunkt, Widget-React-App, CSP). **← F1✅ F2✅ F3✅ F4 PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅ PKG-5✅ PKG-6✅ → PKG-7/8**
 - [ ] **Dark Mode System-Präferenz Sync** — Automatische Erkennung (`prefers-color-scheme`), Sync mit User-Setting, keine Flash-of-wrong-theme. Mittlerer Nutzen (UX), niedriger Aufwand (Cookie/LocalStorage, Script im `<head>`).
 - [ ] **Barrierefreiheits-Audit & Zertifizierung** — Vollständiger axe-core CI, WCAG 2.1 AA Checkliste, Screenreader-Tests, Tastatur-Navigation aller Flows. Hoher Nutzen (Inklusion, Legal), hoher Aufwand (Audit, Fixes, Regression-Tests).
 - [ ] **Performance-Budget & Lighthouse CI** — Budgets für JS/CSS/Images/Fonts, PR-Gate bei Regression, Core Web Vitals Monitoring. Hoher Nutzen (UX, SEO, Conversion), mittlerer Aufwand (CI-Integration, Budgets definieren).
@@ -80,7 +80,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Review-Embed für externe Sites** — **F1✅ F2✅ F3✅ F4 PKG-1✅ PKG-2✅** (Feature-Flag, Types, Schemas, Embed Data API Routes). Nächster Schritt: PKG-3 (Widget Core).
+**Review-Embed für externe Sites** — **F1✅ F2✅ F3✅ F4 PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅ PKG-5✅ PKG-6✅** (Feature-Flag, Types, Schemas, Embed Data API, Widget Core, Embed Script, Embed Modal, Detail Pages Integration). Nächster Schritt: PKG-7 (E2E Tests) & PKG-8 (Doku & Verify).
 
 ### Nächste Schritte
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { PublicSeriesWithParts, PublicSeriesPart } from "@/lib/review-series-schema";
 import { ShareButtons } from "@/components/ui/ShareButtons";
+import { EmbedModal } from "@/components/embed/EmbedModal";
 import { UserPlus, UserCheck, Loader2, Lock, User, Edit2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -187,6 +188,12 @@ export function SeriesDetail({ series }: SeriesDetailProps) {
               url={`/serien/${series.slug}`}
               image={series.coverImage || undefined}
               variant="inline"
+            />
+            <EmbedModal
+              type="series"
+              slug={series.slug}
+              title={series.title}
+              coverImage={series.coverImage || null}
             />
 
             {isUserSeries && !series.isOwner && (
