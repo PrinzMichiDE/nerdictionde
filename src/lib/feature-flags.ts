@@ -12,6 +12,7 @@ export const FEATURE_ADVANCED_SEARCH_FILTERS = process.env.FEATURE_ADVANCED_SEAR
 export const FEATURE_PERSONALIZED_RECOMMENDATIONS = process.env.FEATURE_PERSONALIZED_RECOMMENDATIONS !== 'false';
 export const FEATURE_COMMUNITY_QA = process.env.FEATURE_COMMUNITY_QA !== 'false';
 export const FEATURE_HARDWARE_COMPATIBILITY = process.env.FEATURE_HARDWARE_COMPATIBILITY === 'true';
+export const FEATURE_REVIEW_TEMPLATES = process.env.FEATURE_REVIEW_TEMPLATES === 'true';
 
 // Object export for easy access
 export const featureFlags = {
@@ -25,4 +26,5 @@ export const featureFlags = {
   get recommendations() { return FEATURE_PERSONALIZED_RECOMMENDATIONS; },
   get communityQa() { return FEATURE_COMMUNITY_QA; },
   get hardwareCompatibility() { return FEATURE_HARDWARE_COMPATIBILITY; },
+  get reviewTemplates() { return FEATURE_REVIEW_TEMPLATES; },
 };
