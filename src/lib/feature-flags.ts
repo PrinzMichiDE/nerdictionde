@@ -42,3 +42,20 @@ export const featureFlags = {
   get pushNotifications() { return FEATURE_PUSH_NOTIFICATIONS; },
   get notificationMutes() { return FEATURE_NOTIFICATION_MUTES; },
 };
+
+// Individual flag check functions (for use in schemas)
+export function isEnhancedNotificationPrefsEnabled() {
+  return FEATURE_ENHANCED_NOTIFICATION_PREFS;
+}
+
+export function isNotificationDigestEnabled() {
+  return FEATURE_NOTIFICATION_DIGEST;
+}
+
+export function isPushNotificationsEnabled() {
+  return FEATURE_PUSH_NOTIFICATIONS;
+}
+
+export function isNotificationMutesEnabled() {
+  return FEATURE_NOTIFICATION_MUTES;
+}
