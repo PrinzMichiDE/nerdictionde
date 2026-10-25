@@ -10,5 +10,15 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
+    projects: [
+      {
+        extends: true,
+        test: {
+          environment: "jsdom",
+          include: ["tests/hooks/**/*.test.ts"],
+          setupFiles: [],
+        },
+      },
+    ],
   },
 });
