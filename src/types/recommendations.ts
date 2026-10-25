@@ -34,9 +34,13 @@ export interface ReviewSummary {
   images: string[];
   metaDescription?: string | null;
   releaseDate?: Date | null;
-  userRatingAvg?: number;
-  userRatingCount?: number;
+  userRatingAvg?: number | null;
+  userRatingCount?: number | null;
   metadata?: Record<string, unknown> | null;
+}
+
+export interface ReviewWithTags extends ReviewSummary {
+  tags: { tag: { name: string; slug: string } }[];
 }
 
 export interface UserSignals {
