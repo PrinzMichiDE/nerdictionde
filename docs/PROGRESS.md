@@ -1085,3 +1085,36 @@
 - Barrierefreiheits-Audit & Zertifizierung — Vollständiger axe-core CI, WCAG 2.1 AA Checkliste, Screenreader-Tests, Tastatur-Navigation aller Flows. Hoher Nutzen (Inklusion, Legal), hoher Aufwand (Audit, Fixes, Regression-Tests).
 - Performance-Budget & Lighthouse CI — Budgets für JS/CSS/Images/Fonts, PR-Gate bei Regression, Core Web Vitals Monitoring. Hoher Nutzen (UX, SEO, Conversion), mittlerer Aufwand (CI-Integration, Budgets definieren).
 
+---
+
+### Zusammenfassung: Erweiterte Benachrichtigungs-Präferenzen — PKG-1 (DB Migration & Models) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- **Enums:** `NotificationChannel` (IN_APP/EMAIL/PUSH), `NotificationFrequency` (IMMEDIATE/DAILY/WEEKLY), `MuteTargetType` (REVIEW/COLLECTION/SERIES/USER)
+- **NotificationPreference neu:** Granulares Model pro User × NotificationType × Channel mit Frequency & Enabled (ersetzt altes category-basiertes Model)
+- **Neue Models:** `NotificationMute` (Objekt-basierte Stummschaltung), `PushSubscription` erweitert (userAgent, updatedAt)
+- **NotificationType erweitert:** `review_comment`, `review_reaction`, `review_published`, `mention`
+- **Migration:** Via `prisma db push --accept-data-loss` angewendet (altes Model inkompatibel, Defaults für Bestandsnutzer via Seed nötig)
+- **Feature-Flags:** `FEATURE_ENHANCED_NOTIFICATION_PREFS`, `FEATURE_NOTIFICATION_DIGEST`, `FEATURE_PUSH_NOTIFICATIONS`, `FEATURE_NOTIFICATION_MUTES` in `lib/feature-flags.ts` + `.env.example`
+- **Kompatibilität:** Altes `/api/push/preferences` API als Compatibility Layer für `PushNotificationManager` Component erhalten
+- **Verifikation:** Type-Check ✅, Build ✅, Tests 791/791 ✅, Lint keine neuen Errors ✅
+
+**Dateien (neu/geändert):**
+- `prisma/schema.prisma` (Enums, Model-Ersetzungen, 2 neue Models)
+- `src/lib/feature-flags.ts`, `.env.example`
+- `src/lib/webpush.ts` (notifySubscribers auf neue API umgestellt)
+- `src/app/api/push/preferences/route.ts` (Compatibility Layer)
+- `src/app/api/cron/generate-product-reviews/route.ts` (notifySubscribers Call angepasst)
+- `docs/features/enhanced-notification-preferences.md` (Feature Spec F2)
+- `docs/features/enhanced-notification-preferences-design.md` (Design & Plan F3)
+- `docs/DECISIONS.md`, `docs/PROGRESS.md` aktualisiert
+
+---
+
+### Nächstes Feature (ROADMAP)
+
+**Aktuelles Feature:** **Erweiterte Benachrichtigungs-Präferenzen** — **F1✅ F2✅ F3✅ → F4 PKG-1✅**  
+**Nächster Schritt:** **PKG-2: Types & Zod-Schemas** (`src/lib/notification-preferences-schema.ts`, Tests)
+
