@@ -58,6 +58,7 @@ model Review {
   series          ReviewSeries?   @relation(fields: [seriesId], references: [id], onDelete: SetNull)
   seriesItems     ReviewSeriesItem[]
   qaQuestions     ReviewQA[]
+  recommendationDismisses RecommendationDismiss[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -449,6 +450,7 @@ model TwitchUser {
   qaQuestions          ReviewQA[]           @relation("ReviewQAAuthor")
   qaAnswers            QAAnswer[]           @relation("QAAnswerAuthor")
   qaVotes              QAVote[]
+  recommendationDismisses RecommendationDismiss[]
 
   @@index([twitchId])
   @@index([username])
@@ -1925,4 +1927,21 @@ model QAVote {
   @@index([questionId])
   @@index([answerId])
   @@map("qa_votes")
+}
+
+// Personalisierte Empfehlungen — Dismiss-Tracking
+model RecommendationDismiss {
+  id        String   @id @default(cuid())
+  userId    String
+  user      TwitchUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewId  String
+  review    Review     @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reason    String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@unique([userId, reviewId])
+  @@index([userId, expiresAt])
+  @@index([expiresAt])
+  @@map("recommendation_dismisses")
 }
