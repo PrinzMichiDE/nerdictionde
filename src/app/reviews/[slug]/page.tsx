@@ -35,6 +35,9 @@ import { CommentSection } from "@/components/community/CommentSection";
 import { QAList } from "@/components/qa/QAList";
 import { getQAList } from "@/lib/qa";
 import { FEATURE_COMMUNITY_QA } from "@/lib/qa-schema";
+import { HardwareCompatibilityBadge, HardwareCompatibilitySkeleton } from "@/components/reviews/HardwareCompatibilityBadge";
+import { FEATURE_HARDWARE_COMPATIBILITY } from "@/lib/feature-flags";
+import { checkCompatibility, estimateFps } from "@/lib/hardware-compatibility";
 import { ScoreBlock } from "@/components/shared/ScoreBlock";
 import { ProsCons } from "@/components/shared/ProsCons";
 import { MetaLine } from "@/components/shared/MetaLine";
@@ -198,7 +201,41 @@ export default async function ReviewDetailPage({
 
   const review = await prisma.review.findUnique({
     where: { slug },
-    include: {
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      title_en: true,
+      category: true,
+      content: true,
+      content_en: true,
+      score: true,
+      pros: true,
+      pros_en: true,
+      cons: true,
+      cons_en: true,
+      images: true,
+      youtubeVideos: true,
+      status: true,
+      igdbId: true,
+      tmdbId: true,
+      steamAppId: true,
+      epicId: true,
+      gogId: true,
+      amazonAsin: true,
+      affiliateLink: true,
+      hardwareId: true,
+      specs: true,
+      metadata: true,
+      metaDescription: true,
+      metaKeywords: true,
+      releaseDate: true,
+      userRatingCount: true,
+      userRatingAvg: true,
+      seriesId: true,
+      seriesOrder: true,
+      createdAt: true,
+      updatedAt: true,
       comments: true,
       tags: { include: { tag: true } },
     },
@@ -244,6 +281,27 @@ export default async function ReviewDetailPage({
   const seriesInfo = FEATURE_REVIEW_SERIES && review.seriesId
     ? await getReviewSeriesInfo(review.id)
     : null;
+
+  // Hardware Compatibility Check (Server-side for SSR)
+  let hardwareCompatibility = null;
+  if (FEATURE_HARDWARE_COMPATIBILITY && review.category === 'hardware' && session?.userId) {
+    try {
+      const user = await prisma.twitchUser.findUnique({
+        where: { id: session.userId },
+        select: { hardwareProfile: true, hardwareProfileEnabled: true },
+      });
+      
+      if (user?.hardwareProfile && user.hardwareProfileEnabled) {
+        const hwProfile = user.hardwareProfile as { cpu: string; gpu: string; ram: string; monitor?: string; psu?: string; resolution?: string; refreshRate?: number };
+        hardwareCompatibility = checkCompatibility(hwProfile, review);
+        // Add FPS estimates for GPU reviews
+        const fpsEstimates = estimateFps(hwProfile, review);
+        hardwareCompatibility = { ...hardwareCompatibility, fpsEstimates };
+      }
+    } catch (error) {
+      console.warn('[Review Detail] Failed to compute hardware compatibility:', error);
+    }
+  }
 
   const [userRating, isBookmarked, categoryAvg] = await Promise.all([
     session
@@ -802,6 +860,14 @@ export default async function ReviewDetailPage({
           metadata={review.metadata as Record<string, unknown> | null}
           specs={review.specs as Record<string, unknown> | null}
           isEn={isEn}
+        />
+      )}
+
+      {/* Hardware Compatibility Badge */}
+      {review.category === "hardware" && FEATURE_HARDWARE_COMPATIBILITY && (
+        <HardwareCompatibilityBadge
+          data={hardwareCompatibility}
+          reviewSlug={slug}
         />
       )}
 

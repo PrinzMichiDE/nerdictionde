@@ -364,6 +364,9 @@ model TwitchUser {
   broadcasterType       String?
   readingHistoryEnabled Boolean   @default(false) @map("reading_history_enabled")
   personalizedRecommendationsEnabled Boolean @default(true) @map("personalized_recommendations_enabled")
+  hardwareProfile       Json?     @map("hardware_profile")
+  hardwareProfileEnabled Boolean  @default(false) @map("hardware_profile_enabled")
+  hardwareProfileVersion Int      @default(1) @map("hardware_profile_version")
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
