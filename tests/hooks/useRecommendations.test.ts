@@ -120,10 +120,11 @@ describe('useRecommendations', () => {
 
     expect(result.current.data?.recommendations).toHaveLength(2);
 
-    await result.current.dismiss('rev1', 'not_interested');
+    await act(async () => {
+      await result.current.dismiss('rev1', 'not_interested');
+    });
 
-    await waitFor(() => expect(result.current.loading).toBe(false));
-
+    // Optimistic update should be immediate, no loading state change
     expect(result.current.data?.recommendations).toHaveLength(1);
     expect(result.current.data?.recommendations[0].review.id).toBe('rev2');
     expect(mockFetch).toHaveBeenCalledWith('/api/recommendations/dismiss', expect.objectContaining({

@@ -49,6 +49,7 @@ import { getCachedReviewReactions } from "@/lib/review-reactions";
 import { generateBreadcrumbSchema, generateFAQSchema, generateReviewSchema, getSiteUrl } from "@/lib/seo";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { ReviewRecommendations } from "@/components/recommendations";
 
 export async function generateMetadata({
   params,
@@ -879,6 +880,9 @@ export default async function ReviewDetailPage({
             category={review.category}
             score={review.score}
           />
+
+          {/* Review Recommendations */}
+          <ReviewRecommendations reviewSlug={review.slug} limit={5} />
 
           {/* FAQ Section - matches FAQPage schema for AEO */}
           {faqs.length > 0 && (

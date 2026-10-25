@@ -10,6 +10,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { generateItemListSchema, getSiteUrl } from "@/lib/seo";
 import { NewsletterSignup } from "@/components/shared/NewsletterSignup";
+import { RecommendationsSection } from "@/components/recommendations";
 
 export const dynamic = "force-dynamic";
 
@@ -124,6 +125,7 @@ export default async function HomePage() {
 
       <Hero latest={reviews[0] ?? null} stats={stats} />
       <HomeSubscribedCategoryChips />
+      <RecommendationsSection limit={10} />
 
       <div className="mt-16 space-y-20 md:mt-20 md:space-y-28">
         {reviews.length > 0 && <EditorialPicks reviews={reviews} />}
