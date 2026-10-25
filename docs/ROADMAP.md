@@ -80,8 +80,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Social Sharing & Viral Loops** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅)**. Nächster Schritt: PKG-3 Meta-Tags Generierung.
+**Social Sharing & Viral Loops** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅, PKG-3 ✅)**. Nächster Schritt: PKG-4 Share-Tracking API.
 
 ## Nächster Schritt
 
-F4 PKG-3: `lib/share-meta.ts` für OG/Twitter Meta-Tags Generierung pro Content-Type (Review, Collection, Series, Profile), `generateMetadata` Integration, `unstable_cache` 5 Min, Fallback-Bilder.
+F4 PKG-4: `/api/share/track` Route — POST mit Zod-Validierung, Rate-Limit (30 req/min/IP), `keepalive` fetch, Batch-Insert via `createMany`, Counter-Increment auf `shareCounts` JSON, Integration-Tests.

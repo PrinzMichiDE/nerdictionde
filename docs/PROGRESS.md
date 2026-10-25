@@ -514,6 +514,14 @@
 - Unit-Tests: `tests/lib/share-urls.test.ts` (19 Tests, alle grün)
 - Type-Check, Tests (674 passed) grün
 
+**PKG-3 ✅:**
+- `src/lib/share-meta.ts`: OG/Twitter Meta-Tags Generierung für 4 Content-Types (REVIEW, COLLECTION, SERIES, PROFILE)
+- `generateShareMetadata()` Basis-Funktion + spezialisierte Helfer (`generateReviewMetadata`, `generateCollectionMetadata`, `generateSeriesMetadata`, `generateProfileMetadata`)
+- `unstable_cache` 5 Min mit Tag-Invaliderung (`share-meta:{type}:{id}`)
+- Fallback-Bild `/og-default.png`, Markdown-Stripping, article/profile Types
+- Unit-Tests: `tests/lib/share-meta.test.ts` (28 Tests, alle grün)
+- Type-Check, Build, Tests (702 passed) grün
+
 ---
 
 ### Nächstes Feature (ROADMAP)
