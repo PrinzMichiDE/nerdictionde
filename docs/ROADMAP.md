@@ -80,8 +80,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-Keines — **Hardware-Kompatibilitäts-Check abgeschlossen (F1–F9 ✅)**. **Typ A vollständig erledigt**. Nächster Schritt: Typ D Feature wählen.
+**Review-Template-System** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 in Arbeit)**. Nächster Schritt: PKG-5 Template Selector UI → PKG-6 Editor → PKG-7 Frontend Renderer → Tests → Doku → Verify.
 
 ## Nächster Schritt
 
-Hauptschleife: F1 Auswahl für nächstes Typ-D-Feature (Review-Template-System empfohlen) → F2 Spec → F3 Design → F4 Implementierung.
+Hauptschleife: PKG-5 Template Selector UI → PKG-6 Editor → PKG-7 Frontend Renderer → PKG-8 Schema.org → PKG-9 Styles → PKG-10 Tests → PKG-11 Doku → PKG-12 Verify.

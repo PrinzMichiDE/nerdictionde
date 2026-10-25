@@ -41,8 +41,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Review-Template-System** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1, PKG-2 ✅, PKG-3 ✅, PKG-4 in Arbeit)**  
-**Phase:** F4 Implementierung → PKG-4 Admin CRUD Erweitern → PKG-5 Template Selector UI → PKG-6 Editor → PKG-7 Frontend Renderer
+**Aktuelles Feature:** **Review-Template-System** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 in Arbeit, PKG-6 geplant, PKG-7 geplant)**  
+**Phase:** F4 Implementierung → PKG-5 Template Selector UI → PKG-6 Editor → PKG-7 Frontend Renderer → PKG-8 Schema.org → PKG-9 Styles → PKG-10 Tests → PKG-11 Doku → PKG-12 Verify
 
 ---
 
