@@ -116,7 +116,7 @@ export function ParallaxHighlights() {
           {highlights.map((highlight, index) => (
             <Card
               key={index}
-              className={`group relative overflow-hidden border-2 transition-all duration-700 hover:shadow-2xl hover:-translate-y-2 ${
+              className={`group relative overflow-hidden border-2 transition-colors transition-shadow transition-transform duration-700 hover:shadow-2xl hover:-translate-y-2 ${
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
               style={{ transitionDelay: `${index * 0.15}s` }}
@@ -126,7 +126,7 @@ export function ParallaxHighlights() {
               />
               <CardContent className="p-8 relative z-10 text-center space-y-4">
                 <div className="flex justify-center">
-                  <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border-2 group-hover:scale-110 transition-transform duration-300">
+                  <div className="p-4 rounded-2xl bg-background/50 border-2 group-hover:scale-110 transition-transform duration-300">
                     {highlight.icon}
                   </div>
                 </div>

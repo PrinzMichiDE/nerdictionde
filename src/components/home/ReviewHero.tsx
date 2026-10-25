@@ -92,7 +92,7 @@ export function ReviewHero({ review }: ReviewHeroProps) {
         </div>
 
         <div className="absolute bottom-3 left-3 md:bottom-5 md:left-5 flex flex-wrap items-center gap-2 md:gap-3">
-          <span className="text-white text-xs md:text-sm font-semibold uppercase tracking-widest bg-black/60 px-2.5 py-1 rounded-sm">
+          <span className="text-white text-xs md:text-sm font-semibold bg-black/60 px-2.5 py-1 rounded-sm">
             {getRatingLabel(review.score)}
           </span>
         </div>

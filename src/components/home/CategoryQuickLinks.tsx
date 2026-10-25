@@ -57,12 +57,12 @@ export function CategoryQuickLinks() {
         {categories.map((category, index) => (
           <Card
             key={category.href}
-            className={`group relative overflow-hidden border-2 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 bg-gradient-to-br ${category.color} ${category.hoverColor}`}
+            className={`group relative overflow-hidden border-2 transition-colors transition-shadow transition-transform duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 bg-gradient-to-br ${category.color} ${category.hoverColor}`}
             style={{ animationDelay: `${index * 0.1}s`, animationFillMode: "both" }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <CardContent className="p-8 relative z-10 flex flex-col items-center text-center space-y-4">
-              <div className="p-4 rounded-2xl bg-background/50 backdrop-blur-sm border-2 border-primary/20 group-hover:border-primary/40 group-hover:scale-110 transition-all duration-300">
+              <div className="p-4 rounded-2xl bg-background/50 border-2 border-primary/20 group-hover:border-primary/40 group-hover:scale-110 transition-colors transition-transform duration-300">
                 <div className="text-primary">
                   {category.icon}
                 </div>
@@ -78,7 +78,7 @@ export function CategoryQuickLinks() {
               <Button
                 asChild
                 variant="outline"
-                className="w-full group/button border-2 hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all"
+                className="w-full group/button border-2 hover:border-primary hover:bg-primary hover:text-primary-foreground transition-colors"
               >
                 <Link href={category.href} className="flex items-center justify-center gap-2">
                   Ansehen

@@ -29,7 +29,7 @@ function ReviewCardItem({ review }: { review: Review }) {
     <SpotlightCard className="h-full rounded-2xl">
       <Link
         href={`/reviews/${review.slug}`}
-        className="group flex h-full flex-col rounded-2xl border border-border bg-card transition-all duration-500 hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="group flex h-full flex-col rounded-2xl border border-border bg-card transition-colors transition-transform transition-shadow duration-500 hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {/* Bild */}
         <div className="relative aspect-video overflow-hidden rounded-t-2xl bg-muted">
@@ -55,7 +55,7 @@ function ReviewCardItem({ review }: { review: Review }) {
             <ScoreBadge score={review.score} className="h-11 w-11 text-base shadow-lg" />
           </div>
           <span
-            className="absolute bottom-3 left-3 inline-flex items-center rounded-full px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-widest text-white backdrop-blur-sm"
+            className="absolute bottom-3 left-3 inline-flex items-center rounded-full px-2.5 py-1 text-[0.65rem] font-semibold text-white"
             style={{ background: "rgba(0,0,0,0.55)", border: "1px solid rgba(255,255,255,0.18)" }}
           >
             {categoryLabels[review.category] || review.category}
@@ -71,7 +71,7 @@ function ReviewCardItem({ review }: { review: Review }) {
             {review.title}
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-            {review.content?.replace(/[#*`]/g, "").substring(0, 150)}...
+            {review.content?.replace(/[#*`]/g, "").substring(0, 150)}…
           </p>
           <div className="mt-auto pt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
             <span>Zum Test</span>
@@ -99,7 +99,7 @@ export function LatestReviews({ reviews }: LatestReviewsProps) {
         <ScrollReveal variant="fade" delay={150}>
           <Link
             href="/reviews"
-            className="group hidden sm:inline-flex items-center gap-1.5 rounded-full border border-border px-5 py-2.5 text-sm font-semibold transition-all duration-300 hover:border-primary/40 hover:text-primary hover:shadow-lg hover:shadow-primary/10"
+            className="group hidden sm:inline-flex items-center gap-1.5 rounded-full border border-border px-5 py-2.5 text-sm font-semibold transition-colors transition-shadow duration-300 hover:border-primary/40 hover:text-primary hover:shadow-lg hover:shadow-primary/10"
           >
             Alle ansehen
             <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

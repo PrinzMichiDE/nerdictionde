@@ -61,13 +61,13 @@ export function ComparisonTable() {
             <table className="w-full min-w-[640px] border-collapse text-left">
               <thead>
                 <tr className="border-b border-border bg-muted/50">
-                  <th className="w-[26%] px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <th className="w-[26%] px-6 py-4 text-xs font-semibold text-muted-foreground">
                     Kriterium
                   </th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <th className="px-6 py-4 text-xs font-semibold text-muted-foreground">
                     Typische Review-Seite
                   </th>
-                  <th className="relative bg-primary/5 px-6 py-4 text-xs font-bold uppercase tracking-widest text-primary">
+                  <th className="relative bg-primary/5 px-6 py-4 text-xs font-semibold text-primary">
                     <span className="absolute inset-y-0 left-0 w-[3px] bg-primary" aria-hidden="true" />
                     <span className="inline-flex items-center gap-1.5">
                       <Sparkles className="size-3.5" />

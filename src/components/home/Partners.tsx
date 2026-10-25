@@ -71,7 +71,7 @@ export function Partners() {
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-2">
           <Building2 className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-primary uppercase tracking-wide">
+          <span className="text-sm font-semibold text-primary">
             Partner & Integrationen
           </span>
         </div>
@@ -87,7 +87,7 @@ export function Partners() {
         {partners.map((partner, index) => (
           <Card
             key={partner.name}
-            className={`group relative overflow-hidden border-2 transition-all duration-700 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 hover:border-primary/30 ${
+            className={`group relative overflow-hidden border-2 transition-colors transition-shadow transition-transform duration-700 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 hover:border-primary/30 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
             style={{ transitionDelay: `${index * 0.1}s` }}
@@ -97,7 +97,7 @@ export function Partners() {
             />
             <CardContent className="p-8 relative z-10 text-center space-y-4">
               <div className="flex justify-center">
-                <div className="p-4 rounded-2xl bg-primary/10 border-2 border-primary/20 group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
+                <div className="p-4 rounded-2xl bg-primary/10 border-2 border-primary/20 group-hover:scale-110 group-hover:bg-primary/20 transition-transform transition-colors duration-300">
                   <Building2 className="h-8 w-8 text-primary" />
                 </div>
               </div>

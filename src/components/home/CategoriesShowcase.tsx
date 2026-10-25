@@ -59,7 +59,7 @@ export function CategoriesShowcase({ counts }: CategoriesShowcaseProps) {
               <SpotlightCard tilt={false} className="h-full rounded-3xl">
                 <Link
                   href={cat.href}
-                  className="group shine relative flex h-full flex-col justify-between gap-10 overflow-hidden rounded-3xl border border-border bg-card p-8 transition-all duration-500 hover:-translate-y-2 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10"
+                  className="group shine relative flex h-full flex-col justify-between gap-10 overflow-hidden rounded-3xl border border-border bg-card p-8 transition-colors transition-transform transition-shadow duration-500 hover:-translate-y-2 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10"
                 >
                 {/* Glow */}
                 <div
@@ -83,7 +83,7 @@ export function CategoriesShowcase({ counts }: CategoriesShowcaseProps) {
                   >
                     <Icon className="size-8" />
                   </span>
-                  <ArrowUpRight className="size-6 text-muted-foreground transition-all duration-300 group-hover:text-primary group-hover:translate-x-1 group-hover:-translate-y-1" />
+                  <ArrowUpRight className="size-6 text-muted-foreground transition-colors transition-transform duration-300 group-hover:text-primary group-hover:translate-x-1 group-hover:-translate-y-1" />
                 </div>
 
                 <div className="relative z-10 space-y-3">

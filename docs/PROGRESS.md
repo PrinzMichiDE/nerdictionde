@@ -41,8 +41,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Review-Template-System** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅, PKG-6 ✅, PKG-7 ✅, PKG-8 ✅, PKG-9 ✅, PKG-10 ✅, PKG-11 ✅, PKG-12 ✅)**  
-**Phase:** F9 Abschluss → Hauptschleife für nächstes Feature
+**Aktuelles Feature:** **Social Sharing & Viral Loops** — **F1 ✅, F2 ✅, F3 ✅**  
+**Phase:** F4 Implementierung — PKG-1: DB-Migration & Model
 
 ---
 
@@ -423,6 +423,89 @@
 - [x] Migration reversibel
 - [x] Keine Secrets im Diff
 - [x] Alles gepusht auf `auto/dev`
+
+---
+
+### Zusammenfassung: Personalisierte Empfehlungen (Abgeschlossen 2026-10-25)
+
+**Implementierte User Stories (alle ✅):**
+- US1: "Für dich empfohlen" auf Startseite (`/`) — Grid 2/3/4 Spalten, 5–10 Empfehlungen, Begründungen pro Karte, Dismiss-Button, nur für eingeloggte Nutzer
+- US2: "Auch interessant" auf Review-Detailseiten (`/reviews/[slug]`) — Horizontal scrollbar (Mobile) / Grid (Desktop), 3–5 Empfehlungen, Begründungen, Content-Based
+- US3: Dismiss-Funktion — Pro Empfehlung dismissbar (Nicht interessant / Bereits gelesen / Nicht relevant), persistiert 30 Tage, optimistische UI
+- US4: Begründungen — Badge pro Karte: "Weil du X bewertet hast", "Ähnlich zu Y", "Beliebt in Kategorie Z", "Von Entwickler X", "Trending"
+- US5: Cold-Start Fallback — Trending + Kategorie-Mix für Nutzer ohne Signale
+- US6: Einstellungen Toggle — In `/einstellungen` abschaltbar (API `GET/POST /api/user/recommendations-preference`)
+
+**Technische Highlights:**
+- Content-Based (Tags, Kategorie, Developer/Publisher), User-User Collaborative (Follows), Item-Item Collaborative (Co-Occurrence), Trending (Views × Rating)
+- MMR (Maximal Marginal Relevance) für Diversität (lambda=0.3)
+- Gewichte konfigurierbar: Content 40%, User-User 30%, Item-Item 20%, Trending 10%
+- Cold-Start: Category-Subscriptions → Top-Rated pro Kategorie, sonst Trending-Mix
+- `unstable_cache`: Home 5 Min (`recommendations:home:{userId}`), Detail 15 Min (`recommendations:detail:{reviewId}`), Signals 5 Min
+- Cache-Invaliderung via Tags bei Rating/Bookmark/Follow/ReadingHistory/CategorySub/Dismiss
+- Prisma Model `RecommendationDismiss` + `personalizedRecommendationsEnabled` auf `TwitchUser`
+- Feature-Flag `FEATURE_PERSONALIZED_RECOMMENDATIONS` (Default: `true`)
+- 122 neue Tests (Unit: Signals, Candidates, Scoring, MMR, Reason, Dismiss; Integration: API Routes; E2E: Hooks, Dismiss, Toggle)
+- Reversible Migration `RecommendationDismiss` Tabelle
+
+**Dateien (neu/geändert):**
+- `prisma/schema.prisma` (RecommendationDismiss Model, TwitchUser.personalizedRecommendationsEnabled)
+- `src/types/recommendations.ts`, `src/lib/recommendation-schema.ts`
+- `src/lib/recommendations-signals.ts`, `src/lib/recommendations-candidates.ts`, `src/lib/recommendations-scoring.ts`, `src/lib/recommendations.ts`
+- `src/app/api/recommendations/route.ts`, `src/app/api/recommendations/dismiss/route.ts`, `src/app/api/reviews/[slug]/recommendations/route.ts`, `src/app/api/user/recommendations-preference/route.ts`
+- `src/hooks/useRecommendations.ts`
+- `src/components/recommendations/` (RecommendationCard, RecommendationSkeleton, RecommendationsSection, ReviewRecommendations, PersonalizedRecommendationsToggle)
+- `src/app/page.tsx` (RecommendationsSection Integration), `src/app/reviews/[slug]/page.tsx` (ReviewRecommendations Integration), `src/app/einstellungen/page.tsx` (Toggle)
+- `src/app/api/user/recommendations-preference/route.ts`
+- Tests: `tests/lib/recommendation-schema.test.ts`, `tests/lib/recommendations-signals.test.ts`, `tests/lib/recommendations-candidates.test.ts`, `tests/lib/recommendations-scoring.test.ts`, `tests/lib/recommendations.test.ts`, `tests/hooks/useRecommendations.test.ts`, `tests/app/api/recommendations.test.ts`
+- Doku: `CHANGELOG.md`, `README.md`, `ROADMAP.md`, `.env.example`, `docs/features/personalized-recommendations.md`, `docs/features/personalized-recommendations-design.md`, `docs/PROGRESS.md`
+
+**Definition of Done erfüllt:**
+- [x] Spec vollständig, alle AK getestet & erfüllt
+- [x] Self-Review ohne offene Befunde
+- [x] Build, Type-Check, Lint, Tests grün
+- [x] Doku & Changelog aktualisiert
+- [x] Migration reversibel
+- [x] Keine Secrets im Diff
+- [x] Alles gepusht auf `auto/dev`
+
+---
+
+### Nächstes Feature (ROADMAP)
+
+**Kandidaten (Typ D):**
+- Hardware-Kompatibilitäts-Check
+
+---
+
+### Auswahl: Social Sharing & Viral Loops (F1) — 2026-10-25
+
+- **Gewählt:** Social Sharing & Viral Loops
+- **Verworfen:** Review-Serien für Nutzer (höherer Aufwand, bestehende Series-Model wiederverwenden), Erweiterte Benachrichtigungs-Präferenzen (Cron/Digest nötig), Review-Embed für externe Sites (Widget-App nötig), Dark Mode Sync (niedrigerer Nutzen), Barrierefreiheits-Audit (hoher Aufwand), Performance-Budget (CI-Integration nötig)
+- **Begründung:** Bestes Nutzen-Aufwand-Verhältnis. Hoher Nutzen (Traffic, Markenbekanntheit, Viralität durch One-Click Share auf Twitter/X, Bluesky, Mastodon, Reddit, Discord, Link-Kopie), niedriger Aufwand (bestehende Share-Buttons in ReviewReactions/ReviewCompareShareButton/CollectionShareButton/SeriesShareButton wiederverwenden, Meta-Tags optimieren, Share-Statistiken), keine neuen komplexen Models (nur `ShareEvent` für Tracking), keine Breaking Changes, sofort sichtbare Ergebnisse für alle Content-Types (Reviews, Listen, Serien, Profile).
+- **Commit:** `docs(feature): select social-sharing` → push
+
+**Spezifikation (F2) — 2026-10-25:**
+- `docs/features/social-sharing.md` erstellt: 12 Abschnitte (Problem, 7 User Stories, Scope, Randfälle, Datenmodell, API, UI/UX, Sicherheit/Performance, Tests, Rollout, Review-Checkliste)
+- 6 Plattformen: Twitter/X, Bluesky, Mastodon, Reddit, Discord, Copy Link
+- 4 Content-Types: REVIEW, COLLECTION, SERIES, PROFILE
+- Feature-Flags: `FEATURE_SOCIAL_SHARING` (Default true), `FEATURE_SHARE_TRACKING` (Default true)
+- Reversible Migration `20261025_add_share_tracking`
+- Share-Buttons Komponente konsolidiert bestehende Buttons (ReviewReactions, Collections, Series, Compare)
+
+**Design & Plan (F3) — 2026-10-25:**
+- `docs/features/social-sharing-design.md` erstellt: Architektur, 8 Arbeitspakete (PKG-1 bis PKG-8), Datenfluss, Cache-Strategie, Risiken, Schätzung ~9.5h
+- Konsolidierung von 4 bestehenden Share-Komponenten in 1 zentrale `ui/ShareButtons.tsx`
+- Bestehende Patterns: shadcn/ui, `unstable_cache`, Feature-Flags, Prisma Batch-Ops
+- Keine neuen Dependencies (lucide-react Icons bereits vorhanden)
+
+**Implementierung (F4) — PKG-1 ✅:**
+- Prisma Schema: `ShareEvent`, `ShareContentType`, `SharePlatform` Enums
+- `shareCounts` JSON auf `Review`, `ReviewCollection`, `ReviewSeries`, `TwitchUser`
+- Migration via `prisma db push` angewendet
+- Feature-Flags in `src/lib/feature-flags.ts`: `FEATURE_SOCIAL_SHARING`, `FEATURE_SHARE_TRACKING`
+- `.env.example` aktualisiert
+- Type-Check, Build, Tests (655 passed) grün
 
 ---
 

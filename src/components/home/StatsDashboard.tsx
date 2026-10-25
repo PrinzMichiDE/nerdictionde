@@ -94,7 +94,7 @@ function StatBar({ stat, isVisible, index }: { stat: StatData; isVisible: boolea
       </div>
       <div className="h-3 bg-muted rounded-full overflow-hidden">
         <div
-          className={`h-full ${stat.color} transition-all duration-1000 ease-out rounded-full`}
+          className={`h-full ${stat.color} transition-[width] duration-1000 ease-out rounded-full`}
           style={{
             width: isVisible ? `${percentage}%` : "0%",
             transitionDelay: `${index * 0.1}s`,
@@ -163,7 +163,7 @@ export function StatsDashboard({ statistics }: StatsDashboardProps) {
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-2">
           <BarChart3 className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-primary uppercase tracking-wide">
+          <span className="text-sm font-semibold text-primary">
             Interaktives Dashboard
           </span>
         </div>
@@ -177,7 +177,7 @@ export function StatsDashboard({ statistics }: StatsDashboardProps) {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Key Metrics */}
-        <Card className="lg:col-span-2 border-2 hover:border-primary/30 transition-all duration-500 hover:shadow-xl">
+        <Card className="lg:col-span-2 border-2 hover:border-primary/30 transition-colors transition-shadow duration-500 hover:shadow-xl">
           <CardContent className="p-8 space-y-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-3 rounded-xl bg-primary/10 text-primary">
@@ -196,7 +196,7 @@ export function StatsDashboard({ statistics }: StatsDashboardProps) {
 
         {/* Summary Cards */}
         <div className="space-y-6">
-          <Card ref={cardRef} className="border-2 hover:border-primary/30 transition-all duration-500 hover:shadow-xl">
+          <Card ref={cardRef} className="border-2 hover:border-primary/30 transition-colors transition-shadow duration-500 hover:shadow-xl">
             <CardContent className="p-8 text-center space-y-4">
               <div className="p-4 rounded-xl bg-primary/10 text-primary w-fit mx-auto">
                 <Target className="h-8 w-8" />
@@ -208,7 +208,7 @@ export function StatsDashboard({ statistics }: StatsDashboardProps) {
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-primary/30 transition-all duration-500 hover:shadow-xl">
+          <Card className="border-2 hover:border-primary/30 transition-colors transition-shadow duration-500 hover:shadow-xl">
             <CardContent className="p-8 text-center space-y-4">
               <div className="p-4 rounded-xl bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 w-fit mx-auto">
                 <Calendar className="h-8 w-8" />

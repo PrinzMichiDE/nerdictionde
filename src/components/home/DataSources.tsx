@@ -65,7 +65,7 @@ export function DataSources() {
           <ScrollReveal key={name} variant="up" delay={(i % 4) * 110} className="h-full">
             <SpotlightCard tilt={false} className="h-full rounded-2xl">
               <article
-                className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl"
+                className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card p-6 transition-colors transition-transform transition-shadow duration-500 hover:-translate-y-1.5 hover:shadow-xl"
                 style={{ ["--src-tint" as string]: tint }}
               >
               <div
@@ -89,7 +89,7 @@ export function DataSources() {
                 <h3 className="font-serif text-xl font-semibold tracking-tight">{name}</h3>
                 <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
 
-                <span className="inline-flex items-center rounded-full border border-border px-3 py-1 text-[0.65rem] font-bold uppercase tracking-widest text-muted-foreground">
+                <span className="inline-flex items-center rounded-full border border-border px-3 py-1 text-[0.65rem] font-semibold text-muted-foreground">
                   {usage}
                 </span>
               </div>

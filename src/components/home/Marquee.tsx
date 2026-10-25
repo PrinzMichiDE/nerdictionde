@@ -35,7 +35,7 @@ function MarqueeRow({ row }: { row: number }) {
 
 export function Marquee() {
   return (
-    <div className="full-bleed border-y border-border bg-background/80 py-5 backdrop-blur-sm">
+    <div className="full-bleed border-y border-border bg-background/80 py-5">
       <div className="marquee" style={{ "--marquee-speed": "38s" } as CSSProperties}>
         <div className="marquee-track">
           <MarqueeRow row={0} />

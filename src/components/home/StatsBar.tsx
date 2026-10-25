@@ -108,7 +108,7 @@ function StatCard({ item, index }: { item: StatItem; index: number }) {
         </div>
         <div className="relative z-10 mt-5 h-1 overflow-hidden rounded-full bg-muted">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-primary/70 to-primary transition-all duration-1000 ease-out"
+            className="h-full rounded-full bg-gradient-to-r from-primary/70 to-primary transition-[width] duration-1000 ease-out"
             style={{
               width: item.decimals
                 ? `${Math.min(100, Math.max(4, item.value))}%`

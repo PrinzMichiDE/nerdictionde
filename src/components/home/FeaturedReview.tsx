@@ -23,7 +23,7 @@ export function FeaturedReview({ review }: FeaturedReviewProps) {
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/30 mb-2">
           <Star className="h-5 w-5 text-yellow-600 dark:text-yellow-500 fill-current" />
-          <span className="text-sm font-bold uppercase tracking-wider text-yellow-700 dark:text-yellow-400">
+          <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-400">
             Featured Review
           </span>
         </div>
@@ -33,7 +33,7 @@ export function FeaturedReview({ review }: FeaturedReviewProps) {
         </p>
       </div>
 
-      <Card className="group relative overflow-hidden border-2 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10">
+      <Card className="group relative overflow-hidden border-2 hover:border-primary/30 transition-colors transition-shadow duration-500 hover:shadow-2xl hover:shadow-primary/10">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         
         <div className="grid md:grid-cols-2 gap-0">
@@ -67,7 +67,7 @@ export function FeaturedReview({ review }: FeaturedReviewProps) {
             <div className="absolute top-6 right-6 z-10">
               <Badge 
                 variant="outline" 
-                className="capitalize text-sm font-semibold border-primary/30 bg-background/80 backdrop-blur-sm hover:bg-background/90 transition-colors px-4 py-2"
+                className="capitalize text-sm font-semibold border-primary/30 bg-background/80 hover:bg-background/90 transition-colors px-4 py-2"
               >
                 {review.category}
               </Badge>
@@ -92,7 +92,7 @@ export function FeaturedReview({ review }: FeaturedReviewProps) {
               </h3>
               
               <p className="text-muted-foreground text-base md:text-lg leading-relaxed line-clamp-4">
-                {review.content.replace(/[#*`]/g, "").substring(0, 300)}...
+                {review.content.replace(/[#*`]/g, "").substring(0, 300)}…
               </p>
 
               {/* Pros Preview */}
@@ -116,7 +116,7 @@ export function FeaturedReview({ review }: FeaturedReviewProps) {
               <Button 
                 asChild 
                 size="lg" 
-                className="group/button rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                className="group/button rounded-full shadow-lg hover:shadow-xl transition-transform hover:scale-105"
               >
                 <Link href={`/reviews/${review.slug}`} className="flex items-center gap-2">
                   Vollständigen Review lesen

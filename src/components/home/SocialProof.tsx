@@ -141,7 +141,7 @@ export function SocialProof() {
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-2">
           <TrendingUp className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-primary uppercase tracking-wide">
+          <span className="text-sm font-semibold text-primary">
             Social Proof
           </span>
         </div>
@@ -157,7 +157,7 @@ export function SocialProof() {
         {metrics.map((metric, index) => (
           <Card
             key={index}
-            className={`group relative overflow-hidden border-2 transition-all duration-700 hover:shadow-2xl hover:-translate-y-2 hover:border-primary/30 ${
+            className={`group relative overflow-hidden border-2 transition-colors transition-shadow transition-transform duration-700 hover:shadow-2xl hover:-translate-y-2 hover:border-primary/30 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
             style={{ transitionDelay: `${index * 0.1}s` }}
@@ -167,7 +167,7 @@ export function SocialProof() {
               />
               <CardContent className="p-8 relative z-10 space-y-4">
                 <div className="flex items-start justify-between gap-4">
-                  <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
+                  <div className="p-3 rounded-xl bg-primary/10 text-primary group-hover:scale-110 group-hover:bg-primary/20 transition-transform transition-colors duration-300">
                     {metric.icon}
                   </div>
                 </div>

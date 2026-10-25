@@ -13,6 +13,8 @@ export const FEATURE_PERSONALIZED_RECOMMENDATIONS = process.env.FEATURE_PERSONAL
 export const FEATURE_COMMUNITY_QA = process.env.FEATURE_COMMUNITY_QA !== 'false';
 export const FEATURE_HARDWARE_COMPATIBILITY = process.env.FEATURE_HARDWARE_COMPATIBILITY === 'true';
 export const FEATURE_REVIEW_TEMPLATES = process.env.FEATURE_REVIEW_TEMPLATES === 'true';
+export const FEATURE_SOCIAL_SHARING = process.env.FEATURE_SOCIAL_SHARING !== 'false';
+export const FEATURE_SHARE_TRACKING = process.env.FEATURE_SHARE_TRACKING !== 'false';
 
 // Object export for easy access
 export const featureFlags = {
@@ -27,4 +29,6 @@ export const featureFlags = {
   get communityQa() { return FEATURE_COMMUNITY_QA; },
   get hardwareCompatibility() { return FEATURE_HARDWARE_COMPATIBILITY; },
   get reviewTemplates() { return FEATURE_REVIEW_TEMPLATES; },
+  get socialSharing() { return FEATURE_SOCIAL_SHARING; },
+  get shareTracking() { return FEATURE_SHARE_TRACKING; },
 };

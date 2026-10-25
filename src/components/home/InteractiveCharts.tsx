@@ -62,7 +62,7 @@ export function ScoreDistribution({ scores }: ScoreDistributionProps) {
   const maxCount = Math.max(...distribution.map((d) => d.count), 1);
 
   return (
-    <Card ref={ref} className="border-2 hover:border-primary/30 transition-all duration-500">
+    <Card ref={ref} className="border-2 hover:border-primary/30 transition-colors duration-500">
       <CardContent className="p-8 space-y-6">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-xl bg-primary/10 text-primary">
@@ -86,7 +86,7 @@ export function ScoreDistribution({ scores }: ScoreDistributionProps) {
                 </div>
                 <div className="h-4 bg-muted rounded-full overflow-hidden">
                   <div
-                    className={`h-full ${item.color} transition-all duration-1000 ease-out rounded-full`}
+                    className={`h-full ${item.color} transition-[width] duration-1000 ease-out rounded-full`}
                     style={{
                       width: `${width}%`,
                       transitionDelay: `${index * 0.1}s`,
@@ -151,7 +151,7 @@ export function CategoryPieChart({ data }: PieChartProps) {
   }, [data, total]);
 
   return (
-    <Card ref={ref} className="border-2 hover:border-primary/30 transition-all duration-500">
+    <Card ref={ref} className="border-2 hover:border-primary/30 transition-colors duration-500">
       <CardContent className="p-8 space-y-6">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-xl bg-primary/10 text-primary">
@@ -267,7 +267,7 @@ export function TrendLine({ data }: TrendLineProps) {
     .join(" ");
 
   return (
-    <Card ref={ref} className="border-2 hover:border-primary/30 transition-all duration-500">
+    <Card ref={ref} className="border-2 hover:border-primary/30 transition-colors duration-500">
       <CardContent className="p-8 space-y-6">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-xl bg-primary/10 text-primary">

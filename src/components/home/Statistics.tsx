@@ -83,7 +83,7 @@ function StatCard({ icon, label, value, description, delay = 0 }: StatCardProps)
   return (
     <Card 
       ref={cardRef}
-      className="relative overflow-hidden border-2 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/30 group"
+      className="relative overflow-hidden border-2 transition-colors transition-shadow transition-transform duration-500 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/30 group"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       <CardContent className="p-6 relative z-10">
@@ -93,7 +93,7 @@ function StatCard({ icon, label, value, description, delay = 0 }: StatCardProps)
               <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors group-hover:scale-110">
                 {icon}
               </div>
-              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              <p className="text-sm font-medium text-muted-foreground">
                 {label}
               </p>
             </div>

@@ -62,7 +62,7 @@ export function FeatureGrid() {
         {features.map(({ icon: Icon, title, description, tint }, i) => (
           <ScrollReveal key={title} variant="up" delay={(i % 3) * 120} className="h-full">
             <SpotlightCard tilt={false} className="h-full rounded-2xl">
-              <div className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card p-7 transition-all duration-500 hover:-translate-y-1.5 hover:border-primary/25 hover:shadow-xl hover:shadow-primary/10">
+              <div className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card p-7 transition-colors transition-transform transition-shadow duration-500 hover:-translate-y-1.5 hover:border-primary/25 hover:shadow-xl hover:shadow-primary/10">
                 {/* Obere Akzentlinie */}
                 <div
                   className="absolute inset-x-0 top-0 h-[3px] origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100"

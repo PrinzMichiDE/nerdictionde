@@ -54,11 +54,11 @@ export function WhyNerdiction() {
         {features.map((feature, index) => (
           <Card
             key={index}
-            className="group relative overflow-hidden border-2 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/30"
+            className="group relative overflow-hidden border-2 transition-colors transition-shadow transition-transform duration-500 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/30"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <CardContent className="p-6 relative z-10 space-y-4">
-              <div className="p-3 rounded-xl bg-primary/10 text-primary w-fit group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
+              <div className="p-3 rounded-xl bg-primary/10 text-primary w-fit group-hover:bg-primary/20 group-hover:scale-110 transition-transform transition-colors duration-300">
                 {feature.icon}
               </div>
               <div className="space-y-2">

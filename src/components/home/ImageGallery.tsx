@@ -101,7 +101,7 @@ export function ImageGallery({ reviews }: ImageGalleryProps) {
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-2">
             <ZoomIn className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold text-primary uppercase tracking-wide">
+            <span className="text-sm font-semibold text-primary">
               Bildergalerie
             </span>
           </div>
@@ -117,7 +117,7 @@ export function ImageGallery({ reviews }: ImageGalleryProps) {
           {allImages.slice(0, 12).map((image, index) => (
             <Card
               key={image.id}
-              className={`group relative overflow-hidden border-2 cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 hover:border-primary/30 ${
+              className={`group relative overflow-hidden border-2 cursor-pointer transition-colors transition-shadow transition-transform duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 hover:border-primary/30 ${
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
               style={{ transitionDelay: `${index * 0.05}s` }}
@@ -135,7 +135,7 @@ export function ImageGallery({ reviews }: ImageGalleryProps) {
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                  <div className="p-3 rounded-full bg-background/90 backdrop-blur-sm border-2 border-primary/30">
+                  <div className="p-3 rounded-full bg-background/90 border-2 border-primary/30">
                     <ZoomIn className="h-6 w-6 text-primary" />
                   </div>
                 </div>
@@ -167,7 +167,7 @@ export function ImageGallery({ reviews }: ImageGalleryProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-4 right-4 z-50 rounded-full bg-background/90 backdrop-blur-sm hover:bg-background border-2"
+              className="absolute top-4 right-4 z-50 rounded-full bg-background/90 hover:bg-background border-2"
               onClick={closeLightbox}
             >
               <X className="h-5 w-5" />
@@ -179,7 +179,7 @@ export function ImageGallery({ reviews }: ImageGalleryProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-50 rounded-full bg-background/90 backdrop-blur-sm hover:bg-background border-2"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-50 rounded-full bg-background/90 hover:bg-background border-2"
                   onClick={(e) => {
                     e.stopPropagation();
                     navigateImage("prev");
@@ -190,7 +190,7 @@ export function ImageGallery({ reviews }: ImageGalleryProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-50 rounded-full bg-background/90 backdrop-blur-sm hover:bg-background border-2"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-50 rounded-full bg-background/90 hover:bg-background border-2"
                   onClick={(e) => {
                     e.stopPropagation();
                     navigateImage("next");
@@ -220,7 +220,7 @@ export function ImageGallery({ reviews }: ImageGalleryProps) {
             </div>
 
             {/* Image Info */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 bg-background/90 backdrop-blur-sm px-6 py-3 rounded-full border-2 border-primary/30">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 bg-background/90 px-6 py-3 rounded-full border-2 border-primary/30">
               <p className="text-sm font-semibold text-center">{selectedImage.title}</p>
               <p className="text-xs text-muted-foreground text-center mt-1">
                 {selectedImage.index + 1} / {allImages.length}

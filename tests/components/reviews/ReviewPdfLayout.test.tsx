@@ -41,6 +41,7 @@ interface MockReview {
   metaKeywords: null;
   userRatingCount: number;
   userRatingAvg: number;
+  shareCounts: Record<string, number>;
   seriesId: string | null;
   seriesOrder: number | null;
   templateId: string | null;
@@ -85,6 +86,7 @@ const createMockReview = (overrides: Partial<MockReview> = {}): MockReview => ({
   metaKeywords: null,
   userRatingCount: 0,
   userRatingAvg: 0,
+  shareCounts: {},
   seriesId: null,
   seriesOrder: null,
   templateId: null,

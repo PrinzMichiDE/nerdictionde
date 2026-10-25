@@ -42,7 +42,7 @@ export function FeaturedSpotlight({ review }: FeaturedSpotlightProps) {
       <div className="relative grid overflow-hidden rounded-3xl border border-border bg-card shadow-2xl shadow-primary/5 lg:grid-cols-12 transition-colors duration-500 hover:border-primary/25">
         {/* Ribbon */}
         <div
-          className="absolute left-0 top-6 z-20 inline-flex items-center gap-1.5 rounded-r-full py-1.5 pl-4 pr-5 text-xs font-bold uppercase tracking-widest text-white shadow-lg"
+          className="absolute left-0 top-6 z-20 inline-flex items-center gap-1.5 rounded-r-full py-1.5 pl-4 pr-5 text-xs font-semibold text-white shadow-lg"
           style={{
             background:
               "linear-gradient(90deg, color-mix(in oklab, var(--primary) 88%, black), var(--primary))",
@@ -78,7 +78,7 @@ export function FeaturedSpotlight({ review }: FeaturedSpotlightProps) {
               score={review.score}
               className="h-16 w-16 md:h-20 md:w-20 text-2xl md:text-3xl border-4 border-card shadow-2xl"
             />
-            <p className="mt-2 text-xs font-semibold uppercase tracking-widest text-foreground">
+            <p className="mt-2 text-xs font-semibold text-foreground">
               {getRatingLabel(review.score)}
             </p>
           </div>

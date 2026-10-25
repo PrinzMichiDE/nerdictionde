@@ -63,7 +63,7 @@ export function VideoGallery({ reviews }: { reviews: Review[] }) {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {videos.map((video, i) => (
           <ScrollReveal key={video.key} variant="up" delay={(i % 3) * 120} className="h-full">
-            <article className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card transition-all duration-500 hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10">
+            <article className="group relative h-full overflow-hidden rounded-2xl border border-border bg-card transition-colors transition-transform transition-shadow duration-500 hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10">
               <Link href={`/reviews/${video.slug}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <div className="relative aspect-video overflow-hidden bg-muted">
                   <Image
@@ -80,7 +80,7 @@ export function VideoGallery({ reviews }: { reviews: Review[] }) {
                   />
 
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="inline-flex size-16 animate-pulse-glow items-center justify-center rounded-full border border-white/35 bg-white/15 text-white backdrop-blur-md transition-all duration-500 group-hover:scale-110 group-hover:border-primary group-hover:bg-primary/90">
+                    <span className="inline-flex size-16 animate-pulse-glow items-center justify-center rounded-full border border-white/35 bg-white/15 text-white transition-transform duration-500 group-hover:scale-110 group-hover:border-primary group-hover:bg-primary/90">
                       <Play className="ml-0.5 size-7 fill-white" />
                     </span>
                   </div>
@@ -102,7 +102,7 @@ export function VideoGallery({ reviews }: { reviews: Review[] }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`Video zu „${video.title}“ auf YouTube öffnen`}
-                className="absolute top-3 right-3 z-10 inline-flex size-9 items-center justify-center rounded-lg border border-white/15 bg-black/55 text-white backdrop-blur-sm transition-colors hover:bg-red-600"
+                className="absolute top-3 right-3 z-10 inline-flex size-9 items-center justify-center rounded-lg border border-white/15 bg-black/55 text-white transition-colors hover:bg-red-600"
               >
                 <Youtube className="size-4" />
               </a>

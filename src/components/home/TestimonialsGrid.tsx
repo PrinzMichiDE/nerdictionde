@@ -49,7 +49,7 @@ export function TestimonialsGrid() {
       <div className="grid gap-5 md:grid-cols-3">
         {testimonials.map((t, i) => (
           <ScrollReveal key={t.name} variant="up" delay={i * 130} className="h-full">
-            <figure className="group relative flex h-full flex-col gap-5 overflow-hidden rounded-3xl border border-border bg-card p-7 transition-all duration-500 hover:-translate-y-1.5 hover:border-primary/25 hover:shadow-xl hover:shadow-primary/10">
+            <figure className="group relative flex h-full flex-col gap-5 overflow-hidden rounded-3xl border border-border bg-card p-7 transition-colors transition-transform transition-shadow duration-500 hover:-translate-y-1.5 hover:border-primary/25 hover:shadow-xl hover:shadow-primary/10">
               <div
                 className="absolute -top-14 -right-14 size-36 rounded-full blur-3xl opacity-0 transition-opacity duration-700 group-hover:opacity-25"
                 style={{ background: t.tint }}

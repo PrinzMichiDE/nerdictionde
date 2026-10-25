@@ -38,6 +38,7 @@ model Review {
   releaseDate     DateTime? // Release date for games, movies, series, hardware
   userRatingCount Int             @default(0)
   userRatingAvg   Float           @default(0)
+  shareCounts     Json?           @default("{}") @map("share_counts")
   hardware        Hardware?       @relation(fields: [hardwareId], references: [id], onDelete: SetNull)
   comments        Comment[]
   userRatings     UserRating[]
@@ -370,6 +371,7 @@ model TwitchUser {
   hardwareProfile       Json?     @map("hardware_profile")
   hardwareProfileEnabled Boolean  @default(false) @map("hardware_profile_enabled")
   hardwareProfileVersion Int      @default(1) @map("hardware_profile_version")
+  shareCounts           Json?     @default("{}") @map("share_counts")
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
@@ -1713,6 +1715,7 @@ model ReviewCollection {
   owner          TwitchUser @relation("ReviewCollectionOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   itemCount      Int      @default(0) @map("item_count")
   followersCount Int      @default(0) @map("followers_count")
+  shareCounts    Json?    @default("{}") @map("share_counts")
   version        Int      @default(1)
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
@@ -1834,6 +1837,7 @@ model ReviewSeries {
   coverImage     String?
   partCount      Int      @default(0)
   aggregateScore Float?
+  shareCounts    Json?    @default("{}") @map("share_counts")
   version        Int      @default(1)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -1951,4 +1955,35 @@ model RecommendationDismiss {
   @@index([userId, expiresAt])
   @@index([expiresAt])
   @@map("recommendation_dismisses")
+}
+
+// Social Sharing & Viral Loops
+enum ShareContentType {
+  REVIEW
+  COLLECTION
+  SERIES
+  PROFILE
+}
+
+enum SharePlatform {
+  TWITTER
+  BLUESKY
+  MASTODON
+  REDDIT
+  DISCORD
+  COPY_LINK
+}
+
+model ShareEvent {
+  id          String           @id @default(cuid())
+  contentType ShareContentType
+  contentId   String
+  platform    SharePlatform
+  userId      String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  @@index([contentType, contentId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("share_events")
 }

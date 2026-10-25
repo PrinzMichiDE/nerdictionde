@@ -77,7 +77,7 @@ export function FAQ() {
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-2">
           <HelpCircle className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-primary uppercase tracking-wide">
+          <span className="text-sm font-semibold text-primary">
             Häufige Fragen
           </span>
         </div>
@@ -93,7 +93,7 @@ export function FAQ() {
         {faqs.map((faq, index) => (
           <Card
             key={index}
-            className={`group border-2 transition-all duration-500 hover:border-primary/30 hover:shadow-lg ${
+            className={`group border-2 transition-colors transition-shadow duration-500 hover:border-primary/30 hover:shadow-lg ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
             style={{ transitionDelay: `${index * 0.05}s` }}
@@ -114,7 +114,7 @@ export function FAQ() {
                 />
               </button>
               <div
-                className={`overflow-hidden transition-all duration-300 ${
+                className={`overflow-hidden transition-[max-height,opacity] duration-300 ${
                   openIndex === index ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                 }`}
               >

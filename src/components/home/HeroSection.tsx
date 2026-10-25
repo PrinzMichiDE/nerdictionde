@@ -68,7 +68,7 @@ export function HeroSection() {
 
       <div className="relative z-10 space-y-8 px-4 max-w-5xl">
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm animate-slide-up [animation-delay:0.1s] [animation-fill-mode:both]">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 animate-slide-up [animation-delay:0.1s] [animation-fill-mode:both]">
           <Sparkles className="h-4 w-4 text-primary" />
           <span className="text-sm font-semibold text-primary">Professionelle Reviews seit 2024</span>
         </div>
@@ -94,7 +94,7 @@ export function HeroSection() {
           <Button
             asChild
             size="lg"
-            className="rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 text-lg px-8 py-6 h-auto group"
+            className="rounded-full shadow-lg hover:shadow-xl transition-transform hover:scale-105 text-lg px-8 py-6 h-auto group"
           >
             <Link href="/reviews" className="flex items-center gap-2">
               Alle Reviews entdecken
@@ -105,7 +105,7 @@ export function HeroSection() {
             variant="outline"
             size="lg"
             asChild
-            className="rounded-full border-2 hover:bg-accent hover:border-accent-foreground/20 transition-all hover:scale-105 text-lg px-8 py-6 h-auto backdrop-blur-sm bg-background/50"
+            className="rounded-full border-2 hover:bg-accent hover:border-accent-foreground/20 transition-transform hover:scale-105 text-lg px-8 py-6 h-auto bg-background/50"
           >
             <Link href="/reviews?sort=score-desc">Top Reviews</Link>
           </Button>

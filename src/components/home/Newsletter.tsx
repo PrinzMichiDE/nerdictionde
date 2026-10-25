@@ -22,7 +22,7 @@ export function Newsletter() {
 
   return (
     <section className="space-y-8 py-16">
-      <Card className="relative overflow-hidden border-2 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent hover:border-primary/30 transition-all duration-500 shadow-xl">
+      <Card className="relative overflow-hidden border-2 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent hover:border-primary/30 transition-colors duration-500 shadow-xl">
         {/* Background Effects */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(var(--primary-rgb),0.1),transparent_50%)]" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
@@ -91,7 +91,7 @@ export function Newsletter() {
                     <Button
                       type="submit"
                       size="lg"
-                      className="w-full rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 h-12 text-base group"
+                      className="w-full rounded-full shadow-lg hover:shadow-xl transition-transform hover:scale-105 h-12 text-base group"
                     >
                       <span className="flex items-center justify-center gap-2">
                         <Sparkles className="h-4 w-4" />

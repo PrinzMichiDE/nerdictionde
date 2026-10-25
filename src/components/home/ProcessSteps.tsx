@@ -67,7 +67,7 @@ export function ProcessSteps() {
         {steps.map(({ icon: Icon, number, title, description, chip, tint }, i) => (
           <ScrollReveal key={number} variant="up" delay={i * 140} className="h-full">
             <SpotlightCard tilt={false} className="h-full rounded-3xl">
-              <article className="group relative h-full overflow-hidden rounded-3xl border border-border bg-card p-8 transition-all duration-500 hover:-translate-y-1.5 hover:border-primary/25 hover:shadow-2xl hover:shadow-primary/10">
+              <article className="group relative h-full overflow-hidden rounded-3xl border border-border bg-card p-8 transition-colors transition-transform transition-shadow duration-500 hover:-translate-y-1.5 hover:border-primary/25 hover:shadow-2xl hover:shadow-primary/10">
               {/* Ghost-Nummer */}
               <span
                 className="pointer-events-none absolute -top-3 right-4 font-serif text-7xl font-semibold tracking-tight"
@@ -109,7 +109,7 @@ export function ProcessSteps() {
                   <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
                 </div>
 
-                <span className="mt-auto inline-flex w-fit items-center rounded-full border border-border px-3 py-1 text-[0.65rem] font-bold uppercase tracking-widest text-muted-foreground">
+                <span className="mt-auto inline-flex w-fit items-center rounded-full border border-border px-3 py-1 text-[0.65rem] font-semibold text-muted-foreground">
                   {chip}
                 </span>
               </div>

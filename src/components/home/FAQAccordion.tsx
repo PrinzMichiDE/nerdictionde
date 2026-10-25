@@ -58,7 +58,7 @@ export function FAQAccordion() {
               <div
                 key={faq.question}
                 className={cn(
-                  "overflow-hidden rounded-2xl border transition-all duration-300",
+                  "overflow-hidden rounded-2xl border transition-colors duration-300",
                   isOpen
                     ? "border-primary/30 bg-card shadow-lg shadow-primary/5"
                     : "border-border bg-card/60 hover:border-primary/20"
@@ -89,7 +89,7 @@ export function FAQAccordion() {
                   </span>
                   <span
                     className={cn(
-                      "inline-flex size-8 shrink-0 items-center justify-center rounded-full border transition-all duration-300",
+                      "inline-flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors transition-transform duration-300",
                       isOpen
                         ? "rotate-180 border-primary/40 bg-primary/10 text-primary"
                         : "border-border text-muted-foreground group-hover:border-primary/30 group-hover:text-primary"
