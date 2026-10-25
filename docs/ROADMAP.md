@@ -61,7 +61,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 ### Neue Kandidaten (auto-generiert 2026-10-25 — Roadmap leer, neu generiert)
 
 - [x] **Review-Template-System** — Vordefinierte Review-Strukturen (Pro/Contra, Score-Kategorien, Checkliste) für Autoren; Konsistenz, schnellere Erstellung, SEO-Vorteil durch strukturierte Daten. Hoher Nutzen (Qualität, Effizienz), mittlerer Aufwand (Editor-Erweiterung, Templates als JSON, Validierung). **← erledigt (F1–F12 ✅)**
-- [x] **Social Sharing & Viral Loops** — One-Click Share für Reviews/Listen/Serien (Twitter/X, Bluesky, Mastodon, Reddit, Discord, Link-Kopie); OG/Twitter Cards optimieren; Share-Statistiken. Hoher Nutzen (Traffic, Markenbekanntheit), niedriger Aufwand (bestehende Share-Buttons erweitern, Meta-Tags). **← in Arbeit (F1 ✅, F2 ✅)**
+- [x] **Social Sharing & Viral Loops** — One-Click Share für Reviews/Listen/Serien (Twitter/X, Bluesky, Mastodon, Reddit, Discord, Link-Kopie); OG/Twitter Cards optimieren; Share-Statistiken. Hoher Nutzen (Traffic, Markenbekanntheit), niedriger Aufwand (bestehende Share-Buttons erweitern, Meta-Tags). **← erledigt (F1–F9 ✅)**
 - [ ] **Review-Serien für Nutzer (nicht nur Admin)** — Nutzer können eigene Serien erstellen (z.B. "Meine Top 10 RPGs 2024"), öffentlich/privat, kollaborativ. Hoher Nutzen (Community, UGC), mittlerer Aufwand (bestehende Series-Model wiederverwenden, UI für Erstellung).
 - [ ] **Erweiterte Benachrichtigungs-Präferenzen** — Granulare Einstellungen pro Kategorie/Typ (Push, E-Mail, In-App, Digest), Frequenz (sofort, täglich, wöchentlich), Stumm-Schaltung pro Objekt. Hoher Nutzen (Retention, Kontrolle), mittlerer Aufwand (Prefs-Model, Digest-Cron, UI).
 - [ ] **Review-Embed für externe Sites** — Einbettbarer Widget-Code (`<script>` + `<div>`) für Reviews/Listen/Serien; Responsive, Themeable, No-Cookie. Hoher Nutzen (Distribution, Backlinks), mittlerer Aufwand (neuer Endpunkt, Widget-React-App, CSP).
@@ -80,8 +80,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-**Social Sharing & Viral Loops** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1 ✅, PKG-2 ✅, PKG-3 ✅, PKG-4 ✅, PKG-5 ✅)**. Nächster Schritt: F6 Self-Review, F7 Vollverifikation, F8 Doku.
+**Social Sharing & Viral Loops** — **F1–F9 ✅ (erledigt)**. Nächstes Feature: **Review-Serien für Nutzer** (siehe Typ D Kandidaten).
 
 ## Nächster Schritt
 
-F6 Self-Review: Code-Review gegen Spec-Checkliste, F7 Vollverifikation (Build, Type-Check, Lint, Tests), F8 Doku & Changelog, F9 Abschluss.
+Neues Feature starten: **Review-Serien für Nutzer** (F1: Auswahl, F2: Spec, F3: Design).
