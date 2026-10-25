@@ -44,8 +44,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Review-Serien für Nutzer** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅ PKG-5✅** (Public API Erweiterung)  
-**Nächster Schritt:** **PKG-6: Feed & Notification Integration** (`lib/feed.ts` Erweiterung `includeUserSeries`, Notification Types `user_series_update`, `user_series_invite`)
+**Aktuelles Feature:** **Review-Serien für Nutzer** — **F1✅ F2✅ F3✅ → F4 PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅ PKG-5✅ PKG-6✅** (Feed & Notification Integration)  
+**Nächster Schritt:** **PKG-7: Public Pages Erweiterung** (`/serien` Filter-Chips, `/serien/[slug]` Visibility-Check + Follow-Button, Profil-Tab "Serien")
 
 ---
 
@@ -554,6 +554,33 @@
 
 ---
 
+### Zusammenfassung: Review-Serien für Nutzer — PKG-6 (Feed & Notification Integration) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- **NotificationType Enum erweitert:** `user_series_update`, `user_series_invite` (via `prisma db push`)
+- **Feed Erweiterung (`lib/feed.ts`):** Neuer `user_series_item` FeedItem-Type, `includeUserSeries` Parameter (Default: `true`), Deduplikation gegen Ratings/Bookmarks/Collections
+- **Notification Helpers (`lib/user-series.ts`):**
+  - `createUserSeriesItemNotification(seriesId, actorId, reviewIds[])` — benachrichtigt Follower bei neuen Items (Batch-Insert, Dedupe via `userId !== actorId`)
+  - `createUserSeriesInviteNotification(seriesId, invitedUserId, inviterId)` — benachrichtigt eingeladenen User bei Collaborator-Einladung
+- **API Routes aktualisiert:**
+  - `POST /api/user/serien/[slug]/items` — ruft `createUserSeriesItemNotification` nach erfolgreichem Add auf (fire-and-forget)
+  - `POST /api/user/serien/[slug]/collaborators` — ruft `createUserSeriesInviteNotification` nach erfolgreicher Einladung auf (fire-and-forget)
+  - `GET /api/feed` — übergibt `includeUserSeries` Parameter
+- **Feature-Flag:** `FEATURE_USER_SERIES` steuert Feed-Integration und Notifications
+- **Verifikation:** Type-Check ✅, Build ✅, Tests 791/791 ✅, Lint keine neuen Errors ✅
+
+**Dateien (neu/geändert):**
+- `prisma/schema.prisma` (NotificationType Enum)
+- `src/lib/feed.ts` (FeedItem Type + includeUserSeries)
+- `src/lib/user-series.ts` (2 Notification Helper Functions)
+- `src/app/api/feed/route.ts` (includeUserSeries Parameter)
+- `src/app/api/user/serien/[slug]/items/route.ts` (Notification Trigger)
+- `src/app/api/user/serien/[slug]/collaborators/route.ts` (Notification Trigger)
+
+---
+
 ### Nächstes Feature (ROADMAP)
 
 **Kandidaten (Typ D):**
@@ -777,6 +804,33 @@
 - `src/lib/review-series.ts`
 - `src/app/api/serien/route.ts`
 - `src/app/api/serien/[slug]/route.ts`
+
+---
+
+### Zusammenfassung: Review-Serien für Nutzer — PKG-6 (Feed & Notification Integration) ✅
+
+**Abgeschlossen:** 2026-10-25
+
+**Änderungen:**
+- **NotificationType Enum erweitert:** `user_series_update`, `user_series_invite` (via `prisma db push`)
+- **Feed Erweiterung (`lib/feed.ts`):** Neuer `user_series_item` FeedItem-Type, `includeUserSeries` Parameter (Default: `true`), Deduplikation gegen Ratings/Bookmarks/Collections
+- **Notification Helpers (`lib/user-series.ts`):**
+  - `createUserSeriesItemNotification(seriesId, actorId, reviewIds[])` — benachrichtigt Follower bei neuen Items (Batch-Insert, Dedupe via `userId !== actorId`)
+  - `createUserSeriesInviteNotification(seriesId, invitedUserId, inviterId)` — benachrichtigt eingeladenen User bei Collaborator-Einladung
+- **API Routes aktualisiert:**
+  - `POST /api/user/serien/[slug]/items` — ruft `createUserSeriesItemNotification` nach erfolgreichem Add auf (fire-and-forget)
+  - `POST /api/user/serien/[slug]/collaborators` — ruft `createUserSeriesInviteNotification` nach erfolgreicher Einladung auf (fire-and-forget)
+  - `GET /api/feed` — übergibt `includeUserSeries` Parameter
+- **Feature-Flag:** `FEATURE_USER_SERIES` steuert Feed-Integration und Notifications
+- **Verifikation:** Type-Check ✅, Build ✅, Tests 791/791 ✅, Lint keine neuen Errors ✅
+
+**Dateien (neu/geändert):**
+- `prisma/schema.prisma` (NotificationType Enum)
+- `src/lib/feed.ts` (FeedItem Type + includeUserSeries)
+- `src/lib/user-series.ts` (2 Notification Helper Functions)
+- `src/app/api/feed/route.ts` (includeUserSeries Parameter)
+- `src/app/api/user/serien/[slug]/items/route.ts` (Notification Trigger)
+- `src/app/api/user/serien/[slug]/collaborators/route.ts` (Notification Trigger)
 
 ---
 
