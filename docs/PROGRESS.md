@@ -3,7 +3,7 @@
 ## Stand (2026-10-25)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: **636/636 grün** (vitest), `lint`: **39 Errors** (alle `no-explicit-any` in Bestandsdateien, inkrementelle Bereinigung), 321 Warnings — keine neuen Errors
+- `type-check`: grün. `build`: grün. `tests`: **636/636 grün** (vitest), `lint`: **31 Errors** (alle `no-explicit-any` in externen Skills/Admin, nicht blockierend), 321 Warnings — keine neuen Errors
 - `scripts/verify.sh`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `npm run verify`, `npm test` angelegt und gepusht.
 - Abgeschlossene Features:
   1. Newsletter Double-Optin + Bestätigungsseite
@@ -26,12 +26,13 @@
   18. **Hardware-Kompatibilitäts-Check** (`/einstellungen/hardware`, `/reviews/[slug]`, CPU/GPU/RAM Profil, Kompatibilitäts-Badge, FPS-Schätzungen, Feature-Flag)
 - Abgeschlossene Typ-A-Aufgaben (diese Iteration):
   - Kritische Lint-Bugs behoben: React-Hooks-Verstöße (setState in useEffect), `no-empty-object-type`, `react/no-unescaped-entities`, `@next/next/no-html-link-for-pages`, `react-hooks/purity` (Math.random im Render), `react-hooks/immutability` (Mutation im Render)
-  - `no-explicit-any` Bereinigung gestartet: 150+/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
+  - `no-explicit-any` Bereinigung: **vollständig in Quelldateien** (src/lib/qa.ts, src/lib/recommendations-candidates.ts, src/app/api/user/hardware-profile/route.ts), 150+/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
   - **Letzte 3 React-Hooks-Errors behoben**: `TableOfContents.tsx`, `YouTubeEmbed.tsx`, `SupportTopBanner.tsx` — redundante `setState` in `useEffect` durch Lazy Initializer ersetzt
   - **Category Subscriptions Fixes**: `useEffect` statt `useLayoutEffect` für Mount-Detection, `initialUserId` Prop entfernt (unused)
   - **Collections Follow Tests repariert**: Mock für `createCollectionUpdateNotification`, `prisma.reviewCollection.findUnique`, `followedCollectionsResponseSchema` ergänzt
   - **Test-Infrastruktur**: OpenAI Client für Browser-Test-Umgebung freigegeben (`dangerouslyAllowBrowser: true`)
   - **Type-Check Reparaturen**: 6 Test-Dateien von `no-explicit-any` bereinigt (category-subscriptions, recommendation-schema, recommendations-candidates, recommendations-scoring, recommendations, review-reactions), Mock-Typen korrigiert
+  - **Test-Dateien RequestInit/API-Fixes**: listen/follow, listen/items, recommendations API, review-reactions
 - Abgeschlossene Typ-B-Aufgaben:
   - CHANGELOG.md, README.md, ROADMAP.md, .env.example, PROGRESS.md aktualisiert
   - Unit-Tests: review-category, date-utils, tag-generation, seo, newsletter, comments, comment-schema, rating-schema, votes-api, pdf-export, pdf-layout, search-relevance, highlighter-logic, **collections (95), collection-schema (44), review-reactions (12), advanced-search-filters (18), category-subscriptions (8), category-mapping (19), review-compare (28), review-series (20), qa-schema (25)**
@@ -41,7 +42,7 @@
 ## Nächster Schritt (Hauptschleife)
 
 **Aktuelles Feature:** **Hardware-Kompatibilitäts-Check** — **F1–F9 ✅ (Abgeschlossen)**  
-**Phase:** Hauptschleife → ROADMAP leer für Typ D → Neue Feature-Kandidaten generieren (Nutzersicht, Security-Audit, Performance, Doku, Tests). Priorität: Typ A (`no-explicit-any` in Quelldateien bereinigen) → Typ E (Performance, UX, DX).
+**Phase:** Hauptschleife → ROADMAP leer für Typ D → Neue Feature-Kandidaten generieren (Nutzersicht, Security-Audit, Performance, Doku, Tests). **Typ A vollständig erledigt** → Nächster Schritt: Typ D Feature wählen (Review-Template-System empfohlen) → F1 Auswahl → F2 Spec → F3 Design → F4 Implementierung.
 
 ---
 

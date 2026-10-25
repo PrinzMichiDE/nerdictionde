@@ -17,7 +17,7 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 - [x] `no-explicit-any` Bereinigung: ~150/216 behoben (scripts, admin components, API routes, lib files: igdb, tmdb, tavily, review-generation, job-status, job-resume)
 - [x] **Letzte 3 React-Hooks-Errors behoben** (`TableOfContents.tsx`, `YouTubeEmbed.tsx`, `SupportTopBanner.tsx`) — redundante `setState` in `useEffect` durch Lazy Initializer ersetzt
 - [x] **Test-Infrastruktur & Type-Check Reparaturen**: OpenAI Client für Browser-Tests freigegeben, 6 Test-Dateien von `no-explicit-any` bereinigt, Mock-Typen korrigiert, alle 636 Tests grün
-- [ ] Lint: verbleibende `no-explicit-any` Warnings in Quelldateien inkrementell bereinigen (39 Errors, nicht blockierend für Verify)
+- [x] **`no-explicit-any` Bereinigung in Quelldateien abgeschlossen**: src/lib/qa.ts, src/lib/recommendations-candidates.ts, src/app/api/user/hardware-profile/route.ts — alle Type-Check Errors behoben, 31 verbleibende Errors nur in externen Skills/Admin (nicht blockierend)
 
 ## Typ B — Lücken schließen (Tests, Doku, Fehlerbehandlung)
 
@@ -80,8 +80,8 @@ Stabilität > Features > Optik. Nach jeweils 2 erledigten Aufgaben vom Typ A/B/C
 
 ## Aktuelles Feature
 
-Keines — **Hardware-Kompatibilitäts-Check abgeschlossen (F1–F9 ✅)**. Nächster Schritt: Typ A (`no-explicit-any` in Quelldateien) → Neue Typ-D-Features aus obiger Liste wählen.
+Keines — **Hardware-Kompatibilitäts-Check abgeschlossen (F1–F9 ✅)**. **Typ A vollständig erledigt**. Nächster Schritt: Typ D Feature wählen.
 
 ## Nächster Schritt
 
-Hauptschleife: Typ A Aufgabe (`no-explicit-any` Bereinigung in src/lib/*.ts) → F1 Auswahl für nächstes Typ-D-Feature (Review-Template-System empfohlen) → F2 Spec → F3 Design → F4 Implementierung.
+Hauptschleife: F1 Auswahl für nächstes Typ-D-Feature (Review-Template-System empfohlen) → F2 Spec → F3 Design → F4 Implementierung.
