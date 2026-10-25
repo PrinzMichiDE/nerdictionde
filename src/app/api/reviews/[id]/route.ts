@@ -4,6 +4,9 @@ import { requireAdminAuth } from "@/lib/auth";
 import { FEATURE_CATEGORY_SUBSCRIPTIONS } from "@/lib/feature-flags";
 import { createCategoryNotifications } from "@/lib/category-subscriptions";
 import { mapReviewCategoryToEnum } from "@/lib/category-mapping";
+import { getTemplate, validateTemplateDataForTemplate } from "@/lib/review-templates";
+import { featureFlags } from "@/lib/feature-flags";
+import { Prisma } from "@prisma/client";
 
 export async function GET(
   req: NextRequest,
@@ -39,15 +42,45 @@ export async function PUT(
     // Check current status before update to detect transition to "published"
     const currentReview = await prisma.review.findUnique({
       where: { id },
-      select: { status: true, category: true, title: true, slug: true, images: true },
+      select: { status: true, category: true, title: true, slug: true, images: true, templateId: true, templateVersion: true },
     });
+
+    if (!currentReview) {
+      return NextResponse.json({ error: "Review not found" }, { status: 404 });
+    }
 
     const wasPublished = currentReview?.status === 'published';
     const willBePublished = body.status === 'published';
 
+    // Template validation (if feature enabled and templateId provided or changed)
+    let templateVersion: number | null = currentReview.templateVersion ?? 1;
+    if (featureFlags.reviewTemplates && body.templateId) {
+      const validation = validateTemplateDataForTemplate(body.templateData ?? {}, body.templateId);
+      if (!validation.valid) {
+        return NextResponse.json(
+          { error: 'Template-Validierung fehlgeschlagen', details: validation.errors },
+          { status: 400 }
+        );
+      }
+      const template = await getTemplate(body.templateId);
+      templateVersion = 1;
+    } else if (featureFlags.reviewTemplates && body.templateId === null && currentReview.templateId) {
+      // Template removed
+      templateVersion = null;
+    }
+
+    // Prepare template data for storage
+    const templateId = featureFlags.reviewTemplates && body.templateId !== undefined ? body.templateId : currentReview.templateId;
+    const templateData = featureFlags.reviewTemplates && body.templateData !== undefined ? body.templateData : undefined;
+
     const review = await prisma.review.update({
       where: { id },
-      data: body,
+      data: {
+        ...body,
+        templateId,
+        templateData: templateData as Prisma.InputJsonValue | null,
+        templateVersion: templateId ? templateVersion : null,
+      },
     });
 
     // Trigger category notifications if review is newly published
@@ -94,4 +127,3 @@ export async function DELETE(
     return NextResponse.json({ error: error instanceof Error ? error.message : "Unbekannter Fehler" }, { status: 500 });
   }
 }
-

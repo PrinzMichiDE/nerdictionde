@@ -41,8 +41,8 @@
 
 ## Nächster Schritt (Hauptschleife)
 
-**Aktuelles Feature:** **Hardware-Kompatibilitäts-Check** — **F1–F9 ✅ (Abgeschlossen)**  
-**Phase:** Hauptschleife → ROADMAP leer für Typ D → Neue Feature-Kandidaten generieren (Nutzersicht, Security-Audit, Performance, Doku, Tests). **Typ A vollständig erledigt** → Nächster Schritt: Typ D Feature wählen (Review-Template-System empfohlen) → F1 Auswahl → F2 Spec → F3 Design → F4 Implementierung.
+**Aktuelles Feature:** **Review-Template-System** — **F1 ✅, F2 ✅, F3 ✅, F4 (PKG-1, PKG-2 ✅, PKG-3 ✅, PKG-4 in Arbeit)**  
+**Phase:** F4 Implementierung → PKG-4 Admin CRUD Erweitern → PKG-5 Template Selector UI → PKG-6 Editor → PKG-7 Frontend Renderer
 
 ---
 

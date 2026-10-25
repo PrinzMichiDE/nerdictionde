@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAdminAuth, checkAdminAuth } from "@/lib/auth";
 import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
+import { getTemplate, validateTemplateDataForTemplate, getDefaultTemplate } from "@/lib/review-templates";
+import { featureFlags } from "@/lib/feature-flags";
 
 import { Prisma } from "@prisma/client";
 
@@ -215,6 +217,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Title and content are required" }, { status: 400 });
     }
 
+    // Template validation (if feature enabled and templateId provided)
+    let templateVersion = 1;
+    if (featureFlags.reviewTemplates && body.templateId) {
+      const validation = validateTemplateDataForTemplate(body.templateData ?? {}, body.templateId);
+      if (!validation.valid) {
+        return NextResponse.json(
+          { error: 'Template-Validierung fehlgeschlagen', details: validation.errors },
+          { status: 400 }
+        );
+      }
+      const template = await getTemplate(body.templateId);
+      templateVersion = 1;
+    }
+
     let slug = body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     
     // Check for existing slug and ensure uniqueness
@@ -227,6 +243,10 @@ export async function POST(req: NextRequest) {
       }
       slug = `${body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${Math.random().toString(36).substring(2, 7)}`;
     }
+
+    // Prepare template data for storage
+    const templateId = featureFlags.reviewTemplates && body.templateId ? body.templateId : null;
+    const templateData = featureFlags.reviewTemplates && body.templateData ? body.templateData : null;
 
     const review = await prisma.review.create({
       data: {
@@ -251,6 +271,9 @@ export async function POST(req: NextRequest) {
         specs: body.specs || null,
         metadata: body.metadata || null,
         createdAt: body.createdAt ? new Date(body.createdAt) : undefined,
+        templateId,
+        templateData: templateData ?? Prisma.JsonNull,
+        templateVersion: templateId ? templateVersion : null,
       },
     });
 

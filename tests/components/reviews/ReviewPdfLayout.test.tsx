@@ -43,6 +43,9 @@ interface MockReview {
   userRatingAvg: number;
   seriesId: string | null;
   seriesOrder: number | null;
+  templateId: string | null;
+  templateData: Record<string, string> | null;
+  templateVersion: number | null;
 }
 
 const createMockReview = (overrides: Partial<MockReview> = {}): MockReview => ({
@@ -84,6 +87,9 @@ const createMockReview = (overrides: Partial<MockReview> = {}): MockReview => ({
   userRatingAvg: 0,
   seriesId: null,
   seriesOrder: null,
+  templateId: null,
+  templateData: null,
+  templateVersion: null,
   ...overrides,
 });
 
