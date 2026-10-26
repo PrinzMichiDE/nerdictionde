@@ -50,7 +50,9 @@ export function BulkCreate() {
   const [releaseYear, setReleaseYear] = useState<string>("");
   const [minRating, setMinRating] = useState<string>("");
   const [limit, setLimit] = useState<string>("20");
-  const [sortBy, setSortBy] = useState<"popularity" | "rating" | "release_date" | "name" | "title">("popularity");
+  type SortByValue = "popularity" | "rating" | "release_date" | "name" | "title";
+
+const [sortBy, setSortBy] = useState<SortByValue>("popularity");
   const [order, setOrder] = useState<"asc" | "desc">("desc");
   const [batchSize, setBatchSize] = useState<string>("5");
   const [delay, setDelay] = useState<string>("2000");
@@ -120,9 +122,27 @@ export function BulkCreate() {
     setResult(null);
 
     try {
-      const queryOptions: any = {
+      interface QueryOptions {
+        limit: number;
+        sortBy: "popularity" | "rating" | "release_date" | "name";
+        order: "asc" | "desc";
+        genreId?: number;
+        platformId?: number;
+        releaseYear?: number;
+        minRating?: number;
+      }
+
+      interface RequestBody {
+        batchSize: number;
+        delayBetweenBatches: number;
+        status: "draft" | "published";
+        skipExisting: boolean;
+        queryOptions: QueryOptions;
+      }
+
+      const queryOptions: QueryOptions = {
         limit: parseInt(limit),
-        sortBy: sortBy === "title" ? "name" : sortBy, // TMDB uses "name" for title sorting
+        sortBy: sortBy === "title" ? "name" : sortBy,
         order,
       };
 
@@ -134,11 +154,12 @@ export function BulkCreate() {
       if (minRating) queryOptions.minRating = parseFloat(minRating);
 
       let endpoint = "/api/reviews/bulk-create";
-      const requestBody: any = {
+      const requestBody: RequestBody = {
         batchSize: parseInt(batchSize) || 5,
         delayBetweenBatches: parseInt(delay) || 2000,
         status,
         skipExisting,
+        queryOptions,
       };
 
       if (category === "movie") {
@@ -158,11 +179,12 @@ export function BulkCreate() {
         title: "Massenerstellung abgeschlossen",
         description: `${response.data.results.successful} von ${response.data.results.total} Reviews erstellt.`,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Bulk create failed:", error);
+      const axiosError = error as { response?: { data: { error?: string } }; message?: string } | null;
       toast({
         title: "Massenerstellung fehlgeschlagen",
-        description: error.response?.data?.error || error.message || "Unbekannter Fehler",
+        description: axiosError?.response?.data?.error || axiosError?.message || "Unbekannter Fehler",
         variant: "destructive",
       });
     } finally {
@@ -172,48 +194,41 @@ export function BulkCreate() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <Card className="border-2 border-primary/20 shadow-xl">
+      <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-            <div className="bg-primary/10 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0">
-              <Database className="text-primary h-5 w-5 md:h-6 md:w-6" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <CardTitle className="text-lg md:text-xl lg:text-2xl">Massen-Erstellung</CardTitle>
-              <CardDescription className="text-xs md:text-sm mt-1">
-                Erstelle mehrere Reviews gleichzeitig basierend auf Datenbank-Kriterien
-              </CardDescription>
-            </div>
-          </div>
+          <CardTitle className="text-lg">Massen-Erstellung</CardTitle>
+          <CardDescription>
+            Mehrere Reviews nach Datenbank-Kriterien auf einmal erstellen
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 md:space-y-6">
           <Tabs value={category} onValueChange={(v) => setCategory(v as Category)}>
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 gap-1 md:gap-2">
-              <TabsTrigger value="game" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-4">
-                <Database className="h-3 w-3 md:h-4 md:w-4" />
+            <TabsList className="grid w-full grid-cols-3 gap-1">
+              <TabsTrigger value="game" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-4">
+                <Database className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 Games
               </TabsTrigger>
-              <TabsTrigger value="movie" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-4">
-                <Film className="h-3 w-3 md:h-4 md:w-4" />
+              <TabsTrigger value="movie" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-4">
+                <Film className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 Filme
               </TabsTrigger>
-              <TabsTrigger value="series" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 md:px-4">
-                <Tv className="h-3 w-3 md:h-4 md:w-4" />
+              <TabsTrigger value="series" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-4">
+                <Tv className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 Serien
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="game" className="space-y-6 mt-6">
+            <TabsContent value="game" className="space-y-6 mt-4">
               {loadingOptions ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  <span className="ml-2 text-muted-foreground">Lade Optionen...</span>
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-muted-foreground">Lade Optionen</span>
                 </div>
               ) : (
                 <>
                   {/* IGDB Query Options */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">IGDB Filter</h3>
+                    <h3 className="text-base font-semibold">IGDB Filter</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="genre">Genre</Label>
@@ -290,7 +305,7 @@ export function BulkCreate() {
 
                   <div className="space-y-2">
                     <Label htmlFor="sortBy">Sortieren nach</Label>
-                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortByValue)}>
                       <SelectTrigger id="sortBy">
                         <SelectValue />
                       </SelectTrigger>
@@ -307,7 +322,7 @@ export function BulkCreate() {
 
               {/* Processing Options */}
               <div className="space-y-4 border-t pt-4">
-                <h3 className="text-lg font-semibold">Verarbeitungs-Optionen</h3>
+                <h3 className="text-base font-semibold">Verarbeitungs-Optionen</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="batchSize">Batch-Größe</Label>
@@ -346,20 +361,17 @@ export function BulkCreate() {
               <Button
                 onClick={handleBulkCreate}
                 disabled={loading || !limit}
-                className="w-full h-10 md:h-12 text-sm md:text-base lg:text-lg font-bold"
-                size="lg"
+                className="w-full"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 md:h-5 md:w-5 animate-spin" />
-                    <span className="hidden sm:inline">Erstelle Reviews...</span>
-                    <span className="sm:hidden">Erstelle...</span>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Erstelle Reviews
                   </>
                 ) : (
                   <>
-                    <Database className="mr-2 h-4 w-4 md:h-5 md:w-5" />
-                    <span className="hidden sm:inline">Massenerstellung starten</span>
-                    <span className="sm:hidden">Starten</span>
+                    <Database className="mr-2 h-4 w-4" />
+                    Massenerstellung starten
                   </>
                 )}
               </Button>
@@ -369,7 +381,7 @@ export function BulkCreate() {
 
             <TabsContent value="movie" className="space-y-6 mt-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">TMDB Filter</h3>
+                <h3 className="text-base font-semibold">TMDB Filter</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="movie-genre">Genre</Label>
@@ -430,7 +442,7 @@ export function BulkCreate() {
 
                   <div className="space-y-2">
                     <Label htmlFor="movie-sortBy">Sortieren nach</Label>
-                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortByValue)}>
                       <SelectTrigger id="movie-sortBy">
                         <SelectValue />
                       </SelectTrigger>
@@ -445,7 +457,7 @@ export function BulkCreate() {
 
                   <div className="space-y-2">
                     <Label htmlFor="movie-order">Reihenfolge</Label>
-                    <Select value={order} onValueChange={(v) => setOrder(v as any)}>
+                    <Select value={order} onValueChange={(v) => setOrder(v as "asc" | "desc")}>
                       <SelectTrigger id="movie-order">
                         <SelectValue />
                       </SelectTrigger>
@@ -460,7 +472,7 @@ export function BulkCreate() {
 
               {/* Processing Options */}
               <div className="space-y-4 border-t pt-4">
-                <h3 className="text-lg font-semibold">Verarbeitungs-Optionen</h3>
+                <h3 className="text-base font-semibold">Verarbeitungs-Optionen</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="movie-batchSize">Batch-Größe</Label>
@@ -499,17 +511,16 @@ export function BulkCreate() {
               <Button
                 onClick={handleBulkCreate}
                 disabled={loading || !limit}
-                className="w-full h-12 text-lg font-bold"
-                size="lg"
+                className="w-full"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Erstelle Reviews...
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Erstelle Reviews
                   </>
                 ) : (
                   <>
-                    <Film className="mr-2 h-5 w-5" />
+                    <Film className="mr-2 h-4 w-4" />
                     Massenerstellung starten
                   </>
                 )}
@@ -518,7 +529,7 @@ export function BulkCreate() {
 
             <TabsContent value="series" className="space-y-6 mt-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">TMDB Filter</h3>
+                <h3 className="text-base font-semibold">TMDB Filter</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="series-genre">Genre</Label>
@@ -579,7 +590,7 @@ export function BulkCreate() {
 
                   <div className="space-y-2">
                     <Label htmlFor="series-sortBy">Sortieren nach</Label>
-                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortByValue)}>
                       <SelectTrigger id="series-sortBy">
                         <SelectValue />
                       </SelectTrigger>
@@ -594,7 +605,7 @@ export function BulkCreate() {
 
                   <div className="space-y-2">
                     <Label htmlFor="series-order">Reihenfolge</Label>
-                    <Select value={order} onValueChange={(v) => setOrder(v as any)}>
+                    <Select value={order} onValueChange={(v) => setOrder(v as "asc" | "desc")}>
                       <SelectTrigger id="series-order">
                         <SelectValue />
                       </SelectTrigger>
@@ -609,7 +620,7 @@ export function BulkCreate() {
 
               {/* Processing Options */}
               <div className="space-y-4 border-t pt-4">
-                <h3 className="text-lg font-semibold">Verarbeitungs-Optionen</h3>
+                <h3 className="text-base font-semibold">Verarbeitungs-Optionen</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="series-batchSize">Batch-Größe</Label>
@@ -648,17 +659,16 @@ export function BulkCreate() {
               <Button
                 onClick={handleBulkCreate}
                 disabled={loading || !limit}
-                className="w-full h-12 text-lg font-bold"
-                size="lg"
+                className="w-full"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Erstelle Reviews...
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Erstelle Reviews
                   </>
                 ) : (
                   <>
-                    <Tv className="mr-2 h-5 w-5" />
+                    <Tv className="mr-2 h-4 w-4" />
                     Massenerstellung starten
                   </>
                 )}
@@ -670,35 +680,35 @@ export function BulkCreate() {
 
       {/* Results */}
       {result && (
-        <Card className="border-2 shadow-xl">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-lg md:text-xl">Ergebnisse</CardTitle>
-            <CardDescription className="text-xs md:text-sm">Zusammenfassung der Massenerstellung</CardDescription>
+            <CardTitle className="text-lg">Ergebnisse</CardTitle>
+            <CardDescription>Zusammenfassung der Massenerstellung</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-              <div className="text-center p-3 md:p-4 bg-muted rounded-lg">
-                <div className="text-xl md:text-2xl font-bold">{result.total}</div>
-                <div className="text-xs md:text-sm text-muted-foreground">Gesamt</div>
+              <div className="rounded-lg bg-muted px-3 py-3 text-center">
+                <div className="text-xl font-semibold tabular-nums md:text-2xl">{result.total}</div>
+                <div className="text-sm text-muted-foreground">Gesamt</div>
               </div>
-              <div className="text-center p-3 md:p-4 bg-green-500/10 rounded-lg">
-                <div className="text-xl md:text-2xl font-bold text-green-600">{result.successful}</div>
-                <div className="text-xs md:text-sm text-muted-foreground">Erfolgreich</div>
+              <div className="rounded-lg bg-success/10 px-3 py-3 text-center">
+                <div className="text-xl font-semibold tabular-nums text-success md:text-2xl">{result.successful}</div>
+                <div className="text-sm text-muted-foreground">Erfolgreich</div>
               </div>
-              <div className="text-center p-3 md:p-4 bg-yellow-500/10 rounded-lg">
-                <div className="text-xl md:text-2xl font-bold text-yellow-600">{result.skipped}</div>
-                <div className="text-xs md:text-sm text-muted-foreground">Übersprungen</div>
+              <div className="rounded-lg bg-warning/10 px-3 py-3 text-center">
+                <div className="text-xl font-semibold tabular-nums text-warning md:text-2xl">{result.skipped}</div>
+                <div className="text-sm text-muted-foreground">Übersprungen</div>
               </div>
-              <div className="text-center p-3 md:p-4 bg-red-500/10 rounded-lg">
-                <div className="text-xl md:text-2xl font-bold text-red-600">{result.failed}</div>
-                <div className="text-xs md:text-sm text-muted-foreground">Fehlgeschlagen</div>
+              <div className="rounded-lg bg-destructive/10 px-3 py-3 text-center">
+                <div className="text-xl font-semibold tabular-nums text-destructive md:text-2xl">{result.failed}</div>
+                <div className="text-sm text-muted-foreground">Fehlgeschlagen</div>
               </div>
             </div>
 
             {result.reviews.length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-semibold flex items-center gap-2 text-sm md:text-base">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <CheckCircle2 className="h-4 w-4 text-success" />
                   Erstellte Reviews ({result.reviews.length})
                 </h4>
                 <div className="max-h-48 overflow-y-auto space-y-1">
@@ -718,14 +728,14 @@ export function BulkCreate() {
             {result.errors.length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-semibold flex items-center gap-2 text-sm md:text-base">
-                  <XCircle className="h-4 w-4 text-red-600" />
+                  <XCircle className="h-4 w-4 text-destructive" />
                   Fehler ({result.errors.length})
                 </h4>
                 <div className="max-h-48 overflow-y-auto space-y-1">
                   {result.errors.map((error, index) => (
                     <div
                       key={index}
-                      className="p-2 bg-red-500/10 rounded text-xs md:text-sm"
+                      className="rounded bg-destructive/10 p-2 text-xs md:text-sm"
                     >
                       <div className="font-medium break-words">
                         {error.game || error.movie || error.series}

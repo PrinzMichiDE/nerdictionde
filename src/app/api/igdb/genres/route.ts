@@ -5,9 +5,10 @@ export async function POST() {
   try {
     const genres = await getIGDBGenres();
     return NextResponse.json(genres);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("IGDB Genres error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const err = error as Error;
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 

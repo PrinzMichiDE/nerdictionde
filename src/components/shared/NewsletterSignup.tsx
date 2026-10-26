@@ -17,6 +17,7 @@ export function NewsletterSignup({
 }: NewsletterSignupProps) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [confirmationToken, setConfirmationToken] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,7 +42,8 @@ export function NewsletterSignup({
       }
 
       setStatus("success");
-      setMessage(data.message || "Du bist angemeldet.");
+      setMessage(data.message || "Danke! Bestaetige deine Anmeldung ueber den Link.");
+      setConfirmationToken(data.confirmationToken || "");
       form.reset();
     } catch {
       setStatus("error");
@@ -80,16 +82,37 @@ export function NewsletterSignup({
       </form>
 
       {status !== "idle" && (
-        <div
-          className={cn(
-            "flex items-center gap-2 text-sm font-medium",
-            status === "success"
-              ? "text-green-600 dark:text-green-400"
-              : "text-destructive",
-          )}
-        >
-          <Icon className="size-4" />
-          {message}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center">
+          <div
+            className={cn(
+              "flex items-center gap-2 text-sm font-medium",
+              status === "success"
+                ? "text-green-600 dark:text-green-400"
+                : "text-destructive",
+            )}
+          >
+            <Icon className="size-4" />
+            {message}
+          </div>
+        </div>
+      )}
+
+      {status === "success" && confirmationToken && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-4 text-left">
+          <span className="text-xs text-muted-foreground font-medium">
+            Bestaetigungs-Link:
+          </span>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 truncate text-xs text-muted-foreground bg-muted px-2 py-1.5 rounded-sm">
+              {`${typeof window !== "undefined" ? window.location.origin : ""}/newsletter/confirm/${confirmationToken}`}
+            </code>
+            <a
+              href={`/newsletter/confirm/${confirmationToken}`}
+              className="text-sm text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+            >
+            Bestaetigen
+            </a>
+          </div>
         </div>
       )}
 

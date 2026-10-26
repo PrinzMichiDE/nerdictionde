@@ -1,7 +1,11 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { ReviewEditor } from "@/app/admin/components/ReviewEditor";
-import { Toaster } from "@/components/ui/toaster";
+import { Review } from "@/types/review";
+
+export const metadata = {
+  title: "Review bearbeiten",
+};
 
 export default async function EditReviewPage({
   params,
@@ -15,11 +19,5 @@ export default async function EditReviewPage({
 
   if (!review) notFound();
 
-  return (
-    <div className="flex flex-col h-full -mt-4">
-       <ReviewEditor review={review as any} />
-       <Toaster />
-    </div>
-  );
+  return <ReviewEditor review={review as Review} />;
 }
-

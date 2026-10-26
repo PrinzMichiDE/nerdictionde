@@ -27,27 +27,65 @@ async function main() {
 
   console.log(`${gameReviews.length} Game-Reviews mit IGDB-ID gefunden.`);
 
+  interface IGDBCompany {
+  developer: boolean;
+  publisher: boolean;
+  company: { name: string };
+}
+
+interface IGDBPlatform {
+  name: string;
+}
+
+interface IGDBGenre {
+  name: string;
+}
+
+interface IGDBGameMode {
+  name: string;
+}
+
+interface IGDBPlayerPerspective {
+  name: string;
+}
+
+interface IGDBEngine {
+  name: string;
+}
+
+interface IGDBGameData {
+  involved_companies?: IGDBCompany[];
+  platforms?: IGDBPlatform[];
+  genres?: IGDBGenre[];
+  game_modes?: IGDBGameMode[];
+  player_perspectives?: IGDBPlayerPerspective[];
+  engines?: IGDBEngine[];
+  first_release_date?: number;
+  rating?: number;
+  aggregated_rating?: number;
+}
+
   for (const review of gameReviews) {
     console.log(`\nVerarbeite: ${review.title} (ID: ${review.igdbId})...`);
     try {
-      const data = await getIGDBGameById(review.igdbId!);
+      const data = await getIGDBGameById(review.igdbId!) as IGDBGameData | null;
 
       if (!data) {
         console.warn(`  -> Keine IGDB-Daten für ${review.title} gefunden. Überspringe.`);
         continue;
       }
 
-      const developers = data.involved_companies?.filter((c: any) => c.developer).map((c: any) => c.company.name) || [];
-      const publishers = data.involved_companies?.filter((c: any) => c.publisher).map((c: any) => c.company.name) || [];
+      const developers = data.involved_companies?.filter((c) => c.developer).map((c) => c.company.name) || [];
+      const publishers = data.involved_companies?.filter((c) => c.publisher).map((c) => c.company.name) || [];
       
       const gameMetadata = {
           developers,
           publishers,
-          platforms: data.platforms?.map((p: any) => p.name) || [],
-          genres: data.genres?.map((g: any) => g.name) || [],
-          gameModes: data.game_modes?.map((m: any) => m.name) || [],
-          perspectives: data.player_perspectives?.map((p: any) => p.name) || [],
-          engines: data.engines?.map((e: any) => e.name) || [],
+          platforms: data.platforms?.map((p) => p.name) || [],
+          genres: data.genres?.map((g) => g.name) || [],
+          gameModes: data.game_modes?.map((m) => m.name) || [],
+          perspectives: data.player_perspectives?.map((p) => p.name) || [],
+          engines: data.engines?.map((e) => e.name) || [],
           releaseDate: data.first_release_date,
           igdbScore: data.rating,
           criticScore: data.aggregated_rating,

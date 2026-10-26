@@ -251,7 +251,7 @@ export async function searchAmazonProduct(
  * Extract product specifications from Tavily search results
  */
 export function extractProductSpecs(searchResults: TavilySearchResponse): {
-  specs: Record<string, any>;
+  specs: Record<string, unknown>;
   description: string;
   pros: string[];
   cons: string[];
@@ -265,7 +265,7 @@ export function extractProductSpecs(searchResults: TavilySearchResponse): {
   const answer = searchResults.answer || "";
 
   // Try to extract specs from content
-  const specs: Record<string, any> = {};
+  const specs: Record<string, unknown> = {};
   const pros: string[] = [];
   const cons: string[] = [];
 
@@ -323,8 +323,8 @@ export function extractProductSpecs(searchResults: TavilySearchResponse): {
     description: answer || allContent.substring(0, 500),
     pros: pros.slice(0, 5),
     cons: cons.slice(0, 5),
-    price: specs.price,
-    rating: specs.rating,
+    price: specs.price as string | undefined,
+    rating: specs.rating as number | undefined,
   };
 }
 

@@ -5,9 +5,10 @@ export async function POST() {
   try {
     const platforms = await getIGDBPlatforms();
     return NextResponse.json(platforms);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("IGDB Platforms error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const err = error as Error;
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 

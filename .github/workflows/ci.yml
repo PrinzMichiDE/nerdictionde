@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main, auto/dev]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgres://nerdiction:nerdiction@localhost:5432/nerdiction?schema=public
+      NEXT_PUBLIC_BASE_URL: http://localhost:3000
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: nerdiction
+          POSTGRES_PASSWORD: nerdiction
+          POSTGRES_DB: nerdiction
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U nerdiction -d nerdiction"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Dependencies installieren
+        run: npm ci
+
+      - name: Prisma Client generieren
+        run: npx prisma generate
+
+      - name: Verify-Skript ausführen (Build + Type-Check + Lint + Tests)
+        run: bash scripts/verify.sh

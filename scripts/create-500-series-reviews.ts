@@ -54,11 +54,12 @@ async function retryWithBackoff<T>(fn: () => Promise<T>, maxRetries = 3, baseDel
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await fn();
-    } catch (error: any) {
-      lastError = error;
+    } catch (error: unknown) {
+      const err = error as Error;
+      lastError = err;
 
       // Retrying will not help if the review already exists
-      if (error.message?.includes("Already exists")) throw error;
+      if (err.message?.includes("Already exists")) throw err;
 
       if (attempt < maxRetries - 1) {
         const delay = baseDelay * Math.pow(2, attempt);
@@ -174,14 +175,15 @@ async function main() {
             });
             console.log(`   ❌ ${serie.name}: ${result.error}`);
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const err = error as Error;
           progress.failed++;
           progress.failedSeries.push({
             name: serie.name,
             tmdbId: serie.id,
-            error: error.message || "Unknown error",
+            error: err.message || "Unknown error",
           });
-          console.log(`   ❌ ${serie.name}: ${error.message}`);
+          console.log(`   ❌ ${serie.name}: ${err.message}`);
         }
 
         progress.processed++;

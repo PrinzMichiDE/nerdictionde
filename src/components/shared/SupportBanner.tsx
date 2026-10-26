@@ -6,24 +6,22 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export function SupportBanner() {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    // Check if banner was dismissed (with timestamp - show again after 7 days)
+  const [isVisible, setIsVisible] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
     const dismissedData = localStorage.getItem("support-banner-dismissed");
     if (dismissedData) {
       try {
         const { timestamp } = JSON.parse(dismissedData);
         const daysSinceDismiss = (Date.now() - timestamp) / (1000 * 60 * 60 * 24);
         if (daysSinceDismiss < 7) {
-          return; // Don't show if dismissed less than 7 days ago
+          return false;
         }
       } catch {
         // If parsing fails, show the banner
       }
     }
-    setIsVisible(true);
-  }, []);
+    return true;
+  });
 
   const handleDismiss = () => {
     setIsVisible(false);

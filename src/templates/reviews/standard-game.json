@@ -1,0 +1,79 @@
+{
+  "id": "standard-game",
+  "name": "Standard Game Review",
+  "description": "Klassischer Game-Review mit Gameplay, Grafik, Sound, Wertung",
+  "category": "game",
+  "default": true,
+  "fields": [
+    {
+      "id": "intro",
+      "type": "textarea",
+      "label": "Einleitung",
+      "placeholder": "Kurzer Überblick, Genre, Erwartung...",
+      "helpText": "Ein paar Sätze zum Spiel: Genre, Setting, was man erwartet hat.",
+      "required": true,
+      "markdown": true,
+      "order": 1
+    },
+    {
+      "id": "gameplay",
+      "type": "textarea",
+      "label": "Gameplay & Mechaniken",
+      "placeholder": "Steuerung, Level-Design, Schwierigkeit, Innovation...",
+      "helpText": "Wie spielt es sich? Kernmechaniken, Steuerung, Pacing, Wiederspielwert.",
+      "required": true,
+      "markdown": true,
+      "order": 2
+    },
+    {
+      "id": "graphics",
+      "type": "textarea",
+      "label": "Grafik & Technische Leistung",
+      "placeholder": "Artstyle, Performance, Bugs, Raytracing, FPS...",
+      "helpText": "Visueller Stil, Performance auf verschiedenen Systemen, technische Mängel.",
+      "required": true,
+      "markdown": true,
+      "order": 3
+    },
+    {
+      "id": "sound",
+      "type": "textarea",
+      "label": "Sound & Atmosphäre",
+      "placeholder": "Musik, Soundeffekte, Voice Acting, Immersion...",
+      "helpText": "Soundtrack, Effekte, Sprecher, wie Audio die Atmosphäre trägt.",
+      "required": false,
+      "markdown": true,
+      "order": 4
+    },
+    {
+      "id": "pros",
+      "type": "textarea",
+      "label": "Pros",
+      "placeholder": "- Punkt 1\n- Punkt 2\n- Punkt 3",
+      "helpText": "Stärken als Liste (ein Punkt pro Zeile mit Bindestrich).",
+      "required": true,
+      "markdown": false,
+      "order": 5
+    },
+    {
+      "id": "cons",
+      "type": "textarea",
+      "label": "Cons",
+      "placeholder": "- Punkt 1\n- Punkt 2\n- Punkt 3",
+      "helpText": "Schwächen als Liste (ein Punkt pro Zeile mit Bindestrich).",
+      "required": true,
+      "markdown": false,
+      "order": 6
+    },
+    {
+      "id": "verdict",
+      "type": "textarea",
+      "label": "Fazit & Wertung",
+      "placeholder": "Zusammenfassung, Für wen geeignet, finale Score-Begründung...",
+      "helpText": "Finales Urteil, Zielgruppe, Begründung für den Score.",
+      "required": true,
+      "markdown": true,
+      "order": 7
+    }
+  ]
+}

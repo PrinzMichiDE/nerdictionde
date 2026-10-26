@@ -73,8 +73,8 @@ export default function OverlayGenerator() {
       const url = `${window.location.origin}/api/overlay/${data.id}`;
       setSavedUrl(url);
       toast.success("Overlay gespeichert! OBS-URL kopieren bereit.");
-    } catch (e: any) {
-      toast.error(e.message || "Speichern fehlgeschlagen");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Speichern fehlgeschlagen");
     } finally {
       setBusy(false);
     }

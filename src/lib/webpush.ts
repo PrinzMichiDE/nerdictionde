@@ -53,18 +53,33 @@ export async function sendPush(
   }
 }
 
-// Notify all subscribers that opted into `channel` about new content.
-// `channel` maps to NotificationPreference fields (games/movies/series/hardware/deals/forum).
+// Notify all subscribers that opted into a notification type via Push channel.
+// Uses the new NotificationPreference model (type × channel × frequency).
 export async function notifySubscribers(
-  channel: "games" | "movies" | "series" | "hardware" | "deals" | "forum",
+  type: import('@prisma/client').NotificationType,
   payload: PushPayload
 ): Promise<number> {
   ensureConfig();
   if (!configured) return 0;
 
+  // Find users who have this notification type enabled for PUSH channel with IMMEDIATE frequency
+  const prefs = await prisma.notificationPreference.findMany({
+    where: {
+      type,
+      channel: 'PUSH',
+      frequency: 'IMMEDIATE',
+      enabled: true,
+    },
+    select: { userId: true },
+  });
+
+  if (prefs.length === 0) return 0;
+
+  const userIds = prefs.map((p) => p.userId);
+
   const subs = await prisma.pushSubscription.findMany({
     where: {
-      user: { notificationPrefs: { [channel]: true } },
+      userId: { in: userIds },
     },
     select: { endpoint: true, p256dh: true, auth: true },
   });

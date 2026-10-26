@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, MessageSquare, Gamepad2, Film, Tv, Plus, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -152,7 +153,7 @@ export function ForumGenerator() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Kategorie</label>
+            <Label>Kategorie</Label>
             <div className="flex flex-wrap gap-2">
               {categories.map(({ value, label, icon: Icon }) => (
                 <Button
@@ -170,8 +171,9 @@ export function ForumGenerator() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Anzahl Threads</label>
+              <Label htmlFor="forum-thread-count">Anzahl Threads</Label>
               <Input
+                id="forum-thread-count"
                 type="number"
                 min={1}
                 max={20}
@@ -180,8 +182,9 @@ export function ForumGenerator() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Kommentare pro Thread</label>
+              <Label htmlFor="forum-comments-per-thread">Kommentare pro Thread</Label>
               <Input
+                id="forum-comments-per-thread"
                 type="number"
                 min={5}
                 max={30}
@@ -207,9 +210,9 @@ export function ForumGenerator() {
               {Object.entries(results).map(([cat, result]) => (
                 <div key={cat} className="flex items-center gap-2 text-sm">
                   {result.created > 0 ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <CheckCircle2 className="h-4 w-4 text-success" />
                   ) : (
-                    <AlertCircle className="h-4 w-4 text-yellow-500" />
+                    <AlertCircle className="h-4 w-4 text-warning" />
                   )}
                   <span className="font-medium capitalize">{cat}:</span>
                   <span>{result.created} Threads erstellt</span>
@@ -236,17 +239,19 @@ export function ForumGenerator() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Thread ID</label>
+            <Label htmlFor="forum-thread-id">Thread ID</Label>
             <Input
-              placeholder="z.B. clxyz1234..."
+              id="forum-thread-id"
+              placeholder="z.B. clxyz1234"
               value={threadId}
               onChange={(e) => setThreadId(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Anzahl Kommentare</label>
+            <Label htmlFor="forum-comment-count">Anzahl Kommentare</Label>
             <Input
+              id="forum-comment-count"
               type="number"
               min={1}
               max={30}
@@ -262,7 +267,7 @@ export function ForumGenerator() {
 
           {commentResult && (
             <div className="flex items-center gap-2 text-sm">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              <CheckCircle2 className="h-4 w-4 text-success" />
               <span>{commentResult.created} Kommentare hinzugefügt</span>
             </div>
           )}

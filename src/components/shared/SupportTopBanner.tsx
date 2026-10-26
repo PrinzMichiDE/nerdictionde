@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { X, Heart, Coffee } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -10,9 +10,11 @@ export function SupportTopBanner() {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const dismissed = localStorage.getItem("support-top-banner-dismissed");
-    if (!dismissed) setVisible(true);
     setHydrated(true);
+    const dismissed = localStorage.getItem("support-top-banner-dismissed");
+    if (!dismissed) {
+      setVisible(true);
+    }
   }, []);
 
   if (!hydrated || !visible) return null;

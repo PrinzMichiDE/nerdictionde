@@ -1,0 +1,89 @@
+{
+  "id": "movie-series",
+  "name": "Movie / Series Review",
+  "description": "Film- und Serien-Review mit Handlung, Schauspiel, Inszenierung",
+  "category": "movie",
+  "default": false,
+  "fields": [
+    {
+      "id": "intro",
+      "type": "textarea",
+      "label": "Einleitung",
+      "placeholder": "Titel, Genre, Regisseur/Showrunner, Erwartung, Spoiler-Warnung...",
+      "helpText": "Grundinfos: Titel, Jahr, Genre, Laufzeit/Staffeln, Spoiler-Hinweis.",
+      "required": true,
+      "markdown": true,
+      "order": 1
+    },
+    {
+      "id": "plot",
+      "type": "textarea",
+      "label": "Handlung & Setting",
+      "placeholder": "Prämisse, Setting, Weltbau, Spoiler-freie Zusammenfassung...",
+      "helpText": "Worum geht's? Setting, Grundkonflikt, ohne große Spoiler.",
+      "required": true,
+      "markdown": true,
+      "order": 2
+    },
+    {
+      "id": "acting",
+      "type": "textarea",
+      "label": "Schauspiel & Charaktere",
+      "placeholder": "Hauptdarsteller, Ensemble, Charakterentwicklung, Chemie...",
+      "helpText": "Darstellerleistung, Casting, Charaktertiefe, Entwicklung über Story/Staffeln.",
+      "required": true,
+      "markdown": true,
+      "order": 3
+    },
+    {
+      "id": "direction",
+      "type": "textarea",
+      "label": "Inszenierung & Technik",
+      "placeholder": "Regie, Kamera, Schnitt, Musik, VFX, Pace, Atmosphäre...",
+      "helpText": "Visueller Stil, Kameraarbeit, Soundtrack, Tempo, technische Umsetzung.",
+      "required": true,
+      "markdown": true,
+      "order": 4
+    },
+    {
+      "id": "writing",
+      "type": "textarea",
+      "label": "Drehbuch & Storytelling",
+      "placeholder": "Dialoge, Struktur, Twists, Themen, Pacing, Logik...",
+      "helpText": "Schreibqualität, Story-Bogen, Dialoge, thematische Tiefe, Logik-Lücken.",
+      "required": false,
+      "markdown": true,
+      "order": 5
+    },
+    {
+      "id": "pros",
+      "type": "textarea",
+      "label": "Pros",
+      "placeholder": "- Punkt 1\n- Punkt 2\n- Punkt 3",
+      "helpText": "Stärken als Liste (ein Punkt pro Zeile mit Bindestrich).",
+      "required": true,
+      "markdown": false,
+      "order": 6
+    },
+    {
+      "id": "cons",
+      "type": "textarea",
+      "label": "Cons",
+      "placeholder": "- Punkt 1\n- Punkt 2\n- Punkt 3",
+      "helpText": "Schwächen als Liste (ein Punkt pro Zeile mit Bindestrich).",
+      "required": true,
+      "markdown": false,
+      "order": 7
+    },
+    {
+      "id": "verdict",
+      "type": "textarea",
+      "label": "Fazit & Empfehlung",
+      "placeholder": "Zielgruppe, Rewatch-Wert, Vergleich zu Genre-Vertretern, finale Score-Begründung...",
+      "helpText": "Endgültiges Urteil, Für wen sehenswert, Rewatch-Potenzial, Score-Begründung.",
+      "required": true,
+      "markdown": true,
+      "order": 8
+    }
+  ]
+}

@@ -25,7 +25,7 @@ export interface JobStatus {
   estimatedTimeRemaining?: number; // in seconds
   errors: Array<{ item: string; igdbId?: number; tmdbId?: number; error: string }>;
   reviews: Array<{ id: string; title: string; slug: string; igdbId?: number; tmdbId?: number }>;
-  config?: any;
+  config?: unknown;
 }
 
 export async function createJob(
@@ -33,7 +33,7 @@ export async function createJob(
   total: number, 
   totalBatches: number, 
   category: string = "game",
-  config?: any
+  config?: unknown
 ): Promise<JobStatus> {
   const job = await prisma.bulkJob.create({
     data: {
@@ -56,7 +56,7 @@ export async function createJob(
 
   return {
     jobId: job.jobId,
-    status: job.status as any,
+    status: job.status as JobStatus["status"],
     category: job.category,
     total: job.total,
     processed: job.processed,
@@ -68,8 +68,8 @@ export async function createJob(
     totalBatches: job.totalBatches,
     startTime: job.startTime.getTime(),
     estimatedTimeRemaining: job.estimatedTimeRemaining || undefined,
-    errors: (job.errors as any) || [],
-    reviews: (job.reviews as any) || [],
+    errors: (job.errors as JobStatus["errors"]) || [],
+    reviews: (job.reviews as JobStatus["reviews"]) || [],
     config: job.config,
   };
 }
@@ -88,7 +88,7 @@ export async function getJob(jobId: string): Promise<JobStatus | undefined> {
 
   return {
     jobId: job.jobId,
-    status: job.status as any,
+    status: job.status as JobStatus["status"],
     category: job.category,
     total: job.total,
     processed: job.processed,
@@ -99,7 +99,7 @@ export async function getJob(jobId: string): Promise<JobStatus | undefined> {
       name: item.name,
       igdbId: item.igdbId || undefined,
       tmdbId: item.tmdbId || undefined,
-      status: item.status as any,
+      status: item.status as JobItem["status"],
       error: item.error || undefined,
       reviewId: item.reviewId || undefined,
     })),
@@ -107,8 +107,8 @@ export async function getJob(jobId: string): Promise<JobStatus | undefined> {
     totalBatches: job.totalBatches,
     startTime: job.startTime.getTime(),
     estimatedTimeRemaining: job.estimatedTimeRemaining || undefined,
-    errors: (job.errors as any) || [],
-    reviews: (job.reviews as any) || [],
+    errors: (job.errors as JobStatus["errors"]) || [],
+    reviews: (job.reviews as JobStatus["reviews"]) || [],
     config: job.config,
   };
 }
@@ -126,7 +126,7 @@ export async function getAllJobs(limit: number = 50): Promise<JobStatus[]> {
 
   return jobs.map(job => ({
     jobId: job.jobId,
-    status: job.status as any,
+    status: job.status as JobStatus["status"],
     category: job.category,
     total: job.total,
     processed: job.processed,
@@ -137,7 +137,7 @@ export async function getAllJobs(limit: number = 50): Promise<JobStatus[]> {
       name: item.name,
       igdbId: item.igdbId || undefined,
       tmdbId: item.tmdbId || undefined,
-      status: item.status as any,
+      status: item.status as JobItem["status"],
       error: item.error || undefined,
       reviewId: item.reviewId || undefined,
     })),
@@ -145,8 +145,8 @@ export async function getAllJobs(limit: number = 50): Promise<JobStatus[]> {
     totalBatches: job.totalBatches,
     startTime: job.startTime.getTime(),
     estimatedTimeRemaining: job.estimatedTimeRemaining || undefined,
-    errors: (job.errors as any) || [],
-    reviews: (job.reviews as any) || [],
+    errors: (job.errors as JobStatus["errors"]) || [],
+    reviews: (job.reviews as JobStatus["reviews"]) || [],
     config: job.config,
   }));
 }
@@ -158,7 +158,7 @@ export async function updateJob(
   const currentJob = await prisma.bulkJob.findUnique({ where: { jobId } });
   if (!currentJob) return undefined;
 
-  const prismaUpdates: any = { ...updates };
+  const prismaUpdates: Record<string, unknown> = { ...updates };
   
   // Convert startTime if present
   if (updates.startTime) {
@@ -195,7 +195,7 @@ export async function updateJob(
 
   return {
     jobId: updated.jobId,
-    status: updated.status as any,
+    status: updated.status as JobStatus["status"],
     category: updated.category,
     total: updated.total,
     processed: updated.processed,
@@ -206,7 +206,7 @@ export async function updateJob(
       name: item.name,
       igdbId: item.igdbId || undefined,
       tmdbId: item.tmdbId || undefined,
-      status: item.status as any,
+      status: item.status as JobItem["status"],
       error: item.error || undefined,
       reviewId: item.reviewId || undefined,
     })),
@@ -214,8 +214,8 @@ export async function updateJob(
     totalBatches: updated.totalBatches,
     startTime: updated.startTime.getTime(),
     estimatedTimeRemaining: updated.estimatedTimeRemaining || undefined,
-    errors: (updated.errors as any) || [],
-    reviews: (updated.reviews as any) || [],
+    errors: (updated.errors as JobStatus["errors"]) || [],
+    reviews: (updated.reviews as JobStatus["reviews"]) || [],
     config: updated.config,
   };
 }
@@ -237,7 +237,7 @@ export async function updateQueueItem(
   if (item) {
     await prisma.bulkJobItem.update({
       where: { id: item.id },
-      data: updates as any,
+      data: updates as Record<string, unknown>,
     });
   }
 }
@@ -336,7 +336,7 @@ export async function getRunningJobs(): Promise<JobStatus[]> {
 
   return jobs.map(job => ({
     jobId: job.jobId,
-    status: job.status as any,
+    status: job.status as JobStatus["status"],
     category: job.category,
     total: job.total,
     processed: job.processed,
@@ -347,7 +347,7 @@ export async function getRunningJobs(): Promise<JobStatus[]> {
       name: item.name,
       igdbId: item.igdbId || undefined,
       tmdbId: item.tmdbId || undefined,
-      status: item.status as any,
+      status: item.status as JobItem["status"],
       error: item.error || undefined,
       reviewId: item.reviewId || undefined,
     })),
@@ -355,8 +355,8 @@ export async function getRunningJobs(): Promise<JobStatus[]> {
     totalBatches: job.totalBatches,
     startTime: job.startTime.getTime(),
     estimatedTimeRemaining: job.estimatedTimeRemaining || undefined,
-    errors: (job.errors as any) || [],
-    reviews: (job.reviews as any) || [],
+    errors: (job.errors as JobStatus["errors"]) || [],
+    reviews: (job.reviews as JobStatus["reviews"]) || [],
     config: job.config,
   }));
 }

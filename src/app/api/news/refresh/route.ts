@@ -34,6 +34,16 @@ export async function GET() {
     });
 
     const result = await syncNewsFromRss();
+
+    if (!result.success) {
+      // Fehlschlag: Cooldown aufheben, damit der nächste Besucher neu ansetzen
+      // kann statt 60 Minuten auf einen erneut fehlgeschlagenen Lauf zu warten.
+      await prisma.newsSyncState.update({
+        where: { id: "singleton" },
+        data: { lastRunAt: new Date(0) },
+      });
+    }
+
     return NextResponse.json(result, { status: result.success ? 200 : 500 });
   } catch (error) {
     console.error("❌ Error in news refresh:", error);

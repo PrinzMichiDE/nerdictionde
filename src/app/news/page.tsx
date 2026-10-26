@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Newspaper, ArrowRight, Clock } from "lucide-react";
+import { Newspaper, ArrowRight, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import prisma from "@/lib/prisma";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { getSiteUrl, generateItemListSchema } from "@/lib/seo";
 import { NewsSyncTrigger } from "@/components/news/NewsSyncTrigger";
+import { NEWS_CATEGORIES, type NewsCategory } from "@/lib/news-sources";
+import { cn } from "@/lib/utils";
+
+const PER_PAGE = 20;
 
 export const metadata: Metadata = {
   title: "News",
@@ -33,12 +37,47 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function NewsPage() {
-  const articles = await prisma.newsArticle.findMany({
-    where: { status: "published" },
-    orderBy: { publishedAt: "desc" },
-    take: 60,
-  });
+function buildNewsUrl({ category, page }: { category?: NewsCategory; page?: number }) {
+  const params = new URLSearchParams();
+  if (category) params.set("category", category);
+  if (page && page > 1) params.set("page", String(page));
+  const qs = params.toString();
+  return qs ? `/news?${qs}` : "/news";
+}
+
+export default async function NewsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string; page?: string }>;
+}) {
+  const { category: categoryParam, page: pageParam } = await searchParams;
+  const category: NewsCategory | undefined = (NEWS_CATEGORIES as readonly string[]).includes(
+    categoryParam || ""
+  )
+    ? (categoryParam as NewsCategory)
+    : undefined;
+
+  const where = { status: "published" as const, ...(category ? { category } : {}) };
+
+  const total = await prisma.newsArticle.count({ where });
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+  const page = Math.min(Math.max(1, parseInt(pageParam || "1", 10) || 1), totalPages);
+
+  const [articles, counts, allTotal] = await Promise.all([
+    prisma.newsArticle.findMany({
+      where,
+      orderBy: { publishedAt: "desc" },
+      skip: (page - 1) * PER_PAGE,
+      take: PER_PAGE,
+    }),
+    prisma.newsArticle.groupBy({
+      by: ["category"],
+      where: { status: "published" },
+      _count: { _all: true },
+    }),
+    // Gesamtzahl ungefiltert: Das "Alle"-Badge zeigt immer den vollen Bestand.
+    prisma.newsArticle.count({ where: { status: "published" } }),
+  ]);
 
   const itemListSchema = generateItemListSchema(
     articles.map((a) => ({
@@ -47,7 +86,11 @@ export default async function NewsPage() {
     }))
   );
 
-  const [featured, ...rest] = articles;
+  const featured = page === 1 ? articles[0] : undefined;
+  const rest = page === 1 ? articles.slice(1) : articles;
+
+  const pageBtnClass =
+    "inline-flex h-10 w-10 items-center justify-center rounded-sm border border-border text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground disabled:pointer-events-none disabled:opacity-35";
 
   return (
     <div className="max-w-7xl mx-auto space-y-12 py-8 px-4">
@@ -74,6 +117,35 @@ export default async function NewsPage() {
           basierend auf kuratierten Quellen.
         </p>
       </div>
+
+      {/* Kategorien-Filter */}
+      <nav
+        aria-label="Kategorie filtern"
+        className="flex items-center gap-1 overflow-x-auto pb-1"
+      >
+        <Link
+          href={buildNewsUrl({ page })}
+          data-active={!category}
+          className="filter-tab inline-flex items-center whitespace-nowrap"
+        >
+          Alle
+          <span className="filter-tab-count">{allTotal}</span>
+        </Link>
+        {NEWS_CATEGORIES.map((c) => {
+          const count = counts.find((x) => x.category === c)?._count._all ?? 0;
+          return (
+            <Link
+              key={c}
+              href={buildNewsUrl({ category: c })}
+              data-active={category === c}
+              className="filter-tab inline-flex items-center whitespace-nowrap"
+            >
+              {c}
+              <span className="filter-tab-count">{count}</span>
+            </Link>
+          );
+        })}
+      </nav>
 
       {articles.length === 0 ? (
         <p className="text-muted-foreground">Noch keine News verfügbar.</p>
@@ -137,6 +209,39 @@ export default async function NewsPage() {
                 </Link>
               ))}
             </div>
+          )}
+
+          {/* Paginierung */}
+          {totalPages > 1 && (
+            <nav
+              aria-label="Seitennavigation"
+              className="mt-2 flex flex-col items-center gap-4 border-t border-border pt-8"
+            >
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Link
+                  href={buildNewsUrl({ category, page: page - 1 })}
+                  aria-label="Vorherige Seite"
+                  className={cn(pageBtnClass, page <= 1 && "pointer-events-none opacity-35")}
+                  tabIndex={page <= 1 ? -1 : undefined}
+                  aria-disabled={page <= 1}
+                >
+                  <ChevronLeft className="size-4" />
+                </Link>
+                <Link
+                  href={buildNewsUrl({ category, page: page + 1 })}
+                  aria-label="Nächste Seite"
+                  className={cn(pageBtnClass, page >= totalPages && "pointer-events-none opacity-35")}
+                  tabIndex={page >= totalPages ? -1 : undefined}
+                  aria-disabled={page >= totalPages}
+                >
+                  <ChevronRight className="size-4" />
+                </Link>
+              </div>
+              <p className="kicker text-muted-foreground" style={{ fontSize: "0.625rem" }}>
+                Seite <span className="text-foreground">{String(page).padStart(2, "0")}</span> von{" "}
+                <span className="text-foreground">{String(totalPages).padStart(2, "0")}</span>
+              </p>
+            </nav>
           )}
         </div>
       )}

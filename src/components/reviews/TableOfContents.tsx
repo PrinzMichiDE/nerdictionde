@@ -14,13 +14,13 @@ interface TableOfContentsProps {
   isEn: boolean;
 }
 
+// Check if we're on the client side (not during SSR)
+const isClient = typeof window !== "undefined";
+
 export function TableOfContents({ headings, isEn }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string>("");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Use lazy initializer to avoid setState in effect - SSR renders false, client renders true
+  const [mounted] = useState<boolean>(() => isClient);
 
   useEffect(() => {
     if (!mounted || typeof window === "undefined") return;

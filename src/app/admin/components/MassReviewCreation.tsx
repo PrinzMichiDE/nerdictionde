@@ -125,15 +125,32 @@ export function MassReviewCreation() {
     setLoading(true);
 
     try {
-      const requestBody: any = {
-        category,
-        count: parseInt(count) || 200,
-        batchSize: parseInt(batchSize) || 5,
-        delayBetweenBatches: parseInt(delayBetweenBatches) || 3000,
-        delayBetweenItems: parseInt(delayBetweenItems) || 2000,
-        status,
-        skipExisting,
+      interface BulkCreateMassRequestBody {
+      category: string;
+      count: number;
+      batchSize: number;
+      delayBetweenBatches: number;
+      delayBetweenItems: number;
+      status: string;
+      skipExisting: boolean;
+      queryOptions?: {
+        sortBy?: string;
+        order?: string;
+        minRating?: number;
+        genreId?: number;
+        platformId?: number;
       };
+    }
+
+    const requestBody: BulkCreateMassRequestBody = {
+      category,
+      count: parseInt(count) || 200,
+      batchSize: parseInt(batchSize) || 5,
+      delayBetweenBatches: parseInt(delayBetweenBatches) || 3000,
+      delayBetweenItems: parseInt(delayBetweenItems) || 2000,
+      status,
+      skipExisting,
+    };
 
       if (category === "game") {
         requestBody.queryOptions = {
@@ -162,9 +179,10 @@ export function MassReviewCreation() {
       
       setJobId(newJobId);
       fetchJobs(); // Refresh the list to include the new job
-    } catch (error: any) {
-      console.error("Error starting job:", error);
-      alert("Fehler beim Starten des Jobs: " + (error.response?.data?.error || error.message));
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } }; message?: string };
+      console.error("Error starting job:", err);
+      alert("Fehler beim Starten des Jobs: " + (err.response?.data?.error || err.message));
     } finally {
       setLoading(false);
     }
@@ -176,7 +194,7 @@ export function MassReviewCreation() {
   };
 
   const formatTime = (seconds?: number): string => {
-    if (!seconds) return "Berechne...";
+    if (!seconds) return "Berechne";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}m ${secs}s`;
@@ -190,17 +208,6 @@ export function MassReviewCreation() {
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed": return "bg-green-500";
-      case "failed": return "bg-red-500";
-      case "processing":
-      case "running": return "bg-blue-500";
-      case "skipped": return "bg-yellow-500";
-      default: return "bg-gray-300";
-    }
   };
 
   const getCategoryIcon = (cat: string) => {
@@ -221,17 +228,10 @@ export function MassReviewCreation() {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       {/* Left Column: Form & History */}
       <div className="lg:col-span-5 space-y-6">
-        <Card className="border-2 border-primary/20 shadow-xl">
+        <Card>
           <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/10 w-10 h-10 rounded-full flex items-center justify-center">
-                <Play className="text-primary h-5 w-5" />
-              </div>
-              <div>
-                <CardTitle className="text-xl">Neuer Massen-Job</CardTitle>
-                <CardDescription>Konfigurieren und Starten</CardDescription>
-              </div>
-            </div>
+            <CardTitle className="text-lg">Neuer Massen-Job</CardTitle>
+            <CardDescription>Konfigurieren und starten</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -320,7 +320,7 @@ export function MassReviewCreation() {
         </Card>
 
         {/* Job History List */}
-        <Card className="border-2 shadow-lg">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
               <CardTitle className="text-lg">Job Historie</CardTitle>
@@ -374,11 +374,11 @@ export function MassReviewCreation() {
                         job.status === "completed" ? "default" : 
                         job.status === "failed" ? "destructive" : 
                         "secondary"
-                      } className="text-[10px] px-1.5 py-0 h-5">
+                      } className="capitalize text-xs font-medium">
                         {job.status === "running" ? "Läuft" : job.status}
                       </Badge>
                     </div>
-                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground tabular-nums">
                       <span>{formatDate(job.startTime)}</span>
                       <span>{job.processed}/{job.total} verarbeitet</span>
                     </div>
@@ -396,7 +396,7 @@ export function MassReviewCreation() {
       {/* Right Column: Active Job Details */}
       <div className="lg:col-span-7 space-y-6">
         {!jobStatus ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-12 bg-muted/20 rounded-xl border-2 border-dashed">
+          <div className="flex h-full flex-col items-center justify-center rounded-lg border border-dashed bg-muted/20 p-12 text-center">
             <List className="h-12 w-12 text-muted-foreground/30 mb-4" />
             <h3 className="text-lg font-medium text-muted-foreground">Kein Job ausgewählt</h3>
             <p className="text-sm text-muted-foreground/70 max-w-xs mt-2">
@@ -404,25 +404,25 @@ export function MassReviewCreation() {
             </p>
           </div>
         ) : (
-          <Card className="border-2 shadow-xl animate-in fade-in slide-in-from-right-4 duration-300">
+          <Card>
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <CardTitle className="text-xl">Job Details</CardTitle>
-                    <Badge variant="outline" className="font-mono text-[10px]">
-                      {jobStatus.jobId.substring(0, 8)}...
+                    <CardTitle className="text-lg">Job Details</CardTitle>
+                    <Badge variant="outline" className="font-mono text-xs">
+                      {jobStatus.jobId.substring(0, 8)}…
                     </Badge>
                   </div>
                   <CardDescription className="flex items-center gap-2">
                     {getCategoryIcon(jobStatus.category)}
                     <span className="capitalize">{jobStatus.category}</span>
-                    <span>•</span>
+                    <span className="text-muted-foreground/60">,</span>
                     <span>Gestartet am {formatDate(jobStatus.startTime)}</span>
                   </CardDescription>
                 </div>
                 {jobStatus.status === "running" && (
-                  <Badge className="bg-blue-500 animate-pulse flex items-center gap-1.5">
+                  <Badge className="flex items-center gap-1.5 bg-primary motion-safe:animate-pulse">
                     <Loader2 className="h-3 w-3 animate-spin" />
                     Aktiv
                   </Badge>
@@ -432,32 +432,32 @@ export function MassReviewCreation() {
             <CardContent className="space-y-6">
               {/* Stats Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-green-500/10 p-3 rounded-lg border border-green-500/20 text-center">
-                  <div className="text-2xl font-bold text-green-600">{jobStatus.successful}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-green-700/70 font-bold">Erfolg</div>
+                <div className="rounded-lg border border-success/20 bg-success/10 p-3 text-center">
+                  <div className="text-2xl font-semibold tabular-nums text-success">{jobStatus.successful}</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">Erfolg</div>
                 </div>
-                <div className="bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20 text-center">
-                  <div className="text-2xl font-bold text-yellow-600">{jobStatus.skipped}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-yellow-700/70 font-bold">Übersp.</div>
+                <div className="rounded-lg border border-warning/20 bg-warning/10 p-3 text-center">
+                  <div className="text-2xl font-semibold tabular-nums text-warning">{jobStatus.skipped}</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">Übersprungen</div>
                 </div>
-                <div className="bg-red-500/10 p-3 rounded-lg border border-red-500/20 text-center">
-                  <div className="text-2xl font-bold text-red-600">{jobStatus.failed}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-red-700/70 font-bold">Fehler</div>
+                <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-center">
+                  <div className="text-2xl font-semibold tabular-nums text-destructive">{jobStatus.failed}</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">Fehler</div>
                 </div>
-                <div className="bg-blue-500/10 p-3 rounded-lg border border-blue-500/20 text-center">
-                  <div className="text-2xl font-bold text-blue-600">{jobStatus.processed}/{jobStatus.total}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-blue-700/70 font-bold">Gesamt</div>
+                <div className="rounded-lg border border-border bg-muted/50 p-3 text-center">
+                  <div className="text-2xl font-semibold tabular-nums">{jobStatus.processed}/{jobStatus.total}</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">Gesamt</div>
                 </div>
               </div>
 
               {/* Main Progress */}
               <div className="space-y-2">
-                <div className="flex justify-between items-end">
-                  <Label className="text-sm font-semibold">Fortschritt</Label>
-                  <span className="text-2xl font-black text-primary">{progressPercentage}%</span>
+                <div className="flex items-end justify-between">
+                  <Label className="text-sm font-medium">Fortschritt</Label>
+                  <span className="text-lg font-semibold tabular-nums text-primary">{progressPercentage} %</span>
                 </div>
-                <Progress value={progressPercentage} className="h-4 shadow-inner" />
-                <div className="flex justify-between text-xs text-muted-foreground italic font-medium">
+                <Progress value={progressPercentage} className="h-2" />
+                <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Batch {jobStatus.currentBatch} von {jobStatus.totalBatches}</span>
                   {jobStatus.status === "running" && (
                     <div className="flex items-center gap-1">
@@ -471,15 +471,15 @@ export function MassReviewCreation() {
               {/* Errors Section */}
               {jobStatus.errors && jobStatus.errors.length > 0 && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-red-600 font-bold text-sm">
+                  <div className="flex items-center gap-2 text-sm font-medium text-destructive">
                     <XCircle className="h-4 w-4" />
                     Fehler ({jobStatus.errors.length})
                   </div>
-                  <ScrollArea className="h-[120px] border border-red-200 bg-red-50/30 rounded-lg">
-                    <div className="p-3 space-y-2">
+                  <ScrollArea className="h-[120px] rounded-lg border border-destructive/30 bg-destructive/5">
+                    <div className="space-y-2 p-3">
                       {jobStatus.errors.map((err, i) => (
-                        <div key={i} className="text-xs bg-white/80 p-2 rounded border border-red-100 shadow-sm">
-                          <span className="font-bold">{err.item}:</span> {err.error}
+                        <div key={i} className="rounded border border-border bg-card p-2 text-xs">
+                          <span className="font-medium">{err.item}:</span> {err.error}
                         </div>
                       ))}
                     </div>
@@ -493,13 +493,13 @@ export function MassReviewCreation() {
                   variant="ghost" 
                   size="sm" 
                   onClick={() => setShowQueue(!showQueue)}
-                  className="flex items-center gap-2 font-bold uppercase tracking-wider text-[11px]"
+                  className="flex items-center gap-2 text-sm font-medium"
                 >
                   {showQueue ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   Warteschlange ({jobStatus.queue.length})
                 </Button>
                 {jobStatus.reviews && jobStatus.reviews.length > 0 && (
-                  <Badge variant="outline" className="text-[10px]">
+                  <Badge variant="outline" className="text-xs">
                     {jobStatus.reviews.length} Reviews erstellt
                   </Badge>
                 )}
@@ -507,41 +507,33 @@ export function MassReviewCreation() {
 
               {/* Queue Items */}
               {showQueue && (
-                <ScrollArea className="h-[400px] border rounded-xl bg-muted/5 p-4 shadow-inner">
+                <ScrollArea className="h-[400px] rounded-lg border border-border bg-muted/5 p-4">
                   <div className="space-y-2">
                     {jobStatus.queue.map((item, index) => (
                       <div
                         key={index}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-white rounded-lg border border-border/50 shadow-sm hover:border-primary/20 transition-all group"
+                        className="flex flex-col justify-between gap-2 rounded-lg border border-border bg-card p-3 transition-colors sm:flex-row sm:items-center"
                       >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <div className={cn(
-                            "w-2.5 h-2.5 rounded-full shrink-0 shadow-sm",
-                            getStatusColor(item.status)
-                          )} />
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-sm font-bold truncate group-hover:text-primary transition-colors">
-                              {item.name}
-                            </span>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              {item.igdbId && <span className="text-[10px] text-muted-foreground font-mono bg-muted px-1 rounded">IGDB: {item.igdbId}</span>}
-                              {item.tmdbId && <span className="text-[10px] text-muted-foreground font-mono bg-muted px-1 rounded">TMDB: {item.tmdbId}</span>}
-                              {item.error && <span className="text-[10px] text-red-500 font-medium truncate italic max-w-[200px]">{item.error}</span>}
-                            </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium">{item.name}</span>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                            {item.igdbId && <span className="text-xs tabular-nums text-muted-foreground">IGDB: {item.igdbId}</span>}
+                            {item.tmdbId && <span className="text-xs tabular-nums text-muted-foreground">TMDB: {item.tmdbId}</span>}
+                            {item.error && <span className="max-w-[200px] truncate text-xs text-destructive">{item.error}</span>}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                        <div className="flex shrink-0 items-center gap-2">
                           {item.reviewId && (
-                            <Button variant="outline" size="sm" asChild className="h-8 px-2 text-[10px] font-bold">
+                            <Button variant="outline" size="sm" asChild className="h-8 px-2.5 text-xs font-medium">
                               <a href={`/reviews/${item.reviewId}`} target="_blank" rel="noopener noreferrer">
-                                <ExternalLink className="h-3 w-3 mr-1" />
-                                VIEW
+                                <ExternalLink className="mr-1 h-3.5 w-3.5" />
+                                Ansehen
                               </a>
                             </Button>
                           )}
-                          <Badge 
+                          <Badge
                             variant={item.status === "completed" ? "default" : item.status === "failed" ? "destructive" : "secondary"}
-                            className="text-[9px] font-black uppercase tracking-tighter h-6"
+                            className="h-6 capitalize text-xs font-medium"
                           >
                             {item.status}
                           </Badge>

@@ -5,10 +5,13 @@ import { Metadata } from "next";
 import { getSiteUrl } from "@/lib/seo";
 import { ArrowLeft, Settings as SettingsIcon } from "lucide-react";
 import { PushNotificationManager } from "@/components/pwa/PushNotificationManager";
+import { ReadingHistoryPrivacyToggle } from "@/components/reading-history/ReadingHistoryPrivacyToggle";
+import { PersonalizedRecommendationsToggle } from "@/components/recommendations";
+import { FEATURE_CATEGORY_SUBSCRIPTIONS, FEATURE_PERSONALIZED_RECOMMENDATIONS, FEATURE_ENHANCED_NOTIFICATION_PREFS } from "@/lib/feature-flags";
 
 export const metadata: Metadata = {
   title: "Einstellungen - Nerdiction",
-  description: "Push-Benachrichtigungen und App-Einstellungen verwalten.",
+  description: "Push-Benachrichtigungen, Datenschutz und App-Einstellungen verwalten.",
   robots: { index: false, follow: false },
   alternates: { canonical: `${getSiteUrl()}/einstellungen` },
 };
@@ -33,14 +36,64 @@ export default async function SettingsPage() {
           Einstellungen
         </h1>
         <p className="text-sm text-muted-foreground">
-          Verwalte deine Push-Benachrichtigungen für die Nerdiction-App.
+          Verwalte deine Push-Benachrichtigungen, Datenschutz-Einstellungen und App-Präferenzen.
         </p>
       </div>
 
+      {FEATURE_ENHANCED_NOTIFICATION_PREFS && (
+        <Link
+          href="/einstellungen/benachrichtigungen"
+          className="rounded-lg border border-border bg-card p-6 hover:bg-muted/50 transition-colors"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-serif text-xl font-semibold">Benachrichtigungen</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Granulare Einstellungen pro Typ, Kanal (In-App, E-Mail, Push) und Frequenz (Sofort, Täglich, Wöchentlich).
+                Stummschaltungen für einzelne Objekte verwalten.
+              </p>
+            </div>
+            <span className="text-muted-foreground">→</span>
+          </div>
+        </Link>
+      )}
+
+      {FEATURE_CATEGORY_SUBSCRIPTIONS && (
+        <Link
+          href="/einstellungen/kategorien"
+          className="rounded-lg border border-border bg-card p-6 hover:bg-muted/50 transition-colors"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-serif text-xl font-semibold">Kategorie-Abos</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Wähle Kategorien, für die du bei neuen Reviews benachrichtigt werden möchtest.
+              </p>
+            </div>
+            <span className="text-muted-foreground">→</span>
+          </div>
+        </Link>
+      )}
+
       <section className="rounded-lg border border-border bg-card p-6">
-        <h2 className="mb-4 font-serif text-xl font-semibold">Push-Benachrichtigungen</h2>
+        <h2 className="mb-4 font-serif text-xl font-semibold">Push-Benachrichtigungen (Legacy)</h2>
         <PushNotificationManager />
       </section>
+
+      <section className="rounded-lg border border-border bg-card p-6">
+        <h2 className="mb-4 font-serif text-xl font-semibold">Datenschutz</h2>
+        <ReadingHistoryPrivacyToggle />
+      </section>
+
+      {FEATURE_PERSONALIZED_RECOMMENDATIONS && (
+        <section className="rounded-lg border border-border bg-card p-6">
+          <h2 className="mb-4 font-serif text-xl font-semibold">Personalisierte Empfehlungen</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Erhalte auf der Startseite und in Reviews Empfehlungen, die auf deinen Bewertungen, Lesezeichen, Follows und deinem Leseverlauf basieren.
+          </p>
+          <PersonalizedRecommendationsToggle />
+        </section>
+      )}
     </div>
   );
 }

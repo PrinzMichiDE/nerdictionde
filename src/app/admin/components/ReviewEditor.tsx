@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
 import { Review } from "@/types/review";
 import { PreviewPanel } from "./PreviewPanel";
 import { AIAssistant } from "./AIAssistant";
@@ -18,9 +18,24 @@ import {
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ReviewEditorProps {
   review: Review;
+}
+
+type Pane = "form" | "preview" | "assistant";
+
+function useMediaQuery(query: string) {
+  return useSyncExternalStore(
+    (onChange) => {
+      const mql = window.matchMedia(query);
+      mql.addEventListener("change", onChange);
+      return () => mql.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia(query).matches,
+    () => false
+  );
 }
 
 export function ReviewEditor({ review: initialReview }: ReviewEditorProps) {
@@ -31,6 +46,9 @@ export function ReviewEditor({ review: initialReview }: ReviewEditorProps) {
   const [publishing, setPublishing] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const [pane, setPane] = useState<Pane>("form");
+  const wideMatches = useMediaQuery("(min-width: 80rem)");
+  const isWide = wideMatches;
 
   const initialSnapshot = useRef(JSON.stringify(initialReview));
   const dirty = JSON.stringify(review) !== initialSnapshot.current;
@@ -69,7 +87,7 @@ export function ReviewEditor({ review: initialReview }: ReviewEditorProps) {
       setLastSavedAt(new Date());
       toast({
         title: "Gespeichert",
-        description: `Änderungen an "${review.title}" wurden gespeichert.`,
+        description: `Änderungen an „${review.title}“ wurden gespeichert.`,
       });
     } catch (error) {
       console.error("Save failed:", error);
@@ -93,13 +111,14 @@ export function ReviewEditor({ review: initialReview }: ReviewEditorProps) {
       setLastSavedAt(new Date());
       toast({
         title: "Veröffentlicht",
-        description: `"${review.title}" ist jetzt online.`,
+        description: `„${review.title}“ ist jetzt online.`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Publish failed:", error);
+      const err = error as { response?: { data?: { error?: string } } };
       toast({
         title: "Veröffentlichung fehlgeschlagen",
-        description: error.response?.data?.error || "Fehler beim Veröffentlichen.",
+        description: err.response?.data?.error || "Fehler beim Veröffentlichen.",
         variant: "destructive",
       });
     } finally {
@@ -119,12 +138,12 @@ export function ReviewEditor({ review: initialReview }: ReviewEditorProps) {
     publishing || saving ? (
       <span className="flex items-center gap-1.5 text-muted-foreground">
         <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        Speichert...
+        Speichert
       </span>
     ) : dirty ? (
-      <span className="text-yellow-500 font-medium">Ungespeicherte Änderungen</span>
+      <span className="font-medium text-warning">Ungespeicherte Änderungen</span>
     ) : lastSavedAt ? (
-      <span className="text-green-500 font-medium">
+      <span className="font-medium text-success">
         Gespeichert um {lastSavedAt.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
       </span>
     ) : (
@@ -132,31 +151,33 @@ export function ReviewEditor({ review: initialReview }: ReviewEditorProps) {
     );
 
   return (
-    <div className="flex flex-col h-[calc(100vh-10rem)] space-y-4">
-      <div className="flex items-center justify-between border-b pb-4 shrink-0 flex-wrap gap-3">
-        <div className="flex items-center space-x-4 min-w-0">
+    <div className="flex h-[calc(100dvh-6.5rem)] min-h-[480px] flex-col md:h-[calc(100dvh-7.5rem)]">
+      {/* Toolbar */}
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b pb-4">
+        <div className="flex min-w-0 items-center gap-3">
           <Button variant="ghost" size="sm" className="shrink-0" onClick={handleBackToList}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Zurück zur Liste
+            <span className="hidden sm:inline">Zurück zur Liste</span>
+            <span className="sm:hidden">Zurück</span>
           </Button>
           <div className="min-w-0">
-            <h2 className="text-xl font-bold line-clamp-1">{review.title}</h2>
-            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+            <h2 className="truncate text-lg font-bold md:text-xl">{review.title || "Ohne Titel"}</h2>
+            <div className="flex flex-wrap items-center gap-y-0.5 text-xs text-muted-foreground">
               <span className="capitalize">{review.category}</span>
-              <span>•</span>
-              <span className={review.status === "published" ? "text-green-500 font-medium" : "text-yellow-500"}>
+              <span aria-hidden="true" className="mr-2 text-muted-foreground/50">,</span>
+              <span className={review.status === "published" ? "font-medium text-success" : "font-medium text-warning"}>
                 {review.status === "published" ? "Veröffentlicht" : "Entwurf"}
               </span>
-              <span>•</span>
+              <span aria-hidden="true" className="mr-2 text-muted-foreground/50">,</span>
               {statusLabel}
             </div>
           </div>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleSave} disabled={saving || publishing}>
             {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             Speichern
-            <kbd className="ml-2 hidden md:inline-flex items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-[10px] text-muted-foreground">
+            <kbd className="ml-2 hidden items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-xs text-muted-foreground md:inline-flex">
               Ctrl S
             </kbd>
           </Button>
@@ -167,24 +188,46 @@ export function ReviewEditor({ review: initialReview }: ReviewEditorProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 min-h-0">
-        {/* Left: Form Panel */}
-        <div className="overflow-y-auto pr-2 space-y-6 scrollbar-hide">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Formular</h3>
-            <FormPanel review={review} setReview={setReview} />
-        </div>
-
-        {/* Center: Preview Panel */}
-        <div className="border-x px-4 overflow-y-auto space-y-6 scrollbar-hide bg-muted/10 rounded-xl">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground sticky top-0 py-2 bg-background/0 backdrop-blur-sm z-10">Live Vorschau</h3>
-            <PreviewPanel review={review} />
-        </div>
-
-        {/* Right: Assistant */}
-        <div className="overflow-y-auto pl-2 space-y-6 scrollbar-hide">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Assistent</h3>
-            <AIAssistant review={review} setReview={setReview} />
-        </div>
+      {/* Content */}
+      <div className="flex min-h-0 flex-1 flex-col pt-4">
+        {isWide ? (
+          <div className="grid min-h-0 flex-1 grid-cols-12 gap-5">
+            {/* Form */}
+            <div className="col-span-5 min-h-0 overflow-y-auto pr-1 scrollbar-hide">
+              <h3 className="mb-4 text-sm font-medium text-muted-foreground">Formular</h3>
+              <FormPanel review={review} setReview={setReview} />
+            </div>
+            {/* Preview */}
+            <div className="col-span-4 min-h-0 overflow-y-auto rounded-lg border border-border/60 bg-muted/20 p-4 scrollbar-hide">
+              <h3 className="mb-4 text-sm font-medium text-muted-foreground">Vorschau</h3>
+              <PreviewPanel review={review} />
+            </div>
+            {/* Assistant */}
+            <div className="col-span-3 min-h-0 overflow-y-auto pl-1 scrollbar-hide">
+              <h3 className="mb-4 text-sm font-medium text-muted-foreground">Assistent</h3>
+              <AIAssistant review={review} setReview={setReview} />
+            </div>
+          </div>
+        ) : (
+          <Tabs value={pane} onValueChange={(v) => setPane(v as Pane)} className="flex min-h-0 flex-1 flex-col">
+            <TabsList className="w-fit">
+              <TabsTrigger value="form">Formular</TabsTrigger>
+              <TabsTrigger value="preview">Vorschau</TabsTrigger>
+              <TabsTrigger value="assistant">Assistent</TabsTrigger>
+            </TabsList>
+            <TabsContent value="form" className="min-h-0 flex-1 overflow-y-auto pt-4 scrollbar-hide">
+              <FormPanel review={review} setReview={setReview} />
+            </TabsContent>
+            <TabsContent value="preview" className="min-h-0 flex-1 overflow-y-auto pt-4 scrollbar-hide">
+              <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
+                <PreviewPanel review={review} />
+              </div>
+            </TabsContent>
+            <TabsContent value="assistant" className="min-h-0 flex-1 overflow-y-auto pt-4 scrollbar-hide">
+              <AIAssistant review={review} setReview={setReview} />
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
 
       {/* Unsaved changes dialog */}

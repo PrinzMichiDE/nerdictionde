@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const items = [
   { href: "/", label: "Home", icon: Home },
   { href: "/reviews", label: "Reviews", icon: Star },
-  { href: "/streaming-tools", label: "Tools", icon: Wrench },
+  { href: "/tools", label: "Tools", icon: Wrench },
   { href: "/forum", label: "Forum", icon: MessageSquare },
   { href: "/profil", label: "Profil", icon: User },
 ];
@@ -32,7 +32,9 @@ export function MobileBottomNav() {
                 href={href}
                 className={cn(
                   "flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium transition-colors",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  "hover:text-foreground",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  isActive ? "text-primary" : "text-muted-foreground"
                 )}
                 aria-current={isActive ? "page" : undefined}
               >

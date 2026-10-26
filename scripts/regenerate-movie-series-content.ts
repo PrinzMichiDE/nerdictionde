@@ -58,8 +58,9 @@ async function retryWithBackoff<T>(
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await fn();
-    } catch (error: any) {
-      lastError = error;
+    } catch (error: unknown) {
+      const err = error as Error;
+      lastError = err;
       if (attempt < maxRetries - 1) {
         const delay = baseDelay * Math.pow(2, attempt);
         console.log(`  ⚠️  Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
@@ -144,7 +145,7 @@ async function main() {
   console.log("=".repeat(60));
   console.log(`Category: ${category} | Status: ${status}${limit ? ` | Limit: ${limit}` : ""}${force ? " | Force" : ""}`);
 
-  const where: any = {
+  const where: Record<string, unknown> = {
     category: { in: category === "movie" ? ["movie"] : category === "series" ? ["series"] : ["movie", "series"] },
     tmdbId: { not: null },
   };
@@ -214,10 +215,11 @@ async function main() {
         progress.failedReviews.push({ id: review.id, title: review.title, error: result.error || "Unknown" });
         console.error(`  ❌ ${result.error}`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error;
       progress.failed++;
-      progress.failedReviews.push({ id: review.id, title: review.title, error: error.message });
-      console.error(`  ❌ ${error.message}`);
+      progress.failedReviews.push({ id: review.id, title: review.title, error: err.message });
+      console.error(`  ❌ ${err.message}`);
     }
 
     progress.processed = index + 1;

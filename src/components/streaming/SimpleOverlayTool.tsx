@@ -72,8 +72,8 @@ export function SimpleOverlayTool({
       const url = `${window.location.origin}/api/overlay/${data.id}`;
       setSavedUrl(url);
       toast.success("Overlay gespeichert!");
-    } catch (e: any) {
-      toast.error(e.message || "Fehler");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Fehler");
     } finally {
       setBusy(false);
     }

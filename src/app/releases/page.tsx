@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { generateItemListSchema, getSiteUrl } from "@/lib/seo";
 import { ReleaseCalendarAutoSync } from "./components/ReleaseCalendarAutoSync";
+import type { GameMetadata } from "@/types/review";
 
 export const metadata: Metadata = {
   title: "Spiele Release Kalender",
@@ -45,7 +46,7 @@ interface Release {
   releaseDate: Date | null;
   images: string[];
   score: number;
-  metadata: any;
+  metadata: GameMetadata | null;
   steamAppId: string | null;
   epicId: string | null;
   gogId: string | null;

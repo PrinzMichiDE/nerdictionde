@@ -6,6 +6,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Required for hydration-safe theme initialization
     setMounted(true);
     const root = document.documentElement;
     const theme = localStorage.getItem("theme") || "dark";

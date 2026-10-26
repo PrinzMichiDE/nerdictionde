@@ -1,0 +1,358 @@
+
+> nerdiction@0.1.0 lint
+> eslint
+
+
+E:\Projects\nerdictionde\.agents\skills\hallmark\scripts\capture.mjs
+   17:33  warning  'writeFileSync' is defined but never used  @typescript-eslint/no-unused-vars
+  111:14  warning  'shot' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\.agents\skills\hallmark\scripts\sloplint-render.mjs
+  168:55  warning  'probe' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  168:62  warning  'fg' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  168:66  warning  'threshold' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  168:77  warning  'drop' is assigned a value but never used       @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\.agents\skills\hallmark\scripts\sloplint.mjs
+  1856:54  warning  'baseWhere' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  2109:15  warning  'isOklch' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\public\sw.js
+  98:12  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\scripts\create-200-game-reviews.ts
+  4:23  warning  'generateSlug' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\admin\components\BulkCreate.tsx
+  59:18  warning  'setStatus' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  60:24  warning  'setSkipExisting' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\admin\components\FormPanel.tsx
+  333:26  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\admin\components\MassReviewCreation.tsx
+   12:18  warning  'Pause' is defined but never used                            @typescript-eslint/no-unused-vars
+   12:25  warning  'CheckCircle2' is defined but never used                     @typescript-eslint/no-unused-vars
+   13:3   warning  'TrendingUp' is defined but never used                       @typescript-eslint/no-unused-vars
+   52:10  warning  'polling' is assigned a value but never used                 @typescript-eslint/no-unused-vars
+   62:31  warning  'setDelayBetweenBatches' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   63:29  warning  'setDelayBetweenItems' is assigned a value but never used    @typescript-eslint/no-unused-vars
+   64:18  warning  'setStatus' is assigned a value but never used               @typescript-eslint/no-unused-vars
+   65:24  warning  'setSkipExisting' is assigned a value but never used         @typescript-eslint/no-unused-vars
+   69:10  warning  'maxRating' is assigned a value but never used               @typescript-eslint/no-unused-vars
+   69:21  warning  'setMaxRating' is assigned a value but never used            @typescript-eslint/no-unused-vars
+   70:18  warning  'setGenres' is assigned a value but never used               @typescript-eslint/no-unused-vars
+   71:21  warning  'setPlatforms' is assigned a value but never used            @typescript-eslint/no-unused-vars
+   72:27  warning  'setTmdbMovieGenres' is assigned a value but never used      @typescript-eslint/no-unused-vars
+   73:28  warning  'setTmdbSeriesGenres' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  128:26  error    Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  165:21  error    Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+
+E:\Projects\nerdictionde\src\app\api\analytics\stats\route.ts
+  8:27  warning  'req' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\api\auth\twitch\login\route.ts
+  8:27  warning  'req' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\api\auth\twitch\logout\route.ts
+  7:28  warning  'req' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\api\media\upload\route.ts
+  17:9  warning  'pathname' is defined but never used       @typescript-eslint/no-unused-vars
+  18:9  warning  'clientPayload' is defined but never used  @typescript-eslint/no-unused-vars
+  19:9  warning  'multipart' is defined but never used      @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\api\reviews\bulk-create-200\route.ts
+  126:11  warning  'retryWithBackoff' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  182:5   warning  'skipExisting' is assigned a value but never used      @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\api\reviews\bulk-create-mass\route.ts
+   16:33  warning  'HardwareCatalogItem' is defined but never used  @typescript-eslint/no-unused-vars
+  141:15  warning  'createdHw' is assigned a value but never used   @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\api\tools\title-generator\route.ts
+  20:13  warning  'userId' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\game-overlays\page.tsx
+  1:8   warning  'Link' is defined but never used      @typescript-eslint/no-unused-vars
+  4:10  warning  'Gamepad2' is defined but never used  @typescript-eslint/no-unused-vars
+  4:34  warning  'Copy' is defined but never used      @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\newsletter\confirm\[token]\page.tsx
+  11:11  warning  'token' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\newsletter\unsubscribe\[token]\page.tsx
+  11:11  warning  'token' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\profil\page.tsx
+  16:10  warning  'getInitials' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\reviews\vergleichen\page.tsx
+  8:10  warning  'SpecTable' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\streaming-tools\donation-tracker\page.tsx
+  20:10  warning  'userId' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\streaming-tools\overlay-generator\page.tsx
+  26:9  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\tools\page.tsx
+   1:16  warning  'CardContent' is defined but never used     @typescript-eslint/no-unused-vars
+  11:3   warning  'Image' is defined but never used           @typescript-eslint/no-unused-vars
+  14:3   warning  'Heart' is defined but never used           @typescript-eslint/no-unused-vars
+  15:3   warning  'Users2' is defined but never used          @typescript-eslint/no-unused-vars
+  16:3   warning  'Settings' is defined but never used        @typescript-eslint/no-unused-vars
+  17:3   warning  'TrendingUp' is defined but never used      @typescript-eslint/no-unused-vars
+  18:3   warning  'Globe' is defined but never used           @typescript-eslint/no-unused-vars
+  19:3   warning  'Palette' is defined but never used         @typescript-eslint/no-unused-vars
+  30:3   warning  'Gift' is defined but never used            @typescript-eslint/no-unused-vars
+  31:3   warning  'Trophy' is defined but never used          @typescript-eslint/no-unused-vars
+  41:3   warning  'TrendingDown' is defined but never used    @typescript-eslint/no-unused-vars
+  42:3   warning  'Bot' is defined but never used             @typescript-eslint/no-unused-vars
+  44:3   warning  'Database' is defined but never used        @typescript-eslint/no-unused-vars
+  46:3   warning  'Star' is defined but never used            @typescript-eslint/no-unused-vars
+  47:3   warning  'Award' is defined but never used           @typescript-eslint/no-unused-vars
+  48:3   warning  'Brush' is defined but never used           @typescript-eslint/no-unused-vars
+  49:11  warning  'TypeIcon' is defined but never used        @typescript-eslint/no-unused-vars
+  51:3   warning  'Badge' is defined but never used           @typescript-eslint/no-unused-vars
+  52:3   warning  'Puzzle' is defined but never used          @typescript-eslint/no-unused-vars
+  53:3   warning  'Volume2' is defined but never used         @typescript-eslint/no-unused-vars
+  55:3   warning  'Shuffle' is defined but never used         @typescript-eslint/no-unused-vars
+  56:3   warning  'Vote' is defined but never used            @typescript-eslint/no-unused-vars
+  57:3   warning  'PartyPopper' is defined but never used     @typescript-eslint/no-unused-vars
+  58:3   warning  'HelpCircle' is defined but never used      @typescript-eslint/no-unused-vars
+  59:3   warning  'BookOpen' is defined but never used        @typescript-eslint/no-unused-vars
+  60:3   warning  'GlassWater' is defined but never used      @typescript-eslint/no-unused-vars
+  61:3   warning  'Activity' is defined but never used        @typescript-eslint/no-unused-vars
+  62:3   warning  'Eye' is defined but never used             @typescript-eslint/no-unused-vars
+  64:3   warning  'Moon' is defined but never used            @typescript-eslint/no-unused-vars
+  65:3   warning  'Mic' is defined but never used             @typescript-eslint/no-unused-vars
+  66:3   warning  'Handshake' is defined but never used       @typescript-eslint/no-unused-vars
+  67:3   warning  'CalendarCheck' is defined but never used   @typescript-eslint/no-unused-vars
+  68:3   warning  'UserCheck' is defined but never used       @typescript-eslint/no-unused-vars
+  69:3   warning  'FileCheck' is defined but never used       @typescript-eslint/no-unused-vars
+  70:10  warning  'ZapIcon' is defined but never used         @typescript-eslint/no-unused-vars
+  71:3   warning  'Code' is defined but never used            @typescript-eslint/no-unused-vars
+  72:3   warning  'Webhook' is defined but never used         @typescript-eslint/no-unused-vars
+  73:3   warning  'Plug' is defined but never used            @typescript-eslint/no-unused-vars
+  74:3   warning  'Brain' is defined but never used           @typescript-eslint/no-unused-vars
+  76:3   warning  'BarChart' is defined but never used        @typescript-eslint/no-unused-vars
+  77:3   warning  'Search' is defined but never used          @typescript-eslint/no-unused-vars
+  78:3   warning  'CalendarDays' is defined but never used    @typescript-eslint/no-unused-vars
+  79:3   warning  'Split' is defined but never used           @typescript-eslint/no-unused-vars
+  80:12  warning  'ImageIcon' is defined but never used       @typescript-eslint/no-unused-vars
+  82:3   warning  'RefreshCw' is defined but never used       @typescript-eslint/no-unused-vars
+  83:3   warning  'ArrowLeftRight' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\tools\schedule-planner\client.tsx
+  113:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  141:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\app\tools\title-generator\client.tsx
+   8:10  warning  'Textarea' is defined but never used  @typescript-eslint/no-unused-vars
+  65:14  warning  'error' is defined but never used     @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\analytics\AnalyticsDashboard.tsx
+  132:56  warning  'i' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\community\CommentSection.tsx
+  7:10  warning  'Avatar' is defined but never used          @typescript-eslint/no-unused-vars
+  7:18  warning  'AvatarFallback' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\home\3DCard.tsx
+  4:10  warning  'Card' is defined but never used         @typescript-eslint/no-unused-vars
+  4:16  warning  'CardContent' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\home\FAQ.tsx
+  66:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+E:\Projects\nerdictionde\src\components\home\HeroSection.tsx
+  6:31  warning  'useMemo' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\home\ImageGallery.tsx
+  47:39  warning  The ref value 'galleryRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'galleryRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  92:6   warning  React Hook useEffect has a missing dependency: 'navigateImage'. Either include it or remove the dependency array                                                                                                                                                     react-hooks/exhaustive-deps
+
+E:\Projects\nerdictionde\src\components\home\InteractiveCharts.tsx
+   43:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  129:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  250:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+E:\Projects\nerdictionde\src\components\home\ParallaxSection.tsx
+  18:15  warning  'rect' is assigned a value but never used                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  98:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+E:\Projects\nerdictionde\src\components\home\Partners.tsx
+  64:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+E:\Projects\nerdictionde\src\components\home\PressMentions.tsx
+  52:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+E:\Projects\nerdictionde\src\components\home\ScrollAnimations.tsx
+  39:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+E:\Projects\nerdictionde\src\components\home\SocialProof.tsx
+   15:10  warning  'useCountUp' is defined but never used                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+   35:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  134:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+E:\Projects\nerdictionde\src\components\home\Statistics.tsx
+  43:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  77:54  warning  'delay' is assigned a value but never used                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\home\StatsDashboard.tsx
+   34:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+  152:32  warning  The ref value 'ref.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'ref.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+E:\Projects\nerdictionde\src\components\reviews\CompareButton.tsx
+  3:23  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\reviews\ReviewPdfLayout.tsx
+   29:9    warning  'radius' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  190:43   warning  'siteUrl' is defined but never used          @typescript-eslint/no-unused-vars
+  299:103  error    Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+
+E:\Projects\nerdictionde\src\components\reviews\TableOfContents.tsx
+  29:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+E:\Projects\nerdictionde\src\components\reviews\TableOfContents.tsx:29:5
+  27 |   useEffect(() => {
+  28 |     if (!isClient) return;
+> 29 |     setMounted(true);
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  30 |   }, []);
+  31 |
+  32 |   useEffect(() => {  react-hooks/set-state-in-effect
+
+E:\Projects\nerdictionde\src\components\reviews\YouTubeEmbed.tsx
+  43:10  warning  'isClientState' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+  52:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+E:\Projects\nerdictionde\src\components\reviews\YouTubeEmbed.tsx:52:5
+  50 |   useEffect(() => {
+  51 |     if (!isClient) return;
+> 52 |     setIsClient(true);
+     |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  53 |     const extractedId = extractVideoId(videoId);
+  54 |     setEmbedId(extractedId);
+  55 |   }, [videoId]);  react-hooks/set-state-in-effect
+  55:6   warning  React Hook useEffect has a missing dependency: 'isClient'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-hooks/exhaustive-deps
+
+E:\Projects\nerdictionde\src\components\search\Highlighter.tsx
+  16:3   warning  'tagName' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  32:29  warning  'index' is defined but never used             @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\search\SearchFilters.tsx
+  5:37  warning  'Calendar' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\search\SearchResults.tsx
+   3:10  warning  'useState' is defined but never used  @typescript-eslint/no-unused-vars
+  10:10  warning  'Skeleton' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\shared\MicroInteractions.tsx
+  3:39  warning  'CSSProperties' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\shared\ProfileLink.tsx
+  39:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+E:\Projects\nerdictionde\src\components\shared\SupportBanner.tsx
+  3:20  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\components\shared\SupportTopBanner.tsx
+  20:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+E:\Projects\nerdictionde\src\components\shared\SupportTopBanner.tsx:20:5
+  18 |   useEffect(() => {
+  19 |     if (!isClient) return;
+> 20 |     setHydrated(true);
+     |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  21 |   }, []);
+  22 |
+  23 |   if (!hydrated || !visible) return null;  react-hooks/set-state-in-effect
+
+E:\Projects\nerdictionde\src\components\tools\UserProfile.tsx
+  6:18  warning  'User' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\lib\auth-twitch.ts
+   89:12  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  138:3   warning  'state' is defined but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\lib\image-generation.ts
+  25:5  warning  'style' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+E:\Projects\nerdictionde\src\lib\job-status.ts
+  339:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  350:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  358:28  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  359:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\Projects\nerdictionde\src\lib\review-generation.ts
+    15:3   warning  'extractTavilyImages' is defined but never used  @typescript-eslint/no-unused-vars
+    40:60  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+    40:84  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   171:25  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   245:12  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   274:26  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   504:13  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   514:11  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   748:13  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   832:71  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   848:61  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   848:90  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   849:61  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   849:90  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   850:48  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   851:42  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+   949:19  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1023:17  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1032:11  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1167:17  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1284:19  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1367:71  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1381:59  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1381:88  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1382:59  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1382:88  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1383:46  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1384:40  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1461:19  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1774:19  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  1901:19  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  2179:71  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+
+E:\Projects\nerdictionde\src\lib\tavily.ts
+  254:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  268:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\Projects\nerdictionde\src\lib\tmdb-large.ts
+  137:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  266:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\Projects\nerdictionde\src\lib\tmdb.ts
+  209:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  305:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  330:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  352:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  375:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  396:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 190 problems (51 errors, 139 warnings)
+

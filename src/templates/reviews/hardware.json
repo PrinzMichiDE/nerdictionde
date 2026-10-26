@@ -1,0 +1,89 @@
+{
+  "id": "hardware",
+  "name": "Hardware Review",
+  "description": "Technisches Hardware-Review mit Specs, Benchmarks, Vergleiche",
+  "category": "hardware",
+  "default": false,
+  "fields": [
+    {
+      "id": "intro",
+      "type": "textarea",
+      "label": "Einleitung",
+      "placeholder": "Was wird getestet? Zielgruppe, Preisrahmen, Erwartung...",
+      "helpText": "Produktvorstellung, Marktposition, UVP, Lieferumfang.",
+      "required": true,
+      "markdown": true,
+      "order": 1
+    },
+    {
+      "id": "specs",
+      "type": "textarea",
+      "label": "Technische Daten & Features",
+      "placeholder": "Chipset, VRAM, Takt, Anschlüsse, Kühlung, Stromverbrauch...",
+      "helpText": "Wichtige Specs tabellarisch oder als Liste. Besondere Features hervorheben.",
+      "required": true,
+      "markdown": true,
+      "order": 2
+    },
+    {
+      "id": "build-quality",
+      "type": "textarea",
+      "label": "Verarbeitung & Design",
+      "placeholder": "Materialien, Verarbeitungsqualität, RGB, Größe, Gewicht...",
+      "helpText": "Haptik, Materialwahl, Designsprache, Montagefreundlichkeit.",
+      "required": true,
+      "markdown": true,
+      "order": 3
+    },
+    {
+      "id": "performance",
+      "type": "textarea",
+      "label": "Performance & Benchmarks",
+      "placeholder": "Synthetische Benchmarks, Real-World Tests, Thermals, Lautstärke...",
+      "helpText": "Messwerte (FPS, Scores, Temps, dB), Vergleich zu Konkurrenz, Thermals.",
+      "required": true,
+      "markdown": true,
+      "order": 4
+    },
+    {
+      "id": "software",
+      "type": "textarea",
+      "label": "Software & Features",
+      "placeholder": "Treiber, Utility-App, OC-Tools, RGB-Control, Updates...",
+      "helpText": "Software-Erfahrung, Stabilität, Feature-Set, Update-Politik.",
+      "required": false,
+      "markdown": true,
+      "order": 5
+    },
+    {
+      "id": "pros",
+      "type": "textarea",
+      "label": "Pros",
+      "placeholder": "- Punkt 1\n- Punkt 2\n- Punkt 3",
+      "helpText": "Stärken als Liste (ein Punkt pro Zeile mit Bindestrich).",
+      "required": true,
+      "markdown": false,
+      "order": 6
+    },
+    {
+      "id": "cons",
+      "type": "textarea",
+      "label": "Cons",
+      "placeholder": "- Punkt 1\n- Punkt 2\n- Punkt 3",
+      "helpText": "Schwächen als Liste (ein Punkt pro Zeile mit Bindestrich).",
+      "required": true,
+      "markdown": false,
+      "order": 7
+    },
+    {
+      "id": "verdict",
+      "type": "textarea",
+      "label": "Fazit & Kaufempfehlung",
+      "placeholder": "Preis/Leistung, Für wen geeignet, Alternativen, finale Score-Begründung...",
+      "helpText": "Endgültiges Urteil, Zielgruppe, Preis/Leistung, Alternativen nennen.",
+      "required": true,
+      "markdown": true,
+      "order": 8
+    }
+  ]
+}

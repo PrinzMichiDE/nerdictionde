@@ -6,7 +6,6 @@ import type { Review } from "@/types/review";
 import { ReviewCard } from "@/components/reviews/ReviewCard";
 import { getCategoryStyle } from "@/lib/review-category";
 import { ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/shared/EmptyState";
 
 type SortMode = "new" | "score";
@@ -78,43 +77,42 @@ export function HomeReviews({ reviews }: { reviews: Review[] }) {
         </Link>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-y border-border py-3">
-        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Kategorie">
-          <FilterButton
-            active={category === "all"}
-            color="var(--foreground)"
-            onClick={() => setCategory("all")}
-          >
-            Alle
-            <span className="ml-1.5 tabular-nums opacity-60">{reviews.length}</span>
-          </FilterButton>
-          {categories.map(([value, count]) => {
-            const style = getCategoryStyle(value);
-            return (
-              <FilterButton
-                key={value}
-                active={category === value}
-                color={style.color}
-                onClick={() => setCategory(value)}
-              >
-                {style.label}
-                <span className="ml-1.5 tabular-nums opacity-60">{count}</span>
-              </FilterButton>
-            );
-          })}
-        </div>
-
-        <div className="flex items-center gap-1.5" role="group" aria-label="Sortierung">
-          {sorts.map((option) => (
+      <div className="filter-bar sticky top-20 z-20">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-y border-border py-3">
+          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Kategorie">
             <FilterButton
-              key={option.value}
-              active={sort === option.value}
+              active={category === "all"}
               color="var(--foreground)"
-              onClick={() => setSort(option.value)}
-            >
-              {option.label}
-            </FilterButton>
-          ))}
+              onClick={() => setCategory("all")}
+              label="Alle"
+              count={reviews.length}
+            />
+            {categories.map(([value, count]) => {
+              const style = getCategoryStyle(value);
+              return (
+                <FilterButton
+                  key={value}
+                  active={category === value}
+                  color={style.color}
+                  onClick={() => setCategory(value)}
+                  label={style.label}
+                  count={count}
+                />
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-1.5" role="group" aria-label="Sortierung">
+            {sorts.map((option) => (
+              <FilterButton
+                key={option.value}
+                active={sort === option.value}
+                color="var(--foreground)"
+                onClick={() => setSort(option.value)}
+                label={option.label}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
@@ -123,8 +121,8 @@ export function HomeReviews({ reviews }: { reviews: Review[] }) {
       </p>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {visible.map((review, index) => (
-          <ReviewCard key={review.id} review={review} index={index} />
+        {visible.map((review) => (
+          <ReviewCard key={review.id} review={review} />
         ))}
       </div>
     </section>
@@ -135,35 +133,28 @@ function FilterButton({
   active,
   color,
   onClick,
-  children,
+  label,
+  count,
 }: {
   active: boolean;
   color: string;
   onClick: () => void;
-  children: React.ReactNode;
+  label: string;
+  count?: number;
 }) {
-  const bg = active ? `color-mix(in oklab, ${color} 8%, transparent)` : "transparent";
-  const border = active ? color : "var(--border)";
-  const text = active ? color : "var(--muted-foreground)";
-
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={cn(
-        "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        active
-          ? "hover:bg-[color-mix(in_oklab,var(--foreground)_10%,transparent)]"
-          : "hover:border-foreground/40 hover:text-foreground",
-      )}
-      style={{
-        borderColor: border,
-        color: text,
-        backgroundColor: bg,
-      }}
+      data-active={active}
+      className="filter-tab"
+      style={{ "--tab-color": color } as React.CSSProperties}
     >
-      {children}
+      {label}
+      {count !== undefined && (
+        <span className="filter-tab-count tabular-nums opacity-60">{count}</span>
+      )}
     </button>
   );
 }

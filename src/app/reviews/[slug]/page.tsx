@@ -14,6 +14,14 @@ import { RelatedReviews } from "@/components/reviews/RelatedReviews";
 import { HardwareMetadata } from "@/components/reviews/HardwareMetadata";
 import { ReviewProgress } from "@/components/reviews/ReviewProgress";
 import { ReviewActions } from "@/components/reviews/ReviewActions";
+import { ReviewReactions } from "@/components/reviews/ReviewReactions";
+import { ReadingHistoryBadge } from "@/components/reading-history/ReadingHistoryBadge";
+import { ReadingHistoryTrackerWrapper } from "@/components/reading-history/ReadingHistoryTrackerWrapper";
+import { getReadingHistoryForReview } from "@/lib/reading-history";
+import { FEATURE_READING_HISTORY } from "@/lib/feature-flags";
+import { getReviewSeriesInfo } from "@/lib/review-series";
+import { SeriesBadge } from "@/components/series/SeriesBadge";
+import { FEATURE_REVIEW_SERIES } from "@/lib/feature-flags";
 import { YouTubeEmbed } from "@/components/reviews/YouTubeEmbed";
 import { EpisodeList } from "@/components/reviews/EpisodeList";
 import { GameProgressTracker } from "@/components/reviews/GameProgressTracker";
@@ -22,7 +30,14 @@ import { SpoilerSection } from "@/components/reviews/SpoilerSection";
 import { getCategoryStyle } from "@/lib/review-category";
 import { getServerSession } from "@/lib/session";
 import { UserRatingSection } from "@/components/reviews/UserRatingSection";
+import { DealsWidget } from "@/components/reviews/DealsWidget";
 import { CommentSection } from "@/components/community/CommentSection";
+import { QAList } from "@/components/qa/QAList";
+import { getQAList } from "@/lib/qa";
+import { FEATURE_COMMUNITY_QA } from "@/lib/qa-schema";
+import { HardwareCompatibilityBadge, HardwareCompatibilitySkeleton } from "@/components/reviews/HardwareCompatibilityBadge";
+import { FEATURE_HARDWARE_COMPATIBILITY } from "@/lib/feature-flags";
+import { checkCompatibility, estimateFps } from "@/lib/hardware-compatibility";
 import { ScoreBlock } from "@/components/shared/ScoreBlock";
 import { ProsCons } from "@/components/shared/ProsCons";
 import { MetaLine } from "@/components/shared/MetaLine";
@@ -33,9 +48,16 @@ import { RatingBreakdown } from "@/components/shared/RatingBreakdown";
 import { ScoreCompare } from "@/components/shared/ScoreCompare";
 import { ReadingProgressBar } from "@/components/shared/ReadingProgressBar";
 import { ScrollToTop } from "@/components/shared/ScrollToTop";
+import { getCachedReviewReactions } from "@/lib/review-reactions";
 import { generateBreadcrumbSchema, generateFAQSchema, generateReviewSchema, getSiteUrl } from "@/lib/seo";
+import { buildSchemaOrgReview } from "@/lib/review-templates";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { ReviewRecommendations } from "@/components/recommendations";
+import { ReviewTemplateRenderer } from "@/components/reviews/ReviewTemplateRenderer";
+import { getTemplate } from "@/lib/review-templates";
+import { FEATURE_REVIEW_TEMPLATES } from "@/lib/feature-flags";
+import { generateReviewMetadata } from "@/lib/share-meta";
 
 export async function generateMetadata({
   params,
@@ -50,6 +72,7 @@ export async function generateMetadata({
 
   const review = await prisma.review.findUnique({
     where: { slug },
+    include: { tags: { include: { tag: true } } },
   });
 
   if (!review) return {};
@@ -59,46 +82,24 @@ export async function generateMetadata({
   const description =
     review.metaDescription || content.substring(0, 160).replace(/\n/g, " ");
 
-  const url = `${getSiteUrl()}/reviews/${slug}`;
-
-  const image = review.images?.[0];
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: url,
-      languages: {
-        "de-DE": url,
-        en: `${url}?lang=en`,
-        "x-default": url,
-      },
+  return generateReviewMetadata(
+    {
+      id: review.id,
+      slug: review.slug,
+      title: review.title,
+      title_en: review.title_en,
+      content: review.content,
+      category: review.category,
+      images: review.images,
+      score: review.score,
+      author: undefined, // Author info not in this select
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
+      tags: review.tags ?? undefined,
+      youtubeVideos: review.youtubeVideos,
     },
-    keywords: review.metaKeywords
-      ? review.metaKeywords.split(",").map((k) => k.trim()).filter(Boolean)
-      : [title, review.category, "Review", "Test", "Kritik"],
-    openGraph: {
-      type: "article",
-      title: `${title} Test & Review`,
-      description,
-      url,
-      siteName: "Nerdiction",
-      locale: "de_DE",
-      images: image ? [{ url: image, alt: title }] : [],
-      publishedTime: review.createdAt instanceof Date ? review.createdAt.toISOString() : undefined,
-      modifiedTime: review.updatedAt instanceof Date ? review.updatedAt.toISOString() : undefined,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${title} Test & Review`,
-      description,
-      images: image ? [image] : [],
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
-  };
+    isEn ? "en" : "de"
+  );
 }
 
 interface FaqReviewShape {
@@ -184,7 +185,44 @@ export default async function ReviewDetailPage({
 
   const review = await prisma.review.findUnique({
     where: { slug },
-    include: {
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      title_en: true,
+      category: true,
+      content: true,
+      content_en: true,
+      score: true,
+      pros: true,
+      pros_en: true,
+      cons: true,
+      cons_en: true,
+      images: true,
+      youtubeVideos: true,
+      status: true,
+      igdbId: true,
+      tmdbId: true,
+      steamAppId: true,
+      epicId: true,
+      gogId: true,
+      amazonAsin: true,
+      affiliateLink: true,
+      hardwareId: true,
+      specs: true,
+      metadata: true,
+      metaDescription: true,
+      metaKeywords: true,
+      releaseDate: true,
+      userRatingCount: true,
+      userRatingAvg: true,
+      seriesId: true,
+      seriesOrder: true,
+      templateId: true,
+      templateData: true,
+      templateVersion: true,
+      createdAt: true,
+      updatedAt: true,
       comments: true,
       tags: { include: { tag: true } },
     },
@@ -192,7 +230,75 @@ export default async function ReviewDetailPage({
 
   if (!review) notFound();
 
+  const [deals, priceHistory] = await Promise.all([
+    prisma.deal.findMany({
+      where: { reviewId: review.id, status: "active" },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+    prisma.priceHistory.findMany({
+      where: { reviewId: review.id },
+      orderBy: { recordedAt: "asc" },
+      take: 30,
+    }),
+  ]);
+
   const session = await getServerSession();
+
+  const reactions = await getCachedReviewReactions(review.id, session?.userId ?? null);
+  const readingHistory = session?.userId
+    ? await getReadingHistoryForReview(session.userId, review.id)
+    : null;
+
+  // QA List für SSR
+  let qaInitialData = null;
+  if (FEATURE_COMMUNITY_QA) {
+    try {
+      const qaList = await getQAList(review.id, undefined, 10, 'relevance', undefined, session?.userId ?? undefined);
+      qaInitialData = {
+        questions: qaList.questions,
+        nextCursor: qaList.nextCursor,
+        totalCount: qaList.totalCount,
+      };
+    } catch (error) {
+      console.warn('[Review Detail] Failed to fetch QA list:', error);
+    }
+  }
+
+  const seriesInfo = FEATURE_REVIEW_SERIES && review.seriesId
+    ? await getReviewSeriesInfo(review.id)
+    : null;
+
+  // Hardware Compatibility Check (Server-side for SSR)
+  let hardwareCompatibility = null;
+  if (FEATURE_HARDWARE_COMPATIBILITY && review.category === 'hardware' && session?.userId) {
+    try {
+      const user = await prisma.twitchUser.findUnique({
+        where: { id: session.userId },
+        select: { hardwareProfile: true, hardwareProfileEnabled: true },
+      });
+      
+      if (user?.hardwareProfile && user.hardwareProfileEnabled) {
+        const hwProfile = user.hardwareProfile as { cpu: string; gpu: string; ram: string; monitor?: string; psu?: string; resolution?: string; refreshRate?: number };
+        hardwareCompatibility = checkCompatibility(hwProfile, review);
+        // Add FPS estimates for GPU reviews
+        const fpsEstimates = estimateFps(hwProfile, review);
+        hardwareCompatibility = { ...hardwareCompatibility, fpsEstimates };
+      }
+    } catch (error) {
+      console.warn('[Review Detail] Failed to compute hardware compatibility:', error);
+    }
+  }
+
+  // Fetch template if review has one
+  let template = null;
+  if (FEATURE_REVIEW_TEMPLATES && review.templateId) {
+    try {
+      template = await getTemplate(review.templateId);
+    } catch (error) {
+      console.warn('[Review Detail] Failed to fetch template:', error);
+    }
+  }
 
   const [userRating, isBookmarked, categoryAvg] = await Promise.all([
     session
@@ -245,7 +351,12 @@ export default async function ReviewDetailPage({
   const wordCount = (content || "").split(/\s+/).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
-  const jsonLd = generateReviewSchema({ ...review, title, content });
+  const jsonLd = template && review.templateData && FEATURE_REVIEW_TEMPLATES
+    ? buildSchemaOrgReview(
+        { ...review, title, author: { displayName: "Redaktion", id: review.id }, id: review.id, slug: review.slug, templateData: review.templateData as Record<string, string> },
+        template
+      )
+    : generateReviewSchema({ ...review, title, content });
 
   const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/reviews/${slug}`;
@@ -507,14 +618,36 @@ export default async function ReviewDetailPage({
                 reviewId={review.id}
                 isLoggedIn={!!session}
                 initialBookmarked={!!isBookmarked}
+                lang={isEn ? "en" : "de"}
+                coverImage={review.images?.[0] ?? null}
               />
             </div>
+
+            {/* Review Reactions */}
+            <div className="pt-4">
+              <ReviewReactions
+                reviewId={review.id}
+                initialData={reactions}
+              />
+            </div>
+
+            {/* Reading History Badge */}
+            {readingHistory && (
+              <div className="pt-2">
+                <ReadingHistoryBadge
+                  initialData={readingHistory}
+                  reviewId={review.id}
+                  isEn={isEn}
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex items-center self-start lg:self-end gap-1 bg-muted rounded-md p-1 text-xs font-semibold uppercase tracking-widest border border-border shrink-0">
             <Link
               href={`/reviews/${slug}`}
-              className={`px-4 py-2 rounded-[4px] transition-colors ${
+              aria-label="Auf Deutsch anzeigen"
+              className={`px-4 py-2 rounded-[4px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 !isEn
                   ? "bg-background text-foreground border border-border shadow-xs"
                   : "text-muted-foreground hover:text-foreground"
@@ -524,7 +657,8 @@ export default async function ReviewDetailPage({
             </Link>
             <Link
               href={`/reviews/${slug}?lang=en`}
-              className={`px-4 py-2 rounded-[4px] transition-colors ${
+              aria-label="Auf Englisch anzeigen"
+              className={`px-4 py-2 rounded-[4px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 isEn
                   ? "bg-background text-foreground border border-border shadow-xs"
                   : "text-muted-foreground hover:text-foreground"
@@ -535,6 +669,11 @@ export default async function ReviewDetailPage({
           </div>
         </div>
       </header>
+
+      {/* Series Badge */}
+      {seriesInfo && FEATURE_REVIEW_SERIES && (
+        <SeriesBadge seriesInfo={seriesInfo} />
+      )}
 
       {/* Hero Image */}
       <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
@@ -691,7 +830,7 @@ export default async function ReviewDetailPage({
       {/* Game Metadata Section */}
       {review.category === "game" && review.metadata && (
         <GameMetadata
-          metadata={review.metadata as any}
+          metadata={review.metadata as Record<string, unknown>}
           nerdictionScore={review.score}
           steamAppId={review.steamAppId}
           epicId={review.epicId}
@@ -703,7 +842,7 @@ export default async function ReviewDetailPage({
       {/* Movie Metadata Section */}
       {review.category === "movie" && review.metadata && (
         <MovieSeriesMetadata
-          metadata={review.metadata as any}
+          metadata={review.metadata as Record<string, unknown>}
           category="movie"
           isEn={isEn}
         />
@@ -712,7 +851,7 @@ export default async function ReviewDetailPage({
       {/* Series Metadata Section */}
       {review.category === "series" && review.metadata && (
         <MovieSeriesMetadata
-          metadata={review.metadata as any}
+          metadata={review.metadata as Record<string, unknown>}
           category="series"
           isEn={isEn}
         />
@@ -721,9 +860,17 @@ export default async function ReviewDetailPage({
       {/* Hardware Metadata Section */}
       {review.category === "hardware" && (
         <HardwareMetadata
-          metadata={review.metadata as any}
-          specs={review.specs as Record<string, any> | null}
+          metadata={review.metadata as Record<string, unknown> | null}
+          specs={review.specs as Record<string, unknown> | null}
           isEn={isEn}
+        />
+      )}
+
+      {/* Hardware Compatibility Badge */}
+      {review.category === "hardware" && FEATURE_HARDWARE_COMPATIBILITY && (
+        <HardwareCompatibilityBadge
+          data={hardwareCompatibility}
+          reviewSlug={slug}
         />
       )}
 
@@ -744,15 +891,41 @@ export default async function ReviewDetailPage({
             />
           )}
 
-          <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed prose-headings:scroll-mt-24 prose-headings:font-serif prose-headings:tracking-tight prose-headings:font-semibold">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm, spoilerPlugin]}
-              rehypePlugins={[[rehypeSlugCustomId, { enableCustomId: true }]]}
-              components={MarkdownComponents as any}
+          {/* Template Renderer - for reviews with structured templates */}
+          {template && review.templateData && FEATURE_REVIEW_TEMPLATES && (
+            <ReviewTemplateRenderer
+              template={template}
+              templateData={review.templateData as Record<string, string>}
+              review={{
+                title: review.title,
+                slug: review.slug,
+                score: review.score,
+                category: review.category,
+                author: { displayName: "Redaktion" },
+                createdAt: review.createdAt,
+                images: review.images,
+              }}
+              variant="sections"
+            />
+          )}
+
+          {/* Reading History Tracker - wraps main content for scroll/dwell tracking */}
+          {!template && (
+            <ReadingHistoryTrackerWrapper
+              reviewId={review.id}
+              featureEnabled={FEATURE_READING_HISTORY}
             >
-              {content || ""}
-            </ReactMarkdown>
-          </div>
+              <div className="prose prose-lg dark:prose-invert max-w-none text-foreground/90 leading-relaxed prose-headings:scroll-mt-24 prose-headings:font-serif prose-headings:tracking-tight prose-headings:font-semibold" data-reading-content>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, spoilerPlugin]}
+                  rehypePlugins={[[rehypeSlugCustomId, { enableCustomId: true }]]}
+                  components={MarkdownComponents as Record<string, React.ComponentType<Record<string, unknown>>>}
+                >
+                  {content || ""}
+                </ReactMarkdown>
+              </div>
+            </ReadingHistoryTrackerWrapper>
+          )}
 
           {/* Hardware Requirements */}
           {review.category === "game" && specs && (
@@ -797,6 +970,9 @@ export default async function ReviewDetailPage({
             score={review.score}
           />
 
+          {/* Review Recommendations */}
+          <ReviewRecommendations reviewSlug={review.slug} limit={5} />
+
           {/* FAQ Section - matches FAQPage schema for AEO */}
           {faqs.length > 0 && (
             <section aria-label={isEn ? "Frequently Asked Questions" : "Häufige Fragen"} className="space-y-6 pt-10 border-t border-border">
@@ -836,6 +1012,13 @@ export default async function ReviewDetailPage({
                 })}
               />
             </section>
+          )}
+
+          {/* Community Q&A */}
+          {FEATURE_COMMUNITY_QA && qaInitialData && (
+            <div className="pt-10 border-t border-border">
+              <QAList reviewSlug={review.slug} initialData={qaInitialData} />
+            </div>
           )}
 
           {/* Comment Section */}
@@ -924,6 +1107,9 @@ export default async function ReviewDetailPage({
               </div>
             </div>
           )}
+
+          {/* Preis & Angebote */}
+          <DealsWidget deals={deals} priceHistory={priceHistory} />
 
           <UserRatingSection
             reviewId={review.id}

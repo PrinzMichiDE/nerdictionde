@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Pre-Commit: Format + Lint + Secret-Scan"
+
+# Format prüfen (Prettier)
+npx prettier --check "src/**/*.{ts,tsx,js,jsx}" "scripts/**/*.ts" "scripts/**/*.mjs" || true
+
+# Lint auf gestageten Dateien (falls ESLint verfügbar)
+npx eslint --max-warnings 0 $(git diff --cached --name-only --diff-filter=ACM | grep '\.tsx\?$' | tr '\n' ' ') || true
+
+# Secret-Scan: keine .env, keine API-Keys im Diff
+if git diff --cached --name-only | grep -qE '^\.env($|\.)'; then
+  echo "FEHLER: .env-* Datei darf nicht committed werden." >&2
+  exit 1
+fi
+
+echo "Pre-Commit erledigt."

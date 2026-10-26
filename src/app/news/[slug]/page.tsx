@@ -5,11 +5,13 @@ import { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlugCustomId from "rehype-slug-custom-id";
-import { ArrowLeft, ExternalLink, Tag } from "lucide-react";
+import { ArrowLeft, Printer, Tag } from "lucide-react";
 import { getSiteUrl, generateArticleSchema } from "@/lib/seo";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
 import { MetaLine } from "@/components/shared/MetaLine";
+import { Button } from "@/components/ui/button";
+import { RelatedNews } from "@/components/news/RelatedNews";
+import { generateReviewMetadata } from "@/lib/share-meta";
+import { ShareButtons } from "@/components/ui/ShareButtons";
 
 export async function generateMetadata({
   params,
@@ -26,38 +28,26 @@ export async function generateMetadata({
   if (!article) return {};
 
   const title = isEn && article.title_en ? article.title_en : article.title;
-  const excerpt = isEn && article.excerpt_en ? article.excerpt_en : article.excerpt;
-  const url = `${getSiteUrl()}/news/${slug}`;
+  const content = isEn && article.content_en ? article.content_en : article.content;
 
-  return {
-    title,
-    description: excerpt || undefined,
-    alternates: {
-      canonical: url,
-      languages: {
-        "de-DE": url,
-        en: `${url}?lang=en`,
-        "x-default": url,
-      },
+  return generateReviewMetadata(
+    {
+      id: article.id,
+      slug: article.slug,
+      title: article.title,
+      title_en: article.title_en,
+      content: article.content,
+      category: "news",
+      images: [],
+      score: 0,
+      author: undefined,
+      createdAt: article.publishedAt,
+      updatedAt: article.updatedAt,
+      tags: article.tags?.map((t) => ({ tag: { name: t } })) || [],
+      youtubeVideos: [],
     },
-    keywords: article.tags,
-    openGraph: {
-      type: "article",
-      title,
-      description: excerpt || undefined,
-      url,
-      siteName: "Nerdiction",
-      locale: "de_DE",
-      publishedTime: article.publishedAt.toISOString(),
-      modifiedTime: article.updatedAt.toISOString(),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description: excerpt || undefined,
-    },
-    robots: { index: true, follow: true },
-  };
+    isEn ? "en" : "de"
+  );
 }
 
 export default async function NewsDetailPage({
@@ -133,6 +123,28 @@ export default async function NewsDetailPage({
         </div>
       </header>
 
+      {/* Teilen & Drucken */}
+      <div className="flex flex-wrap items-center gap-2 pt-4 border-t">
+        <ShareButtons
+          contentType="review"
+          contentId={article.id}
+          title={title}
+          description={excerpt || undefined}
+          url={`/news/${slug}`}
+          variant="inline"
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => window.print()}
+          className="h-9 rounded-full px-4 gap-2 transition-colors hover:border-primary/50"
+          aria-label="Artikel drucken"
+        >
+          <Printer className="size-4" />
+          <span className="text-xs font-semibold">Drucken</span>
+        </Button>
+      </div>
+
       <article className="prose prose-neutral dark:prose-invert max-w-none news-content">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
@@ -156,19 +168,7 @@ export default async function NewsDetailPage({
         </div>
       )}
 
-      {article.sourceUrl && (
-        <div className="text-sm text-muted-foreground">
-          Quelle:
-          <a
-            href={article.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 ml-1 text-primary hover:underline"
-          >
-            {article.sourceName || "Originalmeldung"} <ExternalLink className="h-3.5 w-3.5" />
-          </a>
-        </div>
-      )}
+      <RelatedNews currentId={article.id} category={article.category} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { processHardware } from "@/lib/review-generation";
 import { HARDWARE_CATALOG, type HardwareCatalogItem } from "@/lib/hardware-catalog";
 import { notifySubscribers } from "@/lib/webpush";
@@ -52,7 +53,7 @@ export async function GET(req: NextRequest) {
             type: item.type,
             manufacturer: item.manufacturer,
             model: item.model || null,
-            specs: item.specs,
+            specs: item.specs as Prisma.InputJsonValue,
             msrp: item.msrp ?? null,
             releaseDate: item.releaseDate ? new Date(item.releaseDate) : null,
           },
@@ -98,7 +99,7 @@ export async function GET(req: NextRequest) {
             select: { slug: true, title: true },
           });
           if (review) {
-            const sent = await notifySubscribers("hardware", {
+            const sent = await notifySubscribers("review_published", {
               title: `Neuer Hardware-Test: ${item.name}`,
               body: "Wir haben ein neues Produkt getestet – jetzt auf Nerdiction lesen.",
               url: `/reviews/${review.slug}`,
@@ -108,8 +109,9 @@ export async function GET(req: NextRequest) {
         } else {
           results.push({ name: item.name, success: false, error: result.error || "Unknown error" });
         }
-      } catch (error: any) {
-        results.push({ name: item.name, success: false, error: error.message });
+      } catch (error: unknown) {
+        const err = error as Error;
+        results.push({ name: item.name, success: false, error: err.message });
         console.error(`Error generating hardware review for ${item.name}:`, error);
       }
 
@@ -131,13 +133,14 @@ export async function GET(req: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Cron product review generation error:", error);
+    const err = error as Error;
     return NextResponse.json(
       {
         success: false,
         status: 500,
-        error: error.message,
+        error: err.message,
       },
       { status: 500 }
     );

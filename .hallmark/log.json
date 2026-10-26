@@ -1,0 +1,32 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "polish",
+  "scope": "page",
+  "entry": "homepage",
+  "genre": "editorial",
+  "prompt": "AI-Slop entfernen auf Startseite",
+  "waived": [
+   "26b"
+  ],
+  "sections": [
+   "hero",
+   "editorial-picks",
+   "home-reviews",
+   "score-scale",
+   "newsletter"
+  ],
+  "dropped": [
+   "hero eyebrow Magazin",
+   "ghost numeral 01",
+   "aurora blobs",
+   "scan line",
+   "card index numerals",
+   "rank tiles",
+   "duplicate verdict badge",
+   "image shine",
+   "cursor glow"
+  ],
+  "date": "2026-10-23"
+ }
+]

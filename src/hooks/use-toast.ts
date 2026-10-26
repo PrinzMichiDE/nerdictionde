@@ -25,8 +25,10 @@ function getSnapshot(): Toast[] {
   return toasts;
 }
 
+const EMPTY_TOASTS: Toast[] = [];
+
 function getServerSnapshot(): Toast[] {
-  return [];
+  return EMPTY_TOASTS;
 }
 
 export function toast({ title, description, variant = "default" }: Omit<Toast, "id">) {

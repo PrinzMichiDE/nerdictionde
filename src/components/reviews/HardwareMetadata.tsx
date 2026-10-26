@@ -8,7 +8,7 @@ interface HardwareMetadataProps {
     msrp?: number | null;
     releaseDate?: string | null;
   } | null;
-  specs: Record<string, any> | null;
+  specs: Record<string, unknown> | null;
   isEn: boolean;
 }
 

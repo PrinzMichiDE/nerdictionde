@@ -1,17 +1,18 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { QuickCreate } from "./components/QuickCreate";
 import { BulkCreate } from "./components/BulkCreate";
 import { ReviewList } from "./components/ReviewList";
 import { MassReviewCreation } from "./components/MassReviewCreation";
 import { ReleaseSyncButton } from "./components/ReleaseSyncButton";
 import { ForumGenerator } from "./components/ForumGenerator";
-import { Toaster } from "@/components/ui/toaster";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense, useState, useEffect } from "react";
-import { Rocket, Database, ListVideo, List, Loader2, FileCheck, FilePen, FolderOpen, MessageSquare } from "lucide-react";
+import { Suspense } from "react";
+import { Rocket, Database, ListVideo, List, MessageSquare, FileText, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAdminReviews } from "./reviews-store";
 
 interface TabDef {
   value: string;
@@ -22,6 +23,7 @@ interface TabDef {
 
 const TABS: TabDef[] = [
   { value: "quick", label: "Quick Create", shortLabel: "Quick", icon: <Rocket className="h-4 w-4" /> },
+  { value: "manual", label: "Manuell erstellen", shortLabel: "Neu", icon: <FileText className="h-4 w-4" /> },
   { value: "bulk", label: "Massen-Erstellung", shortLabel: "Massen", icon: <Database className="h-4 w-4" /> },
   { value: "mass-200", label: "Massen-Jobs", shortLabel: "Jobs", icon: <ListVideo className="h-4 w-4" /> },
   { value: "list", label: "Alle Beiträge", shortLabel: "Liste", icon: <List className="h-4 w-4" /> },
@@ -29,43 +31,41 @@ const TABS: TabDef[] = [
 ];
 
 function StatsBar() {
-  const [stats, setStats] = useState<{ total: number; published: number; drafts: number } | null>(null);
+  const { counts, loading, error, reload } = useAdminReviews();
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/reviews?all=true")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (cancelled || !Array.isArray(data)) return;
-        setStats({
-          total: data.length,
-          published: data.filter((r) => r.status === "published").length,
-          drafts: data.filter((r) => r.status === "draft").length,
-        });
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  if (error) {
+    return (
+      <div className="flex flex-col gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm">
+        <p className="font-medium text-destructive">Beiträge konnten nicht geladen werden.</p>
+        <p className="text-muted-foreground">{error}</p>
+        <Button onClick={reload} variant="outline" size="sm" className="mt-1 w-fit">
+          Erneut laden
+        </Button>
+      </div>
+    );
+  }
 
   const items = [
-    { label: "Gesamt", value: stats?.total, icon: FolderOpen, color: "text-foreground", bg: "bg-muted" },
-    { label: "Veröffentlicht", value: stats?.published, icon: FileCheck, color: "text-green-600", bg: "bg-green-500/10" },
-    { label: "Entwürfe", value: stats?.drafts, icon: FilePen, color: "text-yellow-600", bg: "bg-yellow-500/10" },
+    { label: "Gesamt", value: counts.total, tone: "text-foreground" },
+    { label: "Veröffentlicht", value: counts.published, tone: "text-success" },
+    { label: "Entwürfe", value: counts.drafts, tone: "text-warning" },
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-2 md:gap-4">
-      {items.map((item) => (
-        <div key={item.label} className={cn("rounded-xl border p-3 md:p-4 flex items-center gap-2 md:gap-3", item.bg)}>
-          <item.icon className={cn("h-4 w-4 md:h-5 md:w-5 shrink-0", item.color)} />
-          <div className="min-w-0">
-            <div className="text-lg md:text-2xl font-bold leading-tight">
-              {stats ? item.value : <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-            </div>
-            <div className="text-[10px] md:text-xs text-muted-foreground truncate">{item.label}</div>
+    <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-border bg-card">
+      {items.map((item, index) => (
+        <div
+          key={item.label}
+          className={cn("px-3 py-3 md:px-4 md:py-4", index > 0 && "border-l border-border")}
+        >
+          <div className={cn("text-xl font-semibold tabular-nums leading-tight md:text-2xl", item.tone)}>
+            {loading ? (
+              <span className="inline-block h-5 w-10 rounded bg-muted align-middle motion-safe:animate-pulse md:h-6 md:w-12" aria-hidden="true" />
+            ) : (
+              item.value
+            )}
           </div>
+          <div className="mt-1 text-xs text-muted-foreground">{item.label}</div>
         </div>
       ))}
     </div>
@@ -97,7 +97,7 @@ function AdminTabs() {
 
   return (
     <Tabs value={tab} onValueChange={handleTabChange} className="space-y-4 md:space-y-6">
-      <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-2 max-w-5xl">
+      <TabsList className="grid w-full grid-cols-2 gap-1 md:grid-cols-5">
         {TABS.map((t) => (
           <TabsTrigger
             key={t.value}
@@ -115,44 +115,71 @@ function AdminTabs() {
           </TabsTrigger>
         ))}
       </TabsList>
-      <TabsContent value="quick" className="space-y-4 mt-6">
+      <TabsContent value="quick" className="space-y-4 mt-2">
         <QuickCreate />
       </TabsContent>
-      <TabsContent value="bulk" className="space-y-4 mt-6">
+      <TabsContent value="manual" className="space-y-4 mt-2">
+        <ManualCreate />
+      </TabsContent>
+      <TabsContent value="bulk" className="space-y-4 mt-2">
         <BulkCreate />
       </TabsContent>
-      <TabsContent value="mass-200" className="space-y-4 mt-6">
+      <TabsContent value="mass-200" className="space-y-4 mt-2">
         <MassReviewCreation />
       </TabsContent>
-      <TabsContent value="list" className="space-y-4 mt-6">
+      <TabsContent value="list" className="space-y-4 mt-2">
         <ReviewList />
       </TabsContent>
-      <TabsContent value="forum" className="space-y-4 mt-6">
+      <TabsContent value="forum" className="space-y-4 mt-2">
         <ForumGenerator />
       </TabsContent>
     </Tabs>
   );
 }
 
+function ManualCreate() {
+  const router = useRouter();
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <h2 className="text-xl font-bold">Manueller Review erstellen</h2>
+        <p className="text-sm text-muted-foreground">
+          Erstellen Sie einen Review manuell mit Template-Auswahl und strukturiertem Editor.
+        </p>
+      </div>
+      <Button
+        onClick={() => router.push("/admin/reviews/new")}
+        className="w-full md:w-auto"
+        size="lg"
+      >
+        <Plus className="mr-2 h-4 w-4" />
+        Neuer Review mit Template
+      </Button>
+      <p className="text-xs text-muted-foreground">
+        Wählen Sie ein Template (Game, Hardware, Film/Serie) und füllen Sie die strukturierten Felder aus.
+      </p>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   return (
-    <div className="space-y-4 md:space-y-8 pb-8 md:pb-12 animate-fade-in px-4 md:px-0">
-      <div className="flex flex-col space-y-2 md:space-y-3">
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-          Admin Dashboard
-        </h1>
-        <p className="text-muted-foreground text-sm md:text-base lg:text-lg">
-          Erstelle und verwalte deine Reviews professionell und effizient.
+    <div className="space-y-4 pb-8 md:space-y-6 md:pb-12">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Redaktion</h1>
+        <p className="text-sm text-muted-foreground md:text-base">
+          Beiträge erstellen, prüfen und veröffentlichen.
         </p>
       </div>
 
-      <Suspense fallback={<div className="flex items-center justify-center py-16">Laden...</div>}>
+      <Suspense fallback={<div className="rounded-lg border border-border p-4 text-sm text-muted-foreground">Laden</div>}>
         <StatsBar />
-        <ReleaseSyncButton />
-        <AdminTabs />
+        <div className="space-y-4 md:space-y-6">
+          <ReleaseSyncButton />
+          <AdminTabs />
+        </div>
       </Suspense>
-
-      <Toaster />
     </div>
   );
 }

@@ -58,7 +58,13 @@ function saveProgress(progress: Progress) {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function processWithRetry(game: any, maxAttempts = 3) {
+interface IGDBGame {
+  id: number;
+  name: string;
+  // Add other properties as needed
+}
+
+async function processWithRetry(game: IGDBGame, maxAttempts = 3) {
   let lastResult: { success: boolean; reviewId?: string; error?: string } = {
     success: false,
     error: "Unknown error",
@@ -118,7 +124,7 @@ async function main() {
 
     offset += games.length;
     const candidates = games.filter(
-      (game: any) => typeof game.id === "number" && !existingIgdbIds.has(game.id)
+      (game: IGDBGame) => typeof game.id === "number" && !existingIgdbIds.has(game.id)
     );
     console.log(
       `\n📄 IGDB page ${pageNumber}: ${games.length} games, ${candidates.length} not reviewed yet`
@@ -127,7 +133,7 @@ async function main() {
     for (let i = 0; i < candidates.length && createdCount < TARGET_COUNT; i += CONCURRENCY) {
       const batch = candidates.slice(i, i + CONCURRENCY);
       const results = await Promise.all(
-        batch.map(async (game: any) => ({
+        batch.map(async (game: IGDBGame) => ({
           game,
           result: await processWithRetry(game),
         }))

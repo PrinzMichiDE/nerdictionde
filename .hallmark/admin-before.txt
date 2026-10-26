@@ -1,0 +1,55 @@
+C:\Users\micro\AppData\Local\Temp\opencode\admin-before\src\app\admin\components\AIAssistant.tsx
+  FAIL 10a :109 transition-all on <Button class="rounded-2xl h-11 w-11 shrink-0 …"> | fix: Name the properties: transition-colors, transition-opacity or transition-transform
+  FAIL 27 :109 motion utilities (a transition on a transform) with no motion-reduce: or motion-safe: variant anywhere | fix: Add motion-reduce: fallbacks, or put the motion behind motion-safe:
+  FAIL 67 :68 "Smart Actions" uppercase at 10px tracked 0.1em on <h4 class="text-[10px] font-bold uppercase…"> | fix: Sentence case in the body face, a step smaller, untracked: drop uppercase and the tracking-* class
+  FAIL 67 :93 "Assistent Chat" uppercase at 10px tracked 0.1em on <h4 class="text-[10px] font-bold uppercase…">
+  REFLEX 26b :1 no :disabled styling anywhere | fix: All eight states; guard: not a form control, no aria-disabled anywhere
+  WARN F1 :99 straight quote in prose x5 (first: rag mich alles: "Mach den Text k) | fix: Use typographic quotes: “ ” ’
+C:\Users\micro\AppData\Local\Temp\opencode\admin-before\src\app\admin\components\MassReviewCreation.tsx
+  FAIL 10a :513 transition-all on <div class="flex flex-col sm:flex-row sm:it…">
+  FAIL 67 :437 "Erfolg" uppercase at 10px tracked 0.05em on <div class="text-[10px] uppercase tracking-…">
+  FAIL 67 :441 "Übersp." uppercase at 10px tracked 0.05em on <div class="text-[10px] uppercase tracking-…">
+  FAIL 67 :445 "Fehler" uppercase at 10px tracked 0.05em on <div class="text-[10px] uppercase tracking-…">
+  FAIL 67 :449 "Gesamt" uppercase at 10px tracked 0.05em on <div class="text-[10px] uppercase tracking-…">
+  FAIL 67 :492 "Warteschlange ( )" uppercase at 11px tracked 0.05em on <Button class="flex items-center gap-2 font-bo…">
+  FAIL 67 :542 uppercase at 9px on <Badge class="text-[9px] font-black uppercase…">
+  REFLEX 64 :527 font-mono on "IGDB:" at 10px (<span class="text-[10px] text-muted-foregrou…">) | fix: Labels in the body face at a smaller size and normal case; font-mono only for code and figures
+  REFLEX 64 :528 font-mono on "TMDB:" at 10px (<span class="text-[10px] text-muted-foregrou…">)
+  WARN 74 :439 default palette instead of theme tokens: 20 distinct palette classes (bg-green-500 border-green-500 text-green-600 text… | fix: Extend the Tailwind theme with the Hallmark tokens and use those names
+  WARN F2 :414 three-period ellipsis in prose x1 | fix: Use a true ellipsis character (…)
+C:\Users\micro\AppData\Local\Temp\opencode\admin-before\src\app\admin\components\QuickCreate.tsx
+  FAIL 10a :251 transition-all on <Button class="flex-1 h-11 font-medium transit…">
+  FAIL 10a :343 transition-all on <div class="h-full bg-primary transition-al…">
+  FAIL 67 :305 "Fortschritt" uppercase at 12px tracked 0.05em on <span class="text-xs font-semibold uppercase…">
+  WARN F2 :289 three-period ellipsis in prose x2
+C:\Users\micro\AppData\Local\Temp\opencode\admin-before\src\app\admin\components\ReviewList.tsx
+  FAIL 10a :355 transition-all on <Card class="group overflow-hidden transitio…">
+  FAIL 19 :319 dash "—" in copy | fix: A comma, a colon, a full stop or parentheses; never a dash
+  WARN 11 :363 group-hover:scale-110 on <Image class="object-cover transition-transfo…">: the image moves on hover | fix: Imagery sits still; give the container the feedback
+  WARN F2 :410 three-period ellipsis in prose x2
+C:\Users\micro\AppData\Local\Temp\opencode\admin-before\src\app\admin\page.tsx
+  FAIL 27 :139 motion utilities (animate-fade-in) with no motion-reduce: or motion-safe: variant anywhere
+  REFLEX 2b :141 gradient text (from-foreground to-foreground/70) on <h1 class="text-2xl md:text-3xl lg:text-4x…"> | fix: Solid ink; weight or a display face. Guard: a single-hue ramp from two tokens with 40 and 41 passing
+C:\Users\micro\AppData\Local\Temp\opencode\admin-before\src\app\admin\components\ReleaseSyncButton.tsx
+  FAIL 63 :68 middle-dot meta string "Gefunden: · Neu: · Aktualisiert: · Übersprungen: …" | fix: Line breaks, columns or hairlines; one dot in a byline at most
+C:\Users\micro\AppData\Local\Temp\opencode\admin-before\src\app\admin\components\PreviewPanel.tsx
+  FAIL 67 :34 "Bild Platzhalter (Nicht…" uppercase at 10px on <div class="my-6 p-4 border border-dashed r…">
+  FAIL 67 :45 "Draft Preview" uppercase at 10px tracked 0.1em on <span class="text-[10px] text-muted-foregrou…">
+  FAIL 67 :62 "Kein Bild" uppercase at 10px tracked 0.1em on <span class="text-muted-foreground text-[10p…">
+  FAIL 67 :69 "Videos & Trailer" uppercase at 14px tracked 0.05em on <h3 class="text-sm font-bold uppercase tra…">
+  FAIL 67 :97 "Vorschau Wertung" uppercase at 10px tracked 0.1em on <span class="text-[10px] font-bold uppercase…">
+  FAIL 67 :103 "Pro" uppercase at 10px tracked 0.1em on <h4 class="text-[10px] font-bold text-gree…">
+  FAIL 67 :113 "Contra" uppercase at 10px tracked 0.1em on <h4 class="text-[10px] font-bold text-red-…">
+  WARN 74 :112 default palette instead of theme tokens: 6 distinct palette classes (bg-green-500 border-green-500 text-green-500 bg-re…
+C:\Users\micro\AppData\Local\Temp\opencode\admin-before\src\app\admin\components\ReviewEditor.tsx
+  FAIL 67 :173 "Formular" uppercase at 14px tracked 0.05em on <h3 class="text-sm font-semibold uppercase…">
+  FAIL 67 :179 "Live Vorschau" uppercase at 14px tracked 0.05em on <h3 class="text-sm font-semibold uppercase…">
+  FAIL 67 :185 "Assistent" uppercase at 14px tracked 0.05em on <h3 class="text-sm font-semibold uppercase…">
+  WARN 29 :179 glass: backdrop-blur-sm over bg-background/0 on <h3 class="text-sm font-semibold uppercase…"> | fix: Solid or grained surface; elevation by lightness, shadows with offset and blur
+  WARN F2 :122 three-period ellipsis in prose x1
+C:\Users\micro\AppData\Local\Temp\opencode\admin-before\src\app\admin\components\BulkCreate.tsx
+  WARN 74 :692 default palette instead of theme tokens: 6 distinct palette classes (bg-green-500 text-green-600 bg-yellow-500 text-yel…
+  WARN F2 :210 three-period ellipsis in prose x5
+C:\Users\micro\AppData\Local\Temp\opencode\admin-before\src\app\admin\components\FormPanel.tsx
+  WARN 74 :117 default palette instead of theme tokens: 8 distinct palette classes (text-green-500 bg-red-500 border-green-500 text-re…
+sloplint: 28 FAIL, 4 REFLEX, 12 WARN across 12 file(s).

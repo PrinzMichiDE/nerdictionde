@@ -18,6 +18,8 @@ function slugFromName(name: string): string {
     .replace(/^-|-$/g, "");
 }
 
+export { slugFromName };
+
 export interface GenerateTagsInput {
   reviewTitle: string;
   category: string;
@@ -35,7 +37,7 @@ export interface GenerateTagsInput {
 /**
  * Derive tag names from metadata (genres, platforms, etc.) and score.
  */
-function tagsFromMetadata(input: GenerateTagsInput): string[] {
+export function tagsFromMetadata(input: GenerateTagsInput): string[] {
   const names: string[] = [];
   const meta = input.metadata || {};
 

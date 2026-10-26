@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAdminAuth, checkAdminAuth } from "@/lib/auth";
 import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
+import { getTemplate, validateTemplateDataForTemplate, getDefaultTemplate } from "@/lib/review-templates";
+import { featureFlags } from "@/lib/feature-flags";
+
+import { Prisma } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,7 +25,7 @@ export async function GET(req: NextRequest) {
     const isAdmin = checkAdminAuth(req);
     const canSeeAll = isAdmin && (all || status === "all");
 
-    const where: any = {
+    const where: Prisma.ReviewWhereInput = {
       // Non-admins can only see published reviews
       ...(canSeeAll ? {} : isAdmin && status ? { status } : { status: "published" }),
     };
@@ -70,7 +74,8 @@ export async function GET(req: NextRequest) {
     // Add search query filter
     if (query && query.trim()) {
       const searchTerm = query.trim();
-      const searchOR = [
+
+const searchOR: Prisma.ReviewWhereInput[] = [
         { title: { contains: searchTerm, mode: "insensitive" } },
         { title_en: { contains: searchTerm, mode: "insensitive" } },
         { content: { contains: searchTerm, mode: "insensitive" } },
@@ -78,7 +83,7 @@ export async function GET(req: NextRequest) {
       ];
 
       if (where.AND) {
-        where.AND.push({ OR: searchOR });
+        (where.AND as Prisma.ReviewWhereInput[]).push({ OR: searchOR });
       } else if (where.OR) {
         // If we already have an OR (rare but possible with how we build it), 
         // we might want to wrap existing where in AND
@@ -91,7 +96,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Determine orderBy
-    let orderBy: any = { createdAt: "desc" };
+    let orderBy: Record<string, string | { order: string }> = { createdAt: "desc" };
     switch (sort) {
       case "date-asc":
         orderBy = { createdAt: "asc" };
@@ -114,8 +119,9 @@ export async function GET(req: NextRequest) {
     const total = await prisma.review.count({ where });
     const totalPages = shouldPaginate ? Math.ceil(total / limit) : 1;
 
-    // Aggregates for the index UI (ignore the category filter itself, but
-    // respect search/date/score so the numbers reflect the active result set)
+    // Aggregates for the index UI. Category chips ignore the category filter
+    // itself; the score distribution always spans all published reviews,
+    // independent of category/search/date/score filters and pagination.
     let categoryCounts: Record<string, number> | undefined;
     let scoreDistribution: number[] | undefined;
     if (shouldPaginate) {
@@ -129,7 +135,7 @@ export async function GET(req: NextRequest) {
         }),
         prisma.review.groupBy({
           by: ["score"],
-          where: countWhere,
+          where: { status: "published" },
           _count: { _all: true },
         }),
         prisma.review.count({ where: countWhere }),
@@ -154,13 +160,30 @@ export async function GET(req: NextRequest) {
       } : {}),
     });
 
+    // Lesezeichen-Zahlen als Social Proof anreichern
+    let bookmarkCountMap = new Map<string, number>();
+    if (reviews.length > 0) {
+      const bookmarkCounts = await prisma.bookmark.groupBy({
+        by: ["reviewId"],
+        where: { reviewId: { in: reviews.map((r) => r.id) } },
+        _count: { _all: true },
+      });
+      bookmarkCountMap = new Map(
+        bookmarkCounts.map((b) => [b.reviewId, b._count._all])
+      );
+    }
+    const reviewsWithBookmarks = reviews.map((r) => ({
+      ...r,
+      bookmarkCount: bookmarkCountMap.get(r.id) ?? 0,
+    }));
+
     // Editor's picks: top scores not already visible on this page
     let topPicks: Array<{ id: string; title: string; slug: string; score: number; category: string }> | undefined;
-    if (shouldPaginate && reviews.length > 0) {
+    if (shouldPaginate && reviewsWithBookmarks.length > 0) {
       topPicks = await prisma.review.findMany({
         where: {
           status: "published",
-          id: { notIn: reviews.map((r) => r.id) },
+          id: { notIn: reviewsWithBookmarks.map((r) => r.id) },
         },
         orderBy: [{ score: "desc" }, { createdAt: "desc" }],
         take: 3,
@@ -176,11 +199,11 @@ export async function GET(req: NextRequest) {
 
     // If all=true, return array directly for backward compatibility, otherwise return object
     if (all) {
-      return NextResponse.json(reviews);
+      return NextResponse.json(reviewsWithBookmarks);
     }
 
     return NextResponse.json({
-      reviews,
+      reviews: reviewsWithBookmarks,
       pagination: {
         page,
         limit,
@@ -193,8 +216,9 @@ export async function GET(req: NextRequest) {
       ...(scoreDistribution ? { scoreDistribution } : {}),
       ...(topPicks ? { topPicks } : {}),
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
@@ -210,6 +234,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Title and content are required" }, { status: 400 });
     }
 
+    // Template validation (if feature enabled and templateId provided)
+    let templateVersion = 1;
+    if (featureFlags.reviewTemplates && body.templateId) {
+      const validation = validateTemplateDataForTemplate(body.templateData ?? {}, body.templateId);
+      if (!validation.valid) {
+        return NextResponse.json(
+          { error: 'Template-Validierung fehlgeschlagen', details: validation.errors },
+          { status: 400 }
+        );
+      }
+      const template = await getTemplate(body.templateId);
+      templateVersion = 1;
+    }
+
     let slug = body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     
     // Check for existing slug and ensure uniqueness
@@ -222,6 +260,10 @@ export async function POST(req: NextRequest) {
       }
       slug = `${body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${Math.random().toString(36).substring(2, 7)}`;
     }
+
+    // Prepare template data for storage
+    const templateId = featureFlags.reviewTemplates && body.templateId ? body.templateId : null;
+    const templateData = featureFlags.reviewTemplates && body.templateData ? body.templateData : null;
 
     const review = await prisma.review.create({
       data: {
@@ -246,6 +288,9 @@ export async function POST(req: NextRequest) {
         specs: body.specs || null,
         metadata: body.metadata || null,
         createdAt: body.createdAt ? new Date(body.createdAt) : undefined,
+        templateId,
+        templateData: templateData ?? Prisma.JsonNull,
+        templateVersion: templateId ? templateVersion : null,
       },
     });
 
@@ -258,9 +303,10 @@ export async function POST(req: NextRequest) {
     }).catch((e) => console.warn("Comment generation for review failed:", e));
 
     return NextResponse.json(review);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Create review error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const err = error as Error;
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 

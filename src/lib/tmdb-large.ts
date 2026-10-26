@@ -134,11 +134,12 @@ export async function getTMDBMoviesBulkLarge(
       if (allMovies.length < targetCount) {
         await new Promise((resolve) => setTimeout(resolve, requestDelay));
       }
-    } catch (error: any) {
-      console.error(`Error fetching TMDB movies page ${currentPage}:`, error.message);
+    } catch (error: unknown) {
+      const err = error as { response?: { status: number }; message?: string };
+      console.error(`Error fetching TMDB movies page ${currentPage}:`, err.message);
       
       // If it's a rate limit error, wait longer before retrying
-      if (error.response?.status === 429) {
+      if (err.response?.status === 429) {
         console.log("Rate limit hit, waiting 10 seconds...");
         await new Promise((resolve) => setTimeout(resolve, 10000));
         continue; // Retry the same page
@@ -263,11 +264,12 @@ export async function getTMDBSeriesBulkLarge(
       if (allSeries.length < targetCount) {
         await new Promise((resolve) => setTimeout(resolve, requestDelay));
       }
-    } catch (error: any) {
-      console.error(`Error fetching TMDB series page ${currentPage}:`, error.message);
+    } catch (error: unknown) {
+      const err = error as { response?: { status: number }; message?: string };
+      console.error(`Error fetching TMDB series page ${currentPage}:`, err.message);
       
       // If it's a rate limit error, wait longer before retrying
-      if (error.response?.status === 429) {
+      if (err.response?.status === 429) {
         console.log("Rate limit hit, waiting 10 seconds...");
         await new Promise((resolve) => setTimeout(resolve, 10000));
         continue; // Retry the same page

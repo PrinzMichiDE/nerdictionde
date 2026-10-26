@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { getIGDBUpcomingGames } from "@/lib/igdb";
+import { getIGDBUpcomingGames, IGDBGame } from "@/lib/igdb";
 import { generateSlug } from "@/lib/review-generation";
 
 export interface UpcomingReleasesResult {
@@ -71,7 +71,7 @@ export async function syncUpcomingReleases(): Promise<UpcomingReleasesResult> {
     // 1. Fetch upcoming games from IGDB (next 24 months)
     console.log("📅 Fetching upcoming games with release dates in the next 24 months...");
 
-    const futureGames: any[] = [];
+    const futureGames: IGDBGame[] = [];
     let offset = 0;
     const batchSize = 500;
     const maxGames = 3000;
@@ -142,22 +142,22 @@ export async function syncUpcomingReleases(): Promise<UpcomingReleasesResult> {
         const metadata = {
           developers:
             game.involved_companies
-              ?.filter((c: any) => c.developer)
-              .map((c: any) => c.company.name) || [],
+              ?.filter((c) => c.developer)
+              .map((c) => c.company.name) || [],
           publishers:
             game.involved_companies
-              ?.filter((c: any) => c.publisher)
-              .map((c: any) => c.company.name) || [],
-          platforms: game.platforms?.map((p: any) => p.name) || [],
-          genres: game.genres?.map((g: any) => g.name) || [],
+              ?.filter((c) => c.publisher)
+              .map((c) => c.company.name) || [],
+          platforms: game.platforms?.map((p) => p.name) || [],
+          genres: game.genres?.map((g) => g.name) || [],
           gameModes:
-            ((game.game_modes || []) as Array<{ name: string }>).map((m) => m.name) || [],
+            (game.game_modes || []).map((m) => m.name) || [],
           perspectives:
-            ((game.player_perspectives || []) as Array<{ name: string }>).map(
+            (game.player_perspectives || []).map(
               (p) => p.name
             ) || [],
           engines:
-            ((game.game_engines || []) as Array<{ name: string }>).map((e) => e.name) || [],
+            (game.game_engines || []).map((e) => e.name) || [],
           releaseDate: game.first_release_date,
           igdbScore: game.rating,
           criticScore: game.aggregated_rating ?? null,
@@ -205,9 +205,9 @@ export async function syncUpcomingReleases(): Promise<UpcomingReleasesResult> {
         console.log(
           `  ✓ Created draft review for: ${game.name} (Release: ${releaseDate?.toLocaleDateString()})`
         );
-      } catch (error: any) {
+      } catch (error) {
         errors++;
-        console.error(`  ✗ Error processing ${game.name}:`, error.message);
+        console.error(`  ✗ Error processing ${game.name}:`, error instanceof Error ? error.message : String(error));
       }
     }
 
@@ -235,13 +235,13 @@ export async function syncUpcomingReleases(): Promise<UpcomingReleasesResult> {
       duration: `${duration}s`,
       timestamp: new Date().toISOString(),
     };
-  } catch (error: any) {
+  } catch (error) {
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.error("❌ Error in upcoming releases sync:", error);
 
     return {
       success: false,
-      error: error.message || "Unknown error",
+      error: error instanceof Error ? error.message : "Unknown error",
       message: "Upcoming releases sync failed.",
       stats: { totalFound: 0, created: 0, updated: 0, skipped: 0, errors: 1 },
       duration: `${duration}s`,

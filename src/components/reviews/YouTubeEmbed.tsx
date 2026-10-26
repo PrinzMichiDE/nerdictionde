@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Play } from "lucide-react";
 import { VideoChapters } from "./VideoChapters";
 
@@ -39,15 +39,9 @@ export function YouTubeEmbed({
   reviewId,
   isEn = false,
 }: YouTubeEmbedProps) {
-  const [isClient, setIsClient] = useState(false);
-  const [embedId, setEmbedId] = useState<string | null>(null);
+  const isClient = typeof window !== "undefined";
+  const embedId = isClient ? extractVideoId(videoId) : null;
   const [startAt, setStartAt] = useState(0);
-
-  useEffect(() => {
-    setIsClient(true);
-    const extractedId = extractVideoId(videoId);
-    setEmbedId(extractedId);
-  }, [videoId]);
 
   if (!isClient || !embedId) {
     return (
