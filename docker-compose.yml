@@ -1,6 +1,6 @@
 name: nerdiction
 
-# Self-hosting stack: PostgreSQL + the published application image.
+# Self-hosting stack: PostgreSQL + the published application image + Cron jobs.
 # Start with: docker compose up -d
 # The app reads runtime configuration from .env (see README > Docker).
 services:
@@ -42,6 +42,40 @@ services:
       HOSTNAME: "0.0.0.0"
     ports:
       - "3000:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  cron:
+    image: alpine:3.22
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      APP_URL: http://app:3000
+      CRON_SECRET: ${CRON_SECRET:-}
+    command: >
+      sh -c "
+        apk add --no-cache curl tzdata &&
+        echo '0 0 * * * curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $$CRON_SECRET" "$$APP_URL/api/cron/generate-category-reviews"' > /etc/crontabs/root &&
+        echo '0 1 * * * curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $$CRON_SECRET" "$$APP_URL/api/cron/auto-reviews"' >> /etc/crontabs/root &&
+        echo '0 2 * * * curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $$CRON_SECRET" "$$APP_URL/api/cron/fetch-hardware-rss"' >> /etc/crontabs/root &&
+        echo '0 3 1 * * curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $$CRON_SECRET" "$$APP_URL/api/cron/import-hardwaredealz"' >> /etc/crontabs/root &&
+        echo '0 4 * * * curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $$CRON_SECRET" "$$APP_URL/api/cron/fetch-upcoming-releases"' >> /etc/crontabs/root &&
+        echo '0 5 * * * curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $$CRON_SECRET" "$$APP_URL/api/cron/generate-product-reviews"' >> /etc/crontabs/root &&
+        echo '0 6 * * * curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $$CRON_SECRET" "$$APP_URL/api/cron/publish-release-reviews"' >> /etc/crontabs/root &&
+        echo '0 6 * * * curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $$CRON_SECRET" "$$APP_URL/api/cron/update-prices"' >> /etc/crontabs/root &&
+        echo '0 7 * * * curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $$CRON_SECRET" "$$APP_URL/api/cron/scrape-mydealz"' >> /etc/crontabs/root &&
+        echo '0 8 * * * curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $$CRON_SECRET" "$$APP_URL/api/cron/backfill-review-enrichment"' >> /etc/crontabs/root &&
+        echo '0 9 * * * curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $$CRON_SECRET" "$$APP_URL/api/cron/generate-news"' >> /etc/crontabs/root &&
+        echo '0 10 * * * curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $$CRON_SECRET" "$$APP_URL/api/cron/generate-forum"' >> /etc/crontabs/root &&
+        echo '0 11 * * * curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $$CRON_SECRET" "$$APP_URL/api/cron/generate-product-reviews?limit=5"' >> /etc/crontabs/root &&
+        crond -f -l 2
+      "
 
 volumes:
   db_data:
