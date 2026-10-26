@@ -1402,11 +1402,60 @@
 
 ---
 
+### Zusammenfassung: Review-Embed für externe Sites (F1–F9 ✅)
+
+**User Stories (alle ✅):**
+- US1: Review einbetten — "Einbetten"-Button auf `/reviews/[slug]` öffnet Modal mit Embed-Code, Preview, Copy-to-Clipboard
+- US2: Liste einbetten — "Einbetten"-Button auf `/listen/[slug]` mit `data-nerdiction-embed="collection"`
+- US3: Serie einbetten — "Einbetten"-Button auf `/serien/[slug]` mit `data-nerdiction-embed="series"`
+- US4: Externe Site lädt Embed via Script-Tag — `/embed.js` liefert minimiertes JS (~5-10 KB gzipped), Shadow-DOM Widget, Responsive, Themeable
+- US5: No-Cookie/Privacy-Friendly — Keine Cookies, `data-consent="false"` deaktiviert Analytics, `Referrer-Policy: strict-origin-when-cross-origin`
+- US6: Admin kann Embeds deaktivieren — Feature-Flag `FEATURE_REVIEW_EMBED` (Default: `true`), bei `false`: 404 auf allen Embed-Endpunkten
+- US7: CSP-kompatibel — `script-src 'self' https://nerdiction.de`, Styles inline im Shadow DOM, keine `eval()`/`new Function()`
+
+**Technische Highlights:**
+- 3 Embed Data API Endpunkte: `/api/embed/review/[slug]`, `/api/embed/collection/[slug]`, `/api/embed/series/[slug]`
+- 1 Embed Script Endpunkt: `/embed.js` (minimiert, versioniert, Cache-Control: 1 Jahr immutable)
+- 1 Embed Modal Component: Preview (live via Shadow DOM), Code-Block mit Syntax-Highlighting, Optionen (Theme: auto/light/dark, Consent, Compact)
+- 3 Widget-Typen: Review, Collection, Series — alle im Shadow DOM mit CSS-Variablen für Theming
+- `unstable_cache` 5 Min auf Embed-API + Tag-Invaliderung (`embed:{type}:{slug}`)
+- Feature-Flag `FEATURE_REVIEW_EMBED` schützt alle Embed-Features
+- Native HTML5 Drag-and-Drop nicht nötig (kein DnD im Embed)
+- Barrierefreiheit: Modal mit Focus-Trap, ARIA-Labels, Keyboard-Navigation, Escape schließt Modal
+- Security: XSS-Schutz via `textContent`/`createElement`, Rate-Limit 100 req/min/IP, CORS `Access-Control-Allow-Origin: *`
+- Keine neuen Prisma Models, keine Migration nötig
+- 19 neue Tests (Unit, Integration, E2E) — alle grün
+- 0 neue Lint Errors, 0 TypeScript Errors, Build grün
+
+**Dateien (neu/geändert):**
+- `src/types/embed.ts`
+- `src/lib/embed-schema.ts`, `src/lib/embed-data.ts`
+- `src/app/api/embed/review/[slug]/route.ts`, `src/app/api/embed/collection/[slug]/route.ts`, `src/app/api/embed/series/[slug]/route.ts`
+- `src/app/embed.js/route.ts`
+- `src/components/embed/EmbedWidgets.tsx`, `src/components/embed/EmbedProvider.tsx`, `src/components/embed/EmbedModal.tsx`
+- `src/components/reviews/ReviewActions.tsx` (Embed-Button Integration)
+- `src/app/listen/[slug]/page.tsx` (Embed-Button Integration)
+- `src/app/serien/[slug]/page.tsx` / `src/components/series/SeriesDetail.tsx` (Embed-Button Integration)
+- `tests/lib/embed-schema.test.ts`, `tests/lib/embed-data.test.ts`, `tests/api/embed/review.test.ts`, `tests/api/embed/collection.test.ts`, `tests/api/embed/series.test.ts`, `tests/api/embed/script.test.ts`, `tests/embed.test.tsx`
+- `src/lib/feature-flags.ts` (FEATURE_REVIEW_EMBED), `.env.example`
+- `docs/features/review-embed.md`, `docs/features/review-embed-design.md`
+- `CHANGELOG.md`, `README.md`, `ROADMAP.md`, `docs/PROGRESS.md`
+
+**Definition of Done erfüllt:**
+- [x] Spec vollständig, alle AK getestet & erfüllt
+- [x] Self-Review ohne offene Befunde
+- [x] Build, Type-Check, Lint, Tests grün
+- [x] Doku & Changelog aktualisiert
+- [x] Keine Migrationen nötig (bestehende Models)
+- [x] Keine Secrets im Diff
+- [x] Alles gepusht auf `auto/dev`
+
+---
+
 ### Aktueller Stand (2026-10-25)
 
 - Branch: `auto/dev` (auf Remote gepusht).
-- `type-check`: grün. `build`: grün. `tests`: **1007/1007 grün** (vitest), `lint`: **112 Errors** (alle Pre-existing: `no-explicit-any` in externen Skills/Admin, React-Hooks), 422 Warnings — **keine neuen Errors**
-- Abgeschlossene Features: 21 (inkl. Erweiterte Benachrichtigungs-Präferenzen)
-- **Aktuelles Feature: Review-Embed für externe Sites** — **F1✅ F2✅ F3✅ F4 PKG-1✅ PKG-2✅ PKG-3✅ PKG-4✅ PKG-5✅ PKG-6✅ (pushed) → PKG-7 (Tests) & PKG-8 (Doku & Verify)**
-- Nächster Zyklus: PKG-7 (E2E Tests) & PKG-8 (Doku & Verify) abschließen
+- `type-check`: grün. `build`: grün. `tests`: **1037/1037 grün** (vitest), `lint`: **134 Errors** (alle Pre-existing: `no-explicit-any` in externen Skills/Admin, React-Hooks), 442 Warnings — **keine neuen Errors**
+- Abgeschlossene Features: 22 (inkl. Review-Embed für externe Sites)
+- **Nächstes Feature:** Wird in nächstem Zyklus aus ROADMAP gewählt
 

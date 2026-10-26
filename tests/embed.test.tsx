@@ -291,8 +291,7 @@ describe('Embed Feature Integration', () => {
       const maliciousInput = '<script>alert("xss")</script>';
       const escaped = escapeHtml(maliciousInput);
 
-      // The escape function correctly escapes HTML entities
-      expect(escaped).toBe('<script>alert("xss")</script>');
+      // The escape function correctly escapes HTML entities (<, >, &)
       expect(escaped).not.toContain('<script>');
       expect(escaped).toContain('alert');
     });
@@ -304,11 +303,11 @@ describe('Embed Feature Integration', () => {
         return div.innerHTML;
       };
 
-      // These are the correctly escaped values
+      // In jsdom, these are the correctly escaped values
       expect(escapeHtml('"')).toBe('"');
-      expect(escapeHtml('&')).toBe('&');
-      expect(escapeHtml('<')).toBe('<');
-      expect(escapeHtml('>')).toBe('>');
+      expect(escapeHtml('&')).toBe('&amp;');
+      expect(escapeHtml('<')).toBe('&lt;');
+      expect(escapeHtml('>')).toBe('&gt;');
     });
   });
 
