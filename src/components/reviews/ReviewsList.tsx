@@ -10,7 +10,7 @@ import { ScoreDistribution } from "@/components/reviews/ScoreDistribution";
 import { CategoryChips } from "@/components/shared/CategoryChips";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/shared/Skeleton";
-import { ChevronDown, Search } from "lucide-react";
+import { Bookmark, ChevronDown, Search } from "lucide-react";
 
 interface PaginationData {
   page: number;
@@ -330,6 +330,14 @@ export function ReviewsList() {
                     })}
                   </span>
                 </div>
+                {review.bookmarkCount && review.bookmarkCount > 0 && (
+                  <div className="mt-1 flex items-center gap-1">
+                    <Bookmark className="size-3 text-muted-foreground" aria-hidden="true" />
+                    <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                      {review.bookmarkCount} gespeichert
+                    </span>
+                  </div>
+                )}
               </article>
             </Link>
           ))}

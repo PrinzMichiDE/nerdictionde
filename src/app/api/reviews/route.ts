@@ -160,13 +160,30 @@ const searchOR: Prisma.ReviewWhereInput[] = [
       } : {}),
     });
 
+    // Lesezeichen-Zahlen als Social Proof anreichern
+    let bookmarkCountMap = new Map<string, number>();
+    if (reviews.length > 0) {
+      const bookmarkCounts = await prisma.bookmark.groupBy({
+        by: ["reviewId"],
+        where: { reviewId: { in: reviews.map((r) => r.id) } },
+        _count: { _all: true },
+      });
+      bookmarkCountMap = new Map(
+        bookmarkCounts.map((b) => [b.reviewId, b._count._all])
+      );
+    }
+    const reviewsWithBookmarks = reviews.map((r) => ({
+      ...r,
+      bookmarkCount: bookmarkCountMap.get(r.id) ?? 0,
+    }));
+
     // Editor's picks: top scores not already visible on this page
     let topPicks: Array<{ id: string; title: string; slug: string; score: number; category: string }> | undefined;
-    if (shouldPaginate && reviews.length > 0) {
+    if (shouldPaginate && reviewsWithBookmarks.length > 0) {
       topPicks = await prisma.review.findMany({
         where: {
           status: "published",
-          id: { notIn: reviews.map((r) => r.id) },
+          id: { notIn: reviewsWithBookmarks.map((r) => r.id) },
         },
         orderBy: [{ score: "desc" }, { createdAt: "desc" }],
         take: 3,
@@ -182,11 +199,11 @@ const searchOR: Prisma.ReviewWhereInput[] = [
 
     // If all=true, return array directly for backward compatibility, otherwise return object
     if (all) {
-      return NextResponse.json(reviews);
+      return NextResponse.json(reviewsWithBookmarks);
     }
 
     return NextResponse.json({
-      reviews,
+      reviews: reviewsWithBookmarks,
       pagination: {
         page,
         limit,

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Review } from "@/types/review";
 import { REACTION_EMOJIS, REACTION_TYPES, type ReactionType } from '@/types/review-reactions';
 import { getCategoryStyle, getScoreColor, getVerdict } from "@/lib/review-category";
-import { ArrowRight, Clock3 } from "lucide-react";
+import { ArrowRight, Bookmark, Clock3 } from "lucide-react";
 import { CompareButton } from "./CompareButton";
 import { cn } from "@/lib/utils";
 
@@ -24,9 +24,10 @@ interface ReviewCardProps {
     total: number;
   } | null;
   series?: SeriesInfo | null;
+  bookmarkCount?: number;
 }
 
-export function ReviewCard({ review, reactionsSummary, series }: ReviewCardProps) {
+export function ReviewCard({ review, reactionsSummary, series, bookmarkCount }: ReviewCardProps) {
   const formattedDate = new Date(review.createdAt).toLocaleDateString("de-DE", {
     year: "numeric",
     month: "long",
@@ -90,6 +91,13 @@ export function ReviewCard({ review, reactionsSummary, series }: ReviewCardProps
             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium text-muted-foreground rounded-full bg-muted" aria-label={`Top-Reaktion: ${topCount} Nutzer`}>
               <span aria-hidden="true">{REACTION_EMOJIS[topReaction]}</span>
               <span className="tabular-nums">{topCount}</span>
+            </div>
+          )}
+
+          {bookmarkCount && bookmarkCount > 0 && (
+            <div className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-muted-foreground rounded-full bg-muted" aria-label={`Von ${bookmarkCount} Personen gespeichert`}>
+              <Bookmark className="size-3" aria-hidden="true" />
+              <span className="tabular-nums">{bookmarkCount}</span>
             </div>
           )}
 

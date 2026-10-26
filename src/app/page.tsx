@@ -5,6 +5,8 @@ import { EditorialPicks } from "@/components/home/EditorialPicks";
 import { HomeReviews } from "@/components/home/HomeReviews";
 import { HomeSubscribedCategoryChips } from "@/components/home/HomeSubscribedCategoryChips";
 import { ScoreScale } from "@/components/home/ScoreScale";
+import { SectionHeading } from "@/components/home/SectionHeading";
+import { ScrollReveal } from "@/components/home/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -123,43 +125,48 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
       />
 
-      <Hero latest={reviews[0] ?? null} stats={stats} />
+      <ScrollReveal variant="up">
+        <Hero latest={reviews[0] ?? null} stats={stats} />
+      </ScrollReveal>
       <HomeSubscribedCategoryChips />
       <RecommendationsSection limit={10} />
 
       <div className="mt-16 space-y-20 md:mt-20 md:space-y-28">
-        {reviews.length > 0 && <EditorialPicks reviews={reviews} />}
-
-        {reviews.length > 0 ? (
-          <HomeReviews reviews={reviews} />
-        ) : (
-          <section className="rounded-sm border border-border bg-card p-10 text-center">
-            <h2 className="font-serif text-3xl font-semibold tracking-tight">
-              Die ersten Tests sind in Arbeit
-            </h2>
-            <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-              Sobald wir die ersten Titel veröffentlichen, erscheinen sie hier mit
-              vollständiger Wertung.
-            </p>
-            <Button asChild size="lg" className="mt-6 rounded-full">
-              <Link href="/reviews">Zu den Reviews</Link>
-            </Button>
-          </section>
+        {reviews.length > 0 && (
+          <ScrollReveal variant="up" delay={80}>
+            <EditorialPicks reviews={reviews} />
+          </ScrollReveal>
         )}
 
-        <section
-          id="so-testen-wir"
-          className="grid scroll-mt-24 gap-10 lg:grid-cols-12 lg:gap-12"
-        >
-          <div className="lg:col-span-5">
-            <h2 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl">
-              So testen wir
-            </h2>
-            <p className="mt-3 max-w-xl text-muted-foreground">
-              Jede Wertung entsteht nach demselben Ablauf. Wir dokumentieren, was wir
-              geprüft haben, und nennen die Quellen.
-            </p>
+        {reviews.length > 0 ? (
+          <ScrollReveal variant="up" delay={120}>
+            <HomeReviews reviews={reviews} />
+          </ScrollReveal>
+        ) : (
+          <ScrollReveal variant="fade">
+            <section className="rounded-sm border border-border bg-card p-10 text-center">
+              <h2 className="font-serif text-3xl font-semibold tracking-tight">
+                Die ersten Tests sind in Arbeit
+              </h2>
+              <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
+                Sobald wir die ersten Titel veröffentlichen, erscheinen sie hier mit
+                vollständiger Wertung.
+              </p>
+              <Button asChild size="lg" className="mt-6 rounded-full">
+                <Link href="/reviews">Zu den Reviews</Link>
+              </Button>
+            </section>
+          </ScrollReveal>
+        )}
 
+        <ScrollReveal variant="up" delay={160} id="so-testen-wir">
+          <section className="grid scroll-mt-24 gap-10 lg:grid-cols-12 lg:gap-12">
+            <SectionHeading
+              kicker="Methode"
+              title="So testen wir"
+              description="Jede Wertung entsteht nach demselben Ablauf. Wir dokumentieren, was wir geprüft haben, und nennen die Quellen."
+              align="left"
+            />
             <ol className="mt-8 space-y-6">
               {methodSteps.map((step, index) => (
                 <li key={step.title} className="flex gap-4 border-t border-border pt-4">
@@ -179,25 +186,27 @@ export default async function HomePage() {
             <p className="mt-6 text-sm text-muted-foreground">
               Datenquellen: IGDB, TMDB, Steam und Twitch.
             </p>
-          </div>
 
-          <div className="lg:col-span-7">
-            <ScoreScale reviews={reviews} />
-          </div>
-        </section>
+            <div className="lg:col-span-7 mt-10 lg:mt-0">
+              <ScoreScale reviews={reviews} />
+            </div>
+          </section>
+        </ScrollReveal>
 
-        <section className="flex flex-col gap-6 border-t border-border pt-10 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="font-serif text-2xl font-semibold tracking-tight md:text-3xl">
-              Kein Test verpassen.
-            </h2>
-            <p className="mt-2 max-w-xl text-muted-foreground">
-              Melde dich für den Nerdiction-Newsletter an. Wir informieren dich,
-              sobald ein neuer Test veröffentlicht wird.
-            </p>
-          </div>
-          <NewsletterSignup source="homepage" className="max-w-md" />
-        </section>
+        <ScrollReveal variant="up" delay={200}>
+          <section className="flex flex-col gap-6 border-t border-border pt-10 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+                Kein Test verpassen.
+              </h2>
+              <p className="mt-2 max-w-xl text-muted-foreground">
+                Melde dich für den Nerdiction-Newsletter an. Wir informieren dich,
+                sobald ein neuer Test veröffentlicht wird.
+              </p>
+            </div>
+            <NewsletterSignup source="homepage" className="max-w-md" />
+          </section>
+        </ScrollReveal>
       </div>
     </div>
   );

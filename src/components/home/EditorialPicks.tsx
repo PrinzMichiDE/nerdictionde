@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Review } from "@/types/review";
 import { getCategoryStyle, getScoreColor, getVerdict } from "@/lib/review-category";
+import { ArrowRight } from "lucide-react";
 
 interface EditorialPicksProps {
   reviews: Review[];
@@ -34,14 +35,17 @@ export function EditorialPicks({ reviews }: EditorialPicksProps) {
               <Link
                 href={`/reviews/${review.slug}`}
                 aria-label={`Platz ${index + 1}: ${review.title}, ${review.score} von 100`}
-                className="grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-4 py-4 transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="pick-row group block"
               >
-                <span className="font-serif text-2xl font-semibold tabular-nums text-muted-foreground">
+                <span
+                  className="pick-index font-serif font-semibold tabular-nums text-muted-foreground"
+                  aria-hidden="true"
+                >
                   {index + 1}
                 </span>
 
-                <div className="min-w-0">
-                  <span className="text-xs" style={{ color: style.color }}>
+                <div className="min-w-0 flex-1">
+                  <span className="kicker text-[0.6875rem]" style={{ color: style.color }}>
                     {style.label}
                   </span>
                   <h3
@@ -64,6 +68,9 @@ export function EditorialPicks({ reviews }: EditorialPicksProps) {
                   </span>
                   <span className="block text-xs text-muted-foreground">von 100</span>
                 </div>
+
+                <ArrowRight className="pick-arrow size-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                <span className="pick-rule" aria-hidden="true" />
               </Link>
             </li>
           );

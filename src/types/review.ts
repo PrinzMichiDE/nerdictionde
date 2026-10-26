@@ -94,4 +94,5 @@ export interface Review {
   releaseDate?: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  bookmarkCount?: number;
 }

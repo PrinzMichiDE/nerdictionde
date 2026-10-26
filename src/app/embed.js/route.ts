@@ -2,15 +2,18 @@
 // Embed Script Route (/embed.js)
 // ============================================
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { isReviewEmbedEnabled } from '@/lib/feature-flags';
 
-export const dynamic = 'force-static';
-export const revalidate = 31536000; // 1 year
+const EMBED_SCRIPT = `// ============================================
+// Nerdiction Embed Script
+// Version: 1.0.0
+// ============================================
 
-const EMBED_SCRIPT = `/*! nerdiction-embed v1.0.0 | (c) 2026 Nerdiction.de | MIT License */
 (function() {
   'use strict';
 
+  // CSS Styles for all widget types (injected into Shadow DOM)
   const EMBED_CSS = \`
 :host {
   --nerdiction-primary: #3b82f6;
@@ -39,7 +42,9 @@ const EMBED_SCRIPT = `/*! nerdiction-embed v1.0.0 | (c) 2026 Nerdiction.de | MIT
   box-sizing: border-box;
 }
 
-:host([data-compact="true"]) { max-width: 100%; }
+:host([data-compact="true"]) {
+  max-width: 100%;
+}
 
 :host([data-theme="dark"]) {
   --nerdiction-bg: #0f172a;
@@ -100,12 +105,192 @@ const EMBED_SCRIPT = `/*! nerdiction-embed v1.0.0 | (c) 2026 Nerdiction.de | MIT
 :host([data-reduced-motion="true"]) .nerdiction-embed__skeleton-text { animation: none; }
 \`;
 
+  // XSS Protection: escape HTML entities
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
 
+  // Get theme from attribute
+  function getTheme(themeAttr) {
+    if (!themeAttr) return 'auto';
+    if (['auto', 'light', 'dark'].includes(themeAttr)) return themeAttr;
+    return 'auto';
+  }
+
+  // Render skeleton loader
+  function renderSkeleton(shadow, theme, compact) {
+    const container = shadow.getElementById('nerdiction-embed-root');
+    if (!container) return;
+
+    container.innerHTML = \`
+      <div class="nerdiction-embed__skeleton">
+        <div class="nerdiction-embed__skeleton-cover" />
+        <div class="nerdiction-embed__skeleton-title" />
+        <div class="nerdiction-embed__skeleton-meta" />
+        <div class="nerdiction-embed__skeleton-text" />
+        <div class="nerdiction-embed__skeleton-text short" />
+      </div>
+    \`;
+  }
+
+  // Render error state
+  function renderError(shadow, theme, compact, message, url) {
+    const container = shadow.getElementById('nerdiction-embed-root');
+    if (!container) return;
+
+    container.innerHTML = \`
+      <div class="nerdiction-embed__error">
+        <svg class="nerdiction-embed__error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <h2 class="nerdiction-embed__error-title">Inhalt nicht verfügbar</h2>
+        <p class="nerdiction-embed__error-message">\${escapeHtml(message)}</p>
+        \${url ? \`<a class="nerdiction-embed__error-link" href="\${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">Auf nerdiction.de ansehen<svg class="nerdiction-embed__external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>\` : ''}
+      </div>
+    \`;
+  }
+
+  // Render review widget HTML
+  function renderReviewHTML(data, theme, compact) {
+    const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    return \`
+      <article class="nerdiction-embed" data-type="review">
+        \${data.coverImage ? \`<img class="nerdiction-embed__cover" src="\${escapeHtml(data.coverImage)}" alt="\${escapeHtml(data.coverAlt || data.title)}" loading="lazy" />\` : ''}
+        <div class="nerdiction-embed__content">
+          <header class="nerdiction-embed__header">
+            <h1 class="nerdiction-embed__title">\${escapeHtml(data.title)}</h1>
+            <div class="nerdiction-embed__meta">
+              <span class="nerdiction-embed__score">\${data.score.toFixed(1)}</span>
+              <span class="nerdiction-embed__category">\${escapeHtml(data.categoryLabel)}</span>
+            </div>
+          </header>
+          \${data.excerpt ? \`<p class="nerdiction-embed__excerpt">\${escapeHtml(data.excerpt)}</p>\` : ''}
+          \${data.pros.length > 0 || data.cons.length > 0 ? \`
+            <div class="nerdiction-embed__pros-cons">
+              \${data.pros.slice(0, compact ? 2 : 3).map(pro => \`
+                <div class="nerdiction-embed__pro">
+                  <svg class="nerdiction-embed__pro-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <span>\${escapeHtml(pro)}</span>
+                </div>
+              \`).join('')}
+              \${data.cons.slice(0, compact ? 2 : 3).map(con => \`
+                <div class="nerdiction-embed__con">
+                  <svg class="nerdiction-embed__con-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  <span>\${escapeHtml(con)}</span>
+                </div>
+              \`).join('')}
+            </div>
+          \` : ''}
+          <footer class="nerdiction-embed__footer">
+            <div class="nerdiction-embed__author">
+              \${data.author?.avatar ? \`<img class="nerdiction-embed__avatar" src="\${escapeHtml(data.author.avatar)}" alt="" aria-hidden="true" />\` : ''}
+              <span>Von <strong>\${escapeHtml(data.author?.displayName || data.author?.username || 'Nerdiction')}</strong>\${data.publishedAt ? \` · \${new Date(data.publishedAt).toLocaleDateString('de-DE', { year: 'numeric', month: 'short', day: 'numeric' })}\` : ''}</span>
+            </div>
+            <a class="nerdiction-embed__link" href="\${escapeHtml(data.url)}" target="_blank" rel="noopener noreferrer">
+              Auf nerdiction.de lesen
+              <svg class="nerdiction-embed__external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </a>
+          </footer>
+        </div>
+      </article>
+    \`;
+  }
+
+  // Render collection widget HTML
+  function renderCollectionHTML(data, theme, compact) {
+    return \`
+      <article class="nerdiction-embed" data-type="collection">
+        \${data.coverImage ? \`<img class="nerdiction-embed__cover" src="\${escapeHtml(data.coverImage)}" alt="\${escapeHtml(data.title)}" loading="lazy" />\` : ''}
+        <div class="nerdiction-embed__content">
+          <header class="nerdiction-embed__header">
+            <h1 class="nerdiction-embed__title">\${escapeHtml(data.title)}</h1>
+            <div class="nerdiction-embed__meta"><span class="nerdiction-embed__category">\${data.itemCount} Einträge</span></div>
+          </header>
+          \${data.description ? \`<p class="nerdiction-embed__excerpt">\${escapeHtml(data.description)}</p>\` : ''}
+          \${data.items.length > 0 ? \`
+            <div class="nerdiction-embed__items">
+              \${data.items.slice(0, compact ? 3 : 5).map(item => \`
+                <a class="nerdiction-embed__item" href="https://nerdiction.de/reviews/\${escapeHtml(item.review.slug)}" target="_blank" rel="noopener noreferrer">
+                  \${item.review.coverImage ? \`<img class="nerdiction-embed__item-image" src="\${escapeHtml(item.review.coverImage)}" alt="" aria-hidden="true" loading="lazy" />\` : ''}
+                  <div class="nerdiction-embed__item-content">
+                    <h3 class="nerdiction-embed__item-title">#\${item.position} \${escapeHtml(item.review.title)}</h3>
+                    <span class="nerdiction-embed__item-score">\${item.review.score.toFixed(1)}</span>
+                  </div>
+                </a>
+              \`).join('')}
+            </div>
+          \` : ''}
+          <footer class="nerdiction-embed__footer">
+            <div class="nerdiction-embed__author">
+              \${data.owner.avatar ? \`<img class="nerdiction-embed__avatar" src="\${escapeHtml(data.owner.avatar)}" alt="" aria-hidden="true" />\` : ''}
+              <span>Kuratiert von <strong>\${escapeHtml(data.owner.displayName || data.owner.username)}</strong></span>
+            </div>
+            <a class="nerdiction-embed__link" href="\${escapeHtml(data.url)}" target="_blank" rel="noopener noreferrer">
+              Liste ansehen
+              <svg class="nerdiction-embed__external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </a>
+          </footer>
+        </div>
+      </article>
+    \`;
+  }
+
+  // Render series widget HTML
+  function renderSeriesHTML(data, theme, compact) {
+    return \`
+      <article class="nerdiction-embed" data-type="series">
+        \${data.coverImage ? \`<img class="nerdiction-embed__cover" src="\${escapeHtml(data.coverImage)}" alt="\${escapeHtml(data.title)}" loading="lazy" />\` : ''}
+        <div class="nerdiction-embed__content">
+          <header class="nerdiction-embed__header">
+            <h1 class="nerdiction-embed__title">\${escapeHtml(data.title)}</h1>
+            <div class="nerdiction-embed__meta"><span class="nerdiction-embed__category">\${data.partCount} Teile</span></div>
+          </header>
+          \${data.description ? \`<p class="nerdiction-embed__excerpt">\${escapeHtml(data.description)}</p>\` : ''}
+          \${data.parts.length > 0 ? \`
+            <div class="nerdiction-embed__parts">
+              \${data.parts.slice(0, compact ? 3 : 5).map(part => \`
+                <div class="nerdiction-embed__part">
+                  <span class="nerdiction-embed__part-number">\${part.order}</span>
+                  <div class="nerdiction-embed__part-content">
+                    <h3 class="nerdiction-embed__part-title">\${escapeHtml(part.review.title)}</h3>
+                    <span class="nerdiction-embed__part-score">\${part.review.score.toFixed(1)}</span>
+                  </div>
+                </div>
+              \`).join('')}
+            </div>
+          \` : ''}
+          <footer class="nerdiction-embed__footer">
+            <div class="nerdiction-embed__author">
+              \${data.owner.avatar ? \`<img class="nerdiction-embed__avatar" src="\${escapeHtml(data.owner.avatar)}" alt="" aria-hidden="true" />\` : ''}
+              <span>\${data.owner.username ? \`Von <strong>\${escapeHtml(data.owner.displayName || data.owner.username)}</strong>\` : 'Redaktionelle Serie'}</span>
+            </div>
+            <a class="nerdiction-embed__link" href="\${escapeHtml(data.url)}" target="_blank" rel="noopener noreferrer">
+              Serie ansehen
+              <svg class="nerdiction-embed__external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </a>
+          </footer>
+        </div>
+      </article>
+    \`;
+  }
+
+  // Main Embed Widget Class
   class EmbedWidget {
     constructor() {
       this.initialized = false;
@@ -120,6 +305,8 @@ const EMBED_SCRIPT = `/*! nerdiction-embed v1.0.0 | (c) 2026 Nerdiction.de | MIT
       } else {
         this.processEmbeds();
       }
+
+      // Watch for dynamically added embeds
       this.observeMutations();
     }
 
@@ -136,170 +323,88 @@ const EMBED_SCRIPT = `/*! nerdiction-embed v1.0.0 | (c) 2026 Nerdiction.de | MIT
     renderEmbed(element) {
       const type = element.dataset.nerdictionEmbed;
       const slug = element.dataset.slug;
-      const theme = element.dataset.theme || 'auto';
+      const theme = getTheme(element.dataset.theme);
       const compact = element.dataset.compact === 'true';
 
       if (!type || !slug) return;
 
+      // Create Shadow DOM
       const shadow = element.attachShadow({ mode: 'open' });
       const container = document.createElement('div');
       container.id = 'nerdiction-embed-root';
       shadow.appendChild(container);
 
+      // Inject styles
       const style = document.createElement('style');
       style.textContent = EMBED_CSS;
       shadow.appendChild(style);
 
+      // Set theme attributes on host
       const host = shadow.host;
       host.setAttribute('data-theme', theme);
       if (compact) host.setAttribute('data-compact', 'true');
 
+      // Respect reduced motion
       const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-      if (mediaQuery.matches) host.setAttribute('data-reduced-motion', 'true');
+      if (mediaQuery.matches) {
+        host.setAttribute('data-reduced-motion', 'true');
+      }
 
-      this.renderSkeleton(shadow, theme, compact);
-      this.fetchData(type, slug).then(data => {
-        if (!data) {
-          this.renderError(shadow, theme, compact, 'Inhalt nicht gefunden', \`https://nerdiction.de/\${type}s/\${slug}\`);
-          return;
-        }
-        this.renderWidgetContent(shadow, type, data, theme, compact);
-      }).catch(() => {
-        this.renderError(shadow, theme, compact, 'Fehler beim Laden', \`https://nerdiction.de/\${type}s/\${slug}\`);
-      });
-    }
+      // Listen for theme changes if auto
+      if (theme === 'auto') {
+        const mq = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleChange = () => {
+          host.setAttribute('data-theme', mq.matches ? 'dark' : 'light');
+        };
+        mq.addEventListener?.('change', handleChange);
+        // Note: cleanup would be needed for full implementation
+      }
 
-    getBaseStyles() { return EMBED_CSS; }
+      // Show skeleton
+      renderSkeleton(shadow, theme, compact);
 
-    renderSkeleton(shadow, theme, compact) {
-      const container = shadow.getElementById('nerdiction-embed-root');
-      if (!container) return;
-      container.innerHTML = \`
-        <div class="nerdiction-embed__skeleton">
-          <div class="nerdiction-embed__skeleton-cover" />
-          <div class="nerdiction-embed__skeleton-title" />
-          <div class="nerdiction-embed__skeleton-meta" />
-          <div class="nerdiction-embed__skeleton-text" />
-          <div class="nerdiction-embed__skeleton-text short" />
-        </div>
-      \`;
+      // Fetch data
+      this.fetchData(type, slug)
+        .then(data => {
+          if (!data) {
+            renderError(shadow, theme, compact, 'Inhalt nicht gefunden', \`https://nerdiction.de/\${type}s/\${slug}\`);
+            return;
+          }
+          this.renderWidgetContent(shadow, type, data, theme, compact);
+        })
+        .catch(() => {
+          renderError(shadow, theme, compact, 'Fehler beim Laden', \`https://nerdiction.de/\${type}s/\${slug}\`);
+        });
     }
 
     async fetchData(type, slug) {
       try {
-        const response = await fetch(\`https://nerdiction.de/api/embed/\${type}/\${slug}\`, { headers: { 'Accept': 'application/json' } });
+        const response = await fetch(\`https://nerdiction.de/api/embed/\${type}/\${slug}\`, {
+          headers: { 'Accept': 'application/json' },
+        });
         if (!response.ok) return null;
         const json = await response.json();
         return json.data;
-      } catch { return null; }
+      } catch {
+        return null;
+      }
     }
 
     renderWidgetContent(shadow, type, data, theme, compact) {
       const container = shadow.getElementById('nerdiction-embed-root');
       if (!container) return;
-      container.innerHTML = this.renderWidgetHTML(type, data, theme, compact);
-    }
 
-    renderWidgetHTML(type, data, theme, compact) {
       switch (type) {
-        case 'review': return this.renderReviewHTML(data, theme, compact);
-        case 'collection': return this.renderCollectionHTML(data, theme, compact);
-        case 'series': return this.renderSeriesHTML(data, theme, compact);
-        default: return '';
+        case 'review':
+          container.innerHTML = renderReviewHTML(data, theme, compact);
+          break;
+        case 'collection':
+          container.innerHTML = renderCollectionHTML(data, theme, compact);
+          break;
+        case 'series':
+          container.innerHTML = renderSeriesHTML(data, theme, compact);
+          break;
       }
-    }
-
-    renderReviewHTML(data, theme, compact) {
-      return \`
-        <article class="nerdiction-embed" data-type="review">
-          \${data.coverImage ? \`<img class="nerdiction-embed__cover" src="\${data.coverImage}" alt="\${this.escapeHtml(data.coverAlt || data.title)}" loading="lazy" />\` : ''}
-          <div class="nerdiction-embed__content">
-            <header class="nerdiction-embed__header">
-              <h1 class="nerdiction-embed__title">\${this.escapeHtml(data.title)}</h1>
-              <div class="nerdiction-embed__meta"><span class="nerdiction-embed__score">\${data.score.toFixed(1)}</span><span class="nerdiction-embed__category">\${this.escapeHtml(data.categoryLabel)}</span></div>
-            </header>
-            \${data.excerpt ? \`<p class="nerdiction-embed__excerpt">\${this.escapeHtml(data.excerpt)}</p>\` : ''}
-            \${data.pros.length > 0 || data.cons.length > 0 ? \`
-              <div class="nerdiction-embed__pros-cons">
-                \${data.pros.slice(0, compact ? 2 : 3).map(pro => \`
-                  <div class="nerdiction-embed__pro"><svg class="nerdiction-embed__pro-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span>\${this.escapeHtml(pro)}</span></div>\`).join('')}
-                \${data.cons.slice(0, compact ? 2 : 3).map(con => \`
-                  <div class="nerdiction-embed__con"><svg class="nerdiction-embed__con-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg><span>\${this.escapeHtml(con)}</span></div>\`).join('')}
-              </div>\` : ''}
-            <footer class="nerdiction-embed__footer">
-              <div class="nerdiction-embed__author">
-                \${data.author?.avatar ? \`<img class="nerdiction-embed__avatar" src="\${data.author.avatar}" alt="" aria-hidden="true" />\` : ''}
-                <span>Von <strong>\${this.escapeHtml(data.author?.displayName || data.author?.username || 'Nerdiction')}</strong>\${data.publishedAt ? \` · \${new Date(data.publishedAt).toLocaleDateString('de-DE', { year: 'numeric', month: 'short', day: 'numeric' })}\` : ''}</span>
-              </div>
-              <a class="nerdiction-embed__link" href="\${data.url}" target="_blank" rel="noopener noreferrer">Auf nerdiction.de lesen<svg class="nerdiction-embed__external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>
-            </footer>
-          </div>
-        </article>
-      \`;
-    }
-
-    renderCollectionHTML(data, theme, compact) {
-      return \`
-        <article class="nerdiction-embed" data-type="collection">
-          \${data.coverImage ? \`<img class="nerdiction-embed__cover" src="\${data.coverImage}" alt="\${this.escapeHtml(data.title)}" loading="lazy" />\` : ''}
-          <div class="nerdiction-embed__content">
-            <header class="nerdiction-embed__header"><h1 class="nerdiction-embed__title">\${this.escapeHtml(data.title)}</h1><div class="nerdiction-embed__meta"><span class="nerdiction-embed__category">\${data.itemCount} Einträge</span></div></header>
-            \${data.description ? \`<p class="nerdiction-embed__excerpt">\${this.escapeHtml(data.description)}</p>\` : ''}
-            \${data.items.length > 0 ? \`
-              <div class="nerdiction-embed__items">
-                \${data.items.slice(0, compact ? 3 : 5).map(item => \`
-                  <a class="nerdiction-embed__item" href="https://nerdiction.de/reviews/\${item.review.slug}" target="_blank" rel="noopener noreferrer">
-                    \${item.review.coverImage ? \`<img class="nerdiction-embed__item-image" src="\${item.review.coverImage}" alt="" aria-hidden="true" loading="lazy" />\` : ''}
-                    <div class="nerdiction-embed__item-content"><h3 class="nerdiction-embed__item-title">#\${item.position} \${this.escapeHtml(item.review.title)}</h3><span class="nerdiction-embed__item-score">\${item.review.score.toFixed(1)}</span></div>
-                  </a>\`).join('')}
-              </div>\` : ''}
-            <footer class="nerdiction-embed__footer">
-              <div class="nerdiction-embed__author">\${data.owner.avatar ? \`<img class="nerdiction-embed__avatar" src="\${data.owner.avatar}" alt="" aria-hidden="true" />\` : ''}<span>Kuratiert von <strong>\${this.escapeHtml(data.owner.displayName || data.owner.username)}</strong></span></div>
-              <a class="nerdiction-embed__link" href="\${data.url}" target="_blank" rel="noopener noreferrer">Liste ansehen<svg class="nerdiction-embed__external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>
-            </footer>
-          </div>
-        </article>
-      \`;
-    }
-
-    renderSeriesHTML(data, theme, compact) {
-      return \`
-        <article class="nerdiction-embed" data-type="series">
-          \${data.coverImage ? \`<img class="nerdiction-embed__cover" src="\${data.coverImage}" alt="\${this.escapeHtml(data.title)}" loading="lazy" />\` : ''}
-          <div class="nerdiction-embed__content">
-            <header class="nerdiction-embed__header"><h1 class="nerdiction-embed__title">\${this.escapeHtml(data.title)}</h1><div class="nerdiction-embed__meta"><span class="nerdiction-embed__category">\${data.partCount} Teile</span></div></header>
-            \${data.description ? \`<p class="nerdiction-embed__excerpt">\${this.escapeHtml(data.description)}</p>\` : ''}
-            \${data.parts.length > 0 ? \`
-              <div class="nerdiction-embed__parts">
-                \${data.parts.slice(0, compact ? 3 : 5).map(part => \`
-                  <div class="nerdiction-embed__part"><span class="nerdiction-embed__part-number">\${part.order}</span><div class="nerdiction-embed__part-content"><h3 class="nerdiction-embed__part-title">\${this.escapeHtml(part.review.title)}</h3><span class="nerdiction-embed__part-score">\${part.review.score.toFixed(1)}</span></div></div>\`).join('')}
-              </div>\` : ''}
-            <footer class="nerdiction-embed__footer">
-              <div class="nerdiction-embed__author">\${data.owner.avatar ? \`<img class="nerdiction-embed__avatar" src="\${data.owner.avatar}" alt="" aria-hidden="true" />\` : ''}<span>\${data.owner.username ? \`Von <strong>\${this.escapeHtml(data.owner.displayName || data.owner.username)}</strong>\` : 'Redaktionelle Serie'}</span></div>
-              <a class="nerdiction-embed__link" href="\${data.url}" target="_blank" rel="noopener noreferrer">Serie ansehen<svg class="nerdiction-embed__external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>
-            </footer>
-          </div>
-        </article>
-      \`;
-    }
-
-    renderError(shadow, theme, compact, message, url) {
-      const container = shadow.getElementById('nerdiction-embed-root');
-      if (!container) return;
-      container.innerHTML = \`
-        <div class="nerdiction-embed__error">
-          <svg class="nerdiction-embed__error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-          <h2 class="nerdiction-embed__error-title">Inhalt nicht verfügbar</h2>
-          <p class="nerdiction-embed__error-message">\${this.escapeHtml(message)}</p>
-          <a class="nerdiction-embed__error-link" href="\${url}" target="_blank" rel="noopener noreferrer">Auf nerdiction.de ansehen<svg class="nerdiction-embed__external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>
-        </div>
-      \`;
-    }
-
-    escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
     }
 
     observeMutations() {
@@ -308,12 +413,13 @@ const EMBED_SCRIPT = `/*! nerdiction-embed v1.0.0 | (c) 2026 Nerdiction.de | MIT
           for (const node of mutation.addedNodes) {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = node;
-              if (element.matches?.('[data-nerdiction-embed]') && !element._nerdictionInitialized) {
+              if (element.matches('[data-nerdiction-embed]') && !element._nerdictionInitialized) {
                 element._nerdictionInitialized = true;
                 this.renderEmbed(element);
               }
-              const descendants = element.querySelectorAll?.('[data-nerdiction-embed]');
-              descendants?.forEach(descendant => {
+              // Check descendants
+              const descendants = element.querySelectorAll('[data-nerdiction-embed]');
+              descendants.forEach(descendant => {
                 if (!descendant._nerdictionInitialized) {
                   descendant._nerdictionInitialized = true;
                   this.renderEmbed(descendant);
@@ -323,21 +429,27 @@ const EMBED_SCRIPT = `/*! nerdiction-embed v1.0.0 | (c) 2026 Nerdiction.de | MIT
           }
         }
       });
+
       observer.observe(document.body, { childList: true, subtree: true });
     }
   }
 
+  // Auto-initialize
   const embedWidget = new EmbedWidget();
   embedWidget.init();
 
-  if (typeof window !== 'undefined') {
-    window.NerdictionEmbed = embedWidget;
-  }
-})();
-`;
+  // Export for manual initialization
+  window.NerdictionEmbed = embedWidget;
+})();`;
 
-export async function GET() {
+export async function GET(_req: NextRequest) {
+  // Feature flag check
+  if (!isReviewEmbedEnabled()) {
+    return new NextResponse('Feature disabled', { status: 404 });
+  }
+
   return new NextResponse(EMBED_SCRIPT, {
+    status: 200,
     headers: {
       'Content-Type': 'application/javascript; charset=utf-8',
       'Cache-Control': 'public, max-age=31536000, immutable',

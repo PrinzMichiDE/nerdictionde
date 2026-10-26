@@ -43,6 +43,12 @@ und dieses Projekt hält sich an [Semantische Versionierung](https://semver.org/
 - Pre-Commit-Hook (`.husky/pre-commit`): Format, Lint, Secret-Scan
 - Projektdokumentation unter `docs/` (PROGRESS, ROADMAP, DECISIONS, Feature-Spezifikationen)
 
+## [Unreleased]
+
+### Hinzugefügt
+
+- **Review-Embed für externe Sites**: Einbettbare Widgets für Reviews, Listen und Serien via `<script async src="https://nerdiction.de/embed.js"></script><div data-nerdiction-embed="review" data-slug="..."></div>`; Shadow DOM Isolation (keine CSS-Konflikte), Themeable (auto/light/dark), Responsive (Container-Queries), No-Cookie/Privacy-First (keine Cookies, `data-consent="false"` deaktiviert Analytics), CSP-kompatibel; 3 Content-Types (review, collection, series) mit jeweils angepasstem Layout (Score/Pros/Cons, Item-Liste, Part-Liste); Embed-Modal auf Detailseiten (`/reviews/[slug]`, `/listen/[slug]`, `/serien/[slug]`) mit Live-Vorschau, Theme/Consent/Compact-Optionen, Copy-to-Clipboard; API Endpoints `/api/embed/review/[slug]`, `/api/embed/collection/[slug]`, `/api/embed/series/[slug]` (5 Min Cache + Tag-Invaliderung); `/embed.js` statisch serviert (1 Jahr Cache, immutable); Feature-Flag `FEATURE_REVIEW_EMBED` (Default: true); 1007 Tests grün; Type-Check, Build, Lint grün
+
 ### Geändert
 
 - `NewsletterSubscription`: `isActive`-Standard auf `false` (erst nach Double-Optin aktiv), neue Felder `confirmationToken` und `confirmedAt`
