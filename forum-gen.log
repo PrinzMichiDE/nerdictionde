@@ -1,0 +1,32 @@
+🚀 Starting creation of 5000 forum posts with random replies...
+Using humanizer for all text content
+
+📝 Generating 1667 threads for category: gaming...
+(node:44760) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✅ Created 0 threads in gaming
+💬 Adding random replies to threads in gaming...
+
+📝 Generating 1667 threads for category: movies...
+JSON parse error for threads: SyntaxError: Expected ',' or ']' after array element in JSON at position 2961 (line 44 column 6)
+    at JSON.parse (<anonymous>)
+    at generateThreadsForCategory (E:\Projects\nerdictionde\src\lib\forum-generation.ts:213:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumThreads (E:\Projects\nerdictionde\src\lib\forum-generation.ts:345:21)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:28:22)
+✅ Created 0 threads in movies
+💬 Adding random replies to threads in movies...
+
+📝 Generating 1666 threads for category: series...
+JSON parse error for threads: SyntaxError: Expected ',' or ']' after array element in JSON at position 5236 (line 74 column 6)
+    at JSON.parse (<anonymous>)
+    at generateThreadsForCategory (E:\Projects\nerdictionde\src\lib\forum-generation.ts:213:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumThreads (E:\Projects\nerdictionde\src\lib\forum-generation.ts:345:21)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:28:22)
+✅ Created 0 threads in series
+💬 Adding random replies to threads in series...
+
+✨ Generation complete!
+📊 Total forum posts (threads) created: 0
+💬 Total replies (comments) added: 0

@@ -73,10 +73,20 @@ export async function PUT(
     const templateId = featureFlags.reviewTemplates && body.templateId !== undefined ? body.templateId : currentReview.templateId;
     const templateData = featureFlags.reviewTemplates && body.templateData !== undefined ? body.templateData : undefined;
 
+    // Only allow updatable fields to avoid passing read-only/relation fields
+    const {
+      id: _id,
+      createdAt: _createdAt,
+      updatedAt: _updatedAt,
+      comments: _comments,
+      userRatings: _userRatings,
+      ...updatableFields
+    } = body;
+
     const review = await prisma.review.update({
       where: { id },
       data: {
-        ...body,
+        ...updatableFields,
         templateId,
         templateData: templateData as Prisma.InputJsonValue | null,
         templateVersion: templateId ? templateVersion : null,

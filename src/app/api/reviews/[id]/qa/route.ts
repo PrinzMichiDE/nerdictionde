@@ -27,18 +27,19 @@ async function validateReviewAccess(slug: string): Promise<{ reviewId: string } 
 }
 
 /**
- * GET /api/reviews/[slug]/qa
+ * GET /api/reviews/[id]/qa
  * Liste Fragen für ein Review (paginiert, sortiert)
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const featureCheck = await checkFeatureFlag();
   if (featureCheck) return featureCheck;
 
   try {
-    const { slug } = await params;
+    // Shared [id] segment: these routes are addressed by review slug.
+    const { id: slug } = await params;
     const { searchParams } = new URL(request.url);
 
     // Query Parameter validieren
@@ -82,18 +83,18 @@ export async function GET(
 }
 
 /**
- * POST /api/reviews/[slug]/qa
+ * POST /api/reviews/[id]/qa
  * Neue Frage erstellen
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const featureCheck = await checkFeatureFlag();
   if (featureCheck) return featureCheck;
 
   try {
-    const { slug } = await params;
+    const { id: slug } = await params;
 
     // Authentifizierung erforderlich
     const userId = await getSessionUserId(request);

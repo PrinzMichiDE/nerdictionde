@@ -176,7 +176,7 @@ export function ForumGenerator() {
                 id="forum-thread-count"
                 type="number"
                 min={1}
-                max={20}
+                max={100}
                 value={threadCount}
                 onChange={(e) => setThreadCount(Number(e.target.value))}
               />
@@ -187,7 +187,7 @@ export function ForumGenerator() {
                 id="forum-comments-per-thread"
                 type="number"
                 min={5}
-                max={30}
+                max={100}
                 value={commentCount}
                 onChange={(e) => setCommentCount(Number(e.target.value))}
               />
@@ -254,7 +254,7 @@ export function ForumGenerator() {
               id="forum-comment-count"
               type="number"
               min={1}
-              max={30}
+              max={100}
               value={commentCount}
               onChange={(e) => setCommentCount(Number(e.target.value))}
             />

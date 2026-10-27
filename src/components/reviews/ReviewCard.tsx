@@ -35,8 +35,21 @@ export function ReviewCard({ review, reactionsSummary, series, bookmarkCount }: 
   });
 
   const style = getCategoryStyle(review.category);
-  const snippet = (review.content || "").split(/\s+/).slice(0, 30).join(" ") + "…";
-  const readingTime = Math.max(1, Math.ceil((review.content || "").split(/\s+/).length / 200));
+  const plainText = (review.content || "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/(\*\*|__)(.*?)\1/g, "$2")
+    .replace(/(\*|_)(.*?)\1/g, "$2")
+    .replace(/~~(.*?)~~/g, "$1")
+    .replace(/>\s+/g, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const snippet = plainText.split(/\s+/).slice(0, 30).join(" ") + (plainText.split(/\s+/).length > 30 ? "…" : "");
+  const readingTime = Math.max(1, Math.ceil((plainText.split(/\s+/).length) / 200));
 
   // Top reaction for card display
   const topReaction = reactionsSummary?.total

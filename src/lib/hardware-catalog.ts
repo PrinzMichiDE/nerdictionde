@@ -12,6 +12,8 @@ export interface HardwareCatalogItem {
   msrp?: number;
   releaseDate?: string;
   specs?: Record<string, unknown>;
+  /** Offizielle Produktbild-URL des Herstellers (z. B. Produktfoto von der Hersteller-Website). */
+  image?: string;
 }
 
 export const HARDWARE_CATALOG: HardwareCatalogItem[] = [
@@ -280,6 +282,38 @@ export const HARDWARE_CATALOG: HardwareCatalogItem[] = [
   { name: "DJI FPV Combo", manufacturer: "DJI", model: "FPV Combo", type: "drone", msrp: 1099, releaseDate: "2021-11-04", specs: { camera: "1/2.3 Zoll 12 MP", video: "4K 60fps", range: "10 km", battery: "20 Minuten", weight: "795 g" } },
   { name: "Skydio 2+", manufacturer: "Skydio", model: "2+", type: "drone", msrp: 999, releaseDate: "2022-05-01", specs: { camera: "1/2.3 Zoll 12 MP", video: "4K 60fps", range: "10 km", battery: "29 Minuten", autonomous: "Ja", weight: "754 g" } },
   { name: "Parrot Anafi USA", manufacturer: "Parrot", model: "Anafi USA", type: "drone", msrp: 4990, releaseDate: "2020-05-01", specs: { camera: "1/2.8 Zoll 21 MP", video: "4K", range: "40 km", battery: "32 Minuten", zoom: "32x", weight: "1085 g" } },
+
+  // === Laptops ===
+  { name: "Apple MacBook Pro 14\" M3", manufacturer: "Apple", model: "MacBook Pro M3", type: "laptop", msrp: 1999, releaseDate: "2023-11-07", specs: { display: '14.2" Liquid Retina XDR', chip: "Apple M3", ram: "18/36 GB", storage: "512 GB-2 TB", battery: "22 Stunden", weight: "1.55 kg" } },
+  { name: "Dell XPS 13 Plus", manufacturer: "Dell", model: "XPS 13 Plus", type: "laptop", msrp: 1499, releaseDate: "2023-01-01", specs: { display: '13.4" OLED', chip: "Intel Core i7-1360P", ram: "16/32 GB", storage: "512 GB-1 TB", battery: "12 Stunden", weight: "1.17 kg" } },
+  { name: "Lenovo ThinkPad X1 Carbon", manufacturer: "Lenovo", model: "X1 Carbon Gen 11", type: "laptop", msrp: 1699, releaseDate: "2023-03-01", specs: { display: '14" IPS', chip: "Intel Core i7-1355U", ram: "16/32 GB", storage: "512 GB-1 TB", battery: "15 Stunden", weight: "1.12 kg" } },
+  { name: "ASUS ZenBook 14 OLED", manufacturer: "ASUS", model: "UX3402", type: "laptop", msrp: 1299, releaseDate: "2023-03-01", specs: { display: '14" OLED', chip: "Intel Core i7-13700H", ram: "16/32 GB", storage: "512 GB-1 TB", battery: "14 Stunden", weight: "1.39 kg" } },
+  { name: "HP Spectre x360 14", manufacturer: "HP", model: "Spectre x360 14", type: "laptop", msrp: 1499, releaseDate: "2023-04-01", specs: { display: '13.5" OLED', chip: "Intel Core i7-1355U", ram: "16/32 GB", storage: "512 GB-1 TB", battery: "17 Stunden", weight: "1.37 kg" } },
+  { name: "Razer Blade 16", manufacturer: "Razer", model: "Blade 16", type: "laptop", msrp: 2999, releaseDate: "2023-01-01", specs: { display: '16" Mini-LED 240Hz', chip: "Intel Core i9-13950HX", gpu: "RTX 4090", ram: "32 GB", storage: "1 TB", battery: "4 Stunden", weight: "2.25 kg" } },
+
+  // === Beamer / Projektoren ===
+  { name: "Epson EH-TW9400", manufacturer: "Epson", model: "EH-TW9400", type: "projector", msrp: 2999, releaseDate: "2020-06-01", specs: { resolution: "4K PRO-UHD", brightness: "2600 Lumens", contrast: "1200000:1", lens: "Motorisiert", connectivity: "HDMI 2.0" } },
+  { name: "BenQ X300G", manufacturer: "BenQ", model: "X300G", type: "projector", msrp: 1499, releaseDate: "2023-03-01", specs: { resolution: "1080p", brightness: "2000 Lumens", contrast: "500000:1", technology: "DLP", latency: "4ms", smart: "Android TV" } },
+  { name: "XGIMI Horizon Pro", manufacturer: "XGIMI", model: "Horizon Pro", type: "projector", msrp: 1699, releaseDate: "2021-09-01", specs: { resolution: "4K", brightness: "2200 Lumens", contrast: "1000000:1", androidTV: "Ja", speakers: "Harman Kardon" } },
+  { name: "Samsung The Freestyle", manufacturer: "Samsung", model: "The Freestyle", type: "projector", msrp: 799, releaseDate: "2022-01-01", specs: { resolution: "1080p", brightness: "550 Lumens", size: "Tragbar", smart: "Tizen", rotation: "360°" } },
+
+  // === Fitnessarmbänder ===
+  { name: "Fitbit Charge 6", manufacturer: "Fitbit", model: "Charge 6", type: "fitness-tracker", msrp: 159, releaseDate: "2023-09-01", specs: { display: '1.04" AMOLED', battery: "7 Tage", gps: "Integriert", heartRate: "Ja", waterResistance: "50 m" } },
+  { name: "Xiaomi Smart Band 8", manufacturer: "Xiaomi", model: "Smart Band 8", type: "fitness-tracker", msrp: 49, releaseDate: "2023-04-01", specs: { display: '1.62" AMOLED', battery: "16 Tage", gps: "Nein", heartRate: "Ja", waterResistance: "5 ATM" } },
+  { name: "Garmin Vivosmart 5", manufacturer: "Garmin", model: "Vivosmart 5", type: "fitness-tracker", msrp: 149, releaseDate: "2022-04-01", specs: { display: '0.86" OLED', battery: "7 Tage", gps: "Mit Telefon", heartRate: "Ja", waterResistance: "5 ATM" } },
+  { name: "Whoop 4.0", manufacturer: "Whoop", model: "4.0", type: "fitness-tracker", msrp: 239, releaseDate: "2021-09-01", specs: { display: "Kein Display", battery: "5 Tage", gps: "Mit Telefon", heartRate: "Ja", subscription: "Whoop Membership" } },
+
+  // === Powerbanks ===
+  { name: "Anker 737 PowerCore 24K", manufacturer: "Anker", model: "A1289", type: "powerbank", msrp: 149, releaseDate: "2022-09-01", specs: { capacity: "24000 mAh", output: "140W", input: "140W", ports: "2x USB-C, 1x USB-A", display: "Digital" } },
+  { name: "Belkin BoostCharge Pro 20000mAh", manufacturer: "Belkin", model: "BPB012", type: "powerbank", msrp: 129, releaseDate: "2023-01-01", specs: { capacity: "20000 mAh", output: "65W", input: "65W", ports: "2x USB-C", fastCharge: "PD 3.0" } },
+  { name: "Xiaomi Power Bank 3 Pro", manufacturer: "Xiaomi", model: "PB2050SZM", type: "powerbank", msrp: 59, releaseDate: "2021-08-01", specs: { capacity: "20000 mAh", output: "50W", input: "50W", ports: "2x USB-A, 1x USB-C", quickCharge: "QC 4.0" } },
+  { name: "Ugreen Nexode Power Bank 20000mAh", manufacturer: "Ugreen", model: "145W", type: "powerbank", msrp: 99, releaseDate: "2023-06-01", specs: { capacity: "20000 mAh", output: "145W", input: "100W", ports: "2x USB-C, 1x USB-A", display: "LED" } },
+
+  // === Elektrische Zahnbürsten ===
+  { name: "Oral-B iO Series 9", manufacturer: "Oral-B", model: "iO9", type: "electric-toothbrush", msrp: 299, releaseDate: "2022-09-01", specs: { type: "Magnetisch", modes: "7", pressureSensor: "Ja", display: "Color Display", battery: "2 Wochen" } },
+  { name: "Philips Sonicare DiamondClean 9000", manufacturer: "Philips", model: "HX9911/94", type: "electric-toothbrush", msrp: 249, releaseDate: "2021-08-01", specs: { type: "Sonic", modes: "4", pressureSensor: "Ja", app: "Sonicare App", battery: "3 Wochen" } },
+  { name: "Oral-B Genius X", manufacturer: "Oral-B", model: "Genius X", type: "electric-toothbrush", msrp: 199, releaseDate: "2020-01-01", specs: { type: "Rotation-Oszillation", modes: "6", pressureSensor: "Ja", AI: "Ja", battery: "2 Wochen" } },
+  { name: "Philips Sonicare ProtectiveClean 6100", manufacturer: "Philips", model: "HX6877/29", type: "electric-toothbrush", msrp: 129, releaseDate: "2020-03-01", specs: { type: "Sonic", modes: "3", pressureSensor: "Ja", brushSync: "Ja", battery: "2 Wochen" } },
 
   // === Smart Home (mehr) ===
   { name: "Amazon Echo Dot 5", manufacturer: "Amazon", model: "Echo Dot 5", type: "smart-speaker", msrp: 59, releaseDate: "2022-10-20", specs: { display: "Nein", alexa: "Ja", speaker: "1.7 Zoll", audio: "3.5 mm", smartHome: "Matter, Zigbee" } },

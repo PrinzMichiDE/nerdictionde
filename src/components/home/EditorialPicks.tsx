@@ -13,65 +13,42 @@ export function EditorialPicks({ reviews }: EditorialPicksProps) {
   if (picks.length === 0) return null;
 
   return (
-    <section className="space-y-6">
-      <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <h2 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl">
-          Redaktionstipps
-        </h2>
+    <section className="magazine-picks magazine-section" aria-labelledby="picks-title">
+      <header className="magazine-section-header">
+        <h2 id="picks-title" className="magazine-section-title">Redaktionstipps</h2>
         <Link
           href="/reviews?sort=score"
-          className="rounded-sm text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="magazine-section-link"
         >
           Alle Bestbewerteten
+          <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
-      </div>
+      </header>
 
-      <ol className="border-t border-border">
+      <ol className="magazine-picks-list" role="list" aria-label="Top 3 Redaktionstipps">
         {picks.map((review, index) => {
           const style = getCategoryStyle(review.category);
 
           return (
-            <li key={review.id} className="border-b border-border">
-              <Link
-                href={`/reviews/${review.slug}`}
-                aria-label={`Platz ${index + 1}: ${review.title}, ${review.score} von 100`}
-                className="pick-row group block"
-              >
-                <span
-                  className="pick-index font-serif font-semibold tabular-nums text-muted-foreground"
-                  aria-hidden="true"
-                >
-                  {index + 1}
+            <li key={review.id} className="magazine-pick">
+              <span className="magazine-pick-rank" aria-label={`Platz ${index + 1}`}>
+                {index + 1}
+              </span>
+
+              <div className="magazine-pick-content">
+                <span className="magazine-pick-category" style={{ color: style.color }}>
+                  {style.label}
                 </span>
+                <h3 className="magazine-pick-title">{review.title}</h3>
+                <p className="magazine-pick-verdict">{getVerdict(review.score)}</p>
+              </div>
 
-                <div className="min-w-0 flex-1">
-                  <span className="kicker text-[0.6875rem]" style={{ color: style.color }}>
-                    {style.label}
-                  </span>
-                  <h3
-                    className="mt-0.5 line-clamp-1 font-serif text-lg font-semibold leading-snug md:text-xl"
-                    title={review.title}
-                  >
-                    {review.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {getVerdict(review.score)}
-                  </p>
-                </div>
-
-                <div className="text-right">
-                  <span
-                    className="font-serif text-2xl font-semibold tabular-nums"
-                    style={{ color: getScoreColor(review.score) }}
-                  >
-                    {review.score}
-                  </span>
-                  <span className="block text-xs text-muted-foreground">von 100</span>
-                </div>
-
-                <ArrowRight className="pick-arrow size-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                <span className="pick-rule" aria-hidden="true" />
-              </Link>
+              <div className="magazine-pick-score">
+                <span className="magazine-pick-score-value" style={{ color: getScoreColor(review.score) }}>
+                  {review.score}
+                </span>
+                <span className="magazine-pick-score-label">von 100</span>
+              </div>
             </li>
           );
         })}

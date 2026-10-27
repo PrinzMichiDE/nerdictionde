@@ -1,0 +1,126 @@
+🚀 Starting creation of 5000 forum posts with random replies...
+Using humanizer for all text content
+
+📝 Generating 1667 threads for category: gaming...
+(node:45728) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+RAW START: {
+  "threads": [
+    {
+      "title": "Ist Elden R
+CLEANED START: {
+  "threads": [
+    {
+      "title": "Ist Elden R
+JSON LEN: 8003
+JSON parse error for threads: SyntaxError: Expected ',' or ']' after array element in JSON at position 8003 (line 98 column 6)
+    at JSON.parse (<anonymous>)
+    at generateThreadsForCategory (E:\Projects\nerdictionde\src\lib\forum-generation.ts:231:27)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumThreads (E:\Projects\nerdictionde\src\lib\forum-generation.ts:383:21)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:28:22)
+✅ Created 0 threads in gaming
+💬 Adding random replies to threads in gaming...
+JSON parse error for comments: SyntaxError: Unexpected token 'H', "Here's a t"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at generateCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:333:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:481:22)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:47:33)
+   +0 replies on "Warum verschwinden die Community Mods so langsam?..."
+JSON parse error for comments: SyntaxError: Unexpected token 'H', "Here's a t"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at generateCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:333:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:481:22)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:47:33)
+   +0 replies on "Gibt es noch Spiele ohne tägliches Event-Schema?..."
+JSON parse error for comments: SyntaxError: Unexpected token 'H', "Here's a t"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at generateCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:333:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:481:22)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:47:33)
+   +0 replies on "Bin ich der Einzige der langsam das Abo-Modell has..."
+JSON parse error for comments: SyntaxError: Unexpected token 'H', "Here's a t"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at generateCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:333:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:481:22)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:47:33)
+   +0 replies on "Warum wagt kein Publisher eigentlich noch Risiken?..."
+JSON parse error for comments: SyntaxError: Unexpected token 'H', "Here's a t"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at generateCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:333:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:481:22)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:47:33)
+   +0 replies on "Warum kriegen wir für 80 Euro noch immer Alpha-Sta..."
+JSON parse error for comments: SyntaxError: Unexpected non-whitespace character after JSON at position 165 (line 9 column 4)
+    at JSON.parse (<anonymous>)
+    at generateCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:333:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:481:22)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:47:33)
+   +3 replies on "......"
+JSON parse error for comments: SyntaxError: Unexpected token 'H', "Here's a t"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at generateCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:333:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:481:22)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:47:33)
+   +0 replies on "Open World Games sind doch alle gleich geworden..."
+JSON parse error for comments: SyntaxError: Unexpected token 'H', "Here's a t"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at generateCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:333:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumCommentsForThread (E:\Projects\nerdictionde\src\lib\forum-generation.ts:481:22)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:47:33)
+   +0 replies on "Warum fühlen sich neue Open Worlds immer an wie Ar..."
+   +1 replies on "Warum verschwindet Local Multiplayer komplett?..."
+
+📝 Generating 1667 threads for category: movies...
+RAW START: Thinking Process:
+
+1.  **Deconstruct the Request:*
+CLEANED START: {
+          "threads": [
+            { "title": ".
+JSON LEN: 147
+JSON parse error for threads: SyntaxError: Unexpected token '.', ..."          ...
+      "... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at generateThreadsForCategory (E:\Projects\nerdictionde\src\lib\forum-generation.ts:231:27)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumThreads (E:\Projects\nerdictionde\src\lib\forum-generation.ts:383:21)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:28:22)
+Second parse attempt failed: SyntaxError: Unexpected token '.', ..."          ...
+      "... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at generateThreadsForCategory (E:\Projects\nerdictionde\src\lib\forum-generation.ts:257:33)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumThreads (E:\Projects\nerdictionde\src\lib\forum-generation.ts:383:21)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:28:22)
+✅ Created 0 threads in movies
+💬 Adding random replies to threads in movies...
+
+📝 Generating 1666 threads for category: series...
+RAW START: Here's a thinking process:
+
+1.  **Analyze User Inp
+CLEANED START: Here's a thinking process:
+
+1.  **Analyze User Inp
+JSON LEN: 13287
+JSON parse error for threads: SyntaxError: Unexpected token 'H', "Here's a t"... is not valid JSON
+    at JSON.parse (<anonymous>)
+    at generateThreadsForCategory (E:\Projects\nerdictionde\src\lib\forum-generation.ts:231:27)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateForumThreads (E:\Projects\nerdictionde\src\lib\forum-generation.ts:383:21)
+    at async main (E:\Projects\nerdictionde\scripts\create-5000-forum-posts.ts:28:22)
+✅ Created 0 threads in series
+💬 Adding random replies to threads in series...
+
+✨ Generation complete!
+📊 Total forum posts (threads) created: 0
+💬 Total replies (comments) added: 4

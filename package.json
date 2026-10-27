@@ -19,6 +19,7 @@
     "create-500-game-reviews": "tsx scripts/create-500-game-reviews.ts",
     "create-series-reviews": "tsx scripts/create-500-series-reviews.ts",
     "create-movie-reviews": "tsx scripts/create-500-movie-reviews.ts",
+    "mass-create-reviews": "tsx scripts/mass-create-reviews.ts",
     "regenerate-movie-series": "tsx scripts/regenerate-movie-series-content.ts",
     "regenerate-review-content": "tsx scripts/regenerate-review-content.ts",
     "news:sync": "tsx scripts/generate-news.ts",

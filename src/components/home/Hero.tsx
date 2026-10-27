@@ -15,101 +15,100 @@ export function Hero({ latest, stats }: HeroProps) {
   const category = latest ? getCategoryStyle(latest.category) : null;
 
   return (
-    <section className="relative border-b border-border pb-12 md:pb-16">
-      <div className="relative z-10 grid items-end gap-10 lg:grid-cols-12 lg:gap-12">
-        <div className="lg:col-span-7">
-          <h1 className="font-serif text-5xl font-semibold leading-[1.02] tracking-tight text-balance sm:text-6xl lg:text-7xl xl:text-[5.5rem]">
-            Ehrliche Produkttests.
-          </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-            Wir testen Games, Filme, Serien und Hardware und legen jede Wertung
-            offen.
-          </p>
+    <section className="magazine-hero magazine-section relative" aria-labelledby="hero-title">
+      <div className="magazine-hero-content" id="hero-title">
+        <span className="magazine-hero-badge">Editorial</span>
+        <h1 className="magazine-hero-title">Ehrliche Produkttests.</h1>
+        <p className="magazine-hero-lede">
+          Wir testen Games, Filme, Serien und Hardware und legen jede Wertung
+          offen. Unabhängig, transparent und mit System.
+        </p>
 
-          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
-            <Button asChild size="lg" className="h-12 rounded-full px-7 text-base font-semibold">
-              <Link href="/reviews" className="group inline-flex items-center gap-2">
-                Alle Tests lesen
-                <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" />
-              </Link>
-            </Button>
-            <Link
-              href="#so-testen-wir"
-              className="rounded-sm text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              So werten wir
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+          <Button asChild size="lg" className="h-12 rounded-full px-7 text-base font-semibold">
+            <Link href="/reviews" className="group inline-flex items-center gap-2">
+              Alle Tests lesen
+              <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" />
             </Link>
-          </div>
-
-          {stats.length > 0 && (
-            <dl className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-sm border border-border bg-border sm:grid-cols-4">
-              {stats.map((stat) => (
-                <div key={stat.label} className="bg-background px-4 py-3">
-                  <dt className="text-xs text-muted-foreground">{stat.label}</dt>
-                  <dd className="mt-1 font-serif text-2xl font-semibold tabular-nums">
-                    {stat.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          )}
+          </Button>
+          <Link
+            href="#so-testen-wir"
+            className="magazine-section-link"
+          >
+            So werten wir
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
         </div>
 
-        {latest && category && (
-          <div className="lg:col-span-5">
-            <Link
-              href={`/reviews/${latest.slug}`}
-              className="group block overflow-hidden rounded-sm border border-border bg-card transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                {image ? (
-                  <Image
-                    src={image}
-                    alt={latest.title}
-                    fill
-                    priority
-                    unoptimized
-                    sizes="(max-width: 1024px) 100vw, 40vw"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                    Kein Bild
-                  </div>
-                )}
+        {stats.length > 0 && (
+          <dl className="magazine-hero-stats" role="list" aria-label="Statistiken">
+            {stats.map((stat) => (
+              <div key={stat.label} className="magazine-stat">
+                <dd className="magazine-stat-value">{stat.value}</dd>
+                <dt className="magazine-stat-label">{stat.label}</dt>
               </div>
-
-              <div className="flex items-start justify-between gap-4 p-5">
-                <div className="min-w-0">
-                  <span className="text-xs text-muted-foreground">
-                    Zuletzt getestet:{" "}
-                    <span style={{ color: category.color }}>{category.label}</span>
-                  </span>
-                  <h2 className="mt-1 font-serif text-2xl font-semibold leading-snug text-balance">
-                    {latest.title}
-                  </h2>
-                </div>
-                <div className="shrink-0 text-right">
-                  <span
-                    className="font-serif text-2xl font-semibold tabular-nums"
-                    style={{ color: getScoreColor(latest.score) }}
-                  >
-                    {latest.score}
-                  </span>
-                  <span className="block text-xs text-muted-foreground">
-                    {getVerdict(latest.score)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between border-t border-border px-5 py-3 text-sm">
-                <span className="font-medium">Test lesen</span>
-                <ArrowRight className="size-4 text-muted-foreground" />
-              </div>
-            </Link>
-          </div>
+            ))}
+          </dl>
         )}
       </div>
+
+      {latest && category && (
+        <div className="magazine-hero-featured">
+          <Link
+            href={`/reviews/${latest.slug}`}
+            className="magazine-featured-card group block"
+            aria-label={`${latest.title}, ${latest.score} von 100`}
+          >
+            <div className="magazine-featured-image relative aspect-[16/9] overflow-hidden bg-muted">
+              {image ? (
+                <Image
+                  src={image}
+                  alt={latest.title}
+                  fill
+                  priority
+                  unoptimized
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                  Kein Bild
+                </div>
+              )}
+              <span className="magazine-featured-category" style={{ background: category.color }}>
+                {category.label}
+              </span>
+            </div>
+
+            <div className="magazine-featured-content">
+              <div className="magazine-featured-meta">
+                <time dateTime={new Date(latest.createdAt).toISOString()} className="text-xs">
+                  {new Date(latest.createdAt).toLocaleDateString("de-DE", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </time>
+              </div>
+              <h2 className="magazine-featured-title">{latest.title}</h2>
+
+              <div className="magazine-featured-footer">
+                <div className="magazine-featured-score">
+                  <span className="magazine-featured-score-value" style={{ color: getScoreColor(latest.score) }}>
+                    {latest.score}
+                  </span>
+                  <span className="magazine-featured-score-label">von 100</span>
+                </div>
+                <span className="magazine-featured-verdict">{getVerdict(latest.score)}</span>
+                <span className="magazine-featured-read">
+                  Test lesen
+                  <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" />
+                </span>
+              </div>
+            </div>
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

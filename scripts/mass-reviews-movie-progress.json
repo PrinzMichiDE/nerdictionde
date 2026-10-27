@@ -1,0 +1,60 @@
+{
+  "category": "movie",
+  "target": 50,
+  "processed": 12,
+  "successful": 12,
+  "failed": 0,
+  "skipped": 0,
+  "lastProcessedIndex": 10,
+  "successfulItems": [
+    {
+      "name": "Nightmare Before Christmas",
+      "reviewId": "cmvqzca530000mmgg5n79x3uj"
+    },
+    {
+      "name": "Toy Story 5",
+      "reviewId": "cmvqzitsz0001mmggloeryhcm"
+    },
+    {
+      "name": "Obsession – Du sollst mich lieben",
+      "reviewId": "cmvr02y5f000cmmgg3r6q00hj"
+    },
+    {
+      "name": "Disclosure Day – Der Tag der Wahrheit",
+      "reviewId": "cmvr10125001kmmgg26xy08c7"
+    },
+    {
+      "name": "Vaiana",
+      "reviewId": "cmvr174iq001lmmggjie49gm0"
+    },
+    {
+      "name": "Krieg der Welten",
+      "reviewId": "cmvr271yq001ummgg8ahfwpni"
+    },
+    {
+      "name": "Coco - Lebendiger als das Leben!",
+      "reviewId": "cmvr3w4i0001ymmggo4gcy51i"
+    },
+    {
+      "name": "Runner",
+      "reviewId": "cmvr4b92b001zmmgg9cfvkhck"
+    },
+    {
+      "name": "Mutiny",
+      "reviewId": "cmvr4bbcr0020mmgg9p84x0ck"
+    },
+    {
+      "name": "Digger",
+      "reviewId": "cmvr6dx9y002dmmgg5pxl2cgt"
+    },
+    {
+      "name": "Tad Stones und die Wunderlampe",
+      "reviewId": "cmvr6n3l3002emmggvxjqsu2w"
+    },
+    {
+      "name": "Colony",
+      "reviewId": "cmvr72sdy002fmmggpk2u64zz"
+    }
+  ],
+  "failedItems": []
+}

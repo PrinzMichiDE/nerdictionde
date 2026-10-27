@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import type { Review } from "@/types/review";
-import { ReviewCard } from "@/components/reviews/ReviewCard";
+
 import { getCategoryStyle } from "@/lib/review-category";
 import { ArrowRight } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -41,7 +42,21 @@ export function HomeReviews({ reviews }: { reviews: Review[] }) {
 
   if (visible.length === 0) {
     return (
-      <section className="space-y-8">
+      <section
+        className="magazine-section magazine-reveal"
+        style={{ "--reveal-delay": "200ms" } as React.CSSProperties}
+        aria-labelledby="reviews-title"
+      >
+        <header className="magazine-section-header">
+          <h2 id="reviews-title" className="magazine-section-title">Alle Tests</h2>
+          <Link
+            href="/reviews"
+            className="magazine-section-link"
+          >
+            Alle Reviews
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </header>
         <EmptyState
           title="Keine Tests in dieser Kategorie"
           description="Versuche es mit einer anderen Kategorie oder sieh dir alle Tests an."
@@ -58,78 +73,78 @@ export function HomeReviews({ reviews }: { reviews: Review[] }) {
   }
 
   return (
-    <section className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <section
+      className="magazine-section magazine-reveal"
+      style={{ "--reveal-delay": "200ms" } as React.CSSProperties}
+      aria-labelledby="reviews-title"
+    >
+      <header className="magazine-section-header">
         <div>
-          <h2 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl">
-            Alle Tests
-          </h2>
-          <p className="mt-2 max-w-xl text-muted-foreground">
+          <h2 id="reviews-title" className="magazine-section-title">Alle Tests</h2>
+          <p className="magazine-section-desc mt-2">
             Filtere nach Kategorie und sortiere nach Datum oder Wertung.
           </p>
         </div>
         <Link
           href="/reviews"
-          className="group inline-flex items-center gap-1.5 rounded-sm text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="magazine-section-link"
         >
           Alle Reviews
-          <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+          <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
-      </div>
+      </header>
 
-      <div className="filter-bar sticky top-20 z-20">
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-y border-border py-3">
-          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Kategorie">
-            <FilterButton
-              active={category === "all"}
-              color="var(--foreground)"
-              onClick={() => setCategory("all")}
-              label="Alle"
-              count={reviews.length}
-            />
-            {categories.map(([value, count]) => {
-              const style = getCategoryStyle(value);
-              return (
-                <FilterButton
-                  key={value}
-                  active={category === value}
-                  color={style.color}
-                  onClick={() => setCategory(value)}
-                  label={style.label}
-                  count={count}
-                />
-              );
-            })}
-          </div>
-
-          <div className="flex items-center gap-1.5" role="group" aria-label="Sortierung">
-            {sorts.map((option) => (
-              <FilterButton
-                key={option.value}
-                active={sort === option.value}
-                color="var(--foreground)"
-                onClick={() => setSort(option.value)}
-                label={option.label}
+      <div className="magazine-filter-bar" role="search" aria-label="Tests filtern">
+        <div className="magazine-filter-group" role="group" aria-label="Kategorie">
+          <MagazineFilterButton
+            active={category === "all"}
+            color="var(--foreground)"
+            onClick={() => setCategory("all")}
+            label="Alle"
+            count={reviews.length}
+          />
+          {categories.map(([value, count]) => {
+            const style = getCategoryStyle(value);
+            return (
+              <MagazineFilterButton
+                key={value}
+                active={category === value}
+                color={style.color}
+                onClick={() => setCategory(value)}
+                label={style.label}
+                count={count}
               />
-            ))}
-          </div>
+            );
+          })}
+        </div>
+
+        <div className="magazine-filter-group" role="group" aria-label="Sortierung">
+          {sorts.map((option) => (
+            <MagazineFilterButton
+              key={option.value}
+              active={sort === option.value}
+              color="var(--foreground)"
+              onClick={() => setSort(option.value)}
+              label={option.label}
+            />
+          ))}
         </div>
       </div>
 
-      <p className="sr-only" role="status">
+      <p className="sr-only" role="status" aria-live="polite">
         {visible.length} {visible.length === 1 ? "Test" : "Tests"} angezeigt
       </p>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="magazine-review-grid" role="list" aria-label="Testübersicht">
         {visible.map((review) => (
-          <ReviewCard key={review.id} review={review} />
+          <MagazineReviewCard key={review.id} review={review} />
         ))}
       </div>
     </section>
   );
 }
 
-function FilterButton({
+function MagazineFilterButton({
   active,
   color,
   onClick,
@@ -148,13 +163,62 @@ function FilterButton({
       onClick={onClick}
       aria-pressed={active}
       data-active={active}
-      className="filter-tab"
+      className="magazine-filter-btn"
       style={{ "--tab-color": color } as React.CSSProperties}
     >
       {label}
       {count !== undefined && (
-        <span className="filter-tab-count tabular-nums opacity-60">{count}</span>
+        <span className="magazine-filter-count tabular-nums opacity-60">{count}</span>
       )}
     </button>
+  );
+}
+
+function MagazineReviewCard({ review }: { review: Review }) {
+  const image = review.images?.[0];
+  const style = getCategoryStyle(review.category);
+  const catColor = style.color;
+
+  return (
+    <Link href={`/reviews/${review.slug}`} className="magazine-review-card group block" aria-label={`${review.title}, ${review.score} von 100`}>
+      <div className="magazine-review-image relative aspect-[16/9] overflow-hidden bg-muted">
+        {image ? (
+          <Image
+            src={image}
+            alt={review.title}
+            fill
+            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+            className="object-cover"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+            Kein Bild
+          </div>
+        )}
+        <span className="magazine-review-category" style={{ background: catColor }}>
+          {style.label}
+        </span>
+      </div>
+
+      <div className="magazine-review-content">
+        <h3 className="magazine-review-title">{review.title}</h3>
+
+        <div className="magazine-review-meta">
+          <span
+            className="magazine-review-score"
+            style={{
+              color: catColor,
+              borderColor: `color-mix(in oklab, ${catColor} 30%, transparent)`,
+              background: `color-mix(in oklab, ${catColor} 12%, transparent)`,
+            } as React.CSSProperties}
+          >
+            {review.score}
+          </span>
+          <span className="magazine-review-verdict">
+            {review.category === "game" ? "Game" : review.category === "movie" ? "Film" : review.category === "series" ? "Serie" : "Hardware"}
+          </span>
+        </div>
+      </div>
+    </Link>
   );
 }

@@ -1,0 +1,843 @@
+
+> nerdiction@0.1.0 mass-create-reviews
+> tsx scripts/mass-create-reviews.ts
+
+🚀 Massenerstellung von Reviews – Kategorien: hardware
+   Ziel pro Kategorie: 20 | Status: draft | Batch: 1
+   Hinweis: "amazon" wird nicht unterstützt (kein Prozessor/Datenquelle).
+============================================================
+
+🔧 Kategorie: Hardware (Katalog)
+(node:29528) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✅ 266 neue Hardware-Produkte als Kandidaten ausgewählt
+
+📦 hardware: 1-1 von 266 (Ziel: 0/20)
+🔍 Searching Tavily for hardware iPhone 15 Pro Max...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for iPhone 15 Pro Max...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Error generating OpenAI image 1 for iPhone 15 Pro Max: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 17:56:35 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for iPhone 15 Pro Max: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 17:56:37 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for iPhone 15 Pro Max: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 17:56:39 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ iPhone 15 Pro Max (1/20)
+   ⏱️  Erfolgreich: 1/20 | ETA: ~243 min
+
+📦 hardware: 2-2 von 266 (Ziel: 1/20)
+🔍 Searching Tavily for hardware iPhone 15 Pro...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+✅ Generated Q&A for review cmvqzm8ez0001mms8nqhlgcxe
+Error in generation for iPhone 15 Pro, retrying... APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateContent (E:\Projects\nerdictionde\src\lib\review-generation.ts:250:24)
+    at async generateHardwareReviewContent (E:\Projects\nerdictionde\src\lib\review-generation.ts:1174:20)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1214:27)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for iPhone 15 Pro...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Error generating OpenAI image 1 for iPhone 15 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 18:24:35 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for iPhone 15 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 18:27:12 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for iPhone 15 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 18:30:27 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ iPhone 15 Pro (2/20)
+   ⏱️  Erfolgreich: 2/20 | ETA: ~419 min
+
+📦 hardware: 3-3 von 266 (Ziel: 2/20)
+🔍 Searching Tavily for hardware iPhone 15...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+No questions generated for review
+Error in generation for iPhone 15, retrying... APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateContent (E:\Projects\nerdictionde\src\lib\review-generation.ts:250:24)
+    at async generateHardwareReviewContent (E:\Projects\nerdictionde\src\lib\review-generation.ts:1174:20)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1214:27)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for iPhone 15...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Error generating OpenAI image 1 for iPhone 15: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 19:07:07 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for iPhone 15: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 19:13:36 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for iPhone 15: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 19:18:11 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ iPhone 15 (3/20)
+   ⏱️  Erfolgreich: 3/20 | ETA: ~558 min
+
+📦 hardware: 4-4 von 266 (Ziel: 3/20)
+🔍 Searching Tavily for hardware Samsung Galaxy S24 Ultra...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+Failed to parse Q&A JSON: SyntaxError: Expected ',' or ']' after array element in JSON at position 4137 (line 29 column 6)
+    at JSON.parse (<anonymous>)
+    at generateAndSaveQAForReview (E:\Projects\nerdictionde\src\lib\qa-generation.ts:142:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+Error in generation for Samsung Galaxy S24 Ultra, retrying... APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateContent (E:\Projects\nerdictionde\src\lib\review-generation.ts:250:24)
+    at async generateHardwareReviewContent (E:\Projects\nerdictionde\src\lib\review-generation.ts:1174:20)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1214:27)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for Samsung Galaxy S24 Ultra...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Error generating OpenAI image 1 for Samsung Galaxy S24 Ultra: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 20:01:05 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for Samsung Galaxy S24 Ultra: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 20:08:27 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for Samsung Galaxy S24 Ultra: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 20:09:05 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ Samsung Galaxy S24 Ultra (4/20)
+   ⏱️  Erfolgreich: 4/20 | ETA: ~589 min
+
+📦 hardware: 5-5 von 266 (Ziel: 4/20)
+🔍 Searching Tavily for hardware Samsung Galaxy S24+...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+No questions generated for review
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for Samsung Galaxy S24+...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Error generating OpenAI image 1 for Samsung Galaxy S24+: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 20:29:01 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for Samsung Galaxy S24+: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 20:35:55 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for Samsung Galaxy S24+: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 20:41:03 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ Samsung Galaxy S24+ (5/20)
+   ⏱️  Erfolgreich: 5/20 | ETA: ~554 min
+
+📦 hardware: 6-6 von 266 (Ziel: 5/20)
+🔍 Searching Tavily for hardware Samsung Galaxy S24...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+Failed to parse Q&A JSON: SyntaxError: Expected ',' or ']' after array element in JSON at position 4906 (line 42 column 6)
+    at JSON.parse (<anonymous>)
+    at generateAndSaveQAForReview (E:\Projects\nerdictionde\src\lib\qa-generation.ts:142:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for Samsung Galaxy S24...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Error generating OpenAI image 1 for Samsung Galaxy S24: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 20:58:32 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for Samsung Galaxy S24: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 20:58:34 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for Samsung Galaxy S24: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 20:58:37 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ Samsung Galaxy S24 (6/20)
+   ⏱️  Erfolgreich: 6/20 | ETA: ~455 min
+
+📦 hardware: 7-7 von 266 (Ziel: 6/20)
+🔍 Searching Tavily for hardware Google Pixel 8 Pro...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+No questions generated for review
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for Google Pixel 8 Pro...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Error generating OpenAI image 1 for Google Pixel 8 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 21:14:02 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for Google Pixel 8 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 21:23:30 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for Google Pixel 8 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 21:25:44 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 1/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:79)
+    at Array.from (<anonymous>)
+    at mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:25)
+    at generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:27)
+    at generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:28)
+    at processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1326:5)
+Comment batch 2/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:79)
+    at Array.from (<anonymous>)
+    at mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:25)
+    at generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:27)
+    at generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:28)
+    at processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1326:5)
+Comment batch 3/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:79)
+    at Array.from (<anonymous>)
+    at mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:25)
+    at generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:27)
+    at generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:28)
+    at processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1326:5)
+   ✅ Google Pixel 8 Pro (7/20)
+Comment batch 4/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 5/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 6/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+   ⏱️  Erfolgreich: 7/20 | ETA: ~424 min
+Comment batch 7/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 8/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 9/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 10/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 11/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 12/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 13/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 14/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 15/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 16/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 17/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 18/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 19/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 20/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 21/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 22/22 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Top-up comment generation failed: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:218:9)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:79)
+    at Array.from (<anonymous>)
+    at mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:25)
+    at generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:33)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Q&A generation failed: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildQAPrompt (E:\Projects\nerdictionde\src\lib\qa-generation.ts:82:26)
+    at generateAndSaveQAForReview (E:\Projects\nerdictionde\src\lib\qa-generation.ts:125:20)
+
+📦 hardware: 8-8 von 266 (Ziel: 7/20)
+🔍 Searching Tavily for hardware Google Pixel 8...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative

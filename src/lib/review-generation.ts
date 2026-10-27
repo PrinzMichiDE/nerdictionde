@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import openai, { OPENAI_MODEL } from "@/lib/openai";
 import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
+import { generateAndSaveQAForReview } from "@/lib/qa-generation";
 import { uploadImage } from "@/lib/blob";
 import { calculatePublicationDate } from "@/lib/date-utils";
 import { TMDBMovie, TMDBSeries, getTMDBImageUrl, getTMDBMovieById, getTMDBSeriesById } from "@/lib/tmdb";
@@ -940,6 +941,14 @@ export async function processGame(
       category: "game",
     }).catch((e) => console.warn("Comment generation for game review failed:", e));
 
+    generateAndSaveQAForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      score: reviewContent.score,
+      pros: reviewContent.de.pros,
+      cons: reviewContent.de.cons,
+      category: "game",
+    }).catch((e) => console.warn("Q&A generation for game review failed:", e));
+
     generateAndAttachTagsForReview(review.id, {
       reviewTitle: reviewContent.de.title,
       category: "game",
@@ -977,6 +986,7 @@ const HARDWARE_TYPE_LABELS: Record<string, string> = {
   speaker: "Lautsprecher",
   "robot-vacuum": "Saugroboter",
   smartwatch: "Smartwatch",
+  "fitness-tracker": "Fitnessarmband",
   ev: "Elektromobil",
   drone: "Drohne",
   "3d-printer": "3D-Drucker",
@@ -1004,8 +1014,10 @@ const HARDWARE_TYPE_LABELS: Record<string, string> = {
   "heads-up-display": "HUD",
   "building-set": "Klemmbaustein-Set",
   tablet: "Tablet",
+  laptop: "Laptop",
   "vr-headset": "VR-Headset",
   tv: "Fernseher",
+  projector: "Beamer",
   "vacuum-cleaner": "Staubsauger",
   "air-purifier": "Luftreiniger",
   "smart-lighting-strip": "LED-Streifen",
@@ -1013,11 +1025,14 @@ const HARDWARE_TYPE_LABELS: Record<string, string> = {
   "hair-dryer": "Haartrockner",
   epilator: "Epilierer",
   shaver: "Rasierer",
+  "electric-toothbrush": "Elektrische Zahnbürste",
+  "powerbank": "Powerbank",
   "air-fryer": "Heißluftfritteuse",
   "smart-speaker": "Smart Speaker",
   "smart-thermostat": "Smart Thermostat",
   "cycling-accessories": "Fahrradzubehör",
   "outdoor-gear": "Outdoor-Ausrüstung",
+  gadget: "Gadget",
 };
 
 /**
@@ -1033,6 +1048,8 @@ interface HardwareData {
   msrp?: number | null;
   specs?: Prisma.JsonValue;
   images?: string[];
+  /** Offizielle Produktbild-URL des Herstellers (z. B. Produktfoto von der Hersteller-Website). */
+  image?: string;
 }
 
 export async function generateHardwareReviewContent(
@@ -1208,31 +1225,57 @@ export async function processHardware(
       slug = `${generateSlug(baseName)}-${Math.random().toString(36).substring(2, 7)}`;
     }
 
-    // Generate images (Tavily first, then DALL-E fallback)
+    // Generate images: official manufacturer images first, AI only as last resort
     let imageUrls: string[] = [];
-    let tavilyResults: TavilySearchResponse | null = null;
-    try {
-      tavilyResults = await searchHardwareProduct(hardwareData.name || "Unbekanntes Produkt", hardwareData.manufacturer || "");
-    } catch {
-      // non-blocking
+
+    // 1. Offizielles Hersteller-Produktbild aus dem Katalog (priorisiert)
+    if (hardwareData.image) {
+      try {
+        const syncedUrl = await uploadImage(hardwareData.image, `${slug}-official.jpg`);
+        imageUrls.push(syncedUrl);
+      } catch (error) {
+        console.warn(`⚠️  Could not upload official image for ${hardwareData.name}:`, error);
+        imageUrls.push(hardwareData.image);
+      }
     }
 
-    try {
-      imageUrls = await generateReviewImages({
-        productName: hardwareData.name || "Unbekanntes Produkt",
-        productType: HARDWARE_TYPE_LABELS[hardwareData.type || "hardware"] || "Hardware",
-        manufacturer: hardwareData.manufacturer || "",
-        style: "professional",
-        count: 4,
-        tavilySearchResults: tavilyResults || undefined,
-      });
-    } catch (error) {
-      console.warn(`⚠️  Image generation failed for ${hardwareData.name}:`, error);
-    }
-
-    // Also try to reuse existing product images from the Hardware table
+    // 2. Bestehende Produktbilder aus der Hardware-Tabelle (falls vorhanden)
     if (hardwareData.images && Array.isArray(hardwareData.images) && hardwareData.images.length > 0) {
-      imageUrls = [...hardwareData.images, ...imageUrls].slice(0, 6);
+      for (const imgUrl of hardwareData.images) {
+        if (imageUrls.length >= 6) break;
+        try {
+          const syncedUrl = await uploadImage(imgUrl, `${slug}-product-${imageUrls.length + 1}.jpg`);
+          imageUrls.push(syncedUrl);
+        } catch {
+          imageUrls.push(imgUrl);
+        }
+      }
+    }
+
+    // 3. Tavily-Recherche für echte Produktbilder (keine KI-Generierung)
+    let tavilyResults: TavilySearchResponse | null = null;
+    if (imageUrls.length === 0) {
+      try {
+        tavilyResults = await searchHardwareProduct(hardwareData.name || "Unbekanntes Produkt", hardwareData.manufacturer || "");
+      } catch {
+        // non-blocking
+      }
+    }
+
+    // 4. DALL-E nur als letzter Fallback, wenn überhaupt keine echten Bilder vorhanden sind
+    if (imageUrls.length === 0) {
+      try {
+        imageUrls = await generateReviewImages({
+          productName: hardwareData.name || "Unbekanntes Produkt",
+          productType: HARDWARE_TYPE_LABELS[hardwareData.type || "hardware"] || "Hardware",
+          manufacturer: hardwareData.manufacturer || "",
+          style: "professional",
+          count: 4,
+          tavilySearchResults: tavilyResults || undefined,
+        });
+      } catch (error) {
+        console.warn(`⚠️  AI image generation failed for ${hardwareData.name}:`, error);
+      }
     }
 
     const contentDe = replaceImagePlaceholders(reviewContent.de.content, imageUrls, hardwareData.name);
@@ -1287,6 +1330,14 @@ export async function processHardware(
       cons: reviewContent.de.cons,
       category: "hardware",
     }).catch((e) => console.warn("Comment generation for hardware review failed:", e));
+
+    generateAndSaveQAForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      score: reviewContent.score,
+      pros: reviewContent.de.pros,
+      cons: reviewContent.de.cons,
+      category: "hardware",
+    }).catch((e) => console.warn("Q&A generation for hardware review failed:", e));
 
     generateAndAttachTagsForReview(review.id, {
       reviewTitle: reviewContent.de.title,
@@ -1465,6 +1516,14 @@ export async function enrichAndPublishDraftGameReview(
       cons: reviewContent.de.cons,
       category: "game",
     }).catch((e) => console.warn("Comment generation for draft publish failed:", e));
+
+    generateAndSaveQAForReview(reviewId, {
+      reviewTitle: reviewContent.de.title,
+      score: reviewContent.score,
+      pros: reviewContent.de.pros,
+      cons: reviewContent.de.cons,
+      category: "game",
+    }).catch((e) => console.warn("Q&A generation for draft publish failed:", e));
 
     generateAndAttachTagsForReview(reviewId, {
       reviewTitle: reviewContent.de.title,
@@ -1780,6 +1839,14 @@ export async function processMovie(
       category: "movie",
     }).catch((e) => console.warn("Comment generation for movie review failed:", e));
 
+    generateAndSaveQAForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      score,
+      pros: reviewContent.de.pros,
+      cons: reviewContent.de.cons,
+      category: "movie",
+    }).catch((e) => console.warn("Q&A generation for movie review failed:", e));
+
     generateAndAttachTagsForReview(review.id, {
       reviewTitle: reviewContent.de.title,
       category: "movie",
@@ -1907,6 +1974,14 @@ export async function processSeries(
       cons: reviewContent.de.cons,
       category: "series",
     }).catch((e) => console.warn("Comment generation for series review failed:", e));
+
+    generateAndSaveQAForReview(review.id, {
+      reviewTitle: reviewContent.de.title,
+      score: reviewContent.score,
+      pros: reviewContent.de.pros,
+      cons: reviewContent.de.cons,
+      category: "series",
+    }).catch((e) => console.warn("Q&A generation for series review failed:", e));
 
     generateAndAttachTagsForReview(review.id, {
       reviewTitle: reviewContent.de.title,

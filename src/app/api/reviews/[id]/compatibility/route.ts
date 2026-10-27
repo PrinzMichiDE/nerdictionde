@@ -1,6 +1,6 @@
 /**
  * API Route: Review Hardware Compatibility Check
- * GET /api/reviews/[slug]/compatibility
+ * GET /api/reviews/[id]/compatibility
  * 
  * Returns compatibility status and FPS estimates for the current user's hardware profile
  * against the review's minimum requirements and benchmarks.
@@ -56,10 +56,11 @@ const fetchCompatibilityData = unstable_cache(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { slug } = await params;
+    // Shared [id] segment: these routes are addressed by review slug.
+    const { id: slug } = await params;
     const session = await getServerSession();
     const userId = session?.userId ?? null;
 

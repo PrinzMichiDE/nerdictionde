@@ -1,0 +1,40 @@
+{
+  "category": "hardware",
+  "target": 20,
+  "processed": 7,
+  "successful": 7,
+  "failed": 0,
+  "skipped": 0,
+  "lastProcessedIndex": 6,
+  "successfulItems": [
+    {
+      "name": "iPhone 15 Pro Max",
+      "reviewId": "cmvqzm8ez0001mms8nqhlgcxe"
+    },
+    {
+      "name": "iPhone 15 Pro",
+      "reviewId": "cmvr0tnvd001amms8c5tvd8w1"
+    },
+    {
+      "name": "iPhone 15",
+      "reviewId": "cmvr2oa4y001fmms8d9x8bbei"
+    },
+    {
+      "name": "Samsung Galaxy S24 Ultra",
+      "reviewId": "cmvr4f16p001kmms8ggy4p9q8"
+    },
+    {
+      "name": "Samsung Galaxy S24+",
+      "reviewId": "cmvr5r776002emms8xzz0i5vz"
+    },
+    {
+      "name": "Samsung Galaxy S24",
+      "reviewId": "cmvr647co002jmms83at4980m"
+    },
+    {
+      "name": "Google Pixel 8 Pro",
+      "reviewId": "cmvr7avpy002omms8r98pk518"
+    }
+  ],
+  "failedItems": []
+}

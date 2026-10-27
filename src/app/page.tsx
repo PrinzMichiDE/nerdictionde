@@ -5,7 +5,7 @@ import { EditorialPicks } from "@/components/home/EditorialPicks";
 import { HomeReviews } from "@/components/home/HomeReviews";
 import { HomeSubscribedCategoryChips } from "@/components/home/HomeSubscribedCategoryChips";
 import { ScoreScale } from "@/components/home/ScoreScale";
-import { SectionHeading } from "@/components/home/SectionHeading";
+
 import { ScrollReveal } from "@/components/home/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -119,7 +119,8 @@ export default async function HomePage() {
   );
 
   return (
-    <div className="relative">
+    <>
+      <div className="magazine-bg" aria-hidden="true" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
@@ -128,7 +129,9 @@ export default async function HomePage() {
       <ScrollReveal variant="up">
         <Hero latest={reviews[0] ?? null} stats={stats} />
       </ScrollReveal>
+
       <HomeSubscribedCategoryChips />
+
       <RecommendationsSection limit={10} />
 
       <div className="mt-16 space-y-20 md:mt-20 md:space-y-28">
@@ -143,8 +146,8 @@ export default async function HomePage() {
             <HomeReviews reviews={reviews} />
           </ScrollReveal>
         ) : (
-          <ScrollReveal variant="fade">
-            <section className="rounded-sm border border-border bg-card p-10 text-center">
+          <ScrollReveal variant="fade" delay={120}>
+            <section className="rounded-lg border border-border bg-card p-10 text-center">
               <h2 className="font-serif text-3xl font-semibold tracking-tight">
                 Die ersten Tests sind in Arbeit
               </h2>
@@ -160,54 +163,51 @@ export default async function HomePage() {
         )}
 
         <ScrollReveal variant="up" delay={160} id="so-testen-wir">
-          <section className="grid scroll-mt-24 gap-10 lg:grid-cols-12 lg:gap-12">
-            <SectionHeading
-              kicker="Methode"
-              title="So testen wir"
-              description="Jede Wertung entsteht nach demselben Ablauf. Wir dokumentieren, was wir geprüft haben, und nennen die Quellen."
-              align="left"
-            />
-            <ol className="mt-8 space-y-6">
+          <section className="magazine-methodology magazine-section" aria-labelledby="method-title">
+            <header className="magazine-section-header">
+              <span className="magazine-kicker">Methode</span>
+              <h2 id="method-title" className="magazine-section-title">So testen wir</h2>
+            </header>
+
+            <div className="magazine-method-steps" role="list" aria-label="Testmethode Schritte">
               {methodSteps.map((step, index) => (
-                <li key={step.title} className="flex gap-4 border-t border-border pt-4">
-                  <span className="font-serif text-2xl font-semibold tabular-nums text-primary">
+                <article key={step.title} className="magazine-method-step" role="listitem">
+                  <span className="magazine-method-number" aria-hidden="true">
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  <div>
-                    <h3 className="font-medium">{step.title}</h3>
-                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                      {step.text}
-                    </p>
+                  <div className="magazine-method-content">
+                    <h3 className="magazine-method-title">{step.title}</h3>
+                    <p className="magazine-method-desc">{step.text}</p>
                   </div>
-                </li>
+                </article>
               ))}
-            </ol>
+            </div>
 
-            <p className="mt-6 text-sm text-muted-foreground">
+            <p className="magazine-sources">
               Datenquellen: IGDB, TMDB, Steam und Twitch.
             </p>
 
-            <div className="lg:col-span-7 mt-10 lg:mt-0">
+            <div className="magazine-score-distribution">
               <ScoreScale reviews={reviews} />
             </div>
           </section>
         </ScrollReveal>
 
         <ScrollReveal variant="up" delay={200}>
-          <section className="flex flex-col gap-6 border-t border-border pt-10 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="font-serif text-2xl font-semibold tracking-tight md:text-3xl">
-                Kein Test verpassen.
-              </h2>
-              <p className="mt-2 max-w-xl text-muted-foreground">
-                Melde dich für den Nerdiction-Newsletter an. Wir informieren dich,
-                sobald ein neuer Test veröffentlicht wird.
-              </p>
+          <section className="magazine-newsletter magazine-section" aria-labelledby="newsletter-title">
+            <h2 id="newsletter-title" className="magazine-newsletter-title">
+              Kein Test verpassen.
+            </h2>
+            <p className="magazine-newsletter-desc">
+              Melde dich für den Nerdiction-Newsletter an. Wir informieren dich,
+              sobald ein neuer Test veröffentlicht wird.
+            </p>
+            <div className="magazine-newsletter-form">
+              <NewsletterSignup source="homepage" className="w-full" />
             </div>
-            <NewsletterSignup source="homepage" className="max-w-md" />
           </section>
         </ScrollReveal>
       </div>
-    </div>
+    </>
   );
 }

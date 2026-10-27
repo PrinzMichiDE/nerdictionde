@@ -35,18 +35,19 @@ async function validateQuestionId(questionId: string): Promise<NextResponse | nu
 }
 
 /**
- * GET /api/reviews/[slug]/qa/[questionId]
+ * GET /api/reviews/[id]/qa/[questionId]
  * Einzelne Frage mit Antworten laden
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string; questionId: string }> }
+  { params }: { params: Promise<{ id: string; questionId: string }> }
 ): Promise<NextResponse> {
   const featureCheck = await checkFeatureFlag();
   if (featureCheck) return featureCheck;
 
   try {
-    const { slug, questionId } = await params;
+    // Shared [id] segment: these routes are addressed by review slug.
+    const { id: slug, questionId } = await params;
 
     // Review ID aus Slug ermitteln (Validierung)
     const accessCheck = await validateReviewAccess(slug);
@@ -87,18 +88,18 @@ export async function GET(
 }
 
 /**
- * PATCH /api/reviews/[slug]/qa/[questionId]
+ * PATCH /api/reviews/[id]/qa/[questionId]
  * Frage bearbeiten (nur Owner)
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string; questionId: string }> }
+  { params }: { params: Promise<{ id: string; questionId: string }> }
 ): Promise<NextResponse> {
   const featureCheck = await checkFeatureFlag();
   if (featureCheck) return featureCheck;
 
   try {
-    const { slug, questionId } = await params;
+    const { id: slug, questionId } = await params;
 
     // Authentifizierung erforderlich
     const userId = await getSessionUserId(request);
@@ -157,18 +158,18 @@ export async function PATCH(
 }
 
 /**
- * DELETE /api/reviews/[slug]/qa/[questionId]
+ * DELETE /api/reviews/[id]/qa/[questionId]
  * Frage löschen (Soft-Delete, nur Owner)
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string; questionId: string }> }
+  { params }: { params: Promise<{ id: string; questionId: string }> }
 ): Promise<NextResponse> {
   const featureCheck = await checkFeatureFlag();
   if (featureCheck) return featureCheck;
 
   try {
-    const { slug, questionId } = await params;
+    const { id: slug, questionId } = await params;
 
     // Authentifizierung erforderlich
     const userId = await getSessionUserId(request);

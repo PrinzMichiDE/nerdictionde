@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Edit, Eye, Search, Filter, Loader2, X, Trash2, Gamepad2, Film, Tv, ArrowUpDown, CheckCircle2, Circle, AlertCircle } from "lucide-react";
+import { Edit, Eye, Search, Filter, Loader2, X, Trash2, Gamepad2, Film, Tv, ArrowUpDown, CheckCircle2, Circle, AlertCircle, Upload } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { ScoreBadge } from "@/components/reviews/ScoreBadge";
@@ -65,6 +65,7 @@ export function ReviewList() {
   const [reviewToDelete, setReviewToDelete] = useState<Review | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [togglingStatusId, setTogglingStatusId] = useState<string | null>(null);
+  const [bulkPublishing, setBulkPublishing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const urlSyncTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -129,7 +130,7 @@ export function ReviewList() {
     setTogglingStatusId(review.id);
     const nextStatus = review.status === "published" ? "draft" : "published";
     try {
-      await axios.put(`/api/reviews/${review.id}`, { ...review, status: nextStatus });
+      await axios.put(`/api/reviews/${review.id}`, { status: nextStatus });
       updateReview({ ...review, status: nextStatus });
       toast({
         title: nextStatus === "published" ? "Veröffentlicht" : "Zurück in Entwurf",
@@ -145,6 +146,29 @@ export function ReviewList() {
       });
     } finally {
       setTogglingStatusId(null);
+    }
+  };
+
+  const bulkPublishScored = async () => {
+    try {
+      setBulkPublishing(true);
+      const res = await axios.post("/api/reviews/bulk-publish-scored");
+      const count = res.data?.count || 0;
+      toast({
+        title: "Veröffentlicht",
+        description: `${count} Beitrag${count === 1 ? "" : "e"} mit Bewertung wurden veröffentlicht.`,
+      });
+      await reload();
+    } catch (error: unknown) {
+      console.error("Error bulk publishing scored reviews:", error);
+      const err = error as { response?: { data?: { error?: string } } };
+      toast({
+        title: "Massenveröffentlichung fehlgeschlagen",
+        description: err.response?.data?.error || "Fehler beim Veröffentlichen",
+        variant: "destructive",
+      });
+    } finally {
+      setBulkPublishing(false);
     }
   };
 
@@ -242,6 +266,24 @@ export function ReviewList() {
       {/* Search and Filters */}
       <Card className="p-4">
         <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="text-sm text-muted-foreground">
+              Entwürfe mit Bewertung (Score &gt; 0) auf „Veröffentlicht“ setzen
+            </div>
+            <Button size="sm" onClick={bulkPublishScored} disabled={bulkPublishing}>
+              {bulkPublishing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Wird veröffentlicht
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Alle Beiträge mit Bewertung veröffentlichen
+                </>
+              )}
+            </Button>
+          </div>
           {/* Search Bar */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />

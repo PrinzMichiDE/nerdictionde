@@ -1,0 +1,16 @@
+{
+  "category": "series",
+  "target": 2,
+  "processed": 1,
+  "successful": 1,
+  "failed": 0,
+  "skipped": 0,
+  "lastProcessedIndex": 1,
+  "successfulItems": [
+    {
+      "name": "Tagesschau",
+      "reviewId": "cmvqd4pnv0021mmssgjdww9w7"
+    }
+  ],
+  "failedItems": []
+}

@@ -5,13 +5,13 @@ import { Metadata } from "next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlugCustomId from "rehype-slug-custom-id";
-import { ArrowLeft, Printer, Tag } from "lucide-react";
+import { ArrowLeft, Tag } from "lucide-react";
 import { getSiteUrl, generateArticleSchema } from "@/lib/seo";
 import { MetaLine } from "@/components/shared/MetaLine";
-import { Button } from "@/components/ui/button";
 import { RelatedNews } from "@/components/news/RelatedNews";
 import { generateReviewMetadata } from "@/lib/share-meta";
 import { ShareButtons } from "@/components/ui/ShareButtons";
+import { PrintButton } from "@/components/news/PrintButton";
 
 export async function generateMetadata({
   params,
@@ -133,16 +133,7 @@ export default async function NewsDetailPage({
           url={`/news/${slug}`}
           variant="inline"
         />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => window.print()}
-          className="h-9 rounded-full px-4 gap-2 transition-colors hover:border-primary/50"
-          aria-label="Artikel drucken"
-        >
-          <Printer className="size-4" />
-          <span className="text-xs font-semibold">Drucken</span>
-        </Button>
+        <PrintButton />
       </div>
 
       <article className="prose prose-neutral dark:prose-invert max-w-none news-content">

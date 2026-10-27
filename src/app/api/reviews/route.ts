@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAdminAuth, checkAdminAuth } from "@/lib/auth";
 import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
+import { generateAndSaveQAForReview } from "@/lib/qa-generation";
 import { getTemplate, validateTemplateDataForTemplate, getDefaultTemplate } from "@/lib/review-templates";
 import { featureFlags } from "@/lib/feature-flags";
 
@@ -301,6 +302,14 @@ export async function POST(req: NextRequest) {
       cons: body.cons ?? [],
       category: body.category ?? "game",
     }).catch((e) => console.warn("Comment generation for review failed:", e));
+
+    generateAndSaveQAForReview(review.id, {
+      reviewTitle: body.title,
+      score: body.score ?? 0,
+      pros: body.pros ?? [],
+      cons: body.cons ?? [],
+      category: body.category ?? "game",
+    }).catch((e) => console.warn("Q&A generation for review failed:", e));
 
     return NextResponse.json(review);
   } catch (error: unknown) {

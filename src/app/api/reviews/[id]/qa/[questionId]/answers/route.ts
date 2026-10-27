@@ -35,18 +35,19 @@ async function validateQuestionId(questionId: string): Promise<NextResponse | nu
 }
 
 /**
- * POST /api/reviews/[slug]/qa/[questionId]/answers
+ * POST /api/reviews/[id]/qa/[questionId]/answers
  * Neue Antwort erstellen
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string; questionId: string }> }
+  { params }: { params: Promise<{ id: string; questionId: string }> }
 ): Promise<NextResponse> {
   const featureCheck = await checkFeatureFlag();
   if (featureCheck) return featureCheck;
 
   try {
-    const { slug, questionId } = await params;
+    // Shared [id] segment: these routes are addressed by review slug.
+    const { id: slug, questionId } = await params;
 
     // Authentifizierung erforderlich
     const userId = await getSessionUserId(request);

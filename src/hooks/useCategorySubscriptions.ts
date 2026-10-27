@@ -25,9 +25,13 @@ export function useCategorySubscriptions(): UseCategorySubscriptionsReturn {
   const fetchSubscriptions = useCallback(async () => {
     try {
       const res = await fetch('/api/me/categories/subscriptions');
+      if (res.status === 401) {
+        setSubscribedCategories([]);
+        return;
+      }
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
-      setSubscribedCategories(data.categories);
+      setSubscribedCategories(data.categories || []);
     } catch (err) {
       console.error('Failed to fetch subscriptions:', err);
     } finally {

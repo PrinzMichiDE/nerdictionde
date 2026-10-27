@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma";
 import { generateSEOMetadata } from "@/lib/seo-generation";
 import { generateAndAttachTagsForReview } from "@/lib/tag-generation";
 import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
+import { generateAndSaveQAForReview } from "@/lib/qa-generation";
 
 export interface EnrichReviewResult {
   success: boolean;
@@ -96,6 +97,23 @@ export async function enrichReviewById(reviewId: string): Promise<EnrichReviewRe
     }
   } catch (e) {
     console.warn("Enrich comments failed for review", reviewId, e);
+  }
+
+  try {
+    const qaCount = await prisma.reviewQA.count({
+      where: { reviewId, deletedAt: null },
+    });
+    if (qaCount === 0) {
+      await generateAndSaveQAForReview(reviewId, {
+        reviewTitle: title,
+        score,
+        pros,
+        cons,
+        category,
+      });
+    }
+  } catch (e) {
+    console.warn("Enrich Q&A failed for review", reviewId, e);
   }
 
   return result;

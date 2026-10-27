@@ -27,7 +27,20 @@ function highlightText(text: string, term: string): React.ReactNode {
 }
 
 export function SearchResultCard({ review, highlight }: SearchResultCardProps) {
-  const snippet = (review.content ?? "").replace(/[#*`]/g, "").slice(0, 160);
+  const plainText = (review.content ?? "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/(\*\*|__)(.*?)\1/g, "$2")
+    .replace(/(\*|_)(.*?)\1/g, "$2")
+    .replace(/~~(.*?)~~/g, "$1")
+    .replace(/>\s+/g, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const snippet = plainText.slice(0, 160) + (plainText.length > 160 ? "…" : "");
   const title = review.title;
 
   return (

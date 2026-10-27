@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import Parser from "rss-parser";
 import { generateContent, generateSlug } from "@/lib/review-generation";
-import { getTavilyClient, type TavilySearchResponse } from "@/lib/tavily";
+import { searchWithFallback, type TavilySearchResponse } from "@/lib/tavily";
 import {
   NEWS_CATEGORIES,
   NEWS_FEEDS,
@@ -115,8 +115,7 @@ ${contextLines.join("\n")}
 
 async function researchTopic(query: string): Promise<string[]> {
   try {
-    const client = getTavilyClient();
-    const response: TavilySearchResponse = await client.search(query, {
+    const response: TavilySearchResponse = await searchWithFallback(query, {
       search_depth: "basic",
       include_answer: true,
       include_images: false,
@@ -131,7 +130,7 @@ async function researchTopic(query: string): Promise<string[]> {
     }
     return lines;
   } catch (error) {
-    console.warn(`⚠️  Tavily-Recherche für "${query}" fehlgeschlagen:`, error);
+    console.warn(`⚠️  Recherche für "${query}" fehlgeschlagen:`, error);
     return [];
   }
 }

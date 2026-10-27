@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET as getHomeRecommendations } from '@/app/api/recommendations/route';
 import { POST as dismissRecommendation } from '@/app/api/recommendations/dismiss/route';
-import { GET as getReviewRecommendations } from '@/app/api/reviews/[slug]/recommendations/route';
+import { GET as getReviewRecommendations } from '@/app/api/reviews/[id]/recommendations/route';
 import { ZodError } from 'zod';
 
 // Mock dependencies
@@ -255,12 +255,12 @@ describe('Recommendations API Routes', () => {
     });
   });
 
-  describe('GET /api/reviews/[slug]/recommendations', () => {
+  describe('GET /api/reviews/[id]/recommendations', () => {
     it('returns 404 when feature flag is disabled', async () => {
       mockRecommendationsFlag.value = false;
 
       const request = new Request('http://localhost/api/reviews/test/recommendations');
-      const response = await getReviewRecommendations(request, { params: Promise.resolve({ slug: 'test' }) });
+      const response = await getReviewRecommendations(request, { params: Promise.resolve({ id: 'test' }) });
 
       expect(response.status).toBe(404);
     });
@@ -272,7 +272,7 @@ describe('Recommendations API Routes', () => {
       });
 
       const request = new Request('http://localhost/api/reviews/test/recommendations?limit=invalid');
-      const response = await getReviewRecommendations(request, { params: Promise.resolve({ slug: 'test' }) });
+      const response = await getReviewRecommendations(request, { params: Promise.resolve({ id: 'test' }) });
 
       expect(response.status).toBe(400);
     });
@@ -289,7 +289,7 @@ describe('Recommendations API Routes', () => {
       });
 
       const request = new Request('http://localhost/api/reviews/test/recommendations?limit=5');
-      const response = await getReviewRecommendations(request, { params: Promise.resolve({ slug: 'test' }) });
+      const response = await getReviewRecommendations(request, { params: Promise.resolve({ id: 'test' }) });
 
       expect(response.status).toBe(200);
       expect(libGetReviewRecommendations).toHaveBeenCalledWith('test', 'user1', { limit: 5 });
@@ -307,7 +307,7 @@ describe('Recommendations API Routes', () => {
       });
 
       const request = new Request('http://localhost/api/reviews/test/recommendations?limit=5');
-      const response = await getReviewRecommendations(request, { params: Promise.resolve({ slug: 'test' }) });
+      const response = await getReviewRecommendations(request, { params: Promise.resolve({ id: 'test' }) });
 
       expect(response.status).toBe(200);
       expect(libGetReviewRecommendations).toHaveBeenCalledWith('test', undefined, { limit: 5 });
@@ -322,7 +322,7 @@ describe('Recommendations API Routes', () => {
       });
 
       const request = new Request('http://localhost/api/reviews/test/recommendations');
-      const response = await getReviewRecommendations(request, { params: Promise.resolve({ slug: 'test' }) });
+      const response = await getReviewRecommendations(request, { params: Promise.resolve({ id: 'test' }) });
 
       expect(response.status).toBe(429);
     });

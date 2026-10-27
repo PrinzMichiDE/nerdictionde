@@ -1,0 +1,60 @@
+{
+  "category": "game",
+  "target": 50,
+  "processed": 12,
+  "successful": 12,
+  "failed": 0,
+  "skipped": 0,
+  "lastProcessedIndex": 11,
+  "successfulItems": [
+    {
+      "name": "Marvel's Spider-Man",
+      "reviewId": "cmvqywv8y0000mm4g64jgn00b"
+    },
+    {
+      "name": "The Legend of Zelda: Ocarina of Time",
+      "reviewId": "cmvqzb00u0005mm4glvj5z6zq"
+    },
+    {
+      "name": "Uncharted 2: Among Thieves",
+      "reviewId": "cmvqzc43y000bmm4g5pnw7c2x"
+    },
+    {
+      "name": "Super Mario 64",
+      "reviewId": "cmvr097ut000hmm4gm8e3nd7q"
+    },
+    {
+      "name": "Super Mario World",
+      "reviewId": "cmvr0esvx000imm4gj7oi038m"
+    },
+    {
+      "name": "Minecraft: Java Edition",
+      "reviewId": "cmvr1hjfe000rmm4gh3h3pikx"
+    },
+    {
+      "name": "Dishonored",
+      "reviewId": "cmvr2k4rh000xmm4gon5m12cq"
+    },
+    {
+      "name": "Dark Souls III",
+      "reviewId": "cmvr308fa0013mm4g015s4g0k"
+    },
+    {
+      "name": "Doom",
+      "reviewId": "cmvr3rlzv0018mm4gpar7ye2r"
+    },
+    {
+      "name": "Grand Theft Auto IV",
+      "reviewId": "cmvr5mi3c001cmm4g551hq8ji"
+    },
+    {
+      "name": "Undertale",
+      "reviewId": "cmvr5rcut001dmm4gisy5952z"
+    },
+    {
+      "name": "Super Mario Odyssey",
+      "reviewId": "cmvr5sufr001emm4gqur5n9xp"
+    }
+  ],
+  "failedItems": []
+}

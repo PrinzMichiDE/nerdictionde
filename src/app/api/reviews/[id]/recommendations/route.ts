@@ -11,7 +11,7 @@ import { rateLimit } from '@/lib/rate-limit';
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // Feature flag check
   if (!featureFlags.recommendations) {
@@ -20,7 +20,7 @@ export async function GET(
 
   // Rate limiting (more lenient for detail page)
   const rateLimitResult = await rateLimit(request, {
-    key: `recs:detail:${(await params).slug}`,
+    key: `recs:detail:${(await params).id}`,
     limit: 100,
     window: 60_000, // 1 minute
   });
@@ -39,7 +39,8 @@ export async function GET(
   }
 
   const { limit } = queryResult.data;
-  const { slug } = await params;
+  // Shared [id] segment: these routes are addressed by review slug.
+  const { id: slug } = await params;
 
   // Get user ID if authenticated (optional for detail page)
   let userId: string | undefined;
@@ -52,7 +53,7 @@ export async function GET(
     const result = await getReviewRecommendations(slug, userId, { limit });
     return successResponse(result, rateLimitResult.headers);
   } catch (error) {
-    console.error('[API/reviews/[slug]/recommendations] Error:', error);
+    console.error('[API/reviews/[id]/recommendations] Error:', error);
     return errorResponse('Interner Serverfehler', 500);
   }
 }

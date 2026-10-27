@@ -1,6 +1,25 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifySession } from '@/lib/auth-twitch';
+import { jwtVerify } from 'jose';
+
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || "your-secret-key-change-in-production-min-32-chars"
+);
+
+const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "twitch_session";
+
+async function verifySessionEdge(request: NextRequest): Promise<{ userId: string; twitchId: string; username: string } | null> {
+  try {
+    const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+    if (!token) {
+      return null;
+    }
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    return payload as { userId: string; twitchId: string; username: string };
+  } catch {
+    return null;
+  }
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
@@ -45,7 +64,7 @@ export async function middleware(request: NextRequest) {
 
   // Protect /tools routes with Twitch session auth
   if (pathname.startsWith('/tools')) {
-    const session = await verifySession(request);
+    const session = await verifySessionEdge(request);
 
     if (!session) {
       // Redirect to login with return URL

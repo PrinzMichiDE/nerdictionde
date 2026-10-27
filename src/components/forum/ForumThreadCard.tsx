@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { MessageSquare, Eye, Clock, TrendingUp, Gamepad2, Film, Tv } from "lucide-react";
 import { VoteButtons } from "@/components/shared/VoteButtons";
