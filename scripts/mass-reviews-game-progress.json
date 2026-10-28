@@ -1,11 +1,11 @@
 {
   "category": "game",
   "target": 50,
-  "processed": 12,
-  "successful": 12,
+  "processed": 33,
+  "successful": 33,
   "failed": 0,
   "skipped": 0,
-  "lastProcessedIndex": 11,
+  "lastProcessedIndex": 30,
   "successfulItems": [
     {
       "name": "Marvel's Spider-Man",
@@ -54,6 +54,90 @@
     {
       "name": "Super Mario Odyssey",
       "reviewId": "cmvr5sufr001emm4gqur5n9xp"
+    },
+    {
+      "name": "Life Is Strange",
+      "reviewId": "cmvr7t48j001vmm4gkfsxbwhe"
+    },
+    {
+      "name": "Borderlands 2",
+      "reviewId": "cmvr83gpr001wmm4gsin8tug2"
+    },
+    {
+      "name": "Bloodborne",
+      "reviewId": "cmvr85eqz001xmm4gwyj49eak"
+    },
+    {
+      "name": "Stardew Valley",
+      "reviewId": "cmvr9oz6h002bmm4gpzfru9s6"
+    },
+    {
+      "name": "Call of Duty 4: Modern Warfare",
+      "reviewId": "cmvr9svjp002cmm4g0slxmiiq"
+    },
+    {
+      "name": "Mass Effect 3",
+      "reviewId": "cmvrbdcev002omm4g2t4f7cnb"
+    },
+    {
+      "name": "Assassin's Creed IV Black Flag",
+      "reviewId": "cmvrd9vdx002vmm4gv7b4hg3e"
+    },
+    {
+      "name": "The Last of Us Part II",
+      "reviewId": "cmvrdrdoj002wmm4g8f5385q4"
+    },
+    {
+      "name": "Max Payne",
+      "reviewId": "cmvre5y1s0030mm4g6koluuy3"
+    },
+    {
+      "name": "Assassin's Creed",
+      "reviewId": "cmvrgfqkv0038mm4gzvbvco8b"
+    },
+    {
+      "name": "Hades",
+      "reviewId": "cmvrgj2w70039mm4g5sagwdfx"
+    },
+    {
+      "name": "Fallout 3",
+      "reviewId": "cmvrglsyr003amm4g1lbe1ozb"
+    },
+    {
+      "name": "The Walking Dead",
+      "reviewId": "cmvrj3euk006amm4g6owdwqhb"
+    },
+    {
+      "name": "Assassin's Creed Brotherhood",
+      "reviewId": "cmvrj3hle006bmm4g3semayo4"
+    },
+    {
+      "name": "Fallout 4",
+      "reviewId": "cmvrj3php006cmm4gujfyazyt"
+    },
+    {
+      "name": "Super Mario Bros. 3",
+      "reviewId": "cmvrk1v0r0085mm4gpdgwnqhm"
+    },
+    {
+      "name": "Dragon Age: Origins",
+      "reviewId": "cmvrkakz60086mm4g3wwvtsgh"
+    },
+    {
+      "name": "Dark Souls",
+      "reviewId": "cmvrlyrti00a2mm4gpjpsbhjt"
+    },
+    {
+      "name": "The Last of Us Remastered",
+      "reviewId": "cmvroacth00almm4gsvsmkqys"
+    },
+    {
+      "name": "Metal Gear Solid",
+      "reviewId": "cmvroe79k00ammm4g7n3e71uv"
+    },
+    {
+      "name": "The Legend of Zelda: A Link to the Past",
+      "reviewId": "cmvrov70i00anmm4gik5eqmpf"
     }
   ],
   "failedItems": []

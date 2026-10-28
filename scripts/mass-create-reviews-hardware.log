@@ -841,3 +841,3125 @@ Q&A generation failed: TypeError: Cannot read properties of undefined (reading '
 📦 hardware: 8-8 von 266 (Ziel: 7/20)
 🔍 Searching Tavily for hardware Google Pixel 8...
 ⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+Comment batch 29/48 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error in generation for Google Pixel 8, retrying... APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateContent (E:\Projects\nerdictionde\src\lib\review-generation.ts:250:24)
+    at async generateHardwareReviewContent (E:\Projects\nerdictionde\src\lib\review-generation.ts:1174:20)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1214:27)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 37/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for Google Pixel 8...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Error generating OpenAI image 1 for Google Pixel 8: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 22:08:22 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for Google Pixel 8: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 22:08:24 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for Google Pixel 8: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 22:08:26 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ Google Pixel 8 (8/20)
+   ⏱️  Erfolgreich: 8/20 | ETA: ~397 min
+
+📦 hardware: 9-9 von 266 (Ziel: 8/20)
+🔍 Searching Tavily for hardware OnePlus 12...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+Failed to parse Q&A JSON: SyntaxError: Expected ',' or ']' after array element in JSON at position 1011 (line 11 column 6)
+    at JSON.parse (<anonymous>)
+    at generateAndSaveQAForReview (E:\Projects\nerdictionde\src\lib\qa-generation.ts:142:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+Comment batch 23/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for OnePlus 12...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Comment batch 34/50 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 43/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 1 for OnePlus 12: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 22:24:49 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for OnePlus 12: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 22:32:59 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for OnePlus 12: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 22:34:11 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ OnePlus 12 (9/20)
+   ⏱️  Erfolgreich: 9/20 | ETA: ~359 min
+
+📦 hardware: 10-10 von 266 (Ziel: 9/20)
+🔍 Searching Tavily for hardware Xiaomi 14 Ultra...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+No questions generated for review
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for Xiaomi 14 Ultra...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Error generating OpenAI image 1 for Xiaomi 14 Ultra: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 22:59:59 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for Xiaomi 14 Ultra: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 23:09:59 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for Xiaomi 14 Ultra: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Tue, 27 Oct 2026 23:15:04 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 41/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 47/50 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+SEO metadata generation failed: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateSEOMetadata (E:\Projects\nerdictionde\src\lib\seo-generation.ts:52:22)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1286:17)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ Xiaomi 14 Ultra (10/20)
+   ⏱️  Erfolgreich: 10/20 | ETA: ~362 min
+
+📦 hardware: 11-11 von 266 (Ziel: 10/20)
+🔍 Searching Tavily for hardware Samsung Galaxy Z Fold 5...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+No questions generated for review
+Comment batch 31/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 30/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for Samsung Galaxy Z Fold 5...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Comment batch 31/45 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 39/44 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 32/45 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 33/45 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 1 for Samsung Galaxy Z Fold 5: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 00:10:05 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 41/44 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 39/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for Samsung Galaxy Z Fold 5: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 00:20:06 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for Samsung Galaxy Z Fold 5: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 00:29:21 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ Samsung Galaxy Z Fold 5 (11/20)
+   ⏱️  Erfolgreich: 11/20 | ETA: ~333 min
+
+📦 hardware: 12-12 von 266 (Ziel: 11/20)
+🔍 Searching Tavily for hardware Samsung Galaxy Z Flip 5...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+No questions generated for review
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for Samsung Galaxy Z Flip 5...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Error generating OpenAI image 1 for Samsung Galaxy Z Flip 5: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 00:40:15 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for Samsung Galaxy Z Flip 5: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 00:40:18 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for Samsung Galaxy Z Flip 5: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 00:40:20 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ Samsung Galaxy Z Flip 5 (12/20)
+   ⏱️  Erfolgreich: 12/20 | ETA: ~278 min
+
+📦 hardware: 13-13 von 266 (Ziel: 12/20)
+🔍 Searching Tavily for hardware iPhone 14...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+Comment batch 42/44 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 42/49 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 38/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 43/44 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+No questions generated for review
+Comment batch 39/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 35/45 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 13/24 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for iPhone 14...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Comment batch 43/49 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 44/49 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 45/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 44/44 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 1 for iPhone 14: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 00:55:00 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 38/45 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 5/24 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for iPhone 14: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 01:05:00 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for iPhone 14: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 01:09:17 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 7/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ iPhone 14 (13/20)
+   ⏱️  Erfolgreich: 13/20 | ETA: ~249 min
+
+📦 hardware: 14-14 von 266 (Ziel: 13/20)
+🔍 Searching Tavily for hardware iPhone 14 Pro...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+No questions generated for review
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for iPhone 14 Pro...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Comment batch 45/45 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 13/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 49/49 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 1 for iPhone 14 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 01:43:07 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for iPhone 14 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 01:52:53 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 27/44 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 28/44 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for iPhone 14 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 01:57:45 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ iPhone 14 Pro (14/20)
+   ⏱️  Erfolgreich: 14/20 | ETA: ~212 min
+
+📦 hardware: 15-15 von 266 (Ziel: 14/20)
+🔍 Searching Tavily for hardware iPhone 13...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+No questions generated for review
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for iPhone 13...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Comment batch 35/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 1 for iPhone 13: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 02:12:50 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 18/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 17/22 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for iPhone 13: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 02:16:39 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 30/50 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 29/50 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 31/50 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for iPhone 13: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 02:26:40 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 19/22 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 22/24 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ iPhone 13 (15/20)
+   ⏱️  Erfolgreich: 15/20 | ETA: ~177 min
+
+📦 hardware: 16-16 von 266 (Ziel: 15/20)
+🔍 Searching Tavily for hardware Huawei P60 Pro...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+Comment batch 35/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 9/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+No questions generated for review
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for Huawei P60 Pro...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Comment batch 29/50 failed, retry 2/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 22/22 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 44/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 11/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 1 for Huawei P60 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 02:49:31 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 37/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 44/44 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for Huawei P60 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 02:59:32 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for Huawei P60 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 03:08:21 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ Huawei P60 Pro (16/20)
+   ⏱️  Erfolgreich: 16/20 | ETA: ~143 min
+
+📦 hardware: 17-17 von 266 (Ziel: 16/20)
+🔍 Searching Tavily for hardware Sony Xperia 1 V...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+Comment batch 26/41 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 10/21 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 16/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 30/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 29/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Failed to parse Q&A JSON: SyntaxError: Expected ',' or ']' after array element in JSON at position 1381 (line 11 column 6)
+    at JSON.parse (<anonymous>)
+    at generateAndSaveQAForReview (E:\Projects\nerdictionde\src\lib\qa-generation.ts:142:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for Sony Xperia 1 V...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Error generating OpenAI image 1 for Sony Xperia 1 V: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 03:41:49 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for Sony Xperia 1 V: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 03:41:51 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for Sony Xperia 1 V: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 03:41:53 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ Sony Xperia 1 V (17/20)
+   ⏱️  Erfolgreich: 17/20 | ETA: ~106 min
+
+📦 hardware: 18-18 von 266 (Ziel: 17/20)
+🔍 Searching Tavily for hardware Nothing Phone 2...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+Comment batch 19/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 13/21 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 14/21 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+No questions generated for review
+Comment batch 44/50 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 31/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 45/48 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for Nothing Phone 2...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Comment batch 43/45 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 34/45 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 49/50 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 30/41 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 1 for Nothing Phone 2: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 03:56:15 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 44/45 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 8/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 9/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for Nothing Phone 2: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 04:06:15 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 42/45 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for Nothing Phone 2: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 04:09:52 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 9/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 1/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:79)
+    at Array.from (<anonymous>)
+    at mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:25)
+    at generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:27)
+    at generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:28)
+    at processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1326:5)
+Comment batch 2/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:79)
+    at Array.from (<anonymous>)
+    at mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:25)
+    at generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:27)
+    at generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:28)
+    at processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1326:5)
+Comment batch 3/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:79)
+    at Array.from (<anonymous>)
+    at mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:25)
+    at generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:27)
+    at generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:28)
+    at processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1326:5)
+   ✅ Nothing Phone 2 (18/20)
+Comment batch 4/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 5/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 6/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+   ⏱️  Erfolgreich: 18/20 | ETA: ~72 min
+Comment batch 7/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 8/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 9/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 10/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 11/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 12/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 13/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 14/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 15/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 16/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 17/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 18/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 19/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 20/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 21/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 22/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 23/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 24/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Comment batch 25/25 failed permanently: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:20)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Top-up comment generation failed: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildChunkPrompt (E:\Projects\nerdictionde\src\lib\comment-generation.ts:60:26)
+    at generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:86:18)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:218:9)
+    at worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:26)
+    at <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:79)
+    at Array.from (<anonymous>)
+    at mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:151:25)
+    at generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:33)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22)
+Q&A generation failed: TypeError: Cannot read properties of undefined (reading 'length')
+    at buildQAPrompt (E:\Projects\nerdictionde\src\lib\qa-generation.ts:82:26)
+    at generateAndSaveQAForReview (E:\Projects\nerdictionde\src\lib\qa-generation.ts:125:20)
+
+📦 hardware: 19-19 von 266 (Ziel: 18/20)
+🔍 Searching Tavily for hardware Asus ROG Phone 8 Pro...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+Comment batch 30/49 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 45/45 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 28/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 29/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 27/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 37/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 15/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 14/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 40/50 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 38/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 16/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error in generation for Asus ROG Phone 8 Pro, retrying... APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateContent (E:\Projects\nerdictionde\src\lib\review-generation.ts:250:24)
+    at async generateHardwareReviewContent (E:\Projects\nerdictionde\src\lib\review-generation.ts:1174:20)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1214:27)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 39/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 32/39 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 35/49 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 41/50 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 36/49 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for Asus ROG Phone 8 Pro...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Comment batch 36/42 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 35/39 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 16/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 37/42 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 30/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 1 for Asus ROG Phone 8 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 05:19:06 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 31/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 40/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 44/50 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for Asus ROG Phone 8 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 05:29:06 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 23/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for Asus ROG Phone 8 Pro: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 05:36:11 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ Asus ROG Phone 8 Pro (19/20)
+   ⏱️  Erfolgreich: 19/20 | ETA: ~38 min
+
+📦 hardware: 20-20 von 266 (Ziel: 19/20)
+🔍 Searching Tavily for hardware Oppo Find X7 Ultra...
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+Comment batch 38/44 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 41/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Failed to parse Q&A JSON: SyntaxError: Expected ',' or ']' after array element in JSON at position 3019 (line 20 column 6)
+    at JSON.parse (<anonymous>)
+    at generateAndSaveQAForReview (E:\Projects\nerdictionde\src\lib\qa-generation.ts:142:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+⚠️  Tavily nicht verfügbar, verwende kostenlose Alternative
+📸 Extracting images from Tavily search results for Oppo Find X7 Ultra...
+🎨 Generating 4 additional images using OpenAI DALL-E...
+Comment batch 40/44 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 47/50 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 45/49 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 24/40 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 26/40 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 25/40 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 1 for Oppo Find X7 Ultra: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 05:52:32 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 43/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 44/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 2 for Oppo Find X7 Ultra: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 06:02:32 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 41/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 29/48 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 28/48 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 27/48 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Error generating OpenAI image 3 for Oppo Find X7 Ultra: AuthenticationError: 401 inference error: Unauthorized - unauthorized
+    at APIError.generate (E:\Projects\nerdictionde\node_modules\openai\src\core\error.ts:76:14)
+    at OpenAI.makeStatusError (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:478:28)
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:728:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async generateReviewImages (E:\Projects\nerdictionde\src\lib\image-generation.ts:84:28)
+    at async processHardware (E:\Projects\nerdictionde\src\lib\review-generation.ts:1268:21)
+    at async <anonymous> (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:166:24)
+    at async Promise.allSettled (index 0)
+    at async processInBatches (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:162:5)
+    at async main (E:\Projects\nerdictionde\scripts\mass-create-reviews.ts:352:22) {
+  status: 401,
+  headers: Headers {
+    date: 'Wed, 28 Oct 2026 06:08:57 GMT',
+    'content-length': '44',
+    server: 'HeRay'
+  },
+  requestID: null,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 43/44 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+   ✅ Oppo Find X7 Ultra (20/20)
+   🎯 Ziel von 20 für hardware erreicht.
+
+📊 hardware: ✅ 20, ⏭️  0, ❌ 0
+   ✅ Fortschrittsdatei für hardware gelöscht.
+
+============================================================
+📊 GESAMTERGEBNIS
+   Verarbeitet: 20
+   ✅ Erstellt:   20
+   ⏭️  Übersprungen: 0
+   ❌ Fehlgeschlagen: 0
+
+🎉 Fertig.
