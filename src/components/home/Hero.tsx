@@ -17,16 +17,22 @@ export function Hero({ latest, stats }: HeroProps) {
   return (
     <section className="magazine-hero magazine-section relative" aria-labelledby="hero-title">
       <div className="magazine-hero-content" id="hero-title">
-        <span className="magazine-hero-badge">Editorial</span>
-        <h1 className="magazine-hero-title">Ehrliche Produkttests.</h1>
+        <span className="magazine-hero-badge">
+          <span className="kicker-line" aria-hidden="true"></span>
+          Editorial
+        </span>
+        <h1 className="magazine-hero-title text-balance">
+          Ehrliche Produkttests.<br className="hidden md:block" />
+          <span className="block md:inline">Ohne bezahlte Platzierungen.</span>
+        </h1>
         <p className="magazine-hero-lede">
           Wir testen Games, Filme, Serien und Hardware und legen jede Wertung
           offen. Unabhängig, transparent und mit System.
         </p>
 
         <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
-          <Button asChild size="lg" className="h-12 rounded-full px-7 text-base font-semibold">
-            <Link href="/reviews" className="group inline-flex items-center gap-2">
+          <Button asChild size="lg" className="h-12 rounded-full px-7 text-base font-semibold group">
+            <Link href="/reviews" className="inline-flex items-center gap-2">
               Alle Tests lesen
               <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none" />
             </Link>
@@ -56,19 +62,18 @@ export function Hero({ latest, stats }: HeroProps) {
         <div className="magazine-hero-featured">
           <Link
             href={`/reviews/${latest.slug}`}
-            className="magazine-featured-card group block"
+            className="magazine-featured-card group block spotlight-card"
             aria-label={`${latest.title}, ${latest.score} von 100`}
           >
-            <div className="magazine-featured-image relative aspect-[16/9] overflow-hidden bg-muted">
+            <div className="magazine-featured-image relative aspect-[16/9] overflow-hidden bg-muted shine">
               {image ? (
                 <Image
                   src={image}
                   alt={latest.title}
                   fill
                   priority
-                  unoptimized
                   sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
+                  className="object-cover spotlight-img"
                 />
               ) : (
                 <div className="flex h-full items-center justify-center text-sm text-muted-foreground">

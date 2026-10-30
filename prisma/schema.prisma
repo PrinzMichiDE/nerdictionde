@@ -60,6 +60,8 @@ model Review {
   seriesItems     ReviewSeriesItem[]
   qaQuestions     ReviewQA[]
   recommendationDismisses RecommendationDismiss[]
+  factCheckLogs           FactCheckLog[]
+  articleDrafts           ArticleDraft[]
   templateId      String?         @map("template_id")
   templateData    Json?           @map("template_data")
   templateVersion Int?            @default(1) @map("template_version")
@@ -2059,6 +2061,76 @@ model RecommendationDismiss {
   @@index([expiresAt])
   @@map("recommendation_dismisses")
 }
+
+// ============================================================================
+// Automatisierte Content-Pipeline (Phase 1-5)
+// ============================================================================
+
+model FactCheckLog {
+  id           String   @id @default(cuid())
+  reviewId     String?
+  review       Review?  @relation(fields: [reviewId], references: [id], onDelete: SetNull)
+  field        String   // z. B. "price", "specs.cpu", "releaseDate"
+  value        String   // der geprüfte Wert
+  source       String   // Primärquelle (z. B. "hersteller-website", "hardware-db")
+  status       String   // "verified" | "corrected" | "rejected"
+  confidence   Float    // 0-100
+  note         String?
+  createdAt    DateTime @default(now())
+
+  @@index([reviewId])
+  @@index([status])
+}
+
+model ArticleDraft {
+  id             String   @id @default(cuid())
+  reviewId       String?
+  review         Review?  @relation(fields: [reviewId], references: [id], onDelete: SetNull)
+  title          String
+  slug           String   @unique
+  category       String
+  content        String   // Markdown
+  score          Int
+  pros           String[]
+  cons           String[]
+  metaDescription String?
+  metaKeywords   String?
+  jsonLd         Json?    // Schema.org structured data
+  factCheckScore Int      // 0-100
+  readabilityScore Int    // 0-100
+  seoScore       Int      // 0-100
+  status         String   @default("draft") // "draft" | "fact_checked" | "rich_content_ready" | "needs_revision" | "published" | "blocked"
+  issues         Json?    // Array von Fact-Check/Qualitäts-Problemen
+  handoff        Json?    // Agent-to-agent Handoff-Daten
+  sourceData     Json?    // Rohdaten aus Phase 1
+  publishedAt    DateTime?
+  richContentAssets RichContentAsset[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@index([category, status])
+}
+
+model RichContentAsset {
+  id          String   @id @default(cuid())
+  draftId     String
+  draft       ArticleDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  type        String   // "infographic" | "chart" | "table" | "image" | "alt_text"
+  name        String
+  url         String?  // Blob-URL oder Data-URL
+  content     Json?    // z. B. Chart-Config, Tabellen-Daten, Alt-Text
+  width       Int?
+  height      Int?
+  fileSizeKb  Int?
+  createdAt   DateTime @default(now())
+
+  @@index([draftId])
+  @@index([type])
+}
+
+// ============================================================================
 
 // Social Sharing & Viral Loops
 enum ShareContentType {

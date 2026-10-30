@@ -10,18 +10,58 @@ import { ScrollReveal } from "@/components/home/ScrollReveal";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { generateItemListSchema, getSiteUrl } from "@/lib/seo";
+import {
+  generateItemListSchema,
+  generateWebPageSchema,
+  getSiteUrl,
+  SITE_NAME,
+} from "@/lib/seo";
 import { NewsletterSignup } from "@/components/shared/NewsletterSignup";
 import { RecommendationsSection } from "@/components/recommendations";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: { absolute: "Nerdiction - Ehrliche Produkttests" },
+  title: {
+    absolute: `${SITE_NAME} - Ehrliche Produkttests für Games, Filme, Serien & Hardware`,
+  },
   description:
-    "Unabhängige Tests zu Games, Filmen, Serien und Hardware. Wir legen jede Wertung offen und testen ohne bezahlte Platzierungen.",
+    "Unabhängige Tests zu Games, Filmen, Serien und Hardware. Wir legen jede Wertung offen und testen ohne bezahlte Platzierungen. Nerdiction – dein redaktionelles Magazin für fundierte Kaufentscheidungen.",
   alternates: {
     canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "de_DE",
+    url: getSiteUrl(),
+    title: `${SITE_NAME} - Ehrliche Produkttests für Games, Filme, Serien & Hardware`,
+    description:
+      "Unabhängige Tests zu Games, Filmen, Serien und Hardware. Wir legen jede Wertung offen und testen ohne bezahlte Platzierungen.",
+    images: [
+      {
+        url: `${getSiteUrl()}/icon-512.png`,
+        width: 512,
+        height: 512,
+        alt: `${SITE_NAME} - Magazin für unabhängige Produkttests`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@nerdiction_de",
+    title: `${SITE_NAME} - Ehrliche Produkttests`,
+    description:
+      "Unabhängige Tests zu Games, Filmen, Serien und Hardware. Wir legen jede Wertung offen und testen ohne bezahlte Platzierungen.",
+    images: [`${getSiteUrl()}/icon-512.png`],
   },
 };
 
@@ -118,12 +158,26 @@ export default async function HomePage() {
     }))
   );
 
+  const webPageSchema = generateWebPageSchema({
+    title: `${SITE_NAME} - Ehrliche Produkttests für Games, Filme, Serien & Hardware`,
+    description:
+      "Unabhängige Tests zu Games, Filmen, Serien und Hardware. Wir legen jede Wertung offen und testen ohne bezahlte Platzierungen.",
+    url: `${getSiteUrl()}/`,
+    isPartOf: {
+      "@id": `${getSiteUrl()}#website`,
+    },
+  });
+
   return (
     <>
       <div className="magazine-bg" aria-hidden="true" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
       />
 
       <ScrollReveal variant="up">

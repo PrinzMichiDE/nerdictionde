@@ -3963,3 +3963,311 @@ Comment batch 43/44 failed, retry 1/2: APIConnectionTimeoutError: Request timed 
    ❌ Fehlgeschlagen: 0
 
 🎉 Fertig.
+Comment batch 30/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 37/43 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+No questions generated for review
+Comment batch 31/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 32/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 42/43 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 40/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 31/45 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 36/48 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 41/50 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 43/43 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 46/47 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 4/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 33/46 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 0)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 12/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 35/45 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 37/51 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 32/49 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 19/25 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async <anonymous> (E:\Projects\nerdictionde\src\lib\comment-generation.ts:195:14)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 1)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:193:21)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}
+Comment batch 34/49 failed, retry 1/2: APIConnectionTimeoutError: Request timed out.
+    at OpenAI.makeRequest (E:\Projects\nerdictionde\node_modules\openai\src\client.ts:669:15)
+    at async generateChunkTexts (E:\Projects\nerdictionde\src\lib\comment-generation.ts:89:22)
+    at async worker (E:\Projects\nerdictionde\src\lib\comment-generation.ts:147:20)
+    at async Promise.all (index 2)
+    at async mapWithConcurrency (E:\Projects\nerdictionde\src\lib\comment-generation.ts:152:3)
+    at async generateComments (E:\Projects\nerdictionde\src\lib\comment-generation.ts:217:27)
+    at async generateAndSaveCommentsForReview (E:\Projects\nerdictionde\src\lib\comment-generation.ts:240:22) {
+  status: undefined,
+  headers: undefined,
+  requestID: undefined,
+  error: undefined,
+  code: undefined,
+  param: undefined,
+  type: undefined
+}

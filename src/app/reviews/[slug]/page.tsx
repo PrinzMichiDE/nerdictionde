@@ -12,9 +12,13 @@ import { MovieSeriesMetadata } from "@/components/reviews/MovieSeriesMetadata";
 import { TableOfContents } from "@/components/reviews/TableOfContents";
 import { RelatedReviews } from "@/components/reviews/RelatedReviews";
 import { HardwareMetadata } from "@/components/reviews/HardwareMetadata";
+import { AmazonAffiliateLink } from "@/components/reviews/AmazonAffiliateLink";
 import { ReviewProgress } from "@/components/reviews/ReviewProgress";
 import { ReviewActions } from "@/components/reviews/ReviewActions";
 import { ReviewReactions } from "@/components/reviews/ReviewReactions";
+import { AdaptiveSummary } from "@/components/reviews/adaptive-summary";
+import { DecisionAssistant } from "@/components/tools/decision-assistant";
+import { ProductMatcher } from "@/components/tools/product-matcher";
 import { ReadingHistoryBadge } from "@/components/reading-history/ReadingHistoryBadge";
 import { ReadingHistoryTrackerWrapper } from "@/components/reading-history/ReadingHistoryTrackerWrapper";
 import { getReadingHistoryForReview } from "@/lib/reading-history";
@@ -40,6 +44,7 @@ import { FEATURE_HARDWARE_COMPATIBILITY } from "@/lib/feature-flags";
 import { checkCompatibility, estimateFps } from "@/lib/hardware-compatibility";
 import { ScoreBlock } from "@/components/shared/ScoreBlock";
 import { ProsCons } from "@/components/shared/ProsCons";
+import { ReviewBadgeGenerator } from "@/components/reviews/ReviewBadgeGenerator";
 import { MetaLine } from "@/components/shared/MetaLine";
 import { SpecTable } from "@/components/shared/SpecTable";
 import { SourceList } from "@/components/shared/SourceList";
@@ -807,6 +812,19 @@ export default async function ReviewDetailPage({
         </div>
       </section>
 
+      {/* Adaptive Summary (Profi vs. Einsteiger + TL;DR) */}
+      <AdaptiveSummary
+        review={{
+          title,
+          score: review.score,
+          pros,
+          cons,
+          content,
+          category: review.category,
+        }}
+        className="max-w-5xl mx-auto"
+      />
+
       {/* YouTube Videos Section */}
       {review.youtubeVideos && review.youtubeVideos.length > 0 && (
         <div className="space-y-6">
@@ -872,6 +890,22 @@ export default async function ReviewDetailPage({
           data={hardwareCompatibility}
           reviewSlug={slug}
         />
+      )}
+
+      {/* Amazon Affiliate Link */}
+      {(review.amazonAsin || review.affiliateLink) && (
+        <section className="mt-6 rounded-md border border-border bg-card p-4">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Affiliate-Link
+            </span>
+            <AmazonAffiliateLink
+              asin={review.amazonAsin}
+              href={review.affiliateLink ?? undefined}
+              label={isEn ? "Buy on Amazon" : "Bei Amazon kaufen"}
+            />
+          </div>
+        </section>
       )}
 
       <div className="grid gap-12 md:grid-cols-[1fr_320px]">
@@ -1060,6 +1094,16 @@ export default async function ReviewDetailPage({
             </div>
           </div>
 
+          {/* Publisher & Developer Badge */}
+          <div className="p-4 rounded-md border border-border bg-card space-y-3">
+            <ReviewBadgeGenerator
+              score={review.score}
+              title={title}
+              slug={slug}
+              isEn={isEn}
+            />
+          </div>
+
           {/* Publication Info */}
           <div className="p-4 rounded-md border border-border bg-card space-y-3">
             <h4 className="kicker text-xs">Veröffentlichung</h4>
@@ -1107,6 +1151,41 @@ export default async function ReviewDetailPage({
               </div>
             </div>
           )}
+
+          {/* Kauf-Entscheidungs-Assistent */}
+          <DecisionAssistant
+            review={{
+              id: review.id,
+              title: review.title,
+              score: review.score,
+              pros,
+              cons,
+              metadata: {
+                price: (review.metadata as { price?: number } | null)?.price ?? undefined,
+                currency: (review.metadata as { currency?: string } | null)?.currency,
+                affiliateLink: review.affiliateLink ?? undefined,
+              },
+            }}
+          />
+
+          {/* Passt dieses Produkt zu mir? */}
+          <ProductMatcher
+            products={[
+              {
+                id: review.id,
+                name: review.title,
+                useCases: ["gaming", "office", "creative"],
+                priceLevel:
+                  (review.metadata as { price?: number } | null)?.price ?? 0 > 1000
+                    ? "high"
+                    : (review.metadata as { price?: number } | null)?.price ?? 0 > 500
+                      ? "mid"
+                      : "low",
+                matchExplanation:
+                  "Basierend auf deinem Nutzungsprofil passt dieses Produkt besonders gut zu deinen Anforderungen.",
+              },
+            ]}
+          />
 
           {/* Preis & Angebote */}
           <DealsWidget deals={deals} priceHistory={priceHistory} />

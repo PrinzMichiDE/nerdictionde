@@ -1,0 +1,217 @@
+{
+  "category": "hardware",
+  "target": 50,
+  "processed": 51,
+  "successful": 50,
+  "failed": 1,
+  "skipped": 0,
+  "lastProcessedIndex": 49,
+  "successfulItems": [
+    {
+      "name": "iPhone 15 Pro Max",
+      "reviewId": "cmvtcc5ty010zmm4gkhqkkine"
+    },
+    {
+      "name": "iPhone 15 Pro",
+      "reviewId": "cmvtcdv5h011smm4gq1szq992"
+    },
+    {
+      "name": "iPhone 15",
+      "reviewId": "cmvtcek5s011umm4gty3tuyor"
+    },
+    {
+      "name": "Samsung Galaxy S24",
+      "reviewId": "cmvtfqzsc012emm4g6dqm6jpi"
+    },
+    {
+      "name": "Samsung Galaxy S24 Ultra",
+      "reviewId": "cmvtg33b3012jmm4g8td1lvei"
+    },
+    {
+      "name": "Google Pixel 8 Pro",
+      "reviewId": "cmvtjxknh013qmm4ggqc4k48o"
+    },
+    {
+      "name": "Google Pixel 8",
+      "reviewId": "cmvtk0rmm013smm4gns35q0kr"
+    },
+    {
+      "name": "OnePlus 12",
+      "reviewId": "cmvtkc38k013umm4gbxjj2d1z"
+    },
+    {
+      "name": "Xiaomi 14 Ultra",
+      "reviewId": "cmvtmk9m3014hmm4gek1ftabm"
+    },
+    {
+      "name": "Samsung Galaxy Z Fold 5",
+      "reviewId": "cmvtn0dsv014ymm4g4vjzhpro"
+    },
+    {
+      "name": "Samsung Galaxy Z Flip 5",
+      "reviewId": "cmvtn32xr0150mm4gnlmuqcvn"
+    },
+    {
+      "name": "iPhone 14",
+      "reviewId": "cmvtppfti015kmm4gbmz2y1sy"
+    },
+    {
+      "name": "iPhone 13",
+      "reviewId": "cmvtqaby2015pmm4ghdo5hyhe"
+    },
+    {
+      "name": "iPhone 14 Pro",
+      "reviewId": "cmvtqkjqj015rmm4gg3f5i4x2"
+    },
+    {
+      "name": "Huawei P60 Pro",
+      "reviewId": "cmvtsmtmy016nmm4gqodbxhsd"
+    },
+    {
+      "name": "Sony Xperia 1 V",
+      "reviewId": "cmvtsrn6v016pmm4gqd3myicy"
+    },
+    {
+      "name": "Nothing Phone 2",
+      "reviewId": "cmvttc8lg016rmm4g8ystosf4"
+    },
+    {
+      "name": "Sony WH-1000XM5",
+      "reviewId": "cmvtvdok50172mm4gw0bllc6a"
+    },
+    {
+      "name": "Asus ROG Phone 8 Pro",
+      "reviewId": "cmvtw1ppn017vmm4g1c4i465e"
+    },
+    {
+      "name": "Oppo Find X7 Ultra",
+      "reviewId": "cmvtw50aq017xmm4g9pcmhnpi"
+    },
+    {
+      "name": "Bose QuietComfort Ultra",
+      "reviewId": "cmvtykidk018kmm4g990ded0s"
+    },
+    {
+      "name": "Sennheiser Momentum 4 Wireless",
+      "reviewId": "cmvtzpncn018pmm4gs4gy5ovg"
+    },
+    {
+      "name": "Apple AirPods Max",
+      "reviewId": "cmvu0712k018rmm4gqqrb624c"
+    },
+    {
+      "name": "Sony WF-1000XM5",
+      "reviewId": "cmvu34dbz019bmm4gqc84vtjf"
+    },
+    {
+      "name": "Bose QuietComfort Earbuds II",
+      "reviewId": "cmvu3ttc401asmm4gd2krk5g6"
+    },
+    {
+      "name": "Apple AirPods Pro 2",
+      "reviewId": "cmvu4ftig01aumm4gu4735b4q"
+    },
+    {
+      "name": "Beyerdynamic DT 770 PRO",
+      "reviewId": "cmvu6t6lx01cimm4gsztfebrg"
+    },
+    {
+      "name": "Samsung Galaxy Buds2 Pro",
+      "reviewId": "cmvu73so501ckmm4gptcbrcnb"
+    },
+    {
+      "name": "Sennheiser CX True Wireless",
+      "reviewId": "cmvu77yaf01cmmm4gy7jyj7c4"
+    },
+    {
+      "name": "Bang & Olufsen Beoplay H95",
+      "reviewId": "cmvu9dkor01f3mm4g6rnpqvvq"
+    },
+    {
+      "name": "Sony LinkBuds S",
+      "reviewId": "cmvu9dpgm01f5mm4gd8gk8khw"
+    },
+    {
+      "name": "Focal Bathys",
+      "reviewId": "cmvubglsu01gvmm4gk9opu07p"
+    },
+    {
+      "name": "JBL Tune 230NC TWS",
+      "reviewId": "cmvue5aa101h0mm4g42gqli1k"
+    },
+    {
+      "name": "Anker Soundcore Space A40",
+      "reviewId": "cmvue72c901h2mm4gjqdpy754"
+    },
+    {
+      "name": "Audio-Technica ATH-M50x",
+      "reviewId": "cmvueas4v01h4mm4gxszf90c5"
+    },
+    {
+      "name": "Jabra Elite 10 Gen 2",
+      "reviewId": "cmvuhbntc01hfmm4gfckyylnr"
+    },
+    {
+      "name": "Sony WH-CH720N",
+      "reviewId": "cmvuhbqq401hhmm4gnppac3v2"
+    },
+    {
+      "name": "Bose 700",
+      "reviewId": "cmvuhbu2w01hjmm4g118yefgg"
+    },
+    {
+      "name": "Ecovacs Deebot X2 Omni",
+      "reviewId": "cmvujw1ue01jgmm4gh6sp4lkq"
+    },
+    {
+      "name": "Marshall Major IV",
+      "reviewId": "cmvuk24i701jimm4gh1y5o85l"
+    },
+    {
+      "name": "Roborock S8 Pro Ultra",
+      "reviewId": "cmvuk4nrz01jkmm4g4wasmmln"
+    },
+    {
+      "name": "Dreame L10s Ultra",
+      "reviewId": "cmvulk7t901jvmm4gevkf1ofm"
+    },
+    {
+      "name": "Roborock Q Revo",
+      "reviewId": "cmvuninw101l6mm4gt0qdvfuz"
+    },
+    {
+      "name": "iRobot Roomba j7+",
+      "reviewId": "cmvunxh3e01lnmm4gjpogf8d4"
+    },
+    {
+      "name": "Eufy X10 Pro Omni",
+      "reviewId": "cmvupzq5201mgmm4gvf96u96i"
+    },
+    {
+      "name": "Xiaomi Robot Vacuum S10+",
+      "reviewId": "cmvuq345b01mimm4gcjt7gdej"
+    },
+    {
+      "name": "Neato D10",
+      "reviewId": "cmvuqczgm01mmmm4g2aizx3uk"
+    },
+    {
+      "name": "Roborock S7 MaxV Ultra",
+      "reviewId": "cmvutsb0q01nxmm4ghle2rbu6"
+    },
+    {
+      "name": "Dreame X30 Ultra",
+      "reviewId": "cmvutukrc01nzmm4g9a2kb4gl"
+    },
+    {
+      "name": "Ecovacs Deebot T20 Omni",
+      "reviewId": "cmvutvvpr01o1mm4gu3wnixf4"
+    }
+  ],
+  "failedItems": [
+    {
+      "name": "Samsung Galaxy S24+",
+      "error": "\nInvalid `prisma.review.create()` invocation:\n\n\nUnique constraint failed on the fields: (`slug`)"
+    }
+  ]
+}

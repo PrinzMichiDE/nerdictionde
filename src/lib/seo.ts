@@ -180,6 +180,32 @@ export function generateOrganizationSchema() {
   };
 }
 
+export function generateWebPageSchema(input: {
+  title: string;
+  description: string;
+  url: string;
+  isPartOf?: { "@id": string };
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${input.url}#webpage`,
+    "url": input.url,
+    "name": input.title,
+    "headline": input.title,
+    "description": input.description,
+    "inLanguage": "de-DE",
+    "isPartOf": input.isPartOf,
+    "publisher": {
+      "@id": `${getSiteUrl()}#organization`,
+    },
+    "primaryImageOfPage": {
+      "@type": "ImageObject",
+      "url": `${getSiteUrl()}/icon-512.png`,
+    },
+  };
+}
+
 export function generateWebsiteSchema() {
   const url = getSiteUrl();
   return {

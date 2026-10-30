@@ -1,16 +1,217 @@
 {
   "category": "series",
-  "target": 2,
-  "processed": 1,
-  "successful": 1,
-  "failed": 0,
+  "target": 50,
+  "processed": 51,
+  "successful": 43,
+  "failed": 8,
   "skipped": 0,
-  "lastProcessedIndex": 1,
+  "lastProcessedIndex": 50,
   "successfulItems": [
     {
-      "name": "Tagesschau",
-      "reviewId": "cmvqd4pnv0021mmssgjdww9w7"
+      "name": "The Crown",
+      "reviewId": "cmvs79ceh00jnmmggzrgctrn6"
+    },
+    {
+      "name": "Medium - Nichts bleibt verborgen",
+      "reviewId": "cmvs88b7p00kqmmggbih55h9l"
+    },
+    {
+      "name": "Friends",
+      "reviewId": "cmvs8tv6k00l3mmgggc8gyoom"
+    },
+    {
+      "name": "Magnum P.I.",
+      "reviewId": "cmvsbgeh400lcmmgg3ipyu0yv"
+    },
+    {
+      "name": "Wakfu",
+      "reviewId": "cmvsblms200ldmmgg8vft91j8"
+    },
+    {
+      "name": "Malcolm mittendrin",
+      "reviewId": "cmvsbolhu00lemmggjmkypcb6"
+    },
+    {
+      "name": "MINDHUNTER",
+      "reviewId": "cmvsds4hn00m2mmggk5zk7o7t"
+    },
+    {
+      "name": "Strong Woman Do Bong Soon",
+      "reviewId": "cmvse09me00mfmmggodgtysb7"
+    },
+    {
+      "name": "Baywatch",
+      "reviewId": "cmvsecwlx00mjmmggjokz6kli"
+    },
+    {
+      "name": "The Daily Show",
+      "reviewId": "cmvsfwmah00nummggzc67gxym"
+    },
+    {
+      "name": "Tulsa King",
+      "reviewId": "cmvsfzy4t00nvmmggkjdhdk05"
+    },
+    {
+      "name": "The Late Show with Stephen Colbert",
+      "reviewId": "cmvsg3xlt00nwmmggdcd8qtil"
+    },
+    {
+      "name": "Late Show with David Letterman",
+      "reviewId": "cmvsim4p400ohmmggzw8udg9p"
+    },
+    {
+      "name": "Binnelanders",
+      "reviewId": "cmvsj8mj700olmmggwecnfor8"
+    },
+    {
+      "name": "Slow Horses – Ein Fall für Jackson Lamb",
+      "reviewId": "cmvsj8p0x00ommmggcawkelea"
+    },
+    {
+      "name": "Raw",
+      "reviewId": "cmvslx3ws00ovmmgg9o41eyk1"
+    },
+    {
+      "name": "The Rookie",
+      "reviewId": "cmvslx7oc00owmmgg70rkfv7m"
+    },
+    {
+      "name": "CSI - Den Tätern auf der Spur",
+      "reviewId": "cmvso2nsu00pfmmgg0hx9cwn2"
+    },
+    {
+      "name": "THE TERMINAL LIST – DIE ABSCHUSSLISTE",
+      "reviewId": "cmvso2qyq00pgmmggpdzdsmtz"
+    },
+    {
+      "name": "Tatort",
+      "reviewId": "cmvsodxmp00pommgg9ddsxrpd"
+    },
+    {
+      "name": "The Kelly Clarkson Show",
+      "reviewId": "cmvss3p9o00qummgg1tgt2a95"
+    },
+    {
+      "name": "Chicago Fire",
+      "reviewId": "cmvss8om900qvmmggoytourv0"
+    },
+    {
+      "name": "Smallville",
+      "reviewId": "cmvstin5r00rbmmggk7ynijje"
+    },
+    {
+      "name": "Paw Patrol: Helfer auf vier Pfoten",
+      "reviewId": "cmvsurdoq00rgmmggmq0ow5rc"
+    },
+    {
+      "name": "Bleach",
+      "reviewId": "cmvsv18tm00rhmmggncccl3gj"
+    },
+    {
+      "name": "Dr. House",
+      "reviewId": "cmvsv5p4400rimmggd9uexkfu"
+    },
+    {
+      "name": "Dexter",
+      "reviewId": "cmvsw8i4r00rvmmggxwxugtsw"
+    },
+    {
+      "name": "Shameless - Nicht ganz nüchtern",
+      "reviewId": "cmvsx1t4z00skmmggiyaikr4l"
+    },
+    {
+      "name": "The Office",
+      "reviewId": "cmvsxl0p400spmmggq5nvbrhe"
+    },
+    {
+      "name": "Pokémon",
+      "reviewId": "cmvt0mfd800tjmmggzog8n81f"
+    },
+    {
+      "name": "The Blacklist",
+      "reviewId": "cmvt0ml7g00tlmmggawqaeblu"
+    },
+    {
+      "name": "Hawaii Five-0",
+      "reviewId": "cmvt2s0xa00tummggj6gme3r4"
+    },
+    {
+      "name": "The Flash",
+      "reviewId": "cmvt2s5bl00tvmmggncnwcanl"
+    },
+    {
+      "name": "American Horror Story",
+      "reviewId": "cmvt2s8hk00twmmggdoluq2tx"
+    },
+    {
+      "name": "Chicago P.D.",
+      "reviewId": "cmvt3pv0u00wammggtc0sjftw"
+    },
+    {
+      "name": "Real Time with Bill Maher",
+      "reviewId": "cmvt4cw8x00wpmmggsqjelagd"
+    },
+    {
+      "name": "Doctor Who",
+      "reviewId": "cmvt4v1lp00x7mmggmay31uuo"
+    },
+    {
+      "name": "FROM",
+      "reviewId": "cmvt74v3x00xfmmggodg9ti3f"
+    },
+    {
+      "name": "Die Tagebücher der Apothekerin",
+      "reviewId": "cmvt7ink700xgmmggjpcy6gxz"
+    },
+    {
+      "name": "FBI",
+      "reviewId": "cmvt7kwp200xhmmggxxbsuv5a"
+    },
+    {
+      "name": "Crystal Lake",
+      "reviewId": "cmvt9b74j00xummggia5d7tzd"
+    },
+    {
+      "name": "Die Sopranos",
+      "reviewId": "cmvt9htwh00xvmmggc6fk3b4d"
+    },
+    {
+      "name": "JoJo's Bizarre Adventure",
+      "reviewId": "cmvtabbo300xwmmggyjri957u"
     }
   ],
-  "failedItems": []
+  "failedItems": [
+    {
+      "name": "Supernatural",
+      "error": "\nInvalid `prisma.review.create()` invocation:\n\n\nUnique constraint failed on the fields: (`slug`)"
+    },
+    {
+      "name": "Criminal Minds",
+      "error": "\nInvalid `prisma.review.create()` invocation:\n\n\nUnique constraint failed on the fields: (`slug`)"
+    },
+    {
+      "name": "Der Sommer, als ich schön wurde",
+      "error": "\nInvalid `prisma.review.create()` invocation:\n\n\nUnique constraint failed on the fields: (`slug`)"
+    },
+    {
+      "name": "Bones - Die Knochenjägerin",
+      "error": "\nInvalid `prisma.review.create()` invocation:\n\n\nUnique constraint failed on the fields: (`slug`)"
+    },
+    {
+      "name": "Lupin",
+      "error": "\nInvalid `prisma.review.create()` invocation:\n\n\nUnique constraint failed on the fields: (`slug`)"
+    },
+    {
+      "name": "Game of Thrones",
+      "error": "\nInvalid `prisma.review.create()` invocation:\n\n\nUnique constraint failed on the fields: (`slug`)"
+    },
+    {
+      "name": "American Dad",
+      "error": "\nInvalid `prisma.review.create()` invocation:\n\n\nUnique constraint failed on the fields: (`slug`)"
+    },
+    {
+      "name": "Inspector Barnaby",
+      "error": "\nInvalid `prisma.review.create()` invocation:\n\n\nUnique constraint failed on the fields: (`slug`)"
+    }
+  ]
 }
