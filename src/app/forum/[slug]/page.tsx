@@ -301,7 +301,7 @@ export default async function ForumThreadPage({
             href="/forum"
             className="group -mt-1 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
           >
-            <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+            <ArrowLeft className="size-4 transition-transform motion-reduce:transition-none group-hover:-translate-x-1" />
             Zurück zum Forum
           </Link>
 
