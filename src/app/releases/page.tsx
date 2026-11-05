@@ -122,7 +122,6 @@ export default async function ReleasesPage() {
             <Calendar className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <span className="kicker text-primary">Release-Kalender</span>
             <h1 className="font-serif text-4xl md:text-5xl font-semibold tracking-tight mt-1">
               Spiele Release Kalender
             </h1>
