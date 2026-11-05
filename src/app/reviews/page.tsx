@@ -8,7 +8,7 @@ import { ScoreBlock } from "@/components/shared/ScoreBlock";
 import { ScoreDistribution } from "@/components/reviews/ScoreDistribution";
 import { CategoryChips } from "@/components/shared/CategoryChips";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { getCategoryStyle, getScoreColor, getVerdict } from "@/lib/review-category";
+import { getCategoryStyle, getScoreColor } from "@/lib/review-category";
 import {
   generateBreadcrumbSchema,
   generateItemListSchema,
@@ -226,7 +226,7 @@ export default async function ReviewsPage({
                 Alle Reviews
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                {total} unabhängige Tests — Games, Filme, Serien, Hardware.
+                {total} unabhängige Tests: Games, Filme, Serien, Hardware.
               </p>
             </div>
 
@@ -247,7 +247,7 @@ export default async function ReviewsPage({
 
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span className="text-xs font-semibold text-muted-foreground">
                     Kategorie
                   </span>
                   <div className="flex flex-wrap gap-1">
@@ -266,10 +266,10 @@ export default async function ReviewsPage({
                           name="category"
                           value={cat.value || undefined}
                           formAction="/reviews"
-                          className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
+                          className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors active:scale-95 ${
                             active
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-background text-muted-foreground border-border hover:bg-accent hover:text-foreground"
+                              ? "bg-primary text-primary-foreground border-primary active:bg-primary/90"
+                              : "bg-background text-muted-foreground border-border hover:bg-accent hover:text-foreground active:bg-accent/80"
                           }`}
                         >
                           {cat.label}
@@ -280,7 +280,7 @@ export default async function ReviewsPage({
                 </label>
 
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span className="text-xs font-semibold text-muted-foreground">
                     Sortierung
                   </span>
                   <select
@@ -297,7 +297,7 @@ export default async function ReviewsPage({
                 </label>
 
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span className="text-xs font-semibold text-muted-foreground">
                     Zeitraum
                   </span>
                   <select
@@ -314,7 +314,7 @@ export default async function ReviewsPage({
                 </label>
 
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span className="text-xs font-semibold text-muted-foreground">
                     Score
                   </span>
                   <div className="flex gap-1.5">
@@ -354,7 +354,7 @@ export default async function ReviewsPage({
               <div className="flex items-center gap-2">
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-full hover:bg-primary/90 active:bg-primary/80 transition-colors"
                 >
                   Filtern
                   <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -382,7 +382,6 @@ export default async function ReviewsPage({
           <section className="border-t border-border pt-10">
             <div className="flex items-center justify-between gap-4 mb-6">
               <div>
-                <span className="kicker text-primary">02 · Redaktion</span>
                 <h2 className="mt-1 font-serif text-2xl font-semibold tracking-tight">
                   Top bewertet
                 </h2>
@@ -509,6 +508,7 @@ function ReviewCardPreview({
   rank?: number;
 }) {
   const style = getCategoryStyle(review.category);
+  const scoreColor = getScoreColor(review.score);
   const formattedDate = new Date(review.createdAt).toLocaleDateString("de-DE", {
     year: "numeric",
     month: "long",
@@ -521,24 +521,37 @@ function ReviewCardPreview({
       className="group block"
       aria-label={`${review.title}, ${review.score} von 100`}
     >
-      <article className="review-card flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card transition-all duration-300 hover:border-primary/40">
-        {review.images?.[0] && (
-          <div className="relative aspect-[16/9] w-full bg-muted overflow-hidden shine">
+      <article
+        className="spotlight-card review-card flex h-full flex-col overflow-hidden rounded-sm border border-border bg-card"
+        style={{ "--cat": style.color } as React.CSSProperties}
+      >
+        <div className="relative aspect-[16/9] w-full bg-muted overflow-hidden shine">
+          {review.images?.[0] ? (
             <Image
               src={review.images[0]}
               alt={review.title}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover group-hover:scale-105 transition-transform duration-700"
+              className="object-cover transition-transform duration-700 motion-reduce:transition-none img-bw"
             />
-            <span
-              className="absolute top-3 left-3 z-10 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-wider"
-              style={{ background: style.color }}
-            >
-              {style.label}
-            </span>
-          </div>
-        )}
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-muted">
+              <span className="text-muted-foreground text-xs font-medium">
+                Kein Bild
+              </span>
+            </div>
+          )}
+          <div
+            className="cat-bar"
+            style={{ "--cat": style.color } as React.CSSProperties}
+          />
+          <span
+            className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary text-primary-foreground text-xs font-semibold"
+            style={{ background: style.color }}
+          >
+            {style.label}
+          </span>
+        </div>
 
         <div className="flex flex-1 flex-col gap-3 p-4">
           {rank && (
@@ -553,20 +566,28 @@ function ReviewCardPreview({
             >
               {style.label}
             </span>
-            <span className="inline-flex items-baseline gap-1.5">
-              <span
-                className="font-serif text-lg font-semibold tabular-nums"
-                style={{ color: getScoreColor(review.score) }}
-              >
-                {review.score}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {getVerdict(review.score)}
-              </span>
-            </span>
+            <div
+              className="score-ring"
+              style={{
+                "--score-target": `${Math.max(0, Math.min(100, review.score))}%`,
+                "--ring-color": scoreColor,
+                width: "44px",
+                height: "44px",
+                animationPlayState: "running",
+              } as React.CSSProperties}
+            >
+              <div className="score-ring-inner">
+                <span
+                  className="text-xs font-bold tabular-nums leading-none"
+                  style={{ color: scoreColor }}
+                >
+                  {review.score}
+                </span>
+              </div>
+            </div>
           </div>
 
-          <h3 className="font-serif text-xl font-semibold leading-snug line-clamp-2 transition-colors group-hover:text-primary">
+          <h3 className="review-title-underline font-serif text-xl font-semibold leading-snug line-clamp-2 transition-colors group-hover:text-primary">
             {review.title}
           </h3>
 
@@ -576,7 +597,6 @@ function ReviewCardPreview({
             </time>
             <span className="text-xs font-medium text-primary ml-auto">
               Weiterlesen
-              <ArrowRight className="size-3.5 ml-1 transition-transform duration-200 group-hover:translate-x-0.5" />
             </span>
           </div>
         </div>
