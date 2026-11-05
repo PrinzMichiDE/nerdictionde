@@ -18,13 +18,13 @@ export default function ImpressumPage() {
             <ArrowLeft className="size-4" />
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight">Impressum</h1>
+        <h1 className="text-3xl font-bold tracking-tight" style={{ overflowWrap: "break-word", minWidth: 0 }}>Impressum</h1>
       </div>
 
       <div className="prose prose-slate dark:prose-invert max-w-none space-y-8">
         {/* Angaben gemäß § 5 TMG */}
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold border-b pb-2">
+          <h2 className="text-2xl font-semibold border-b pb-2" style={{ overflowWrap: "break-word", minWidth: 0 }}>
             Angaben gemäß § 5 TMG
           </h2>
           <div className="space-y-2 text-muted-foreground">
@@ -36,19 +36,29 @@ export default function ImpressumPage() {
             <p>
               <strong className="text-foreground">Anschrift:</strong>
               <br />
-              [Anschrift wird auf Anfrage mitgeteilt]
+              [Vollständige Postanschrift gemäß § 5 TMG eintragen]
+              <br />
+              Straße und Hausnummer
+              <br />
+              PLZ und Ort
+              <br />
+              Deutschland
             </p>
             <p>
               <strong className="text-foreground">Kontakt:</strong>
               <br />
               E-Mail: <a href="mailto:michel@michelfritzsch.de" className="text-primary hover:underline">michel@michelfritzsch.de</a>
             </p>
+            <p className="text-sm italic">
+              Hinweis: Gemäß § 5 TMG ist eine vollständige ladungsfähige Anschrift erforderlich. 
+              Bitte ersetzen Sie die Platzhalter durch Ihre tatsächlichen Angaben.
+            </p>
           </div>
         </section>
 
         {/* Haftungsausschluss */}
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold border-b pb-2">
+          <h2 className="text-2xl font-semibold border-b pb-2" style={{ overflowWrap: "break-word", minWidth: 0 }}>
             Haftungsausschluss (Disclaimer)
           </h2>
 
@@ -98,7 +108,7 @@ export default function ImpressumPage() {
 
         {/* Streitschlichtung */}
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold border-b pb-2">
+          <h2 className="text-2xl font-semibold border-b pb-2" style={{ overflowWrap: "break-word", minWidth: 0 }}>
             Streitschlichtung
           </h2>
           <p className="text-muted-foreground leading-relaxed">
