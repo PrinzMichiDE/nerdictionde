@@ -322,11 +322,11 @@ function NewReviewPageContent() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => handleSave("draft")} disabled={saving || publishing}>
-            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Save className="mr-2 h-4 w-4" />}
             Als Entwurf speichern
           </Button>
           <Button size="sm" onClick={() => handleSave("published")} disabled={saving || publishing}>
-            {publishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+            {publishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <CheckCircle className="mr-2 h-4 w-4" />}
             Veröffentlichen
           </Button>
         </div>
@@ -550,11 +550,11 @@ function NewReviewPageContent() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button className="w-full" onClick={() => handleSave("draft")} disabled={saving || publishing}>
-                    {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Save className="mr-2 h-4 w-4" />}
                     Als Entwurf speichern
                   </Button>
                   <Button className="w-full" variant="default" onClick={() => handleSave("published")} disabled={saving || publishing}>
-                    {publishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+                    {publishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <CheckCircle className="mr-2 h-4 w-4" />}
                     Veröffentlichen
                   </Button>
                   <p className="text-xs text-muted-foreground text-center">
@@ -668,11 +668,11 @@ function NewReviewPageContent() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button className="w-full" onClick={() => handleSave("draft")} disabled={saving || publishing}>
-                    {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Save className="mr-2 h-4 w-4" />}
                     Als Entwurf speichern
                   </Button>
                   <Button className="w-full" variant="default" onClick={() => handleSave("published")} disabled={saving || publishing}>
-                    {publishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+                    {publishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <CheckCircle className="mr-2 h-4 w-4" />}
                     Veröffentlichen
                   </Button>
                 </CardContent>
@@ -735,11 +735,11 @@ function NewReviewPageContent() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button className="w-full" onClick={() => handleSave("draft")} disabled={saving || publishing}>
-                    {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <Save className="mr-2 h-4 w-4" />}
                     Als Entwurf speichern
                   </Button>
                   <Button className="w-full" variant="default" onClick={() => handleSave("published")} disabled={saving || publishing}>
-                    {publishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+                    {publishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" /> : <CheckCircle className="mr-2 h-4 w-4" />}
                     Veröffentlichen
                   </Button>
                 </CardContent>
@@ -754,7 +754,7 @@ function NewReviewPageContent() {
 
 export default function NewReviewPage() {
   return (
-    <Suspense fallback={<div className="flex h-64 items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+    <Suspense fallback={<div className="flex h-64 items-center justify-center"><div className="animate-spin motion-reduce:animate-none rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
       <NewReviewPageContent />
     </Suspense>
   );
