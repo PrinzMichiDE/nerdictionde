@@ -323,6 +323,7 @@ export default async function ReviewsPage({
                       type="number"
                       min="0"
                       max="100"
+                      aria-label="Mindestwertung"
                       placeholder="Min"
                       className="h-9 w-full rounded-sm border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring tabular-nums"
                       defaultValue={minScore ?? ""}
@@ -332,6 +333,7 @@ export default async function ReviewsPage({
                       type="number"
                       min="0"
                       max="100"
+                      aria-label="Höchstwertung"
                       placeholder="Max"
                       className="h-9 w-full rounded-sm border border-input bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring tabular-nums"
                       defaultValue={maxScore ?? ""}
@@ -345,6 +347,8 @@ export default async function ReviewsPage({
                 <input
                   name="query"
                   type="search"
+                  aria-label="Titel suchen"
+                  autoComplete="off"
                   placeholder="Titel suchen…"
                   className="w-full h-9 rounded-sm border border-input bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   defaultValue={query ?? ""}
