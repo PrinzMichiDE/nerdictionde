@@ -81,7 +81,7 @@ export default function ChatCommandsTool() {
         href="/streaming-tools"
         className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary"
       >
-        <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+        <ArrowLeft className="size-4 transition-transform motion-reduce:transition-none group-hover:-translate-x-1" />
         Zurück zu Streaming-Tools
       </Link>
 

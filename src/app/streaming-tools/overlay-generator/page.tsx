@@ -93,7 +93,7 @@ export default function OverlayGenerator() {
         href="/streaming-tools"
         className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary"
       >
-        <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+        <ArrowLeft className="size-4 transition-transform motion-reduce:transition-none group-hover:-translate-x-1" />
         Zurück zu Streaming-Tools
       </Link>
 
@@ -263,7 +263,7 @@ export default function OverlayGenerator() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block space-y-1.5">
-      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <span className="text-xs font-semibold text-muted-foreground">
         {label}
       </span>
       {children}

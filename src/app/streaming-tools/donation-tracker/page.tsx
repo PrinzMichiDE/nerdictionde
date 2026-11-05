@@ -84,7 +84,7 @@ export default function DonationTrackerTool() {
         href="/streaming-tools"
         className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary"
       >
-        <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+        <ArrowLeft className="size-4 transition-transform motion-reduce:transition-none group-hover:-translate-x-1" />
         Zurück zu Streaming-Tools
       </Link>
 
@@ -173,7 +173,7 @@ export default function DonationTrackerTool() {
                 </span>
                 <span className="flex-1 truncate text-sm text-muted-foreground">
                   {d.isAnonymous ? "Anonym" : d.donorName}
-                  {d.message ? ` – „${d.message}“` : ""}
+                  {d.message ? `, „${d.message}“` : ""}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {new Date(d.createdAt).toLocaleDateString("de-DE")}
