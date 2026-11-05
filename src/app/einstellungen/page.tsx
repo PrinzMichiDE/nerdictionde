@@ -26,7 +26,7 @@ export default async function SettingsPage() {
         href="/profil"
         className="group -mt-1 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
       >
-        <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+        <ArrowLeft className="size-4 transition-transform motion-reduce:transition-none group-hover:-translate-x-1" />
         Zurück zum Profil
       </Link>
 
@@ -47,7 +47,7 @@ export default async function SettingsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-serif text-xl font-semibold">Benachrichtigungen</h2>
+              <h2 className="font-serif text-xl font-semibold" style={{ overflowWrap: "break-word", minWidth: 0 }}>Benachrichtigungen</h2>
               <p className="text-sm text-muted-foreground mt-1">
                 Granulare Einstellungen pro Typ, Kanal (In-App, E-Mail, Push) und Frequenz (Sofort, Täglich, Wöchentlich).
                 Stummschaltungen für einzelne Objekte verwalten.
@@ -65,7 +65,7 @@ export default async function SettingsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-serif text-xl font-semibold">Kategorie-Abos</h2>
+              <h2 className="font-serif text-xl font-semibold" style={{ overflowWrap: "break-word", minWidth: 0 }}>Kategorie-Abos</h2>
               <p className="text-sm text-muted-foreground mt-1">
                 Wähle Kategorien, für die du bei neuen Reviews benachrichtigt werden möchtest.
               </p>
@@ -76,18 +76,18 @@ export default async function SettingsPage() {
       )}
 
       <section className="rounded-lg border border-border bg-card p-6">
-        <h2 className="mb-4 font-serif text-xl font-semibold">Push-Benachrichtigungen (Legacy)</h2>
+        <h2 className="mb-4 font-serif text-xl font-semibold" style={{ overflowWrap: "break-word", minWidth: 0 }}>Push-Benachrichtigungen (Legacy)</h2>
         <PushNotificationManager />
       </section>
 
       <section className="rounded-lg border border-border bg-card p-6">
-        <h2 className="mb-4 font-serif text-xl font-semibold">Datenschutz</h2>
+        <h2 className="mb-4 font-serif text-xl font-semibold" style={{ overflowWrap: "break-word", minWidth: 0 }}>Datenschutz</h2>
         <ReadingHistoryPrivacyToggle />
       </section>
 
       {FEATURE_PERSONALIZED_RECOMMENDATIONS && (
         <section className="rounded-lg border border-border bg-card p-6">
-          <h2 className="mb-4 font-serif text-xl font-semibold">Personalisierte Empfehlungen</h2>
+          <h2 className="mb-4 font-serif text-xl font-semibold" style={{ overflowWrap: "break-word", minWidth: 0 }}>Personalisierte Empfehlungen</h2>
           <p className="text-sm text-muted-foreground mb-4">
             Erhalte auf der Startseite und in Reviews Empfehlungen, die auf deinen Bewertungen, Lesezeichen, Follows und deinem Leseverlauf basieren.
           </p>

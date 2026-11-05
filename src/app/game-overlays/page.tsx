@@ -78,7 +78,7 @@ export default async function GameOverlaysPage() {
           <li>Klicke bei einem Overlay auf „OBS-URL kopieren&quot;.</li>
           <li>In OBS: Quelle → „Browser&quot; hinzufügen.</li>
           <li>URL einfügen, Breite/Höhe z. B. 1920×1080, „Benutzerdefinierte CSS&quot; leer lassen.</li>
-          <li>Fertig – das Overlay läuft lokal im Browser ohne externe Abhängigkeiten.</li>
+          <li>Fertig: das Overlay läuft lokal im Browser ohne externe Abhängigkeiten.</li>
         </ol>
       </div>
     </div>
