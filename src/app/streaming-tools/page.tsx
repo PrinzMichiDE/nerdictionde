@@ -117,14 +117,14 @@ export default async function StreamingToolsPage() {
               <Link
                 key={t.href}
                 href={t.href}
-                className="group flex flex-col gap-3 rounded-lg border border-border bg-card p-5 transition-all hover:border-primary/50 hover:shadow-lg"
+                className="group flex flex-col gap-3 rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/50"
               >
                 <div className="grid size-10 place-items-center rounded-lg bg-primary/10 text-primary">
                   <Icon className="size-5" />
                 </div>
                 <h3 className="font-semibold">{t.title}</h3>
                 <p className="text-sm text-muted-foreground">{t.desc}</p>
-                <span className="mt-auto inline-flex items-center gap-1 text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="mt-auto inline-flex items-center gap-1 text-sm font-medium text-primary">
                   Öffnen <ArrowRight className="size-4" />
                 </span>
               </Link>

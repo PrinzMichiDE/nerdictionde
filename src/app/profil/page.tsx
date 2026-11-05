@@ -68,7 +68,7 @@ export default async function ProfilePage() {
         href="/"
         className="group -mt-1 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
       >
-        <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+        <ArrowLeft className="size-4 transition-transform motion-reduce:transition-none group-hover:-translate-x-1" />
         Zurück zur Startseite
       </Link>
 
@@ -141,7 +141,7 @@ export default async function ProfilePage() {
               <Link
                 key={rating.id}
                 href={`/reviews/${rating.review.slug}`}
-                className="flex items-center gap-4 p-4 rounded-md border border-border bg-card hover:border-muted-foreground/30 transition-all"
+                className="flex items-center gap-4 p-4 rounded-md border border-border bg-card hover:border-muted-foreground/30 transition-colors"
               >
                 <div className="w-12 h-12 rounded bg-muted shrink-0 flex items-center justify-center">
                   {rating.review.images?.[0] ? (
@@ -191,7 +191,7 @@ export default async function ProfilePage() {
               <Link
                 key={bookmark.id}
                 href={`/reviews/${bookmark.review.slug}`}
-                className="flex items-center gap-4 p-4 rounded-md border border-border bg-card hover:border-muted-foreground/30 transition-all"
+                className="flex items-center gap-4 p-4 rounded-md border border-border bg-card hover:border-muted-foreground/30 transition-colors"
               >
                 <div className="w-12 h-12 rounded bg-muted shrink-0 flex items-center justify-center">
                   {bookmark.review.images?.[0] ? (
