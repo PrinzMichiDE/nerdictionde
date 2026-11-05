@@ -30,8 +30,6 @@ export async function generateContent(
   itemName: string,
   retryCount = 0
 ): Promise<GeneratedReviewContent> {
-  const isRetry = retryCount > 0;
-
   try {
     const aiResponse = await openai.chat.completions.create({
       model: OPENAI_MODEL,

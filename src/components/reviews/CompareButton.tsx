@@ -7,15 +7,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
- * Lokale Vergleichswarenkorb (max. 2 Reviews) im localStorage.
+ * Lokaler Vergleich (max. 3 Reviews) in localStorage.
  * Klicken fügt den aktuellen Review hinzu/entfernt und navigiert zur
- * Vergleichsseite `/reviews/vergleichen?a=<slug>&b=<slug>`, sodass der
- * Vergleich per URL teilbar ist.
+ * Vergleichsseite `/reviews/vergleichen`, sodass der Vergleich per URL teilbar ist.
  *
- * Hydration-sicher: localStorage wird erst nach dem Mount gelesen, damit der
- * erste Client-Render dem server-seitig gerenderten Ausgangszustand identisch
- * ist. Der Klick-Event wird gestoppt, damit ein umgebender Review-Link nicht
- * mitfeuert.
+ * Hydration-sicher: localStorage wird erst nach dem Mount gelesen.
+ * Der Klick-Event wird gestoppt, damit ein umgebender Link nicht mitfeuert.
  */
 const STORAGE_KEY = "nerdiction:compare";
 const MAX_COMPARE = 3;
@@ -27,16 +24,16 @@ interface CompareButtonProps {
 
 export function CompareButton({ slug, className }: CompareButtonProps) {
   const router = useRouter();
+  const [cart, setCart] = useState<string[]>([]);
 
-  const [cart, setCart] = useState<string[]>(() => {
-    if (typeof window === "undefined") return [];
+  useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      if (stored) setCart(JSON.parse(stored));
     } catch {
-      return [];
+      // localStorage nicht verfügbar
     }
-  });
+  }, []);
 
   const inCart = cart.includes(slug);
   const full = cart.length >= MAX_COMPARE && !inCart;

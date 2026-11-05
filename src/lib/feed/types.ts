@@ -4,8 +4,6 @@
  * Shared types for the activity feed. Strict TypeScript, no `any`.
  */
 
-import type { User } from "@prisma/client";
-
 export type FeedItemType = "rating" | "bookmark" | "collection_item" | "user_series_item";
 
 export interface FeedItemUser {

@@ -24,7 +24,7 @@ export function ScoreScale({ reviews }: { reviews: Review[] }) {
         </span>
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
-        Jeder Test liegt auf derselben Skala. Fahre über einen Punkt, um den Test zu sehen.
+        Jeder Test liegt auf derselben Skala. Wähle einen Punkt, um den Test zu öffnen.
       </p>
 
       <div className="mt-8">
@@ -37,16 +37,16 @@ export function ScoreScale({ reviews }: { reviews: Review[] }) {
                 key={review.id}
                 href={`/reviews/${review.slug}`}
                 aria-label={`${review.score} von 100: ${review.title}`}
-                className="group absolute z-10 -translate-x-1/2 rounded-full focus-visible:outline-none"
+                className="group absolute z-10 flex size-11 -translate-x-1/2 items-center justify-center rounded-full focus-visible:outline-none"
                 style={{ left: `${review.score}%`, bottom: `${(index % 3) * 20}px` }}
               >
                 <span
-                  className="block size-3 rounded-full border-2 border-card ring-1 ring-foreground/15 transition-transform duration-150 group-hover:scale-125 group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-card"
+                  className="block size-3 rounded-full border-2 border-card ring-1 ring-foreground/15 transition-transform duration-150 group-hover:scale-125 group-focus-visible:scale-125 group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-card motion-reduce:transition-none"
                   style={{ backgroundColor: color }}
                 />
                 <span
                   className={cn(
-                    "pointer-events-none absolute bottom-full z-20 mb-2 w-56 rounded-sm border border-border bg-popover p-3 text-left opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100",
+                    "pointer-events-none absolute bottom-full z-20 mb-1 w-56 rounded-sm border border-border bg-popover p-3 text-left opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100",
                     review.score < 20 && "left-0",
                     review.score >= 20 && review.score <= 65 && "left-1/2 -translate-x-1/2",
                     review.score > 65 && "right-0"

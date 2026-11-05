@@ -2130,6 +2130,44 @@ model RichContentAsset {
   @@index([type])
 }
 
+model Guide {
+  id               String   @id @default(cuid())
+  title            String
+  title_en         String?
+  slug             String   @unique
+  excerpt          String?
+  excerpt_en       String?
+  content          String   // Markdown (DE)
+  content_en       String?  // Markdown (EN)
+  type             String   @default("guide") // "guide" | "wiki"
+  category         String   // "gaming" | "hardware" | "film-serie" | "streaming" | "gaming-begriffe" | "hardware-terminologie" | "plattformen" | "genres" | etc.
+  subcategory      String?
+  tags             String[]
+  difficulty       String?  // "beginner" | "intermediate" | "advanced"
+  readingTime      Int?     // geschätzte Lesedauer in Minuten
+  featuredImage    String?
+  status           String   @default("published") // "draft" | "published"
+  featured         Boolean  @default(false)
+  order            Int      @default(0)
+  metaDescription  String?
+  metaKeywords     String?
+  publishedAt      DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([slug])
+  @@index([type, status])
+  @@index([category, status])
+  @@index([type, category, status])
+  @@index([featured, publishedAt])
+}
+
+model GuideSyncState {
+  id        String   @id @default("singleton")
+  lastRunAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // ============================================================================
 
 // Social Sharing & Viral Loops

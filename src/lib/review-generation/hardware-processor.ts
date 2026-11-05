@@ -136,10 +136,11 @@ export async function processHardware(
     const imageUrls = [...officialUrls, ...productUrls];
 
     // 6. If no images yet, try Tavily for real product images
-    let finalImageUrls = imageUrls;
+    const finalImageUrls = imageUrls;
+    // If no images yet, Tavily could provide real product images.
+    // Kept minimal: real image extraction would need Tavily response parsing.
     if (finalImageUrls.length === 0 && tavilyResults) {
-      // Try to extract images from tavily results if available
-      // (kept minimal — real image extraction would need tavily response parsing)
+      // No-op for now — placeholder for future Tavily image extraction.
     }
 
     // 7. Replace image placeholders

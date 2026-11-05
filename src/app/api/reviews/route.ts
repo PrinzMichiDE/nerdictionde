@@ -1,221 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { requireAdminAuth, checkAdminAuth } from "@/lib/auth";
-import { generateAndSaveCommentsForReview } from "@/lib/comment-generation";
-import { generateAndSaveQAForReview } from "@/lib/qa-generation";
-import { getTemplate, validateTemplateDataForTemplate, getDefaultTemplate } from "@/lib/review-templates";
-import { featureFlags } from "@/lib/feature-flags";
+import { checkAdminAuth, requireAdminAuth } from "@/lib/auth";
+import { getReviewList } from "@/lib/reviews/list-service";
+import { createReviewService } from "@/lib/reviews/create-service";
+import type { ReviewListParams } from "@/lib/reviews/query-builder";
 
-import { Prisma } from "@prisma/client";
-
+/**
+ * GET /api/reviews — Paginated review list with aggregates.
+ * Supports filtering by category, status, score, date, and search query.
+ */
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const category = searchParams.get("category");
-    const status = searchParams.get("status");
-    const query = searchParams.get("query");
-    const sort = searchParams.get("sort") || "date-desc";
-    const minScore = searchParams.get("minScore");
-    const maxScore = searchParams.get("maxScore");
-    const dateFilter = searchParams.get("dateFilter") || "all";
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "12");
-    const all = searchParams.get("all") === "true"; // Admin flag to get all reviews
-    
-    // Only admins can see all reviews or drafts
-    const isAdmin = checkAdminAuth(req);
-    const canSeeAll = isAdmin && (all || status === "all");
 
-    const where: Prisma.ReviewWhereInput = {
-      // Non-admins can only see published reviews
-      ...(canSeeAll ? {} : isAdmin && status ? { status } : { status: "published" }),
+    const params: ReviewListParams = {
+      category: searchParams.get("category") || undefined,
+      status: searchParams.get("status") || undefined,
+      query: searchParams.get("query") || undefined,
+      sort: searchParams.get("sort") || "date-desc",
+      minScore: searchParams.get("minScore")
+        ? parseInt(searchParams.get("minScore")!, 10)
+        : undefined,
+      maxScore: searchParams.get("maxScore")
+        ? parseInt(searchParams.get("maxScore")!, 10)
+        : undefined,
+      dateFilter: searchParams.get("dateFilter") || "all",
+      page: Math.max(1, parseInt(searchParams.get("page") || "1", 10)),
+      limit: Math.min(
+        100,
+        Math.max(1, parseInt(searchParams.get("limit") || "12", 10))
+      ),
+      all: searchParams.get("all") === "true",
+      isAdmin: Boolean(checkAdminAuth(req)),
     };
 
-    // If all=true, don't apply pagination
-    const shouldPaginate = !all;
+    const result = await getReviewList(params);
 
-    // Add score filter
-    if (minScore || maxScore) {
-      where.score = {
-        ...(minScore ? { gte: parseInt(minScore) } : {}),
-        ...(maxScore ? { lte: parseInt(maxScore) } : {}),
-      };
-    }
-
-    // Add date filter
-    if (dateFilter !== "all") {
-      const now = new Date();
-      let startDate = new Date();
-      
-      switch (dateFilter) {
-        case "7d":
-          startDate.setDate(now.getDate() - 7);
-          break;
-        case "30d":
-          startDate.setDate(now.getDate() - 30);
-          break;
-        case "90d":
-          startDate.setDate(now.getDate() - 90);
-          break;
-        case "year":
-          startDate = new Date(now.getFullYear(), 0, 1);
-          break;
-      }
-      
-      where.createdAt = {
-        gte: startDate,
-      };
-    }
-
-    // Add category filter
-    if (category) {
-      where.category = category;
-    }
-
-    // Add search query filter
-    if (query && query.trim()) {
-      const searchTerm = query.trim();
-
-const searchOR: Prisma.ReviewWhereInput[] = [
-        { title: { contains: searchTerm, mode: "insensitive" } },
-        { title_en: { contains: searchTerm, mode: "insensitive" } },
-        { content: { contains: searchTerm, mode: "insensitive" } },
-        { content_en: { contains: searchTerm, mode: "insensitive" } },
-      ];
-
-      if (where.AND) {
-        (where.AND as Prisma.ReviewWhereInput[]).push({ OR: searchOR });
-      } else if (where.OR) {
-        // If we already have an OR (rare but possible with how we build it), 
-        // we might want to wrap existing where in AND
-        const existingWhere = { ...where };
-        delete existingWhere.OR;
-        where.AND = [existingWhere, { OR: searchOR }];
-      } else {
-        where.OR = searchOR;
-      }
-    }
-
-    // Determine orderBy
-    let orderBy: Record<string, string | { order: string }> = { createdAt: "desc" };
-    switch (sort) {
-      case "date-asc":
-        orderBy = { createdAt: "asc" };
-        break;
-      case "score-desc":
-        orderBy = { score: "desc" };
-        break;
-      case "score-asc":
-        orderBy = { score: "asc" };
-        break;
-      case "title-asc":
-        orderBy = { title: "asc" };
-        break;
-      case "title-desc":
-        orderBy = { title: "desc" };
-        break;
-    }
-
-    // Get total count for pagination
-    const total = await prisma.review.count({ where });
-    const totalPages = shouldPaginate ? Math.ceil(total / limit) : 1;
-
-    // Aggregates for the index UI. Category chips ignore the category filter
-    // itself; the score distribution always spans all published reviews,
-    // independent of category/search/date/score filters and pagination.
-    let categoryCounts: Record<string, number> | undefined;
-    let scoreDistribution: number[] | undefined;
-    if (shouldPaginate) {
-      const countWhere = { ...where };
-      delete countWhere.category;
-      const [countGroups, scoreGroups, countAll] = await Promise.all([
-        prisma.review.groupBy({
-          by: ["category"],
-          where: countWhere,
-          _count: { _all: true },
-        }),
-        prisma.review.groupBy({
-          by: ["score"],
-          where: { status: "published" },
-          _count: { _all: true },
-        }),
-        prisma.review.count({ where: countWhere }),
-      ]);
-      categoryCounts = { all: countAll, game: 0, movie: 0, series: 0, hardware: 0 };
-      for (const group of countGroups) {
-        categoryCounts[group.category as string] = group._count._all;
-      }
-      scoreDistribution = Array.from({ length: 10 }, () => 0);
-      for (const group of scoreGroups) {
-        const bucket = Math.min(9, Math.max(0, Math.floor((group.score || 0) / 10)));
-        scoreDistribution[bucket] += group._count._all;
-      }
-    }
-
-    const reviews = await prisma.review.findMany({
-      where,
-      orderBy,
-      ...(shouldPaginate ? {
-        skip: (page - 1) * limit,
-        take: limit,
-      } : {}),
-    });
-
-    // Lesezeichen-Zahlen als Social Proof anreichern
-    let bookmarkCountMap = new Map<string, number>();
-    if (reviews.length > 0) {
-      const bookmarkCounts = await prisma.bookmark.groupBy({
-        by: ["reviewId"],
-        where: { reviewId: { in: reviews.map((r) => r.id) } },
-        _count: { _all: true },
-      });
-      bookmarkCountMap = new Map(
-        bookmarkCounts.map((b) => [b.reviewId, b._count._all])
-      );
-    }
-    const reviewsWithBookmarks = reviews.map((r) => ({
-      ...r,
-      bookmarkCount: bookmarkCountMap.get(r.id) ?? 0,
-    }));
-
-    // Editor's picks: top scores not already visible on this page
-    let topPicks: Array<{ id: string; title: string; slug: string; score: number; category: string }> | undefined;
-    if (shouldPaginate && reviewsWithBookmarks.length > 0) {
-      topPicks = await prisma.review.findMany({
-        where: {
-          status: "published",
-          id: { notIn: reviewsWithBookmarks.map((r) => r.id) },
-        },
-        orderBy: [{ score: "desc" }, { createdAt: "desc" }],
-        take: 3,
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          score: true,
-          category: true,
-        },
-      });
-    }
-
-    // If all=true, return array directly for backward compatibility, otherwise return object
-    if (all) {
-      return NextResponse.json(reviewsWithBookmarks);
+    if (params.all) {
+      return NextResponse.json(result.reviews);
     }
 
     return NextResponse.json({
-      reviews: reviewsWithBookmarks,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages,
-        hasNext: page < totalPages,
-        hasPrev: page > 1,
-      },
-      ...(categoryCounts ? { categoryCounts } : {}),
-      ...(scoreDistribution ? { scoreDistribution } : {}),
-      ...(topPicks ? { topPicks } : {}),
+      reviews: result.reviews,
+      pagination: result.pagination,
+      ...(result.categoryCounts ? { categoryCounts: result.categoryCounts } : {}),
+      ...(result.scoreDistribution ? { scoreDistribution: result.scoreDistribution } : {}),
+      ...(result.topPicks ? { topPicks: result.topPicks } : {}),
     });
   } catch (error: unknown) {
     const err = error as Error;
@@ -223,99 +52,19 @@ const searchOR: Prisma.ReviewWhereInput[] = [
   }
 }
 
+/**
+ * POST /api/reviews — Create a new review (admin only).
+ */
 export async function POST(req: NextRequest) {
-  // Require admin authentication for creating reviews
+  // Require admin authentication
   const authError = requireAdminAuth(req);
   if (authError) return authError;
 
-  try {
-    const body = await req.json();
+  const result = await createReviewService(await req.json());
 
-    if (!body.title || !body.content) {
-      return NextResponse.json({ error: "Title and content are required" }, { status: 400 });
-    }
-
-    // Template validation (if feature enabled and templateId provided)
-    let templateVersion = 1;
-    if (featureFlags.reviewTemplates && body.templateId) {
-      const validation = validateTemplateDataForTemplate(body.templateData ?? {}, body.templateId);
-      if (!validation.valid) {
-        return NextResponse.json(
-          { error: 'Template-Validierung fehlgeschlagen', details: validation.errors },
-          { status: 400 }
-        );
-      }
-      const template = await getTemplate(body.templateId);
-      templateVersion = 1;
-    }
-
-    let slug = body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    
-    // Check for existing slug and ensure uniqueness
-    let slugAttempts = 0;
-    while (await prisma.review.findUnique({ where: { slug } })) {
-      slugAttempts++;
-      if (slugAttempts > 10) {
-        slug = `${body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${Date.now().toString(36)}`;
-        break;
-      }
-      slug = `${body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${Math.random().toString(36).substring(2, 7)}`;
-    }
-
-    // Prepare template data for storage
-    const templateId = featureFlags.reviewTemplates && body.templateId ? body.templateId : null;
-    const templateData = featureFlags.reviewTemplates && body.templateData ? body.templateData : null;
-
-    const review = await prisma.review.create({
-      data: {
-        title: body.title,
-        title_en: body.title_en || null,
-        slug,
-        category: body.category || "game",
-        content: body.content,
-        content_en: body.content_en || null,
-        score: body.score || 0,
-        pros: body.pros || [],
-        pros_en: body.pros_en || [],
-        cons: body.cons || [],
-        cons_en: body.cons_en || [],
-        images: body.images || [],
-        youtubeVideos: body.youtubeVideos || [],
-        status: body.status || "draft",
-        igdbId: body.igdbId || null,
-        steamAppId: body.steamAppId || null,
-        epicId: body.epicId || null,
-        gogId: body.gogId || null,
-        specs: body.specs || null,
-        metadata: body.metadata || null,
-        createdAt: body.createdAt ? new Date(body.createdAt) : undefined,
-        templateId,
-        templateData: templateData ?? Prisma.JsonNull,
-        templateVersion: templateId ? templateVersion : null,
-      },
-    });
-
-    generateAndSaveCommentsForReview(review.id, {
-      reviewTitle: body.title,
-      score: body.score ?? 0,
-      pros: body.pros ?? [],
-      cons: body.cons ?? [],
-      category: body.category ?? "game",
-    }).catch((e) => console.warn("Comment generation for review failed:", e));
-
-    generateAndSaveQAForReview(review.id, {
-      reviewTitle: body.title,
-      score: body.score ?? 0,
-      pros: body.pros ?? [],
-      cons: body.cons ?? [],
-      category: body.category ?? "game",
-    }).catch((e) => console.warn("Q&A generation for review failed:", e));
-
-    return NextResponse.json(review);
-  } catch (error: unknown) {
-    console.error("Create review error:", error);
-    const err = error as Error;
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: result.status ?? 500 });
   }
-}
 
+  return NextResponse.json(result.review);
+}

@@ -20,9 +20,6 @@ import {
   generateAndAttachTagsForReview,
 } from "@/lib/tag-generation";
 import type {
-  GeneratedReviewContent,
-  ProcessOptions,
-  ProcessResult,
   ReviewMetadataInput,
   PrismaReviewCreateInput,
   GenerationSideEffects,

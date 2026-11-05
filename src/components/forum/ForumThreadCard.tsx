@@ -58,63 +58,62 @@ export function ForumThreadCard({
   const Icon = config.icon;
 
   return (
-    <Link
-      href={`/forum/${slug}`}
-      className="group block border border-border rounded-sm p-5 bg-card hover:border-muted-foreground/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
-    >
+    <article className="border border-border rounded-sm p-5 bg-card hover:border-muted-foreground/30 transition-colors">
       {isTrending && (
         <div className="flex items-center gap-1.5 -mt-0.5 mb-2.5">
           <TrendingUp className="size-3.5" style={{ color: config.color }} />
-          <span
-            className="kicker text-xs"
-            style={{ color: config.color }}
-          >
+          <span className="kicker text-xs" style={{ color: config.color }}>
             Trending
           </span>
         </div>
       )}
 
       <div className="flex items-start gap-4">
-        <div className="shrink-0 pt-1" onClick={(e) => e.preventDefault()}>
+        <div className="shrink-0 pt-1">
           <VoteButtons targetType="thread" targetId={id} initialScore={score} />
         </div>
         <div className="flex-1 min-w-0 space-y-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span
-              className="inline-flex items-center gap-1.5 text-xs font-semibold"
-              style={{ color: config.color }}
-            >
-              <Icon className="size-3.5" />
-              {config.label}
-            </span>
-            <span className="text-xs text-muted-foreground" aria-hidden="true">·</span>
-            <span className="text-xs text-muted-foreground">von {author}</span>
-          </div>
+          <Link
+            href={`/forum/${slug}`}
+            className="group block space-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+          >
+            <div className="flex items-center gap-2 flex-wrap">
+              <span
+                className="inline-flex items-center gap-1.5 text-xs font-semibold"
+                style={{ color: config.color }}
+              >
+                <Icon className="size-3.5" />
+                {config.label}
+              </span>
+              <span className="text-xs text-muted-foreground" aria-hidden="true">·</span>
+              <span className="text-xs text-muted-foreground">von {author}</span>
+            </div>
 
-          <h3 className="font-serif text-lg font-semibold tracking-tight group-hover:text-primary transition-colors line-clamp-2">
-            {title}
-          </h3>
+            <h3 className="font-serif text-lg font-semibold tracking-tight group-hover:text-primary transition-colors line-clamp-2">
+              {title}
+            </h3>
 
-          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-            {excerpt}
-          </p>
+            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+              {excerpt}
+            </p>
 
-          <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
-            <span className="inline-flex items-center gap-1.5">
-              <MessageSquare className="size-3.5" />
-              {commentCount} {commentCount === 1 ? "Antwort" : "Antworten"}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Eye className="size-3.5" />
-              {viewCount}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="size-3.5" />
-              {timeAgo(lastActivityAt)}
-            </span>
-          </div>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
+              <span className="inline-flex items-center gap-1.5">
+                <MessageSquare className="size-3.5" />
+                {commentCount} {commentCount === 1 ? "Antwort" : "Antworten"}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Eye className="size-3.5" />
+                {viewCount}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Clock className="size-3.5" />
+                {timeAgo(lastActivityAt)}
+              </span>
+            </div>
+          </Link>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }

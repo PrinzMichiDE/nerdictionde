@@ -8,6 +8,8 @@ const withBundleAnalyzer = bundleAnalyzer({
 const nextConfig: NextConfig = {
   // Produce a self-contained `.next/standalone` server for the Docker image.
   output: "standalone",
+  // Allow LAN access in dev (e.g. testing from a phone or another machine).
+  allowedDevOrigins: ["100.121.133.83"],
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60 * 60 * 24 * 30,

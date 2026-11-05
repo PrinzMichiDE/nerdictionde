@@ -22,7 +22,10 @@
     "mass-create-reviews": "tsx scripts/mass-create-reviews.ts",
     "regenerate-movie-series": "tsx scripts/regenerate-movie-series-content.ts",
     "regenerate-review-content": "tsx scripts/regenerate-review-content.ts",
+    "backfill:images": "tsx scripts/backfill-review-images.ts",
+    "normalize:review-image-urls": "tsx scripts/normalize-review-image-urls.ts",
     "news:sync": "tsx scripts/generate-news.ts",
+    "guides:sync": "tsx scripts/generate-guides.ts",
     "test:e2e": "e2e run",
     "verify": "bash scripts/verify.sh",
     "test": "vitest run"

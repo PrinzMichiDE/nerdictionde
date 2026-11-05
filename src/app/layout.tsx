@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Public_Sans, Libre_Bodoni } from "next/font/google";
-import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { SiteFrame } from "@/components/layout/SiteFrame";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
+import { CookieConsent } from "@/components/consent/CookieConsent";
+import { GoogleAnalytics } from "@/components/consent/GoogleAnalytics";
 import {
   generateOrganizationSchema,
   generateWebsiteSchema,
@@ -123,19 +124,8 @@ export default function RootLayout({
         </ThemeProvider>
         <ServiceWorkerRegister />
         <Analytics />
-        {/* Google Analytics – lazy to avoid blocking render */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-G2MC0LJ614"
-          strategy="lazyOnload"
-        />
-        <Script id="google-analytics" strategy="lazyOnload">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-G2MC0LJ614');
-          `}
-        </Script>
+        <GoogleAnalytics />
+        <CookieConsent />
       </body>
     </html>
   );

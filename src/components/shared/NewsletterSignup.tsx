@@ -65,7 +65,9 @@ export function NewsletterSignup({
           <Input
             type="email"
             name="email"
-            placeholder="Deine E-Mail-Adresse"
+            autoComplete="email"
+            spellCheck={false}
+            placeholder="Deine E-Mail-Adresse…"
             required
             className="w-full"
             aria-label="E-Mail-Adresse für Newsletter"
@@ -82,7 +84,7 @@ export function NewsletterSignup({
       </form>
 
       {status !== "idle" && (
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center" aria-live="polite">
           <div
             className={cn(
               "flex items-center gap-2 text-sm font-medium",
@@ -91,7 +93,7 @@ export function NewsletterSignup({
                 : "text-destructive",
             )}
           >
-            <Icon className="size-4" />
+            <Icon className="size-4" aria-hidden="true" />
             {message}
           </div>
         </div>

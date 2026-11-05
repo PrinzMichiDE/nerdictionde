@@ -60,30 +60,6 @@ export function escapeNewlinesInStrings(text: string): string {
 }
 
 /**
- * Walks the string and determines whether we are currently inside a JSON string
- * literal at the given position.
- */
-function isInsideStringAt(text: string, position: number): boolean {
-  let inString = false;
-  let escaped = false;
-  for (let i = 0; i < position && i < text.length; i++) {
-    const char = text[i];
-    if (escaped) {
-      escaped = false;
-      continue;
-    }
-    if (char === "\\") {
-      escaped = true;
-      continue;
-    }
-    if (char === '"') {
-      inString = !inString;
-    }
-  }
-  return inString;
-}
-
-/**
  * Closes any unterminated string and balances brackets/braces by appending
  * the missing closers in LIFO order.
  */
@@ -201,48 +177,6 @@ export function aggressiveRepair(text: string, errorPos: number): string {
   }
 
   return closeStructures(text.substring(0, errorPos));
-}
-
-/**
- * Parses a JSON string with multiple fallback repair strategies.
- * Returns the parsed object or throws the original parse error if all
- * strategies fail.
- *
- * Validation: the result must have `de`, `en` and a numeric `score`.
- */
-export function parseGeneratedContent(
-  contentRaw: string,
-  itemName: string
-): GeneratedReviewContent {
-  let repaired = stripControlCharacters(contentRaw.trim());
-  repaired = escapeNewlinesInStrings(repaired);
-  repaired = removeTrailingCommas(repaired);
-
-  // 1. Direct parse
-  try {
-    const parsed = JSON.parse(repaired);
-    validateGeneratedContent(parsed, itemName);
-    return parsed as GeneratedReviewContent;
-  } catch (parseError) {
-    // Trivial responses (e.g. "{}", "null") are not repairable.
-    const err = parseError as Error;
-    if (
-      TRIVIAL_RESPONSE.test(repaired) ||
-      repaired.trim().length < 10
-    ) {
-      throw new Error(`Empty or trivial AI response for ${itemName}`);
-    }
-  }
-
-  // 2. Structural repair (unterminated strings, missing closers)
-  const errorPosMatch = /position (\d+)/.exec(
-    (new Error() as Error).message
-  );
-  // We don't have the original error position here; reconstruct from context.
-  // Callers pass the original error for position hints.
-
-  // Fall through to the full repair pipeline below.
-  throw new Error(`JSON parse failed for ${itemName}`);
 }
 
 /**

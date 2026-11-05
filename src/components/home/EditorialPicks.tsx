@@ -31,24 +31,30 @@ export function EditorialPicks({ reviews }: EditorialPicksProps) {
 
           return (
             <li key={review.id} className="magazine-pick">
-              <span className="magazine-pick-rank" aria-label={`Platz ${index + 1}`}>
-                {index + 1}
-              </span>
-
-              <div className="magazine-pick-content">
-                <span className="magazine-pick-category" style={{ color: style.color }}>
-                  {style.label}
+              <Link
+                href={`/reviews/${review.slug}`}
+                className="group flex w-full items-center rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={`Platz ${index + 1}: ${review.title}, ${review.score} von 100`}
+              >
+                <span className="magazine-pick-rank" aria-hidden="true">
+                  {index + 1}
                 </span>
-                <h3 className="magazine-pick-title">{review.title}</h3>
-                <p className="magazine-pick-verdict">{getVerdict(review.score)}</p>
-              </div>
 
-              <div className="magazine-pick-score">
-                <span className="magazine-pick-score-value" style={{ color: getScoreColor(review.score) }}>
-                  {review.score}
-                </span>
-                <span className="magazine-pick-score-label">von 100</span>
-              </div>
+                <div className="magazine-pick-content">
+                  <span className="magazine-pick-category" style={{ color: style.color }}>
+                    {style.label}
+                  </span>
+                  <h3 className="magazine-pick-title transition-colors group-hover:text-primary">{review.title}</h3>
+                  <p className="magazine-pick-verdict">{getVerdict(review.score)}</p>
+                </div>
+
+                <div className="magazine-pick-score">
+                  <span className="magazine-pick-score-value" style={{ color: getScoreColor(review.score) }}>
+                    {review.score}
+                  </span>
+                  <span className="magazine-pick-score-label">von 100</span>
+                </div>
+              </Link>
             </li>
           );
         })}

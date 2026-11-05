@@ -21,7 +21,7 @@ async function verifySessionEdge(request: NextRequest): Promise<{ userId: string
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
   // Protect /admin routes with token auth

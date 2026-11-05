@@ -163,8 +163,8 @@ export default async function ForumPage({
               commentCount={thread._count.comments}
               viewCount={thread.viewCount}
               score={thread.score}
-              lastActivityAt={thread.lastActivityAt}
-              createdAt={thread.createdAt}
+              lastActivityAt={thread.lastActivityAt.toISOString()}
+              createdAt={thread.createdAt.toISOString()}
               isTrending={
                 sort !== "trending" &&
                 thread.score >= 5 &&

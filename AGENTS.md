@@ -92,6 +92,23 @@ Aktualisieren: `npx skills update` (Versionen stehen in `skills-lock.json`).
 - Bestehende Playwright-/Cypress-Suiten nur mit `migrate-to-e2e` portieren,
   sliceweise und mit `MIGRATION.md`.
 
+## Regel 9 — UI/UX-Pflicht-Skills immer verwenden
+
+- Bei jeder Aufgabe mit UI/UX-Bezug sind die in `Agent.md` definierten
+  UI/UX-Skills verpflichtend zu verwenden: `web-design-guidelines`,
+  `ui-ux-pro-max`, `frontend-design`, `vercel-react-best-practices`,
+  `vercel-composition-patterns` (Details, Quellen, Install-Kommandos in
+  `Agent.md`).
+- Einsatz nach Kontext: Bauen/Ändern → `frontend-design`,
+  `vercel-composition-patterns`, `vercel-react-best-practices` (+ `ui-ux-pro-max`
+  bei Designentscheidungen). Prüfen/Review/Audit → `web-design-guidelines`,
+  `ui-ux-pro-max` (+ `vercel-react-best-practices` bei React/Next.js-Code).
+- Das bestehende Nerdiction-Designsystem bleibt führend (`src/app/globals.css`,
+  `src/components/ui`, `Public Sans`/`Libre Bodoni`, `.dark`). `hallmark` nur
+  für neue eigenständige Marketing-/Sonderseiten (Regel 3).
+- Accessibility-, UX- und Performance-Befunde aus diesen Skills nicht
+  stillschweigend ignorieren; Abweichungen kurz begründen.
+
 ## Regel 5 — Scrapling nur für echte Scraping-Aufgaben
 
 - Dieses Repo ist TypeScript; Scrapling braucht Python 3.10+ und
@@ -163,6 +180,20 @@ Aktualisieren: `npx skills update` (Versionen stehen in `skills-lock.json`).
 - Werkzeug fehlt? `ifixai` ist hier nicht installiert und `uv`/`uvx` gibt es
   nicht. Dann nennen, was fehlt (`pip install "ifixai[<provider>]"` bzw. `uv`),
   statt einen Lauf zu behaupten.
+
+## Regel 8 — Alle deutschen und europäischen Gesetze einhalten
+
+- Bei jeder Aktion, jedem Vorschlag, jedem Code, jeder Konfiguration und
+  jedem Inhalt sind stets die geltenden deutschen und europäischen Gesetze
+  einzuhalten.
+- Besonders zu beachten: DSGVO/GDPR, BDSG, TTDSG, Telemediengesetz (TMG),
+  Urheberrecht (UrhG), Markenrecht, Wettbewerbsrecht (UWG), Haftung,
+  DatenschutzbyDesign und -byDefault sowie einschlägige EU-Verordnungen
+  (z. B. AI Act, Digital Services Act, ePrivacy).
+- Keine Inhalte generieren, die rechtswidrig sind (z. B. Hassrede,
+  Beleidigung, Urheberrechtsverletzungen, unerlaubte Datenerhebung).
+- Bei Unklarheit über Rechtmäßigkeit: nicht raten, sondern auf Klärung
+  hinweisen und einen rechtskonformen Alternativvorschlag machen.
 
 ## Konflikte
 
