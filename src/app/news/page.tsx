@@ -15,7 +15,7 @@ const PER_PAGE = 20;
 export const metadata: Metadata = {
   title: "News",
   description:
-    "Aktuelle News aus der Nerd-Welt – Gaming, Filme & Serien, Hardware und Technik.",
+    "Aktuelle News aus der Nerd-Welt: Gaming, Filme & Serien, Hardware und Technik.",
   alternates: {
     canonical: "/news",
   },
@@ -113,7 +113,7 @@ export default async function NewsPage({
           </div>
         </div>
         <p className="text-muted-foreground text-lg md:text-xl max-w-3xl">
-          Aktuelle Beiträge zu Gaming, Filmen & Serien, Hardware und Technik –
+          Aktuelle Beiträge zu Gaming, Filmen & Serien, Hardware und Technik,
           basierend auf kuratierten Quellen.
         </p>
       </div>
@@ -157,7 +157,7 @@ export default async function NewsPage({
               <Card className="overflow-hidden border border-border">
                 <CardContent className="p-6 md:p-8 space-y-4">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <span className="text-xs font-medium text-muted-foreground">
                       {featured.category}
                     </span>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -189,7 +189,7 @@ export default async function NewsPage({
                   <Card className="h-full border border-border">
                     <CardContent className="p-5 space-y-3 flex flex-col h-full">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                        <span className="text-xs font-medium text-muted-foreground">
                           {article.category}
                         </span>
                         <span className="text-xs text-muted-foreground">

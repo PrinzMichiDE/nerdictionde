@@ -171,7 +171,6 @@ export default function ToolsPage() {
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <span className="kicker text-primary">Für Streamer & Creators</span>
           <h1 className="font-serif text-4xl md:text-5xl font-semibold tracking-tight mt-1 mb-2">Streaming Tools</h1>
           <p className="text-muted-foreground">
             Wähle ein Tool aus der Liste aus.

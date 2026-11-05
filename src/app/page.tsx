@@ -219,7 +219,6 @@ export default async function HomePage() {
         <ScrollReveal variant="up" delay={160} id="so-testen-wir">
           <section className="magazine-methodology magazine-section" aria-labelledby="method-title">
             <header className="magazine-section-header">
-              <span className="magazine-kicker">Methode</span>
               <h2 id="method-title" className="magazine-section-title">So testen wir</h2>
             </header>
 

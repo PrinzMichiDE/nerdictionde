@@ -229,7 +229,7 @@ function CompareView({
         ))}
 
         <div className="col-span-full rounded-lg border border-border bg-card p-6">
-          <h2 className="font-serif text-2xl font-semibold tracking-tight mb-4">
+          <h2 className="font-serif text-2xl font-semibold tracking-tight mb-4" style={{ overflowWrap: "break-word", minWidth: 0 }}>
             Wertungsvergleich
           </h2>
           <ReviewCompareScoreCompare
@@ -304,7 +304,7 @@ function ReviewCompareCard({
           >
             {review.title}
           </Link>
-          <span className="inline-flex items-center rounded-full border border-border bg-card px-2.5 py-0.5 text-[0.6875rem] font-medium text-muted-foreground">
+          <span className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-[0.6875rem] font-medium text-muted-foreground">
             {getCategoryStyle(review.category).label}
           </span>
         </div>
@@ -342,11 +342,11 @@ function ReviewCompareCard({
         <div id={`panel-${index}-overview`} role="tabpanel" aria-labelledby={`tab-${index}-overview`} className={activeTab === "overview" ? "block" : "hidden"}>
           <div className="mt-4 pt-4 border-t border-border space-y-3">
             <div className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Vorteile</h3>
+              <h3 className="text-xs font-semibold text-muted-foreground">Vorteile</h3>
               <ProsCons pros={review.pros} cons={[]} />
             </div>
             <div className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nachteile</h3>
+              <h3 className="text-xs font-semibold text-muted-foreground">Nachteile</h3>
               <ProsCons pros={[]} cons={review.cons} />
             </div>
           </div>
