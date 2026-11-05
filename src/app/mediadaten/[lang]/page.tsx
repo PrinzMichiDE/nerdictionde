@@ -124,7 +124,6 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                 <ArrowLeft className="size-4" />
               </Link>
             </Button>
-            <span className="kicker text-primary">{t.header.title}</span>
           </div>
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-4 text-gradient">
             {t.header.title}
@@ -179,7 +178,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
       {/* Key Metrics */}
       <section className="reveal-view-section">
         <div className="mb-8">
-          <span className="kicker text-primary mb-2 block">Kennzahlen</span>
+          <span className="text-primary mb-2 block font-semibold text-xs">Kennzahlen</span>
           <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mb-2">{t.keyMetrics.title}</h2>
           <p className="text-muted-foreground">{t.keyMetrics.subtitle}</p>
         </div>
@@ -214,7 +213,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
       {/* 12 Month Timeline */}
       <section className="reveal-view-section">
         <div className="mb-8">
-          <span className="kicker text-primary mb-2 block">Verlauf</span>
+          <span className="text-primary mb-2 block font-semibold text-xs">Verlauf</span>
           <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mb-2">{t.timeline.title}</h2>
           <p className="text-muted-foreground">{t.timeline.subtitle}</p>
         </div>
@@ -337,7 +336,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
       {/* Additional Metrics */}
       <section className="reveal-view-section">
         <div className="mb-8">
-          <span className="kicker text-primary mb-2 block">Detaillierte Kennzahlen</span>
+          <span className="text-primary mb-2 block font-semibold text-xs">Detaillierte Kennzahlen</span>
           <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mb-2">{t.detailedMetrics.title}</h2>
           <p className="text-muted-foreground">{t.detailedMetrics.subtitle}</p>
         </div>
@@ -364,13 +363,13 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
       {/* Device & Geography */}
       <section className="reveal-view-section">
         <div className="mb-8">
-          <span className="kicker text-primary mb-2 block">Geräte & Geografie</span>
+          <span className="text-primary mb-2 block font-semibold text-xs">Geräte & Geografie</span>
           <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mb-2">{t.deviceGeography.title}</h2>
           <p className="text-muted-foreground">{t.deviceGeography.subtitle}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* Mobile */}
-          <Card className="group hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-all duration-300">
+          <Card className="group hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-transform duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/8 group-hover:bg-primary/15 transition-colors">
@@ -388,7 +387,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
               </div>
               <div className="h-2.5 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-700 ease-out"
+                  className="h-full rounded-full"
                   style={{
                     width: `${stats.mobileTrafficPercentage}%`,
                     background: "linear-gradient(90deg, var(--chart-1), color-mix(in oklab, var(--chart-1) 60%, var(--chart-2)))",
@@ -399,7 +398,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
           </Card>
 
           {/* Desktop */}
-          <Card className="group hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-all duration-300">
+          <Card className="group hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-transform duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/8 group-hover:bg-primary/15 transition-colors">
@@ -417,7 +416,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
               </div>
               <div className="h-2.5 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-700 ease-out"
+                  className="h-full rounded-full"
                   style={{
                     width: `${stats.desktopTrafficPercentage}%`,
                     background: "linear-gradient(90deg, var(--chart-3), color-mix(in oklab, var(--chart-3) 60%, var(--chart-4)))",
@@ -428,7 +427,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
           </Card>
 
           {/* Top Country */}
-          <Card className="group hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-all duration-300 md:col-span-2 lg:col-span-1">
+          <Card className="group hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-transform duration-300 md:col-span-2 lg:col-span-1">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/8 group-hover:bg-primary/15 transition-colors">
@@ -453,14 +452,14 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
       {/* Target Audience */}
       <section className="reveal-view-section space-y-8">
         <div>
-          <span className="kicker text-primary mb-2 block">Zielgruppe</span>
+          <span className="text-primary mb-2 block font-semibold text-xs">Zielgruppe</span>
           <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mb-2">{t.targetAudience.title}</h2>
           <p className="text-muted-foreground">{t.targetAudience.subtitle}</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           {/* Demographics */}
-          <Card className="hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+          <Card className="hover:shadow-lg hover:shadow-primary/5 transition-colors duration-300">
             <CardHeader>
               <CardTitle className="font-serif text-lg">{t.targetAudience.demographics}</CardTitle>
               <CardDescription>{t.targetAudience.demographicsDesc}</CardDescription>
@@ -499,7 +498,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
           </Card>
 
           {/* Interests */}
-          <Card className="hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+          <Card className="hover:shadow-lg hover:shadow-primary/5 transition-colors duration-300">
             <CardHeader>
               <CardTitle className="font-serif text-lg">{t.targetAudience.interests}</CardTitle>
               <CardDescription>{t.targetAudience.interestsDesc}</CardDescription>
@@ -509,7 +508,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                 {interests.map((item) => (
                   <div
                     key={item.label}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-primary/8 border border-primary/10 text-sm font-medium text-foreground transition-all duration-200 hover:bg-primary/15 hover:border-primary/20 hover:shadow-sm cursor-default"
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-primary/8 border border-primary/10 text-sm font-medium text-foreground transition-colors duration-200 hover:bg-primary/15 hover:border-primary/20 hover:shadow-sm cursor-default"
                   >
                     <item.icon className="size-3.5 text-primary" />
                     {item.label}
@@ -524,7 +523,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
       {/* Contact */}
       <section className="reveal-view-section space-y-8">
         <div>
-          <span className="kicker text-primary mb-2 block">Kontakt</span>
+          <span className="text-primary mb-2 block font-semibold text-xs">Kontakt</span>
           <h2 className="font-serif text-2xl md:text-3xl font-semibold tracking-tight mb-2">{t.contact.title}</h2>
           <p className="text-muted-foreground">{t.contact.subtitle}</p>
         </div>
@@ -534,7 +533,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
             <a
               key={entry.email}
               href={`mailto:${entry.email}`}
-              className="group flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-all duration-300"
+              className="group flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-transform duration-300 motion-reduce:transition-none"
             >
               <div className="p-2.5 rounded-lg bg-primary/8 group-hover:bg-primary/15 transition-colors shrink-0">
                 <Mail className="size-5 text-primary/70 group-hover:text-primary transition-colors" />
@@ -543,7 +542,7 @@ export default async function MediadatenPage({ params }: MediadatenPageProps) {
                 <p className="text-sm font-semibold text-foreground">{entry.label}</p>
                 <p className="text-sm text-primary font-medium truncate">{entry.email}</p>
               </div>
-              <ArrowUpRight className="size-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0" />
+              <ArrowUpRight className="size-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200 shrink-0" />
             </a>
           ))}
         </div>
